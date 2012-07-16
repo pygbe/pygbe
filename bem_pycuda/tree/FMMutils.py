@@ -27,7 +27,7 @@ from scipy.misc.common  import comb
 
 # Wrapped code
 #from direct_c           import direct_c
-from getCoeffwrap       import multipole, getCoeff, getIndex, getIndex_arr
+#from getCoeffwrap       import multipole, getCoeff, getIndex, getIndex_arr
 
 import sys
 sys.path.append('../util')
@@ -138,6 +138,15 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius):
 
     return Cells
 
+def getIndex_python(P, i, j, k): 
+
+    I = 0 
+    for ii in range(i):
+        I += sum(arange(P+2-ii))
+    I += sum(arange(P+2-j,P+2)-i) + k
+
+    return I
+
 def computeIndices(P):
     II = []
     JJ = []
@@ -146,7 +155,7 @@ def computeIndices(P):
     for ii in range(P+1):
         for jj in range(P+1-ii):
             for kk in range(P+1-ii-jj):
-                index.append(getIndex(P,ii,jj,kk))
+                index.append(getIndex_python(P,ii,jj,kk))
                 II.append(ii)
                 JJ.append(jj)
                 KK.append(kk)
@@ -276,7 +285,9 @@ def precompute_terms(P, II, JJ, KK):
         ii,jj,kk = mgrid[0:II[i]+1:1,0:JJ[i]+1:1,0:KK[i]+1:1].astype(int32)
         ii,jj,kk = ii.ravel(), jj.ravel(), kk.ravel()
         index_aux = zeros(len(ii), int32)
-        getIndex_arr(P, len(ii), index_aux, ii, jj, kk)
+#        getIndex_arr(P, len(ii), index_aux, ii, jj, kk)
+        for it in range(len(ii)):
+            index_aux[it] = getIndex_python(P, ii[it], jj[it], kk[it])
         index.append(index_aux)
         combII.append(comb(II[i],ii))
         combJJ.append(comb(JJ[i],jj))

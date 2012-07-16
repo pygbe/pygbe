@@ -810,8 +810,12 @@ def kernels(BSZ, Nm, xkSize):
 			// Add contribution
             if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
             {
-                p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+Y);
-                p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+Y);
+                // With preconditioner
+                //p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+Y);
+                //p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+Y);
+                // No preconditioner
+                p1[i] += dL + L;
+                p2[i] += -dY - Y;
             }
         }
         
@@ -1040,8 +1044,12 @@ def kernels(BSZ, Nm, xkSize):
         
             if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
             {
-                p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+E_hat*Y);
-                p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+E_hat*Y);
+                // With preconditioner
+                //p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+E_hat*Y);
+                //p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+E_hat*Y);
+                // No preconditioner
+                p1[i] += dL + L;
+                p2[i] += -dY - E_hat*Y;
                 AI_int_gpu[i] = an_counter;
             }
         }

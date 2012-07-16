@@ -42,7 +42,7 @@ sys.path.append('../util')
 from triangulation 	 import *
 from an_solution     import an_P
 from semi_analytical import *
-from semi_analyticalwrap import SA_wrap_arr
+#from semi_analyticalwrap import SA_wrap_arr
 
 sys.path.append('tree')
 from FMMutils import *
@@ -54,7 +54,7 @@ import pycuda.driver    as cuda
 #from cuda_kernels import kernels
 
 
-Rec = 5		# Number of recursions to generate sphere
+Rec = 6		# Number of recursions to generate sphere
 R   = 4. 	# Radius of sphere
 K   = 1  	# Number of gauss points
 
@@ -76,14 +76,14 @@ kappa = 0.125                   # Screening parameter
 
 ### GMRES related variables
 restart  = 100 	# Iterations before restart for GMRES
-tol		 = 1e-6 # tolerance of GMRES
+tol		 = 1e-5 # tolerance of GMRES
 max_iter = 1000 # maximum number of iterations for GMRES
 
 ### Tree code related variables
 P     = 6                                         # Order of Taylor expansion
 eps   = 1e-10                                     # Epsilon machine
 Nm    = int32(factorial(P+3)/(6*factorial(P)))    # Number of terms in Taylor expansion
-NCRIT = 100                                      # Max number of particles per twig cell
+NCRIT = 1000                                      # Max number of particles per twig cell
 theta = 0.5                                       # MAC criterion
 BSZ   = 256                                       # CUDA block size
 
@@ -130,6 +130,7 @@ dX22 = zeros(N) # Bottom right block
 Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
                         # Order: Top left, top right, bott left, bott right    
 
+'''
 for i in range(N):
     panel = vertex[triangle[i]]
     center = array([xi[i],yi[i],zi[i]])
@@ -150,6 +151,7 @@ Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
 Precond[1,:] = -1/dX11*dX12*d_aux
 Precond[2,:] = -d_aux*dX21/dX11
 Precond[3,:] = d_aux
+'''
 
 tic = time.time()
 
@@ -179,8 +181,11 @@ for i in range(Nq):
 R_pq  = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
 F = zeros(2*N)
-F[0:N] 		= sum(-transpose(q*ones((N,Nq)))/(E_1*R_pq),axis=0) * Precond[0,:]
-F[N:2*N] 	= sum(-transpose(q*ones((N,Nq)))/(E_1*R_pq),axis=0) * Precond[2,:]
+# With preconditioner
+#F[0:N] 		= sum(-transpose(q*ones((N,Nq)))/(E_1*R_pq),axis=0) * Precond[0,:]
+#F[N:2*N] 	= sum(-transpose(q*ones((N,Nq)))/(E_1*R_pq),axis=0) * Precond[2,:]
+# No preconditioner
+F[0:N] 		= sum(-transpose(q*ones((N,Nq)))/(E_1*R_pq),axis=0)
 toc = time.time()
 rhs_time = toc-tic
 print 'RHS generation time: %fs\n'%rhs_time

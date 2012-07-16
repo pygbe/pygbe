@@ -1,0 +1,20 @@
+PyGBe: Python GPU code for Boundary elements
+
+This is a boundary element method code that does molecular electrostatics calculations in a continuum approach. So far, it calculates two dielectric problems with the formulation presented in Yoon and Lenhoff, "A Boundary Element Method for Molecular Electrostatics with Electrolite Effects", Journal of Computational Chemistry, Vol. 11, No. 9, 1990.
+
+This code is accelerated using the Barnes-Hut treecode so that each GMRES iteration scales as O(NlogN).
+The code is written in Python putting the most computationally intensive parts on the GPU, interfacing with PyCUDA.
+
+Required:
+    - Python
+    - Numpy
+    - PyCUDA
+
+To run:
+    - Type 'python sphere_YL.py' in ./bem_pycuda
+
+As of now, the code does not use any C++. However, some C++ routines are included that can be used if you prefer a CPU only code. To interface pyhton with C++, you need to have swig installed and type 'make all' in the ./util and ./bem_pycuda/tree directories.
+
+Let us know if you have any questions/feedback.
+
+Enjoy!
