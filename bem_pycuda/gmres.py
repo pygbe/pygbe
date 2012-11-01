@@ -1,30 +1,11 @@
-'''
-    Copyright (C) 2011 by Christopher Cooper, Lorena Barba
-  
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-  
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-  
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-'''
-from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum
+from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt, save
+from numpy  import float64 as REAL
 from numpy.linalg           import norm
 from scipy.linalg           import lu_solve, solve
 from scipy.sparse.linalg    import gmres 
 import time
 from matrixfree import gmres_dot as gmres_dot
+from pycuda.tools import DeviceMemoryPool
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
 
@@ -60,110 +41,94 @@ def PlaneRotation (H, cs, sn, s, i, R):
     return H, cs, sn, s
 
 def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, 
-					normal_xDev, xj, yj, zj, xi, yi, zi, xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, sizeTarDev, offsetMltDev, 
-					Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
+                    normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi,  
+                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
+                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
+                    sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
                     tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost,
                     offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, K, threshold, BSZ, GSZ, BlocksPerTwig, X, b, 
-                    R, tol, max_iter, Cells, theta, Nm, II, JJ, KK, index, combII, combJJ, combKK, 
-                    IImii, JJmjj, KKmkk, index_small, P, kappa, NCRIT, twig, eps, time_pack):
-    # Precond       	: preconditioner
-    # E_hat         	: coefficient of bottom right block
-    # vertex        	: array of position of vertices
-    # triangle      	: array of indices of triangle vertices in vertex array
-	# triHost/Dev		: packed array of triangle indices corresponding to each Gauss point on host/device memory	
-	# kHost/Dev			: packed array of Gauss points indices within the element corresponding to each Gauss point on host/device memory	
-	# vertexHost/Dev	: packed array of vertices of triangles on host/device memory
-	# AreaHost/Dev		: packed array of area of triangles on host/device memory
-	# normal_xDev		: packed array of x component of normal vector to triangles on device memory
-    # xi, yi, zi    	: position of targets
-    # xj, yj, zj    	: position of sources
-	# xt,yt,ztHost/Dev	: packed array with position of targets (collocation points) on host/device memory
-	# xs,ys,zsHost/Dev	: packed array with position of sources (Gauss points) on host/device memory
-	# xc,yc,zcHost/Dev	: packed array with position of box centers on host/device memory
-	# sizeTarHost/Dev	: array with number of targets per twig cell on host/device memory
-	# offsetMltHost/Dev	: array with pointers to first element of each twig in xcHost/Dev array on host/device memory
-	# Pre0,1,2,3Host/Dev: packed array with diagonal values of preconditioner for blocks 0,1,2,3 on host/device
-	# tarPtr			: packed array with pointers to targets in xi, yi, zi array
-	# srcPtr			: packed array with pointers to sources in xj, yj, zj array
-	# offSrc			: length of array of packed sources
-	# mltPtr			: packed array with pointers to multipoles in Cells array
-	# offMlt			: length of array of packed multipoles
-	# offsetSrcHost/Dev : array with pointers to first element of each twig in xsHost/Dev array on host/device memory
-    # Area          	: array of element area 
-    # normal        	: array of elements normal
-    # xk/Dev, wk/Dev	: position and weight of 1D gauss quadrature on host/device memory
-    # K             	: number of 2D Gauss points per element
-	# threshold			: threshold to change from analytical to Gauss integration
-	# BSZ, GSZ			: block size and grid size for CUDA
-	# blocksPerTwig		: number of CUDA blocks that fit on a twig (NCRIT/BSZ)
-    # X             	: solution vector
-    # b             	: RHS vector
-    # R             	: number of iterations to restart
-    # tol           	: GMRES tolerance
-    # max_iter      	: maximum number of iterations
-    # Cells         	: array of Cells
-    # theta         	: MAC criterion
-    # Nm            	: number of terms in Taylor expansion
-    # II, JJ, KK    	: x,y,z powers of multipole expansion
-    # index         	: 1D mapping of II,JJ,KK (index of multipoles)
-    # P             	: order of expansion
-    # kappa         	: reciprocal of Debye length
-    # NCRIT         	: max number of points per twig cell
-    # twig          	: array of indices of twigs in Cells array
+                    R, tol, max_iter, Cells, theta, Nm, II, JJ, KK, index, index_large, IndexDev, combII, combJJ, combKK, 
+                    IImii, JJmjj, KKmkk, index_small, index_ptr, P, kappa, NCRIT, twig, eps):
 
     N = len(b)
-    V = zeros((R+1, N))
-    H = zeros((R+1,R))
+    V = zeros((R+1, N), dtype=REAL)
+    H = zeros((R+1,R), dtype=REAL)
 
-    time_Vi 		= 0.
-    time_Vk 		= 0.
-    time_rotation 	= 0.
-    time_lu 		= 0.
-    time_update 	= 0.
+    time_Vi = 0.
+    time_Vk = 0.
+    time_rotation = 0.
+    time_lu = 0.
+    time_update = 0.
 
-    ### Initialize varibles
+    # Initializing varibles
     rel_resid = 1.
-    cs, sn = zeros(N), zeros(N)
+    cs, sn = zeros(N, dtype=REAL), zeros(N, dtype=REAL)
 
     iteration = 0
 
     b_norm = norm(b)
 
-    time_eval = 0.
+    time_eval  = 0.
+    time_trans = 0.
     time_an    = 0.
     time_P2P   = 0.
     time_P2M   = 0.
     time_M2M   = 0.
     time_M2P   = 0.
+    time_pack  = 0.
+    
 
-	### Outer loop
-    while (iteration < max_iter and rel_resid>=tol): 
-        
-		# Call Treecode
-        aux, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, AI_int = gmres_dot(Precond, 
-                    E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, 
-					normal_xDev, xj, yj, zj, xi, yi, zi, xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, sizeTarDev, offsetMltDev, 
-					Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
-      				tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
+    '''
+    A11 = zeros((N/2,N/2))
+    A22 = zeros((N/2,N/2))
+    for i in range(N/2):
+        if i%50==0:
+            print 'element %i'%i
+        vec = zeros(N)
+        vec[i]   = 1.
+        vec[i+N/2] = 1.
+        aux, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
+                    E_hat, vec, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
+                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
+                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
+                    sizeTarDev, offsetMltDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
+                    tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
                     offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                    index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, 
+                    index, index_large, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, 
                     P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
-                    time_P2M, time_M2M, time_M2P, time_an, time_pack)
+                    time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
+        A11[:,i] = aux[0:N/2]
+        A22[:,i] = aux[N/2:N]
 
-       	# Check residual 
+    savetxt('A11fast_500wp.txt',A11)
+    savetxt('A22fast_500wp.txt',A22)
+    quit()
+    ''' 
+
+    while (iteration < max_iter and rel_resid>=tol): # Outer iteration
+        
+        aux, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
+                    E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
+                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
+                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
+                    sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
+                    tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
+                    offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
+                    index, index_large, IndexDev, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr, 
+                    P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
+                    time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
+        
         r = b - aux
         beta = norm(r)
 
         if iteration==0: 
-            print 'Analytical integrals: %i of %i, %i'%(AI_int*2/len(X), len(X)/2, 100*AI_int/len(X)**2)+'%'
+            print 'Analytical integrals: %i of %i, %i'%(AI_int*2/len(X), len(X)/2, 100*4*AI_int/len(X)**2)+'%'
 
         V[0,:] = r[:]/beta
         if iteration==0:
-            res_0 = beta/b_norm
+            res_0 = b_norm
 
-        s = zeros(R+1)
+        s = zeros(R+1, dtype=REAL)
         s[0] = beta
         i = -1
 
@@ -178,17 +143,17 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
             # Compute Vip1
             tic = time.time()
        
-            Vip1, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, AI_int = gmres_dot(Precond, 
-                        E_hat, V[i,:], vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, xj, yj, zj, xi, yi, zi, 
+            Vip1, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
+                        E_hat, V[i,:], vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
                         xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
                         xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
-                        sizeTarDev, offsetMltDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
+                        sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
                         tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
                         offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                        index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, 
+                        index, index_large, IndexDev, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr, 
                         P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
-                        time_P2M, time_M2M, time_M2P, time_an, time_pack)
-      
+                        time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
+
 
             toc = time.time()
             time_Vi+=toc-tic
@@ -214,7 +179,7 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
             toc = time.time()
             time_rotation+=toc-tic
 
-            rel_resid = abs(s[i+1])/res_0
+            rel_resid = abs(s[i+1])/b_norm
 
             if (i+1==R):
                 print('Residual: %f. Restart...'%rel_resid)
@@ -249,11 +214,14 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
     print 'Time P2M          : %f'%time_P2M
     print 'Time M2M          : %f'%time_M2M
     print 'Time packing      : %f'%time_pack
+    print 'Time data transfer: %f'%time_trans
     print 'Time evaluation   : %f'%time_eval
     print '\tTime M2P  : %f'%time_M2P
     print '\tTime P2P  : %f'%time_P2P
     print '\tTime analy: %f'%time_an
+    print '------------------------------'
 #    print 'Tolerance: %f, maximum iterations: %f'%(tol, max_iter)
+
 
     return X
 

@@ -1,7 +1,3 @@
-/***
-This code is a version of calcp from Jacob White's group at MIT.
-We thank them for opening and allowing the use of their codes
-***/
 #include <cmath>
 #include <stdio.h>
 #include <iostream>
@@ -76,10 +72,18 @@ void lineInt(REAL *PHI, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, 
         Rtheta = x/cos(thetak);
         R      = sqrt(Rtheta*Rtheta + z*z);
         expKr  = exp(-kappa*R);
-        PHI[0]+= -wk[i]*(expKr - expKz)/kappa * dtheta/2;
-        PHI[1]+= -wk[i]*(z/R*expKr - expKz*signZ) * dtheta/2;
-        PHI[2]+=  wk[i]*(R-absZ) * dtheta/2;
-        PHI[3]+= -wk[i]*(z/R - signZ) * dtheta/2;
+        if (kappa>1e-10)
+        {
+            PHI[0]+= -wk[i]*(expKr - expKz)/kappa * dtheta/2;
+            PHI[1]+=  wk[i]*(z/R*expKr - expKz*signZ) * dtheta/2;
+        }
+        else
+        {
+            PHI[0]+= wk[i]*(R-absZ) * dtheta/2;
+            PHI[1]+= wk[i]*(z/R - signZ) * dtheta/2;
+        }
+        PHI[2]+= wk[i]*(R-absZ) * dtheta/2;
+        PHI[3]+= wk[i]*(z/R - signZ) * dtheta/2;
     }
 }
 
@@ -225,8 +229,8 @@ void SA_wrap(REAL *PHI, REAL *y, REAL *x, REAL kappa,
 
     if (same==1)
     {
-        PHI[1] = 2*M_PI;
-        PHI[3] = -2*M_PI;
+        PHI[1] = -2*M_PI;
+        PHI[3] = 2*M_PI;
     }
 
 //    printf("PHI: %f, %f, %f, %f\n",PHI[0],PHI[1],PHI[2], PHI[3]);
@@ -257,8 +261,8 @@ void P2P_c(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, R
         REAL *xi, int xiSize, REAL *yi, int yiSize, REAL *zi, int ziSize,
         REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize,
         REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
-        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, int *target, int targetSize,
-        REAL *Area, int AreaSize, REAL *normal_x, int normal_xSize, REAL *xk, int xkSize, 
+        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mclean, int mcleanSize, int *target, int targetSize,
+        REAL *Area, int AreaSize, REAL *xk, int xkSize, 
         REAL *wk, int wkSize, REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
     time_t start, stop;
@@ -273,29 +277,31 @@ void P2P_c(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, R
         for(int j=0; j<N_source; j++)
         {   
             // Check if panels are far enough for Gauss quadrature
-            dx_tri = xi[i] - xi[tri[j]];
-            dy_tri = yi[i] - yi[tri[j]];
-            dz_tri = zi[i] - zi[tri[j]];
+            dx_tri = xt[i_aux] - xi[tri[j]];
+            dy_tri = yt[i_aux] - yi[tri[j]];
+            dz_tri = zt[i_aux] - zi[tri[j]];
             R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri);
             
             L_d  = (sqrt(2*Area[tri[j]])/(R_tri+eps)>=threshold);
             same = (i==tri[j]);
-            condition_an = ((same || L_d) && (k[j]==0));
+            condition_an = (L_d && (k[j]==0));
             condition_gq = (!L_d);
 
             if(condition_gq)
             {
-                dx = s_xj[j] - xt[i_aux];
-                dy = s_yj[j] - yt[i_aux];
-                dz = s_zj[j] - zt[i_aux];
+                dx = xt[i_aux] - s_xj[j];
+                dy = yt[i_aux] - s_yj[j];
+                dz = zt[i_aux] - s_zj[j];
                 R  = sqrt(dx*dx + dy*dy + dz*dz + eps);
                 R2 = R*R;
                 R3 = R2*R;
                 expKr = exp(-kappa*R);
                 MY[i_aux]  += m[j]*expKr/R;
-                dMY[i_aux] += expKr/R2*(kappa+1/R) * (dx*mx[j] + dy*my[j] + dz*mz[j]);
+                dMY[i_aux] += -expKr/R2*(kappa+1/R) * (dx*mx[j] + dy*my[j] + dz*mz[j]);
                 ML[i_aux]  += m[j]/R;
-                dML[i_aux] += 1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                dML[i_aux] += -1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                // The minus sign from the chain rule is being considered in the multiplying vector
+                // since we are deriving respect to r' in 1/|r-r'|
             }
             
             if(condition_an)
@@ -312,9 +318,9 @@ void P2P_c(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, R
                 stop = clock();
 
                 MY[i_aux]  += PHI_1[0] * m[j]/(w0*Area[tri[j]]);
-                dMY[i_aux] += PHI_1[1] * mx[j]/(w0*Area[tri[j]]*normal_x[tri[j]]);
+                dMY[i_aux] += PHI_1[1] * mclean[j];
                 ML[i_aux]  += PHI_1[2] * m[j]/(w0*Area[tri[j]]);
-                dML[i_aux] += PHI_1[3] * mx[j]/(w0*Area[tri[j]]*normal_x[tri[j]]);
+                dML[i_aux] += PHI_1[3] * mclean[j];
 
                 aux[1] += ((REAL)(stop-start))/CLOCKS_PER_SEC;
             }

@@ -18,8 +18,8 @@ extern void P2P_c(double *MY, int MYSize, double *dMY, int dMYSize, double *ML, 
         double *xi, int xiSize, double *yi, int yiSize, double *zi, int ziSize,
         double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, double *s_zj, int s_zjSize,
         double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
-        double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, int *targets, int targetsSize, 
-        double *Area, int AreaSize, double *normal_x, int normal_xSize, double *xk, int xkSize, double *wk, int wkSize, 
+        double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mclean, int mcleanSize, int *targets, int targetsSize, 
+        double *Area, int AreaSize, double *xk, int xkSize, double *wk, int wkSize, 
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 %}
 
@@ -84,15 +84,15 @@ extern void SA_wrap_arr(double *y, int ySize,
 %apply (double* IN_ARRAY1, int DIM1){(double *Area, int AreaSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *xk, int xkSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *wk, int wkSize)};
-%apply (double* IN_ARRAY1, int DIM1){(double *normal_x, int normal_xSize)};
+%apply (double* IN_ARRAY1, int DIM1){(double *mclean, int mcleanSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *aux, int auxSize)};
 extern void P2P_c(double *MY, int MYSize, double *dMY, int dMYSize, double *ML, int MLSize, double *dML, int dMLSize,
         double *triangle, int triangleSize, int *tri, int triSize, int *k, int kSize, 
         double *xi, int xiSize, double *yi, int yiSize, double *zi, int ziSize,
         double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, double *s_zj, int s_zjSize,
         double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
-        double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, int *targets, int targetsSize,
-        double *Area, int AreaSize, double *normal_x, int normal_xSize, double *xk, int xkSize, double *wk, int wkSize, 
+        double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mclean, int mcleanSize, int *targets, int targetsSize,
+        double *Area, int AreaSize, double *xk, int xkSize, double *wk, int wkSize, 
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 %clear (double *MY, int MYSize); 
 %clear (double *dMY, int dMYSize); 
@@ -118,5 +118,5 @@ extern void P2P_c(double *MY, int MYSize, double *dMY, int dMYSize, double *ML, 
 %clear (double *Area, int AreaSize); 
 %clear (double *xk, int xkSize); 
 %clear (double *wk, int wkSize); 
-%clear (double *normal_x, int normal_xSize); 
+%clear (double *mclean, int mcleanSize); 
 %clear (double *aux, int auxSize); 

@@ -1,0 +1,285 @@
+Reading parameters from /Users/jbardhan/Parameters/standard.prm
+Checking for valid parameters
+Reading radii from /Users/jbardhan/Parameters/radii.siz
+Reading charges from built_parse.crg
+Salt layers are curved panels
+Dielectric layers are flat panels
+Number of dielectric layers: 1
+Removed 2 panels with zero area or invalid genus
+   Dielectric layer 0 has 52780 panels (5517.352627 A^2)
+Number of dielectric cavities: 3
+Removed 0 panels with zero area or invalid genus
+   Dielectric cavity 0 has 286 panels (25.688613 A^2)
+Removed 0 panels with zero area or invalid genus
+   Dielectric cavity 1 has 950 panels (87.441114 A^2)
+Removed 0 panels with zero area or invalid genus
+   Dielectric cavity 2 has 274 panels (27.220799 A^2)
+Dielectric layer 0 is inside salt layer 999
+Dielectric cavity 0 is inside dielectric layer 0
+Dielectric cavity 1 marked as bad by meshmaker!  Removing from calculation
+Dielectric cavity 2 is inside dielectric layer 0
+found 0 0 1960 charges
+generating Green's theorem operator
+
+Using no Salt formulation
+
+Constructing operator OUTSIDE dielectrics:
+Using 6 partitioning levels
+D... T... U... VT... PV... UTI... 
+Memory Use For Panels: 43279600
+Memory Use For Cubes: 37702576
+Memory Use For U: 17185060
+Memory Use For VT: 26076688
+Memory Use For UTI: 18429624
+Memory Use For PV: 46420920
+Memory Use For T: 5945856
+Memory Use For D: 99676560
+Memory Use Total: 294716884
+
+Constructing operator INSIDE dielectric 0, OUTSIDE cavities:
+Using 6 partitioning levels
+D... T... U... VT... PV... UTI... 
+Memory Use For Panels: 43738800
+Memory Use For Cubes: 38153844
+Memory Use For U: 17414372
+Memory Use For VT: 26466904
+Memory Use For UTI: 18621728
+Memory Use For PV: 46992080
+Memory Use For T: 5945856
+Memory Use For D: 100655776
+Memory Use Total: 297989360
+
+Constructing M3 operator INSIDE dielectric 0, OUTSIDE dielectric cavities
+Using 6 partitioning levels
+D... T... U... VT... PV... UTI... 
+Memory Use For Panels: 43738800
+Memory Use For Cubes: 48284768
+Memory Use For U: 341772
+Memory Use For VT: 26089156
+Memory Use For UTI: 2537736
+Memory Use For PV: 45552904
+Memory Use For T: 5945856
+Memory Use For D: 2116368
+Memory Use Total: 174607360
+
+Dielectric cavity surface 0 is inside dielectric surface 0
+Constructing operator INSIDE dielectric cavity 0
+Using 3 partitioning levels
+D... T... U... VT... PV... UTI... 
+Memory Use For Panels: 234520
+Memory Use For Cubes: 436236
+Memory Use For U: 7336
+Memory Use For VT: 7252
+Memory Use For UTI: 73216
+Memory Use For PV: 145408
+Memory Use For T: 2972928
+Memory Use For D: 152608
+Memory Use Total: 4029504
+
+Dielectric cavity surface 2 is inside dielectric surface 0
+Constructing operator INSIDE dielectric cavity 2
+Using 3 partitioning levels
+D... T... U... VT... PV... UTI... 
+Memory Use For Panels: 224680
+Memory Use For Cubes: 429000
+Memory Use For U: 6544
+Memory Use For VT: 6544
+Memory Use For UTI: 70144
+Memory Use For PV: 140288
+Memory Use For T: 2972928
+Memory Use For D: 139728
+Memory Use Total: 3989856
+Use minimum degree ordering on A'+A.
+MV TIME: 0.58 s (0.70)
+MV TIME: 0.58 s (0.66)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 1 Residual: 0.341899
+MV TIME: 0.58 s (0.65)
+MV TIME: 0.58 s (0.66)
+MV TIME: 0.00 s (0.01)
+MV TIME: 0.00 s (0.00)
+Iteration: 2 Residual: 0.274248
+MV TIME: 0.57 s (0.65)
+MV TIME: 0.58 s (0.67)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 3 Residual: 0.154725
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 4 Residual: 0.102457
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 5 Residual: 0.0837043
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 6 Residual: 0.050123
+MV TIME: 0.57 s (0.65)
+MV TIME: 0.59 s (0.64)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 7 Residual: 0.0373494
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.59 s (0.65)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 8 Residual: 0.0242737
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 9 Residual: 0.0188465
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 10 Residual: 0.0134365
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.01)
+Iteration: 11 Residual: 0.0104442
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 12 Residual: 0.00815183
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 13 Residual: 0.00684276
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 14 Residual: 0.00609913
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 15 Residual: 0.00484491
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 16 Residual: 0.00443103
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.61)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 17 Residual: 0.00399379
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 18 Residual: 0.00319119
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 19 Residual: 0.00278275
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.01)
+MV TIME: 0.00 s (0.00)
+Iteration: 20 Residual: 0.00244125
+MV TIME: 0.57 s (0.60)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.01)
+Iteration: 21 Residual: 0.00229135
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.01)
+Iteration: 22 Residual: 0.001898
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 23 Residual: 0.0016477
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 24 Residual: 0.00150355
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.01)
+MV TIME: 0.00 s (0.00)
+Iteration: 25 Residual: 0.00118592
+MV TIME: 0.58 s (0.73)
+MV TIME: 0.58 s (0.65)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 26 Residual: 0.000919646
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.00 s (0.01)
+MV TIME: 0.00 s (0.01)
+Iteration: 27 Residual: 0.000779941
+MV TIME: 0.58 s (0.65)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 28 Residual: 0.000624453
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 29 Residual: 0.000512597
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 30 Residual: 0.000367391
+MV TIME: 0.57 s (0.61)
+MV TIME: 0.58 s (0.62)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 31 Residual: 0.00029328
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 32 Residual: 0.000242006
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 33 Residual: 0.000188763
+MV TIME: 0.57 s (0.62)
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 34 Residual: 0.000155566
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 35 Residual: 0.000134895
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.00 s (0.01)
+MV TIME: 0.00 s (0.01)
+Iteration: 36 Residual: 0.000117022
+MV TIME: 0.58 s (0.64)
+MV TIME: 0.59 s (0.65)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 37 Residual: 0.000105387
+MV TIME: 0.58 s (0.63)
+MV TIME: 0.59 s (0.64)
+MV TIME: 0.00 s (0.00)
+MV TIME: 0.00 s (0.00)
+Iteration: 38 Residual: 9.75386e-05
+MV TIME: 0.35 s (0.38)
+time for PBEproblem_solve(): 61.15 s (67.89)
+total solvation energy = -497.248130

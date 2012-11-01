@@ -39,7 +39,7 @@ def get_K(x,n):
     n_fact = factorial(n)
     n_fact2 = factorial(2*n)
     for s in range(n+1):
-        K += 2**s*n_fact*factorial(2*n-s)/(factorial(s)*n_fact2*factorial(n-s))
+        K += 2**s*n_fact*factorial(2*n-s)/(factorial(s)*n_fact2*factorial(n-s)) * x**s
 
     return K
 
@@ -56,8 +56,6 @@ def an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N):
         for n in range(N):
             for m in range(-n,n+1):
                 P1 = lpmv(abs(m),n,cos(zenit))
-#                if m<0:
-#                    P1 *= (-1)**abs(m)*factorial(n-abs(m))/factorial(n+abs(m))
 
                 Enm = 0.
                 for k in range(len(q)):
@@ -65,8 +63,6 @@ def an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N):
                     zenit_k = arccos(xq[k,2]/rho_k)
                     azim_k  = arctan2(xq[k,1],xq[k,0])
                     P2 = lpmv(abs(m),n,cos(zenit_k))
-#                    if m<0:
-#                        P2 *= (-1)**abs(m)*factorial(n-abs(m))/factorial(n+abs(m))
 
                     Enm += q[k]*rho_k**n*factorial(n-abs(m))/factorial(n+abs(m))*P2*exp(-1j*m*azim_k)
     
@@ -84,6 +80,24 @@ def an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N):
         PHI[K] = real(phi)/(4*pi)
 
     return PHI
+
+def two_sphere(a, R, kappa, E_1, E_2, q):
+
+    E_hat = E_2/E_1
+    C0 = -q/(a*a*E_hat*kappa)
+    k0a = exp(-kappa*a)/(kappa*a)
+    k0R = exp(-kappa*R)/(kappa*R)
+    k1a = -k0a - k0a/(kappa*a)
+    i0 = sinh(kappa*a)/(kappa*a)
+    i1 = cosh(kappa*a)/(kappa*a) - i0/(kappa*a)
+
+    Einter = 0.5*q*C0*( (k0a+k0R*i0)/(k1a+k0R*i1) - k0a/k1a)
+    E1sphere = 0.5*q*C0*(k0a/k1a) - 0.5*q**2/a
+    E2sphere = 0.5*q*C0*(k0a+k0R*i0)/(k1a+k0R*i1) - 0.5*q**2/a
+
+    return Einter, E1sphere, E2sphere
+
+
 '''
 q   = array([1.60217646e-19])
 xq  = array([[1e-10,1e-10,0.]])

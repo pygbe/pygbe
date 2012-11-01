@@ -1,11 +1,7 @@
-'''
-This code is a python version of calcp from Jacob White's group in MIT.
-We thank them for opening and allow the use of their code.
-'''
 from numpy import *
 from pylab import *
 from math import atan2
-#from semi_analyticalwrap import SA_wrap_arr
+from semi_analyticalwrap import SA_wrap_arr
 
 def GQ_1D(K):
     T = zeros((K,K))
