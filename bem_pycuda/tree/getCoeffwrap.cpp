@@ -1,7 +1,3 @@
-/**
-This code is a modification of TREECODE3D_YUKAWA from Hans Johnston in UMass Amherst.
-We thank them for opening and aloow use of their code
-**/
 #include <cmath>
 #include <stdio.h>
 #include <iostream>

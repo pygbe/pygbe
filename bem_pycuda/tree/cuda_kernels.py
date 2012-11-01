@@ -1,27 +1,6 @@
-'''
-    Copyright (C) 2011 by Christopher Cooper, Lorena Barba
-  
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-  
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-  
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-'''
 from pycuda.compiler import SourceModule
 
-def kernels(BSZ, Nm, xkSize):
+def kernels(BSZ, Nm, xkSize, P):
     
     mod = SourceModule( """
 
@@ -29,39 +8,18 @@ def kernels(BSZ, Nm, xkSize):
     #define BSZ %(blocksize)d
     #define Nm  %(Nmult)d
     #define xkSize %(K_1D)d
+    #define P      %(Ptree)d
 
-	// Find multipole of order i,j,k in 1D array of multipoles
-    __device__ int getIndex(int P, int i, int j, int k)
-    {
-        int I=0, ii, jj; 
-        for (ii=0; ii<i; ii++)
-        {   
-            for (jj=1; jj<P+2-ii; jj++)
-            {   
-                I+=jj;
-            }   
-        }   
-        for (jj=P+2-j; jj<P+2; jj++)
-        {   
-            I+=jj-i;
-        }   
-        I+=k;
 
-        return I;
+    __device__ int getIndex(int i, int j, int k, int *Index)
+    {   
+        return Index[(P+1)*(P+1)*i + (P+1)*j + k]; 
     }
 
-	// Recursive relation to find the Taylor coefficients for Laplace and Yukawa for potential and force in x, y, z
+
     __device__ void getCoeff(REAL *aL, REAL *axL, REAL *ayL, REAL *azL, 
                              REAL *aY, REAL *axY, REAL *ayY, REAL *azY,
-                             REAL dx, REAL dy, REAL dz, REAL kappa, int P)
-	// aY    : coefficients for Yukawa potential
-	// axY   : coefficients for Yukawa force in x direction
-	// ayY   : coefficients for Yukawa force in y direction
-	// azY   : coefficients for Yukawa force in z direction
-	// aL    : coefficients for Laplace potential
-	// axL   : coefficients for Laplace force in x direction
-	// ayL   : coefficients for Laplace force in y direction
-	// azL   : coefficients for Laplace force in z direction
+                             REAL dx, REAL dy, REAL dz, REAL kappa, int *Index)
     {
         REAL b[Nm];
         REAL R = sqrt(dx*dx+dy*dy+dz*dz);
@@ -77,7 +35,7 @@ def kernels(BSZ, Nm, xkSize):
         aL[0] = 1/R;
 
         // Two indices = 0
-        I = getIndex(P,1,0,0);
+        I = getIndex(1,0,0,Index);
         b[I]   = -kappa * (dx*aY[0]); // 1,0,0
         b[P+1] = -kappa * (dy*aY[0]); // 0,1,0
         b[1]   = -kappa * (dz*aY[0]); // 0,0,1
@@ -102,9 +60,9 @@ def kernels(BSZ, Nm, xkSize):
         {   
             Cb   = -kappa/i;
             C    = 1./(i*R2);
-            I    = getIndex(P,i,0,0);
-            Im1x = getIndex(P,i-1,0,0);
-            Im2x = getIndex(P,i-2,0,0);
+            I    = getIndex(i,0,0,Index);
+            Im1x = getIndex(i-1,0,0,Index);
+            Im2x = getIndex(i-2,0,0,Index);
             b[I] = Cb * (dx*aY[Im1x] + aY[Im2x]);
             aY[I] = C * ( -kappa*(dx*b[Im1x] + b[Im2x]) -(2*i-1)*dx*aY[Im1x] - (i-1)*aY[Im2x] );
             axY[Im1x] = aY[I]*i;
@@ -112,7 +70,7 @@ def kernels(BSZ, Nm, xkSize):
             axL[Im1x] = aL[I]*i;
 
 
-            I    = getIndex(P,0,i,0);
+            I    = getIndex(0,i,0,Index);
             Im1y = I-(P+2-i);
             Im2y = Im1y-(P+2-i+1);
             b[I] = Cb * (dy*aY[Im1y] + aY[Im2y]);
@@ -135,7 +93,7 @@ def kernels(BSZ, Nm, xkSize):
         // One index = 0, one = 1 other >=1
 
         Cb   = -kappa/2;
-        I    = getIndex(P,1,1,0);
+        I    = getIndex(1,1,0,Index);
         Im1x = P+1;
         Im1y = I-(P+2-1-1);
         b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y]);
@@ -146,7 +104,7 @@ def kernels(BSZ, Nm, xkSize):
         axL[Im1x] = aL[I];
         ayL[Im1y] = aL[I];
 
-        I    = getIndex(P,1,0,1);
+        I    = getIndex(1,0,1,Index);
         Im1x = 1;
         Im1z = I-1;
         b[I] = Cb * (dx*aY[Im1x] + dz*aY[Im1z]);
@@ -157,7 +115,7 @@ def kernels(BSZ, Nm, xkSize):
         axL[Im1x] = aL[I];
         azL[Im1z] = aL[I];
 
-        I    = getIndex(P,0,1,1);
+        I    = getIndex(0,1,1,Index);
         Im1y = I-(P+2-1);
         Im1z = I-1;
         b[I] = Cb * (dy*aY[Im1y] + dz*aY[Im1z]);
@@ -172,8 +130,8 @@ def kernels(BSZ, Nm, xkSize):
         {
             Cb   = -kappa/(i+1);
             C    = 1./((1+i)*R2);
-            I    = getIndex(P,1,i,0);
-            Im1x = getIndex(P,0,i,0);
+            I    = getIndex(1,i,0,Index);
+            Im1x = getIndex(0,i,0,Index);
             Im1y = I-(P+2-i-1);
             Im2y = Im1y-(P+2-i);
             b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y] + aY[Im2y]);
@@ -184,8 +142,8 @@ def kernels(BSZ, Nm, xkSize):
             axL[Im1x] = aL[I];
             ayL[Im1y] = aL[I]*i;
 
-            I    = getIndex(P,1,0,i);
-            Im1x = getIndex(P,0,0,i);
+            I    = getIndex(1,0,i,Index);
+            Im1x = getIndex(0,0,i,Index);
             Im1z = I-1;
             Im2z = I-2;
             b[I] = Cb * (dx*aY[Im1x] + dz*aY[Im1z] + aY[Im2z]);
@@ -196,7 +154,7 @@ def kernels(BSZ, Nm, xkSize):
             axL[Im1x] = aL[I];
             azL[Im1z] = aL[I]*i;
 
-            I    = getIndex(P,0,1,i);
+            I    = getIndex(0,1,i,Index);
             Im1y = I-(P+2-1);
             Im1z = I-1;
             Im2z = I-2;
@@ -208,10 +166,10 @@ def kernels(BSZ, Nm, xkSize):
             ayL[Im1y] = aL[I];
             azL[Im1z] = aL[I]*i;
 
-            I    = getIndex(P,i,1,0);
+            I    = getIndex(i,1,0,Index);
             Im1y = I-(P+2-1-i);
-            Im1x = getIndex(P,i-1,1,0);
-            Im2x = getIndex(P,i-2,1,0);
+            Im1x = getIndex(i-1,1,0,Index);
+            Im2x = getIndex(i-2,1,0,Index);
             b[I] = Cb * (dy*aY[Im1y] + dx*aY[Im1x] + aY[Im2x]);
             aY[I] = C * ( -kappa*(dy*b[Im1y]+dx*b[Im1x]+b[Im2x]) -(2*(1+i)-1)*(dy*aY[Im1y]+dx*aY[Im1x]) - (1+i-1)*(aY[Im2x]) );
             axY[Im1x] = aY[I]*i;
@@ -220,10 +178,10 @@ def kernels(BSZ, Nm, xkSize):
             axL[Im1x] = aL[I]*i;
             ayL[Im1y] = aL[I];
 
-            I    = getIndex(P,i,0,1);
+            I    = getIndex(i,0,1,Index);
             Im1z = I-1;
-            Im1x = getIndex(P,i-1,0,1);
-            Im2x = getIndex(P,i-2,0,1);
+            Im1x = getIndex(i-1,0,1,Index);
+            Im2x = getIndex(i-2,0,1,Index);
             b[I] = Cb * (dz*aY[Im1z] + dx*aY[Im1x] + aY[Im2x]);
             aY[I] = C * ( -kappa*(dz*b[Im1z]+dx*b[Im1x]+b[Im2x]) -(2*(1+i)-1)*(dz*aY[Im1z]+dx*aY[Im1x]) - (1+i-1)*(aY[Im2x]) );
             axY[Im1x] = aY[I]*i;
@@ -232,7 +190,7 @@ def kernels(BSZ, Nm, xkSize):
             axL[Im1x] = aL[I]*i;
             azL[Im1z] = aL[I];
 
-            I    = getIndex(P,0,i,1);
+            I    = getIndex(0,i,1,Index);
             Im1z = I-1;
             Im1y = I-(P+2-i);
             Im2y = Im1y-(P+2-i+1);
@@ -252,9 +210,9 @@ def kernels(BSZ, Nm, xkSize):
             {
                 Cb   = -kappa/(i+j);
                 C    = 1./((i+j)*R2);
-                I    = getIndex(P,i,j,0);
-                Im1x = getIndex(P,i-1,j,0);
-                Im2x = getIndex(P,i-2,j,0);
+                I    = getIndex(i,j,0,Index);
+                Im1x = getIndex(i-1,j,0,Index);
+                Im2x = getIndex(i-2,j,0,Index);
                 Im1y = I-(P+2-j-i);
                 Im2y = Im1y-(P+3-j-i);
                 b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y] + aY[Im2x] + aY[Im2y]);
@@ -265,9 +223,9 @@ def kernels(BSZ, Nm, xkSize):
                 axL[Im1x] = aL[I]*i;
                 ayL[Im1y] = aL[I]*j;
 
-                I    = getIndex(P,i,0,j);
-                Im1x = getIndex(P,i-1,0,j);
-                Im2x = getIndex(P,i-2,0,j);
+                I    = getIndex(i,0,j,Index);
+                Im1x = getIndex(i-1,0,j,Index);
+                Im2x = getIndex(i-2,0,j,Index);
                 Im1z = I-1;
                 Im2z = I-2;
                 b[I] = Cb * (dx*aY[Im1x] + dz*aY[Im1z] + aY[Im2x] + aY[Im2z]);
@@ -278,7 +236,7 @@ def kernels(BSZ, Nm, xkSize):
                 axL[Im1x] = aL[I]*i;
                 azL[Im1z] = aL[I]*j;
 
-                I    = getIndex(P,0,i,j);
+                I    = getIndex(0,i,j,Index);
                 Im1y = I-(P+2-i);
                 Im2y = Im1y-(P+3-i);
                 Im1z = I-1;
@@ -297,9 +255,9 @@ def kernels(BSZ, Nm, xkSize):
         {
             // Two index = 1, other>=1
             Cb   = -kappa/3;
-            I    = getIndex(P,1,1,1);
-            Im1x = getIndex(P,0,1,1);
-            Im1y = getIndex(P,1,0,1);
+            I    = getIndex(1,1,1,Index);
+            Im1x = getIndex(0,1,1,Index);
+            Im1y = getIndex(1,0,1,Index);
             Im1y = I-(P);
             Im1z = I-1;
             b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y] + dz*aY[Im1z]);
@@ -317,11 +275,11 @@ def kernels(BSZ, Nm, xkSize):
             {
                 Cb   = -kappa/(2+i);
                 C    = 1./((i+2)*R2);
-                I    = getIndex(P,i,1,1);
-                Im1x = getIndex(P,i-1,1,1);
+                I    = getIndex(i,1,1,Index);
+                Im1x = getIndex(i-1,1,1,Index);
                 Im1y = I-(P+2-i-1);
                 Im1z = I-1;
-                Im2x = getIndex(P,i-2,1,1);
+                Im2x = getIndex(i-2,1,1,Index);
                 b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y] + dz*aY[Im1z] + aY[Im2x]);
                 aY[I] = C * ( -kappa*(dx*b[Im1x]+dy*b[Im1y]+dz*b[Im1z]+b[Im2x]) -(2*(i+2)-1)*(dx*aY[Im1x]+dy*aY[Im1y]+dz*aY[Im1z]) - (i+1)*(aY[Im2x]) );
                 axY[Im1x] = aY[I]*i;
@@ -332,8 +290,8 @@ def kernels(BSZ, Nm, xkSize):
                 ayL[Im1y] = aL[I];
                 azL[Im1z] = aL[I];
 
-                I    = getIndex(P,1,i,1);
-                Im1x = getIndex(P,0,i,1);
+                I    = getIndex(1,i,1,Index);
+                Im1x = getIndex(0,i,1,Index);
                 Im1y = I-(P+2-i-1);
                 Im2y = Im1y-(P+3-i-1);
                 Im1z = I-1 ;
@@ -347,8 +305,8 @@ def kernels(BSZ, Nm, xkSize):
                 ayL[Im1y] = aL[I]*i;
                 azL[Im1z] = aL[I];
 
-                I    = getIndex(P,1,1,i);
-                Im1x = getIndex(P,0,1,i);
+                I    = getIndex(1,1,i,Index);
+                Im1x = getIndex(0,1,i,Index);
                 Im1y = I-(P);
                 Im1z = I-1;
                 Im2z = I-2;
@@ -375,8 +333,8 @@ def kernels(BSZ, Nm, xkSize):
                     C  = 1./((1+i+j)*R2);
                     C1 = -(2.*(1+i+j)-1);
                     C2 = (i+j);
-                    I    = getIndex(P,1,i,j);
-                    Im1x = getIndex(P,0,i,j);
+                    I    = getIndex(1,i,j,Index);
+                    Im1x = getIndex(0,i,j,Index);
                     Im1y = I-(P+2-1-i);
                     Im2y = Im1y-(P+3-1-i);
                     Im1z = I-1;
@@ -391,10 +349,10 @@ def kernels(BSZ, Nm, xkSize):
                     ayL[Im1y] = aL[I]*i;
                     azL[Im1z] = aL[I]*j;
 
-                    I    = getIndex(P,i,1,j);
-                    Im1x = getIndex(P,i-1,1,j);
+                    I    = getIndex(i,1,j,Index);
+                    Im1x = getIndex(i-1,1,j,Index);
                     Im1y = I-(P+2-i-1);
-                    Im2x = getIndex(P,i-2,1,j);
+                    Im2x = getIndex(i-2,1,j,Index);
                     Im1z = I-1;
                     Im2z = I-2;
                     b[I] = Cb * (dx*aY[Im1x] + dy*aY[Im1y] + dz*aY[Im1z] + aY[Im2x] + aY[Im2z]);
@@ -407,9 +365,9 @@ def kernels(BSZ, Nm, xkSize):
                     ayL[Im1y] = aL[I];
                     azL[Im1z] = aL[I]*j;
 
-                    I    = getIndex(P,i,j,1);
-                    Im1x = getIndex(P,i-1,j,1);
-                    Im2x = getIndex(P,i-2,j,1);
+                    I    = getIndex(i,j,1,Index);
+                    Im1x = getIndex(i-1,j,1,Index);
+                    Im2x = getIndex(i-2,j,1,Index);
                     Im1y = I-(P+2-i-j);
                     Im2y = Im1y-(P+3-i-j);
                     Im1z = I-1;
@@ -439,9 +397,9 @@ def kernels(BSZ, Nm, xkSize):
                         C  = 1./((i+j+k)*R2);
                         C1 = -(2.*(i+j+k)-1);
                         C2 = i+j+k-1.;
-                        I    = getIndex(P,i,j,k);
-                        Im1x = getIndex(P,i-1,j,k);
-                        Im2x = getIndex(P,i-2,j,k);
+                        I    = getIndex(i,j,k,Index);
+                        Im1x = getIndex(i-1,j,k,Index);
+                        Im2x = getIndex(i-2,j,k,Index);
                         Im1y = I-(P+2-i-j);
                         Im2y = Im1y-(P+3-i-j);
                         Im1z = I-1;
@@ -464,7 +422,6 @@ def kernels(BSZ, Nm, xkSize):
 
     }
 
-	// Multiply coefficients  with corresponding multipoles
     __device__ void multipole(REAL &L, REAL &dL, REAL &Y, REAL &dY, 
                             REAL *mp, REAL *mpx, REAL *mpy, REAL *mpz, 
                             REAL *aL, REAL *axL, REAL *ayL, REAL *azL, 
@@ -483,13 +440,11 @@ def kernels(BSZ, Nm, xkSize):
 
     }
 
-	// norm of a vector
     __device__ REAL norm(REAL *x)
     {
         return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
     }
 
-	// cross product between two vectors
     __device__ void cross(REAL *x, REAL *y, REAL *z) // z is the resulting array
     {
         z[0] = x[1]*y[2] - x[2]*y[1];
@@ -497,7 +452,6 @@ def kernels(BSZ, Nm, xkSize):
         z[2] = x[0]*y[1] - x[1]*y[0];
     }
 
-	// 3x3 matvec
     __device__ void MV(REAL *M, REAL *V, REAL *res) // 3x3 mat-vec
     {
         REAL V2[3] = {V[0], V[1], V[2]};
@@ -512,8 +466,21 @@ def kernels(BSZ, Nm, xkSize):
         }
     }
 
-	 // len(3) vector dot product 
-    __device__ REAL dot_prod(REAL *x, REAL *y)
+    __device__ void MVip(REAL *M, REAL *V) // 3x3 mat-vec in-place
+    {
+        REAL V2[3] = {V[0], V[1], V[2]};
+        for (int i=0; i<3; i++)
+        {
+            REAL sum = 0.;
+            for (int j=0; j<3; j++)
+            {
+                sum += M[3*i+j]*V2[j];
+            }
+            V[i] = sum;
+        }
+    }
+
+    __device__ REAL dot_prod(REAL *x, REAL *y) // len(3) vector dot product
     {
         return x[0]*y[0] + x[1]*y[1] + x[2]*y[2];
     }
@@ -535,14 +502,19 @@ def kernels(BSZ, Nm, xkSize):
 
     }
 
-	// integral over line
+    __device__ void axip(REAL *x, REAL alpha, int N)
+    {
+        for(int i=0; i<N; i++)
+        {
+            x[i] = alpha*x[i];
+        }
+
+    }
+
     __device__ void lineInt(REAL *PHI, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, REAL *wk, int K)
     {
         REAL theta1 = atan2(v1,x);
         REAL theta2 = atan2(v2,x);
-        REAL dtheta = theta2 - theta1;
-        REAL thetam = (theta2 + theta1)/2;
-
 
         REAL absZ = fabs(z), signZ;
         if (absZ<1e-10) signZ = 0;
@@ -552,84 +524,63 @@ def kernels(BSZ, Nm, xkSize):
         REAL thetak, Rtheta, R, expKr, expKz = exp(-kappa*absZ);
         for (int i=0; i<K; i++)
         {
-            thetak = dtheta/2*xk[i] + thetam;
+            thetak = (theta2 - theta1)/2*xk[i] + (theta2 + theta1)/2;
             Rtheta = x/cos(thetak);
             R      = sqrt(Rtheta*Rtheta + z*z);
             expKr  = exp(-kappa*R);
-            PHI[0]+= -wk[i]*(expKr - expKz)/kappa * dtheta/2;
-            PHI[1]+= -wk[i]*(z/R*expKr - expKz*signZ) * dtheta/2;
-            PHI[2]+=  wk[i]*(R-absZ) * dtheta/2;
-            PHI[3]+= -wk[i]*(z/R - signZ) * dtheta/2;
+            if (kappa>1e-10)
+            {
+                PHI[0]+= -wk[i]*(expKr - expKz)/kappa * (theta2 - theta1)/2;
+                PHI[1]+=  wk[i]*(z/R*expKr - expKz*signZ) * (theta2 - theta1)/2;
+            }
+            else
+            {
+                PHI[0]+= wk[i]*(R-absZ) * (theta2 - theta1)/2;
+                PHI[1]+= wk[i]*(z/R - signZ) * (theta2 - theta1)/2;
+            }
+
+            PHI[2]+= wk[i]*(R-absZ) * (theta2 - theta1)/2;
+            PHI[3]+= wk[i]*(z/R - signZ) * (theta2 - theta1)/2;
         }
     }
 
     __device__ void intSide(REAL *PHI, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *wk, int K)
     {
-        REAL v21[3];
+        REAL v21u[3];
         for (int i=0; i<3; i++)
         {
-            v21[i] = v2[i] - v1[i];
+            v21u[i] = v2[i] - v1[i];
         }
 
-        REAL L21 = norm(v21);
-        REAL v21u[3];
-        ax(v21, v21u, 1/L21, 3);
+        REAL L21 = norm(v21u);
+        axip(v21u, 1/L21, 3);
 
         REAL unit[3] = {0.,0.,1.};
         REAL orthog[3];
         cross(unit, v21u, orthog);
 
-        REAL alpha = dot_prod(v21,v1)/(L21*L21);
+        REAL v1new_x = dot_prod(orthog, v1); 
+        REAL v1new_y = dot_prod(v21u, v1); 
 
-        REAL rOrthog[3];
-        axpy(v21, v1, rOrthog, alpha, -1, 3);
-
-        REAL d_toEdge = norm(rOrthog);
-        REAL v1_neg[3];
-        ax(v1, v1_neg, -1, 3);
-
-        REAL side_vec[3];
-        cross(v21, v1_neg, side_vec);
-
-        REAL rotateToVertLine[9];
-
-        for(int i=0; i<3; i++)
+        if (v1new_x<0)
         {
-            rotateToVertLine[3*i] = orthog[i];
-            rotateToVertLine[3*i+1] = v21u[i];
-            rotateToVertLine[3*i+2] = unit[i];
+            axip(v21u, -1, 3);
+            axip(orthog, -1, 3);
+            v1new_x = dot_prod(orthog, v1);
+            v1new_y = dot_prod(v21u, v1);
         }
 
-        REAL v1new[3];
-        MV(rotateToVertLine,v1,v1new);
+        REAL v2new_y = dot_prod(v21u, v2); 
 
-        if (v1new[0]<0)
+        if ((v1new_y>0 && v2new_y<0) || (v1new_y<0 && v2new_y>0))
         {
-            ax(v21u, v21u, -1, 3);
-            ax(orthog, orthog, -1, 3);
-            ax(rotateToVertLine, rotateToVertLine, -1, 9);
-            rotateToVertLine[8] = 1.;
-            MV(rotateToVertLine,v1,v1new);
-        }
-
-        REAL v2new[3], rOrthognew[3];
-        MV(rotateToVertLine,v2,v2new);
-        MV(rotateToVertLine,rOrthog,rOrthognew);
-        REAL x = v1new[0];
-
-        if ((v1new[1]>0 && v2new[1]<0) || (v1new[1]<0 && v2new[1]>0))
-        {
-            REAL PHI1[4] = {0.,0.,0.,0.} , PHI2[4] = {0.,0.,0.,0.};
-            lineInt(PHI1, p, x, 0, v1new[1], kappa, xk, wk, K);
-            lineInt(PHI2, p, x, v2new[1], 0, kappa, xk, wk, K);
-
-            for(int i=0; i<4; i++)
-                PHI[i] += PHI1[i] + PHI2[i];
+            lineInt(PHI, p, v1new_x, 0, v1new_y, kappa, xk, wk, K);
+            lineInt(PHI, p, v1new_x, v2new_y, 0, kappa, xk, wk, K);
         }
         else
         {
             REAL PHI_aux[4] = {0.,0.,0.,0.};
-            lineInt(PHI_aux, p, x, v1new[1], v2new[1], kappa, xk, wk, K);
+            lineInt(PHI_aux, p, v1new_x, v1new_y, v2new_y, kappa, xk, wk, K);
 
             for(int i=0; i<4; i++)
                 PHI[i] -= PHI_aux[i];
@@ -637,7 +588,6 @@ def kernels(BSZ, Nm, xkSize):
 
     }
 
-	// Semi-analytical integral
     __device__ void SA(REAL *PHI, REAL *y, REAL x0, REAL x1, REAL x2, 
                         REAL kappa, int same, REAL *xk, REAL *wk, int K)
     {   
@@ -669,57 +619,63 @@ def kernels(BSZ, Nm, xkSize):
         cross(Z,X,Y);
 
         // Rotate the coordinate system to match panel plane
-        REAL rot_matrix[9];
-        for (int i=0; i<3; i++)
-        {   
-            rot_matrix[i] = X[i];
-            rot_matrix[i+3] = Y[i];
-            rot_matrix[i+6] = Z[i];
-        }   
-        
-        REAL panel0_plane[3], panel1_plane[3], panel2_plane[3], x_plane[3];
-        MV(rot_matrix, y0_panel, panel0_plane);
-        MV(rot_matrix, y1_panel, panel1_plane);
-        MV(rot_matrix, y2_panel, panel2_plane);
-        MV(rot_matrix, x_panel, x_plane);
+        // Multiply y_panel times a rotation matrix [X; Y; Z]
+        REAL x_aux, y_aux, z_aux;
+        x_aux = dot_prod(X, y0_panel);
+        y_aux = dot_prod(Y, y0_panel);
+        z_aux = dot_prod(Z, y0_panel);
+        y0_panel[0] = x_aux;
+        y0_panel[1] = y_aux;
+        y0_panel[2] = z_aux;
+
+        x_aux = dot_prod(X, y1_panel);
+        y_aux = dot_prod(Y, y1_panel);
+        z_aux = dot_prod(Z, y1_panel);
+        y1_panel[0] = x_aux;
+        y1_panel[1] = y_aux;
+        y1_panel[2] = z_aux;
+
+        x_aux = dot_prod(X, y2_panel);
+        y_aux = dot_prod(Y, y2_panel);
+        z_aux = dot_prod(Z, y2_panel);
+        y2_panel[0] = x_aux;
+        y2_panel[1] = y_aux;
+        y2_panel[2] = z_aux;
+
+        x_aux = dot_prod(X, x_panel);
+        y_aux = dot_prod(Y, x_panel);
+        z_aux = dot_prod(Z, x_panel);
+        x_panel[0] = x_aux;
+        x_panel[1] = y_aux;
+        x_panel[2] = z_aux;
 
         // Shift origin so it matches collocation point
-        REAL panel0_final[3], panel1_final[3], panel2_final[3];
-        for (int i=0; i<3; i++)
+        for (int i=0; i<2; i++)
         {   
-            if (i<2)
-            {   
-                panel0_final[i] = panel0_plane[i] - x_plane[i]; 
-                panel1_final[i] = panel1_plane[i] - x_plane[i]; 
-                panel2_final[i] = panel2_plane[i] - x_plane[i]; 
-            }   
-            else
-            {   
-                panel0_final[i] = panel0_plane[i]; 
-                panel1_final[i] = panel1_plane[i]; 
-                panel2_final[i] = panel2_plane[i]; 
-            }   
+            y0_panel[i] -= x_panel[i]; 
+            y1_panel[i] -= x_panel[i]; 
+            y2_panel[i] -= x_panel[i]; 
         }   
 
         // Loop over sides
-        intSide(PHI, panel0_final, panel1_final, x_plane[2], kappa, xk, wk, K); // Side 0
-        intSide(PHI, panel1_final, panel2_final, x_plane[2], kappa, xk, wk, K); // Side 1
-        intSide(PHI, panel2_final, panel0_final, x_plane[2], kappa, xk, wk, K); // Side 2
+        intSide(PHI, y0_panel, y1_panel, x_panel[2], kappa, xk, wk, K); // Side 0
+        intSide(PHI, y1_panel, y2_panel, x_panel[2], kappa, xk, wk, K); // Side 1
+        intSide(PHI, y2_panel, y0_panel, x_panel[2], kappa, xk, wk, K); // Side 2
 
         if (same==1)
         {
-            PHI[1] = 2*M_PI;
-            PHI[3] = -2*M_PI;
+            PHI[1] = -2*M_PI;
+            PHI[3] =  2*M_PI;
         }
+        
     }
 
-	// M2P 
     __global__ void M2P(int *sizeTarDev, int *offsetMltDev,
                         REAL *xtDev, REAL *ytDev, REAL *ztDev,
                         REAL *xcDev, REAL *ycDev, REAL *zcDev, 
                         REAL *mpDev, REAL *mpxDev, REAL *mpyDev, REAL *mpzDev,
                         REAL *Pre0, REAL *Pre1, REAL *Pre2, REAL *Pre3,
-                        REAL *p1, REAL *p2, int N, int P, REAL kappa, REAL E_hat, int BpT, int NCRIT)
+                        REAL *p1, REAL *p2, int *Index, int N, REAL kappa, REAL E_hat, int BpT, int NCRIT)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
         int CJ_start = offsetMltDev[blockIdx.x];
@@ -733,9 +689,20 @@ def kernels(BSZ, Nm, xkSize):
         __shared__ REAL xc_sh[BSZ],
                         yc_sh[BSZ],
                         zc_sh[BSZ];
+        __shared__ int Index_sh[(P+1)*(P+1)*(P+1)];
+
+        for (int ind=0; ind<((P+1)*(P+1)*(P+1)-1)/BSZ; ind++)
+        {
+            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];    
+        }
+
+        int ind = ((P+1)*(P+1)*(P+1)-1)/BSZ;
+        if (threadIdx.x<(P+1)*(P+1)*(P+1)-BSZ*ind)
+        {
+            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];
+        }
         int i;
 
-		// initialize coefficient arrays with zeros
         for (int mult=0; mult<Nm; mult++)
         {
             axL[mult] = 0.;
@@ -746,7 +713,6 @@ def kernels(BSZ, Nm, xkSize):
             azY[mult] = 0.;
         }
 
-		// One thread does NCRIT/BSZ rows (targets)
         for (int iblock=0; iblock<BpT; iblock++)
         {
             i  = I + iblock*BSZ;
@@ -758,7 +724,6 @@ def kernels(BSZ, Nm, xkSize):
 
             for(int jblock=0; jblock<(Nmlt-1)/BSZ; jblock++)
             {
-				// Load to shared memory
                 __syncthreads();
                 xc_sh[threadIdx.x] = xcDev[CJ_start + jblock*BSZ + threadIdx.x];
                 yc_sh[threadIdx.x] = ycDev[CJ_start + jblock*BSZ + threadIdx.x];
@@ -772,10 +737,8 @@ def kernels(BSZ, Nm, xkSize):
                         dx = xi - xc_sh[j];
                         dy = yi - yc_sh[j];
                         dz = zi - zc_sh[j];
-						// get Taylor coefficients
                         getCoeff(aL, axL, ayL, azL, aY, axY, ayY, azY, 
-                                dx, dy, dz, kappa, P);
-						// Multiply Taylor coefficients with corresponding multipole
+                                dx, dy, dz, kappa, Index_sh);
                         multipole(L, dL, Y, dY, mpDev, mpxDev, mpyDev, mpzDev, 
                                 aL, axL, ayL, azL, aY, axY, ayY, azY, 
                                 CJ_start, jblock, j, E_hat);
@@ -783,9 +746,7 @@ def kernels(BSZ, Nm, xkSize):
                 }
             } 
 
-			// If N is not a multiple of block size
             __syncthreads();
-			// Load to shared memory
             int jblock = (Nmlt-1)/BSZ;
             xc_sh[threadIdx.x] = xcDev[CJ_start + jblock*BSZ + threadIdx.x];
             yc_sh[threadIdx.x] = ycDev[CJ_start + jblock*BSZ + threadIdx.x];
@@ -800,46 +761,44 @@ def kernels(BSZ, Nm, xkSize):
                     dy = yi - yc_sh[j];
                     dz = zi - zc_sh[j];
                     getCoeff(aL, axL, ayL, azL, aY, axY, ayY, azY, 
-                            dx, dy, dz, kappa, P);
+                            dx, dy, dz, kappa, Index_sh);
                     multipole(L, dL, Y, dY, mpDev, mpxDev, mpyDev, mpzDev, 
                             aL, axL, ayL, azL, aY, axY, ayY, azY, 
                             CJ_start, jblock, j, E_hat);
                 }
             }
 
-			// Add contribution
             if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
             {
                 // With preconditioner
-                //p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+Y);
-                //p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+Y);
+                p1[i] += Pre0[i]*(-dL+L) + Pre1[i]*(dY-Y);
+                p2[i] += Pre2[i]*(-dL+L) + Pre3[i]*(dY-Y);
+
                 // No preconditioner
-                p1[i] += dL + L;
-                p2[i] += -dY - Y;
+                //p1[i] += -dL + L;
+                //p2[i] +=  dY - Y;
             }
         }
         
     }
-
-
-	// P2P
-    __global__ void P2P(int *offsetSrcDev, int *sizeTarDev, int *tri, int *kDev, 
+    
+    __global__ void P2P(int *offsetSrcDev, int *offsetIntDev, int *intPtrDev, int *sizeTarDev, int *kDev, 
                         REAL *xsDev, REAL *ysDev, REAL *zsDev, REAL *mDev, REAL *mxDev, 
-                        REAL *myDev, REAL *mzDev, REAL *xtDev, REAL *ytDev, REAL *ztDev, 
+                        REAL *myDev, REAL *mzDev, REAL *mcleanDev, REAL *xtDev, REAL *ytDev, REAL *ztDev, 
                         REAL *AreaDev, REAL *p1, REAL *p2,REAL *Pre0, REAL *Pre1, REAL *Pre2, 
-                        REAL *Pre3, REAL E_hat, int N, REAL *vertexDev, REAL *normal_xDev, 
-                        int K, REAL w0, REAL *xkDev, REAL *wkDev, REAL kappa, 
+                        REAL *Pre3, REAL E_hat, int N, REAL *vertexDev, 
+                        REAL w0, REAL *xkDev, REAL *wkDev, REAL kappa, 
                         REAL threshold, REAL eps, int BpT, int NCRIT, int *AI_int_gpu)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
-        int CJ_start = offsetSrcDev[blockIdx.x];
-        int Nsrc     = offsetSrcDev[blockIdx.x+1] - CJ_start;
+        int CJt_start = offsetIntDev[blockIdx.x];
+        int Ntsrc     = offsetIntDev[blockIdx.x+1] - CJt_start;
         
         REAL xi, yi, zi, dx, dy, dz, r, R_tri, dx_tri, dy_tri, dz_tri, L_d;
 
         __shared__ REAL ver_sh[9*BSZ], xc_sh[BSZ], yc_sh[BSZ], zc_sh[BSZ],
                         xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ],
-                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], nx_sh[BSZ],
+                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mc_sh[BSZ],
                         xk_sh[xkSize], wk_sh[xkSize];
 
 
@@ -850,7 +809,7 @@ def kernels(BSZ, Nm, xkSize):
         }
         __syncthreads();
 
-        int i, same;
+        int i, same, CJ_start, Nsrc, twig_ptr;
 
         for (int iblock=0; iblock<BpT; iblock++)
         {
@@ -861,10 +820,91 @@ def kernels(BSZ, Nm, xkSize):
             zi = ztDev[i];
             int an_counter = 0;
 
-            for(int jblock=0; jblock<(Nsrc-1)/BSZ; jblock++)
+            for (int twig=0; twig<Ntsrc; twig++)
             {
-				// Load to shared memory
+                twig_ptr = intPtrDev[CJt_start + twig];
+                CJ_start = offsetSrcDev[twig_ptr];
+                Nsrc = offsetSrcDev[twig_ptr+1] - CJ_start;
+
+                for(int jblock=0; jblock<(Nsrc-1)/BSZ; jblock++)
+                {
+                    __syncthreads();
+                    xj_sh[threadIdx.x] = xsDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    yj_sh[threadIdx.x] = ysDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    zj_sh[threadIdx.x] = zsDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    m_sh[threadIdx.x] = mDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    mx_sh[threadIdx.x] = mxDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    my_sh[threadIdx.x] = myDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    mz_sh[threadIdx.x] = mzDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    mc_sh[threadIdx.x] = mcleanDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    A_sh[threadIdx.x] = AreaDev[CJ_start + jblock*BSZ + threadIdx.x];
+                    k_sh[threadIdx.x] = kDev[CJ_start + jblock*BSZ + threadIdx.x];
+
+                    for (int vert=0; vert<9; vert++)
+                    {
+                        ver_sh[9*threadIdx.x+vert] = vertexDev[9*(CJ_start+jblock*BSZ+threadIdx.x)+vert];
+                    }
+                    __syncthreads();
+
+                    xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
+                    yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
+                    zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
+                    __syncthreads();
+
+                    if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
+                    {
+                        for (int j=0; j<BSZ; j++)
+                        {
+                            dx_tri = xi - xc_sh[j];
+                            dy_tri = yi - yc_sh[j];
+                            dz_tri = zi - zc_sh[j];
+                            R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri + eps);
+
+                            L_d = sqrt(2*A_sh[j])/(R_tri);
+
+                            if(L_d<threshold)
+                            {
+                                dx = xi - xj_sh[j];
+                                dy = yi - yj_sh[j];
+                                dz = zi - zj_sh[j];
+                                r = sqrt(dx*dx + dy*dy + dz*dz + eps);
+                                L  += m_sh[j]/r; 
+                                Y  += m_sh[j] * exp(-kappa*r)/r; 
+                                dY += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
+                                dL += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+                            }
+                            else if(k_sh[j]==0)
+                            {
+                                REAL PHI_1[4] = {0., 0., 0., 0.};
+                                REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                                                ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                                                ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+
+                                // Check if it is same triangle
+                                // same if collocation point matches vertex average
+
+                                dx = xi - xc_sh[j]; 
+                                dy = yi - yc_sh[j]; 
+                                dz = zi - zc_sh[j]; 
+                                r  = sqrt(dx*dx + dy*dy + dz*dz);
+                                if (r<1e-8) same=1;
+                                else        same=0;
+                                
+
+                                SA(PHI_1, panel, xi, yi, zi, kappa, same, xk_sh, wk_sh, xkSize);
+                    
+                                Y  += PHI_1[0] * m_sh[j]/(w0*A_sh[j]);
+                                L  += PHI_1[2] * m_sh[j]/(w0*A_sh[j]);
+                                dL += PHI_1[3] * mc_sh[j];
+                                dY += PHI_1[1] * mc_sh[j];
+                                an_counter += 1;
+                            }
+                        }
+                    }
+                }
+               
                 __syncthreads();
+                int jblock = (Nsrc-1)/BSZ;
                 xj_sh[threadIdx.x] = xsDev[CJ_start + jblock*BSZ + threadIdx.x];
                 yj_sh[threadIdx.x] = ysDev[CJ_start + jblock*BSZ + threadIdx.x];
                 zj_sh[threadIdx.x] = zsDev[CJ_start + jblock*BSZ + threadIdx.x];
@@ -872,9 +912,9 @@ def kernels(BSZ, Nm, xkSize):
                 mx_sh[threadIdx.x] = mxDev[CJ_start + jblock*BSZ + threadIdx.x];
                 my_sh[threadIdx.x] = myDev[CJ_start + jblock*BSZ + threadIdx.x];
                 mz_sh[threadIdx.x] = mzDev[CJ_start + jblock*BSZ + threadIdx.x];
+                mc_sh[threadIdx.x] = mcleanDev[CJ_start + jblock*BSZ + threadIdx.x];
                 A_sh[threadIdx.x] = AreaDev[CJ_start + jblock*BSZ + threadIdx.x];
                 k_sh[threadIdx.x] = kDev[CJ_start + jblock*BSZ + threadIdx.x];
-                nx_sh[threadIdx.x] = normal_xDev[CJ_start + jblock*BSZ + threadIdx.x];
 
                 for (int vert=0; vert<9; vert++)
                 {
@@ -882,16 +922,13 @@ def kernels(BSZ, Nm, xkSize):
                 }
                 __syncthreads();
 
-				// Calculate center of mass of triangle
                 xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
                 yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
                 zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
                 __syncthreads();
-
                 if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
                 {
-					// Loop over sources
-                    for (int j=0; j<BSZ; j++)
+                    for (int j=0; j<Nsrc-(jblock*BSZ); j++)
                     {
                         dx_tri = xi - xc_sh[j];
                         dy_tri = yi - yc_sh[j];
@@ -900,19 +937,18 @@ def kernels(BSZ, Nm, xkSize):
 
                         L_d = sqrt(2*A_sh[j])/(R_tri);
 
-						// if far: Gauss quadrature
-                        if(L_d<threshold)
+                        if (L_d<threshold)
                         {
-                            dx = xj_sh[j] - xi;
-                            dy = yj_sh[j] - yi;
-                            dz = zj_sh[j] - zi;
+                            dx = xi - xj_sh[j];
+                            dy = yi - yj_sh[j];
+                            dz = zi - zj_sh[j];
                             r = sqrt(dx*dx + dy*dy + dz*dz + eps);
                             L  += m_sh[j]/r; 
                             Y  += m_sh[j] * exp(-kappa*r)/r; 
-                            dY += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
-                            dL += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+                            dY += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
+                            dL += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
                         }
-						// if close: semi-analytical integration
+
                         else if(k_sh[j]==0)
                         {
                             REAL PHI_1[4] = {0., 0., 0., 0.};
@@ -921,123 +957,23 @@ def kernels(BSZ, Nm, xkSize):
                                             ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
 
                             // Check if it is same triangle
-                            REAL x_av=0., y_av=0., z_av=0.;
-                            for (int kk=0; kk<K; kk++)
-                            {
-                                x_av += xtDev[i+kk];
-                                y_av += ytDev[i+kk];
-                                z_av += ztDev[i+kk];
-                            }
+                            // same if collocation point matches vertex average
 
-                            x_av /= K; // Average of Gauss points is triangle centroid
-                            y_av /= K;
-                            z_av /= K;
-
-                            dx = x_av - xc_sh[j]; 
-                            dy = y_av - yc_sh[j]; 
-                            dz = z_av - zc_sh[j]; 
+                            dx = xi - xc_sh[j]; 
+                            dy = yi - yc_sh[j]; 
+                            dz = zi - zc_sh[j]; 
                             r  = sqrt(dx*dx + dy*dy + dz*dz);
                             if (r<1e-8) same=1;
                             else        same=0;
-                            
 
                             SA(PHI_1, panel, xi, yi, zi, kappa, same, xk_sh, wk_sh, xkSize);
                 
                             Y  += PHI_1[0] * m_sh[j]/(w0*A_sh[j]);
-                            dY += PHI_1[1] * mx_sh[j]/(w0*A_sh[j]*nx_sh[j]);
                             L  += PHI_1[2] * m_sh[j]/(w0*A_sh[j]);
-                            dL += PHI_1[3] * mx_sh[j]/(w0*A_sh[j]*nx_sh[j]);
+                            dL += PHI_1[3] * mc_sh[j];
+                            dY += PHI_1[1] * mc_sh[j];
                             an_counter += 1;
                         }
-                    }
-                }
-            }
-           
-			// If N is not a multiple of Block size
-            __syncthreads();
-			// Load to shared memory
-            int jblock = (Nsrc-1)/BSZ;
-            xj_sh[threadIdx.x] = xsDev[CJ_start + jblock*BSZ + threadIdx.x];
-            yj_sh[threadIdx.x] = ysDev[CJ_start + jblock*BSZ + threadIdx.x];
-            zj_sh[threadIdx.x] = zsDev[CJ_start + jblock*BSZ + threadIdx.x];
-            m_sh[threadIdx.x] = mDev[CJ_start + jblock*BSZ + threadIdx.x];
-            mx_sh[threadIdx.x] = mxDev[CJ_start + jblock*BSZ + threadIdx.x];
-            my_sh[threadIdx.x] = myDev[CJ_start + jblock*BSZ + threadIdx.x];
-            mz_sh[threadIdx.x] = mzDev[CJ_start + jblock*BSZ + threadIdx.x];
-            A_sh[threadIdx.x] = AreaDev[CJ_start + jblock*BSZ + threadIdx.x];
-            k_sh[threadIdx.x] = kDev[CJ_start + jblock*BSZ + threadIdx.x];
-            nx_sh[threadIdx.x] = normal_xDev[CJ_start + jblock*BSZ + threadIdx.x];
-
-            for (int vert=0; vert<9; vert++)
-            {
-                ver_sh[9*threadIdx.x+vert] = vertexDev[9*(CJ_start+jblock*BSZ+threadIdx.x)+vert];
-            }
-            __syncthreads();
-
-            xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
-            yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
-            zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
-            __syncthreads();
-			// Loop over sources
-            if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
-            {
-                for (int j=0; j<Nsrc-(jblock*BSZ); j++)
-                {
-                    dx_tri = xi - xc_sh[j];
-                    dy_tri = yi - yc_sh[j];
-                    dz_tri = zi - zc_sh[j];
-                    R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri + eps);
-
-                    L_d = sqrt(2*A_sh[j])/(R_tri);
-
-					// If far: gauss quadrature
-                    if (L_d<threshold)
-                    {
-                        dx = xj_sh[j] - xi;
-                        dy = yj_sh[j] - yi;
-                        dz = zj_sh[j] - zi;
-                        r = sqrt(dx*dx + dy*dy + dz*dz + eps);
-                        L  += m_sh[j]/r; 
-                        Y  += m_sh[j] * exp(-kappa*r)/r; 
-                        dY += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
-                        dL += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
-                    }
-
-					// If close: semi-analytical integration
-                    else if(k_sh[j]==0)
-                    {
-                        REAL PHI_1[4] = {0., 0., 0., 0.};
-                        REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
-                                        ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
-                                        ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
-
-                        // Check if it is same triangle
-                        REAL x_av=0., y_av=0., z_av=0.;
-                        for (int kk=0; kk<K; kk++)
-                        {
-                            x_av += xtDev[i+kk];
-                            y_av += ytDev[i+kk];
-                            z_av += ztDev[i+kk];
-                        }
-
-                        x_av /= K; // Average of Gauss points is triangle centroid
-                        y_av /= K;
-                        z_av /= K;
-
-                        dx = x_av - xc_sh[j]; 
-                        dy = y_av - yc_sh[j]; 
-                        dz = z_av - zc_sh[j]; 
-                        r  = sqrt(dx*dx + dy*dy + dz*dz);
-                        if (r<1e-8) same=1;
-                        else        same=0;
-
-                        SA(PHI_1, panel, xi, yi, zi, kappa, same, xk_sh, wk_sh, xkSize);
-            
-                        Y  += PHI_1[0] * m_sh[j]/(w0*A_sh[j]);
-                        dY += PHI_1[1] * mx_sh[j]/(w0*A_sh[j]*nx_sh[j]);
-                        L  += PHI_1[2] * m_sh[j]/(w0*A_sh[j]);
-                        dL += PHI_1[3] * mx_sh[j]/(w0*A_sh[j]*nx_sh[j]);
-                        an_counter += 1;
                     }
                 }
             }
@@ -1045,17 +981,244 @@ def kernels(BSZ, Nm, xkSize):
             if (threadIdx.x+iblock*BSZ<sizeTarDev[blockIdx.x])
             {
                 // With preconditioner
-                //p1[i] += Pre0[i]*(dL+L) - Pre1[i]*(dY+E_hat*Y);
-                //p2[i] += Pre2[i]*(dL+L) - Pre3[i]*(dY+E_hat*Y);
+                p1[i] += Pre0[i]*(-dL+L) + Pre1[i]*(dY-E_hat*Y);
+                p2[i] += Pre2[i]*(-dL+L) + Pre3[i]*(dY-E_hat*Y);
+
                 // No preconditioner
-                p1[i] += dL + L;
-                p2[i] += -dY - E_hat*Y;
+                //p1[i] += -dL + L;
+                //p2[i] +=  dY - E_hat*Y;
                 AI_int_gpu[i] = an_counter;
             }
         }
     }
 
+    __global__ void get_phir(REAL *phir, REAL *xs, REAL *ys, REAL *zs, 
+                            REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mclean, 
+                            REAL *xq, REAL *yq, REAL *zq, 
+                            REAL *Area, int *k, REAL *vertex, 
+                            int N, int Nj, int Nq, int K,
+                            REAL w0, REAL *xk, REAL *wk, 
+                            REAL threshold, int *AI_int_gpu)
+    {
+        int i = threadIdx.x + blockIdx.x*BSZ;
+        REAL xi, yi, zi, dx, dy, dz, r, L_d;
+        int jblock, triangle;
 
-    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_1D':xkSize}, nvcc="nvcc")#, options=["-Xptxas=-v"])
+        __shared__ REAL ver_sh[9*BSZ], xc_sh[BSZ], yc_sh[BSZ], zc_sh[BSZ],
+                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ],
+                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mc_sh[BSZ],
+                        xk_sh[xkSize], wk_sh[xkSize];
+
+
+        if (threadIdx.x<xkSize)
+        {
+            xk_sh[threadIdx.x] = xk[threadIdx.x];
+            wk_sh[threadIdx.x] = wk[threadIdx.x];
+        }
+        __syncthreads();
+
+        REAL L = 0., Y = 0., dL = 0., dY = 0.;
+        xi = xq[i];
+        yi = yq[i];
+        zi = zq[i];
+        int an_counter = 0;
+
+        for(jblock=0; jblock<(Nj-1)/BSZ; jblock++)
+        {   
+            __syncthreads();
+            xj_sh[threadIdx.x] = xs[jblock*BSZ + threadIdx.x];
+            yj_sh[threadIdx.x] = ys[jblock*BSZ + threadIdx.x];
+            zj_sh[threadIdx.x] = zs[jblock*BSZ + threadIdx.x];
+            m_sh[threadIdx.x]  = m[jblock*BSZ + threadIdx.x];
+            mx_sh[threadIdx.x] = mx[jblock*BSZ + threadIdx.x];
+            my_sh[threadIdx.x] = my[jblock*BSZ + threadIdx.x];
+            mz_sh[threadIdx.x] = mz[jblock*BSZ + threadIdx.x];
+            mc_sh[threadIdx.x] = mclean[jblock*BSZ + threadIdx.x];
+            k_sh[threadIdx.x]  = k[jblock*BSZ + threadIdx.x];
+            A_sh[threadIdx.x]  = Area[(jblock*BSZ + threadIdx.x)/K];
+            
+            for (int vert=0; vert<9; vert++)
+            {
+                triangle = (jblock*BSZ+threadIdx.x)/K;
+                ver_sh[9*threadIdx.x+vert] = vertex[9*triangle+vert];
+            }
+            __syncthreads();
+            
+            xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
+            yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
+            zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
+            __syncthreads();
+
+            for (int j=0; j<BSZ; j++)
+            {
+                dx = xi - xc_sh[j];
+                dy = yi - yc_sh[j];
+                dz = zi - zc_sh[j];
+                r  = sqrt(dx*dx + dy*dy + dz*dz);
+
+                L_d = sqrt(2*A_sh[j])/r;
+
+                if(L_d<threshold)
+                {
+                    dx = xi - xj_sh[j];
+                    dy = yi - yj_sh[j];
+                    dz = zi - zj_sh[j];
+                    r = sqrt(dx*dx + dy*dy + dz*dz);
+                    L  += m_sh[j]/r; 
+                    Y  += 0;
+                    dY += 0;
+                    dL += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+                }
+                else if(k_sh[j]==0)
+                {
+                    REAL PHI_1[4] = {0., 0., 0., 0.};
+                    REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                                    ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                                    ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+
+                    SA(PHI_1, panel, xi, yi, zi, 1e-15, 0, xk_sh, wk_sh, xkSize);
+        
+                    Y  += 0;
+                    L  += PHI_1[2] * m_sh[j]/(w0*A_sh[j]);
+                    dL += PHI_1[3] * mc_sh[j];
+                    dY += 0;
+                    an_counter += 1;
+                }
+            }
+        }
+    
+        __syncthreads();
+        jblock = (Nj-1)/BSZ;
+        if (threadIdx.x<Nj-jblock*BSZ)
+        {
+            xj_sh[threadIdx.x] = xs[jblock*BSZ + threadIdx.x];
+            yj_sh[threadIdx.x] = ys[jblock*BSZ + threadIdx.x];
+            zj_sh[threadIdx.x] = zs[jblock*BSZ + threadIdx.x];
+            m_sh[threadIdx.x]  = m[jblock*BSZ + threadIdx.x];
+            mx_sh[threadIdx.x] = mx[jblock*BSZ + threadIdx.x];
+            my_sh[threadIdx.x] = my[jblock*BSZ + threadIdx.x];
+            mz_sh[threadIdx.x] = mz[jblock*BSZ + threadIdx.x];
+            mc_sh[threadIdx.x] = mclean[jblock*BSZ + threadIdx.x];
+            k_sh[threadIdx.x]  = k[jblock*BSZ + threadIdx.x];
+            A_sh[threadIdx.x]  = Area[(jblock*BSZ + threadIdx.x)/K];
+
+            for (int vert=0; vert<9; vert++)
+            {
+                triangle = (jblock*BSZ+threadIdx.x)/K;
+                ver_sh[9*threadIdx.x+vert] = vertex[9*triangle+vert];
+            }
+        }
+        __syncthreads();
+
+        if (threadIdx.x<Nj-jblock*BSZ)
+        {
+            xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
+            yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
+            zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
+        }
+        __syncthreads();
+
+        for (int j=0; j<Nj-(jblock*BSZ); j++)
+        {
+            dx = xi - xc_sh[j];
+            dy = yi - yc_sh[j];
+            dz = zi - zc_sh[j];
+            r  = sqrt(dx*dx + dy*dy + dz*dz);
+
+            L_d = sqrt(2*A_sh[j])/r;
+
+            if (L_d<threshold)
+            {
+                dx = xi - xj_sh[j];
+                dy = yi - yj_sh[j];
+                dz = zi - zj_sh[j];
+                r = sqrt(dx*dx + dy*dy + dz*dz);
+                L  += m_sh[j]/r; 
+                Y  += 0;
+                dY += 0;
+                dL += -(mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+            }
+
+            else if(k_sh[j]==0)
+            {
+                REAL PHI_1[4] = {0., 0., 0., 0.};
+                REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                                ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                                ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+
+                SA(PHI_1, panel, xi, yi, zi, 1e-15, 0, xk_sh, wk_sh, xkSize);
+    
+                Y  += 0;
+                L  += PHI_1[2] * m_sh[j]/(w0*A_sh[j]);
+                dL += PHI_1[3] * mc_sh[j];
+                dY += 0;
+                an_counter += 1;
+            }
+        }
+       
+        if (i<Nq)
+        {
+            phir[i] = L - dL;
+            AI_int_gpu[i] = an_counter;
+        }
+    }
+
+    __global__ void compute_RHS(REAL *F, REAL *xq, REAL *yq, REAL *zq,
+                                REAL *q, REAL *xi, REAL *yi, REAL *zi,
+                                REAL *P0, REAL *P2, int N, int Nq, REAL E_1)
+    {
+        int I = blockIdx.x*BSZ + threadIdx.x;
+        REAL x = xi[I], y = yi[I], z = zi[I], sum=0.;
+        REAL dx, dy, dz, r;
+        __shared__ REAL xq_sh[BSZ], yq_sh[BSZ], zq_sh[BSZ], q_sh[BSZ];
+
+        for (int block=0; block<(Nq-1)/BSZ; block++)
+        {
+            __syncthreads();
+            xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
+            yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
+            zq_sh[threadIdx.x] = zq[block*BSZ+threadIdx.x];
+            q_sh[threadIdx.x]  = q[block*BSZ+threadIdx.x];
+            __syncthreads();
+
+            for (int i=0; i<BSZ; i++)
+            {
+                dx = xq_sh[i] - x;
+                dy = yq_sh[i] - y;
+                dz = zq_sh[i] - z;
+                r  = sqrt(dx*dx + dy*dy + dz*dz);
+
+                sum += -q_sh[i]/(E_1*r);
+            }
+        }
+
+        int block = (Nq-1)/BSZ; 
+        __syncthreads();
+        xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
+        yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
+        zq_sh[threadIdx.x] = zq[block*BSZ+threadIdx.x];
+        q_sh[threadIdx.x]  = q[block*BSZ+threadIdx.x];
+        __syncthreads();
+
+        for (int i=0; i<Nq-block*BSZ; i++)
+        {
+            dx = xq_sh[i] - x;
+            dy = yq_sh[i] - y;
+            dz = zq_sh[i] - z;
+            r  = sqrt(dx*dx + dy*dy + dz*dz);
+
+            sum += -q_sh[i]/(E_1*r);
+        }
+
+        if (I<N)
+        {
+            F[I] = sum*P0[I];
+            F[I+N] = sum*P2[I];
+        }
+
+    }
+
+    
+    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_1D':xkSize, 'Ptree':P}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
 
     return mod

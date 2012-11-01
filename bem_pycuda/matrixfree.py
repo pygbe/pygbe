@@ -1,25 +1,3 @@
-'''
-    Copyright (C) 2011 by Christopher Cooper, Lorena Barba
-  
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-  
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-  
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-'''
-
 import sys
 sys.path.append('tree')
 from FMMutils import *
@@ -93,103 +71,63 @@ def getWeights(K):
         w[6] = 0.13239415
     return w
 
-def gmres_dot (Precond, E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, 
-				AreaHost, AreaDev, normal_xDev, xj, yj, zj, xi, yi, zi, xtHost, ytHost, ztHost, 
-				xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, 
-				xcDev, ycDev, zcDev, sizeTarDev, offsetMltDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, 
-				Pre1Host, Pre2Host, Pre3Host, tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, 
-				offsetTarHost, sizeTarHost,  offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, P, kappa, NCRIT, K, threshold, BSZ, GSZ, 
-				BlocksPerTwig, twig, eps, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack):
-    # Precond           : preconditioner
-    # E_hat             : coefficient of bottom right block
-    # X                 : vector of weights
-    # vertex            : array of position of vertices
-    # triangle          : array of indices of triangle vertices in vertex array
-    # triHost/Dev       : packed array of triangle indices corresponding to each Gauss point on host/device memory  
-    # kHost/Dev         : packed array of Gauss points indices within the element corresponding to each Gauss point on host/device memory   
-    # vertexHost/Dev    : packed array of vertices of triangles on host/device memory
-    # AreaHost/Dev      : packed array of area of triangles on host/device memory
-    # normal_xDev       : packed array of x component of normal vector to triangles on device memory
-    # xi, yi, zi        : position of targets
-    # xj, yj, zj        : position of sources
-    # xt,yt,ztHost/Dev  : packed array with position of targets (collocation points) on host/device memory
-    # xs,ys,zsHost/Dev  : packed array with position of sources (Gauss points) on host/device memory
-    # xc,yc,zcHost/Dev  : packed array with position of box centers on host/device memory
-    # sizeTarHost/Dev   : array with number of targets per twig cell on host/device memory
-    # offsetMltHost/Dev : array with pointers to first element of each twig in xcHost/Dev array on host/device memory
-    # Pre0,1,2,3Host/Dev: packed array with diagonal values of preconditioner for blocks 0,1,2,3 on host/device
-    # tarPtr            : packed array with pointers to targets in xi, yi, zi array
-    # srcPtr            : packed array with pointers to sources in xj, yj, zj array
-    # offSrc            : length of array of packed sources
-    # mltPtr            : packed array with pointers to multipoles in Cells array
-    # offMlt            : length of array of packed multipoles
-    # offsetSrcHost/Dev : array with pointers to first element of each twig in xsHost/Dev array on host/device memory
-    # Area              : array of element area 
-    # normal            : array of elements normal
-    # xk/Dev, wk/Dev    : position and weight of 1D gauss quadrature on host/device memory
-    # Cells             : array of Cells
-    # K                 : number of 2D Gauss points per element
-    # threshold         : threshold to change from analytical to Gauss integration
-    # BSZ, GSZ          : block size and grid size for CUDA
-    # blocksPerTwig     : number of CUDA blocks that fit on a twig (NCRIT/BSZ)
-    # b                 : RHS vector
-    # R                 : number of iterations to restart
-    # tol               : GMRES tolerance
-    # max_iter          : maximum number of iterations
-    # theta             : MAC criterion
-    # Nm                : number of terms in Taylor expansion
-    # II, JJ, KK        : x,y,z powers of multipole expansion
-    # index             : 1D mapping of II,JJ,KK (index of multipoles)
-    # P                 : order of expansion
-    # kappa             : reciprocal of Debye length
-    # NCRIT             : max number of points per twig cell
-    # twig              : array of indices of twigs in Cells array
-
+def gmres_dot (Precond, E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, 
+                normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi,
+                xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost,
+                xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev,
+                sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
+                tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
+                offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
+                index, index_large, IndexDev, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr, 
+                P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
+                time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans):
 
     N = len(triangle)
     MV = zeros(len(X))
-    L = sqrt(2*Area) # Representative length of panel
+    L = sqrt(2*Area) # Representative length
     AI_int = 0
     
-	### Set up weights vector for Treecode
-	### so that matrix has only 1/r type elements (with no coefficients)
     w    = getWeights(K)
-    X_K = zeros(N*K)
-    X_Kx = zeros(N*K)
-    X_Ky = zeros(N*K)
-    X_Kz = zeros(N*K)
+    X_K = zeros(N*K, dtype=REAL)
+    X_Kx = zeros(N*K, dtype=REAL)
+    X_Ky = zeros(N*K, dtype=REAL)
+    X_Kz = zeros(N*K, dtype=REAL)
+    X_Kclean = zeros(N*K, dtype=REAL)
     
     for i in range(N*K):
-        X_K[i] = X[i/K+N]*w[i%K]*Area[i/K]
-        X_Kx[i]  = X[i/K]*w[i%K]*Area[i/K]*normal[i/K,0]
-        X_Ky[i]  = X[i/K]*w[i%K]*Area[i/K]*normal[i/K,1]
-        X_Kz[i]  = X[i/K]*w[i%K]*Area[i/K]*normal[i/K,2]
+        X_K[i]   =  X[i/K+N]*w[i%K]*Area[i/K]
+        X_Kx[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,0]
+        X_Ky[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,1]
+        X_Kz[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,2]
+        X_Kclean[i] = X[i/K]
+    # The minus sign comes from the chain rule when deriving
+    # with respect to r' in 1/|r-r'|
 
-	### P2M
-    tic = time.time()
+    tic = cuda.Event()
+    toc = cuda.Event()
+    tic.record()
     C = 0
     getMultipole(Cells, C, xj, yj, zj, X_K, X_Kx, X_Ky, X_Kz, II, JJ, KK, index, P, NCRIT)
-    toc = time.time()
-    time_P2M += toc - tic
+#    getMultipole2(Cells, xj, yj, zj, X_K, X_Kx, X_Ky, X_Kz, II, JJ, KK, index, P, twig)
+    toc.record()
+    toc.synchronize()
+    time_P2M += tic.time_till(toc)*1e-3
 
-	### M2M
-    tic = time.time()
+    tic = tic.record()
     for C in reversed(range(1,len(Cells))):
         PC = Cells[C].parent
-        upwardSweep(Cells,C,PC,P, II, JJ, KK, index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small)
-    toc = time.time()
-    time_M2M += toc - tic
+        upwardSweep(Cells,C,PC,P, II, JJ, KK, index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
+    toc.record()
+    toc.synchronize()
+    time_M2M += tic.time_till(toc)*1e-3
 
-	### Pack weights and multipoles
-    tic = time.time()
-	# Weights
+    tic.record()
     mHost = X_K[srcPtr[0:offSrc]]
     mxHost = X_Kx[srcPtr[0:offSrc]]
     myHost = X_Ky[srcPtr[0:offSrc]]
     mzHost = X_Kz[srcPtr[0:offSrc]]
+    mcleanHost = X_Kclean[srcPtr[0:offSrc]]
 
-	# Multipoles
     mpHost = zeros(offMlt*Nm)
     mpxHost = zeros(offMlt*Nm)
     mpyHost = zeros(offMlt*Nm)
@@ -202,39 +140,53 @@ def gmres_dot (Precond, E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev
         mpxHost[i*Nm:i*Nm+Nm] = Cells[C].Mx
         mpyHost[i*Nm:i*Nm+Nm] = Cells[C].My
         mpzHost[i*Nm:i*Nm+Nm] = Cells[C].Mz
-    toc = time.time()
-    time_pack += toc - tic
-
-	### Transfer packed arrays to GPU
-    mpDev = gpuarray.to_gpu(mpHost) 
-    mpxDev = gpuarray.to_gpu(mpxHost) 
-    mpyDev = gpuarray.to_gpu(mpyHost) 
-    mpzDev = gpuarray.to_gpu(mpzHost) 
-
-    mDev = gpuarray.to_gpu(mHost) 
-    mxDev = gpuarray.to_gpu(mxHost) 
-    myDev = gpuarray.to_gpu(myHost) 
-    mzDev = gpuarray.to_gpu(mzHost) 
-
-    tic = time.time()
-
-	### Allocate result vector
-    p  = zeros(len(X))
-    p1Dev = gpuarray.zeros(len(xtHost), dtype=REAL) # Top half of vector
-    p2Dev = gpuarray.zeros(len(xtHost), dtype=REAL) # Bottom half of vector
-
-    xkSize = len(xk)
-    mod = kernels(BSZ,Nm,xkSize)
+    toc.record()
+    toc.synchronize()
+    time_pack += tic.time_till(toc)*1e-3
 
     tec = cuda.Event()
     tac = cuda.Event()
+    tic.record()
+    
+
+    if len(mpHost>0):
+        mpDev = cuda.to_device(mpHost.astype(REAL)) 
+        mpxDev = cuda.to_device(mpxHost.astype(REAL)) 
+        mpyDev = cuda.to_device(mpyHost.astype(REAL)) 
+        mpzDev = cuda.to_device(mpzHost.astype(REAL)) 
+
+    mDev = cuda.to_device(mHost.astype(REAL)) 
+    mxDev = cuda.to_device(mxHost.astype(REAL)) 
+    myDev = cuda.to_device(myHost.astype(REAL)) 
+    mzDev = cuda.to_device(mzHost.astype(REAL)) 
+    mcleanDev = cuda.to_device(mcleanHost.astype(REAL)) 
+
+#    (free,total) = cuda.mem_get_info()
+#    print 'Global memory occupancy: %f%% free'%(free*100/total)
+
+    toc.record()
+    toc.synchronize()
+    time_trans += tic.time_till(toc)*1e-3
+
+    tic.record()
+
+    p  = zeros(len(X))
+#    p1Dev = gpuarray.zeros(len(xtHost), dtype=REAL)
+#    p2Dev = gpuarray.zeros(len(xtHost), dtype=REAL)
+    pHost = zeros(len(xtHost), dtype=REAL)
+    p1Dev = cuda.to_device(pHost.astype(REAL))
+    p2Dev = cuda.to_device(pHost.astype(REAL))
+
+
+    xkSize = len(xk)
+
     tec.record()
-	# M2P
+    mod = kernels(BSZ,Nm,xkSize,P)
     M2P_gpu = mod.get_function("M2P")
     if len(mpHost>0):
         M2P_gpu(sizeTarDev, offsetMltDev, xtDev, ytDev, ztDev, xcDev, ycDev, zcDev, 
-                mpDev, mpxDev, mpyDev, mpzDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, p1Dev, p2Dev, 
-                int32(N), int32(P), REAL(kappa), REAL(E_hat), int32(BlocksPerTwig), int32(NCRIT), 
+                mpDev, mpxDev, mpyDev, mpzDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, p1Dev, p2Dev, IndexDev,
+                int32(N), REAL(kappa), REAL(E_hat), int32(BlocksPerTwig), int32(NCRIT), 
                 block=(BSZ,1,1),grid=(GSZ,1))
     # M2P on CPU
 #    p = M2P_pack(tarPtr, xtHost, ytHost, ztHost, offsetTarHost, sizeTarHost, 
@@ -245,37 +197,49 @@ def gmres_dot (Precond, E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev
     tac.synchronize()
     time_M2P += tec.time_till(tac)*1e-3
 
-	# P2P
     tec.record()
-    AI_int_gpu = gpuarray.zeros(len(xtHost), dtype=int32)
+#    AI_int_gpu = gpuarray.zeros(len(xtHost), dtype=int32)
+    AI_int_gpu = cuda.to_device(zeros(len(xtHost), dtype=int32))
     P2P_gpu = mod.get_function("P2P")
-    P2P_gpu(offsetSrcDev, sizeTarDev, triDev, kDev, 
-           xsDev, ysDev, zsDev, mDev, mxDev, myDev, mzDev, xtDev, ytDev, ztDev, 
+    P2P_gpu(offsetSrcDev, offsetIntDev, intPtrDev, sizeTarDev, kDev, 
+           xsDev, ysDev, zsDev, mDev, mxDev, myDev, mzDev, mcleanDev, xtDev, ytDev, ztDev, 
             AreaDev, p1Dev, p2Dev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, REAL(E_hat), 
-            int32(N), vertexDev, normal_xDev, int32(K), REAL(w[0]), xkDev, wkDev, 
+            int32(N), vertexDev, REAL(w[0]), xkDev, wkDev, 
             REAL(kappa), REAL(threshold), REAL(eps), int32(BlocksPerTwig), int32(NCRIT), 
             AI_int_gpu, block=(BSZ,1,1), grid=(GSZ,1))
 
-    # P2P on CPU
+
+    # P2P on CPU (not working)
 #    p, AI_int, time_an = P2P_pack(xi, yi, zi, offsetSrcHost, offsetTarHost, sizeTarHost, 
 #                                tarPtr, srcPtr, xsHost, ysHost, zsHost, mHost, mxHost, myHost, mzHost, 
 #                                xtHost, ytHost, ztHost, E_hat, N, p, vertexHost, vertex, triangle, AreaHost, Area, normal[:,0], 
 #                                triHost, kHost, K, w, xk, wk, Precond, kappa, threshold, eps, time_an, AI_int)
-
-
+ 
     tac.record()
     tac.synchronize()
     time_P2P += tec.time_till(tac)*1e-3
 
-	### Unpack resulting vector
-    paux1 = zeros(len(xtHost), dtype=REAL) # Top half of vector
-    paux2 = zeros(len(xtHost), dtype=REAL) # Bottom half of vector
-    p1Dev.get(paux1)
-    p2Dev.get(paux2)
+    toc.record()
+    toc.synchronize()
+    time_eval += tic.time_till(toc)*1e-3
+
+    tic.record()
+    paux1 = zeros(len(xtHost), dtype=REAL)
+    paux2 = zeros(len(xtHost), dtype=REAL)
+#    p1Dev.get(paux1)
+#    p2Dev.get(paux2)
+    paux1 = cuda.from_device(p1Dev, len(xtHost), dtype=REAL)
+    paux2 = cuda.from_device(p2Dev, len(xtHost), dtype=REAL)
     p_test = zeros(len(p))
     AI_aux = zeros(len(xtHost), dtype=int32)
-    AI_int_gpu.get(AI_aux)
+#    AI_int_gpu.get(AI_aux)
+    AI_aux = cuda.from_device(AI_int_gpu, len(xtHost), dtype=int32)
     AI_int_cpu = zeros(len(p))
+    toc.record()
+    toc.synchronize()
+    time_trans += tic.time_till(toc)*1e-3
+
+    tic.record()
     t = -1
     for CI in twig:
         t += 1
@@ -285,12 +249,176 @@ def gmres_dot (Precond, E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev
         AI_int_cpu[targets] += AI_aux[CI_start:CI_end]
         p[targets]   += paux1[CI_start:CI_end]
         p[targets+N] += paux2[CI_start:CI_end]
+    toc.record()
+    toc.synchronize()
+    time_pack += tic.time_till(toc)*1e-3
+
+  
+    '''
+    p_test2 = zeros(len(X))
+    for CI in twig:
+        p_test2,time_M2P = M2P_list(Cells, CI, Precond, xi, yi, zi, p_test2, Nm, P, N, E_hat, kappa, eps, time_M2P)        
+    for CI in twig:
+        p_test2, AI_int, time_P2P, time_an = P2P_wrap(Cells, CI, Precond, xj,yj, zj, X_K, X_Kx, X_Ky, X_Kz, xi, yi, zi, p_test2, theta, Area, normal[:,0], kappa, eps, L, K, vertex, triangle, w, xk, wk, E_hat, threshold, time_P2P, time_an, AI_int)
+    '''
+    '''
+    errorTest = sqrt(sum((p_test-p)*(p_test-p))/(sum(p*p)+1e-16))
+    if errorTest>1e-12:
+        print 'wrong'
+        print p
+        print p_test
+    else:
+        print 'right'
+        print p
+        print p_test
+    '''
 
     AI_int = sum(AI_int_cpu)
-
-    MV = p
-
-    toc = time.time()
-    time_eval += toc - tic
     
-    return MV, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, AI_int
+    return p, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int
+
+def get_phir (X, vertex, triangle, xj, yj, zj, xi, yi, zi, xq, yq, zq,
+            Area, normal, xk, wk, Cells, theta, Nm, II, JJ, KK, 
+            index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, 
+            P, kappa, NCRIT, K, threshold, eps):
+
+    N = len(triangle)
+    MV = zeros(len(X))
+    L = sqrt(2*Area) # Representative length
+    AI_int = 0
+    
+    # Setup vector
+    tic = time.time()
+    w    = getWeights(K)
+    X_K = zeros(N*K, dtype=REAL)
+    X_Kx = zeros(N*K, dtype=REAL)
+    X_Ky = zeros(N*K, dtype=REAL)
+    X_Kz = zeros(N*K, dtype=REAL)
+    X_Kclean = zeros(N*K, dtype=REAL)
+    
+    for i in range(N*K):
+        X_K[i] = X[i/K+N]*w[i%K]*Area[i/K]
+        X_Kx[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,0]
+        X_Ky[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,1]
+        X_Kz[i]  = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,2]
+        X_Kclean[i] = X[i/K]
+    # The minus sign comes from the chain rule when deriving
+    # with respect to r' in 1/|r-r'|
+    toc = time.time()
+    time_set = toc - tic
+
+    # P2M
+    tic = time.time()
+    C = 0
+    getMultipole(Cells, C, xj, yj, zj, X_K, X_Kx, X_Ky, X_Kz, II, JJ, KK, index, P, NCRIT)
+    toc = time.time()
+    time_P2M = toc - tic
+
+    # M2M
+    tic = time.time()
+    for C in reversed(range(1,len(Cells))):
+        PC = Cells[C].parent
+        upwardSweep(Cells,C,PC,P, II, JJ, KK, index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small)
+    toc = time.time()
+    time_M2M = toc - tic
+
+    # Evaluation
+    AI_int = 0
+    phi_reac = zeros(len(xq))
+    time_P2P = 0.
+    time_M2P = 0.
+    for i in range(len(xq)):
+        CJ = 0
+        p = 0.
+        source = []
+        p, source, time_M2P = M2P_nonvec(Cells, CJ, xq[i], yq[i], zq[i],
+                                        p, theta, Nm, P, kappa, NCRIT, source, time_M2P)
+        p, AI_int, time_P2P = P2P_nonvec(xj, yj, zj, X_K, X_Kx, X_Ky, X_Kz, X_Kclean, 
+                                        xi, yi, zi, xq[i], yq[i], zq[i], p, vertex, triangle, 
+                                        Area, kappa, K, w, xk, wk, threshold, source, eps, AI_int, time_P2P)
+        phi_reac[i] = p
+    print '\tTime set: %f'%time_P2M
+    print '\tTime P2M: %f'%time_P2M
+    print '\tTime M2M: %f'%time_M2M
+    print '\tTime M2P: %f'%time_M2P
+    print '\tTime P2P: %f'%time_P2P
+
+    print '%i of %i analytical integrals for phi_reac calculation'%(AI_int/len(xq),len(xi))
+
+    return phi_reac
+
+
+def get_phir_gpu (X, vertex, triangle, xj, yj, zj, xq, yq, zq,
+                Area, normal, xk, wk, K, threshold, BSZ, mod):
+
+    N  = len(triangle)
+    Nq = len(xq)
+    Nj = N*K
+    MV = zeros(len(X))
+
+    # Setup vector
+    tic = time.time()
+    w        = getWeights(K)
+    X_K      = zeros(Nj, dtype=REAL)
+    X_Kx     = zeros(Nj, dtype=REAL)
+    X_Ky     = zeros(Nj, dtype=REAL)
+    X_Kz     = zeros(Nj, dtype=REAL)
+    X_Kclean = zeros(Nj, dtype=REAL)
+    vertex_pack = zeros((Nj,3,3), dtype=REAL)
+    
+    for i in range(Nj):
+        X_K[i]      = X[i/K+N]*w[i%K]*Area[i/K]
+        X_Kx[i]     = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,0]
+        X_Ky[i]     = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,1]
+        X_Kz[i]     = -X[i/K]*w[i%K]*Area[i/K]*normal[i/K,2]
+        X_Kclean[i] = X[i/K]
+        vertex_pack[i] = vertex[triangle[i/K]]
+    # The minus sign comes from the chain rule when deriving
+    # with respect to r' in 1/|r-r'|
+
+    k = arange(Nj, dtype=int32)%K
+
+#    vertex_pack = ravel(vertex_pack)
+    vertex_pack = ravel(vertex[triangle[:]])
+
+    phir = gpuarray.zeros(Nq, dtype=REAL)
+    m_gpu  = cuda.to_device(X_K.astype(REAL))
+    mx_gpu = cuda.to_device(X_Kx.astype(REAL))
+    my_gpu = cuda.to_device(X_Ky.astype(REAL))
+    mz_gpu = cuda.to_device(X_Kz.astype(REAL))
+    mc_gpu = cuda.to_device(X_Kclean.astype(REAL))
+    xj_gpu = cuda.to_device(xj.astype(REAL))
+    yj_gpu = cuda.to_device(yj.astype(REAL))
+    zj_gpu = cuda.to_device(zj.astype(REAL))
+    xq_gpu = cuda.to_device(xq.astype(REAL))
+    yq_gpu = cuda.to_device(yq.astype(REAL))
+    zq_gpu = cuda.to_device(zq.astype(REAL))
+    A_gpu  = cuda.to_device(Area.astype(REAL))
+    k_gpu  = cuda.to_device(k.astype(int32))
+    xk_gpu = cuda.to_device(xk.astype(REAL))
+    wk_gpu = cuda.to_device(wk.astype(REAL))
+    vertex_gpu = cuda.to_device(vertex_pack.astype(REAL))
+    AI_int_gpu = cuda.to_device(zeros(Nq, dtype=int32))
+
+    GSZ = int(ceil(float(Nq)/BSZ))
+
+#    mod = kernels(BSZ,1,len(xk))
+    get_phir = mod.get_function("get_phir")
+    get_phir(phir, xj_gpu, yj_gpu, zj_gpu, 
+             m_gpu, mx_gpu, my_gpu, mz_gpu, mc_gpu,
+             xq_gpu, yq_gpu, zq_gpu, A_gpu, k_gpu,
+             vertex_gpu, int32(N), int32(Nj), int32(Nq),
+             int32(K), REAL(w[0]), xk_gpu, wk_gpu, REAL(threshold), 
+             AI_int_gpu, block=(BSZ,1,1), grid=(GSZ,1))
+    
+    AI_aux = zeros(Nq, dtype=int32)
+    AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=int32)
+    AI_int = sum(AI_aux)
+    print '%i of %i analytical integrals for phi_reac calculation'%(AI_int/Nq, N)
+
+    phir_cpu = zeros(Nq, dtype=REAL)
+    phir.get(phir_cpu)
+
+    return phir_cpu
+    
+
