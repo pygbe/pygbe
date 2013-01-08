@@ -1,11 +1,9 @@
-from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt, save
-from numpy  import float64 as REAL
+from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt
 from numpy.linalg           import norm
 from scipy.linalg           import lu_solve, solve
 from scipy.sparse.linalg    import gmres 
 import time
 from matrixfree import gmres_dot as gmres_dot
-from pycuda.tools import DeviceMemoryPool
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
 
@@ -40,19 +38,11 @@ def PlaneRotation (H, cs, sn, s, i, R):
 
     return H, cs, sn, s
 
-def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, 
-                    normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi,  
-                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
-                    sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
-                    tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost,
-                    offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, K, threshold, BSZ, GSZ, BlocksPerTwig, X, b, 
-                    R, tol, max_iter, Cells, theta, Nm, II, JJ, KK, index, index_large, IndexDev, combII, combJJ, combKK, 
-                    IImii, JJmjj, KKmkk, index_small, index_ptr, P, kappa, NCRIT, twig, eps):
+def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     N = len(b)
-    V = zeros((R+1, N), dtype=REAL)
-    H = zeros((R+1,R), dtype=REAL)
+    V = zeros((param.restart+1, N))
+    H = zeros((param.restart+1,param.restart))
 
     time_Vi = 0.
     time_Vk = 0.
@@ -62,98 +52,38 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
 
     # Initializing varibles
     rel_resid = 1.
-    cs, sn = zeros(N, dtype=REAL), zeros(N, dtype=REAL)
+    cs, sn = zeros(N), zeros(N)
 
     iteration = 0
 
     b_norm = norm(b)
 
-    time_eval  = 0.
-    time_trans = 0.
-    time_an    = 0.
-    time_P2P   = 0.
-    time_P2M   = 0.
-    time_M2M   = 0.
-    time_M2P   = 0.
-    time_pack  = 0.
-    
-
-    '''
-    A11 = zeros((N/2,N/2))
-    A22 = zeros((N/2,N/2))
-    for i in range(N/2):
-        if i%50==0:
-            print 'element %i'%i
-        vec = zeros(N)
-        vec[i]   = 1.
-        vec[i+N/2] = 1.
-        aux, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
-                    E_hat, vec, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
-                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
-                    sizeTarDev, offsetMltDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
-                    tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
-                    offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                    index, index_large, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, 
-                    P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
-                    time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
-        A11[:,i] = aux[0:N/2]
-        A22[:,i] = aux[N/2:N]
-
-    savetxt('A11fast_500wp.txt',A11)
-    savetxt('A22fast_500wp.txt',A22)
-    quit()
-    ''' 
-
-    while (iteration < max_iter and rel_resid>=tol): # Outer iteration
+    while (iteration < param.max_iter and rel_resid>=param.tol): # Outer iteration
         
-        aux, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
-                    E_hat, X, vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
-                    xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                    xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
-                    sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
-                    tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
-                    offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                    index, index_large, IndexDev, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr, 
-                    P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
-                    time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
+        aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
         
         r = b - aux
         beta = norm(r)
 
         if iteration==0: 
-            print 'Analytical integrals: %i of %i, %i'%(AI_int*2/len(X), len(X)/2, 100*4*AI_int/len(X)**2)+'%'
+            print 'Analytical integrals: %i of %i, %i'%(timing.AI_int/param.N, param.N, 100*timing.AI_int/param.N**2)+'%'
 
         V[0,:] = r[:]/beta
         if iteration==0:
             res_0 = b_norm
 
-        s = zeros(R+1, dtype=REAL)
+        s = zeros(param.restart+1)
         s[0] = beta
         i = -1
 
-        while (i+1<R and iteration+1<=max_iter): # Inner iteration
+        while (i+1<param.restart and iteration+1<=param.max_iter): # Inner iteration
             i+=1 
             iteration+=1
-
-            if iteration%10==0:
-                print 'iteration: %i, residual %s'%(iteration,rel_resid)
-                
 
             # Compute Vip1
             tic = time.time()
        
-            Vip1, time_eval, time_P2P, time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans, AI_int = gmres_dot(Precond, 
-                        E_hat, V[i,:], vertex, triangle, triHost, triDev, kHost, kDev, vertexHost, vertexDev, AreaHost, AreaDev, normal_xDev, normal_yDev, normal_zDev, xj, yj, zj, xi, yi, zi, 
-                        xtHost, ytHost, ztHost, xsHost, ysHost, zsHost, xcHost, ycHost, zcHost, 
-                        xtDev, ytDev, ztDev, xsDev, ysDev, zsDev, xcDev, ycDev, zcDev, 
-                        sizeTarDev, offsetMltDev, offsetIntDev, intPtrDev, Pre0Dev, Pre1Dev, Pre2Dev, Pre3Dev, Pre0Host, Pre1Host, Pre2Host, Pre3Host,
-                        tarPtr, srcPtr, offSrc, mltPtr, offMlt, offsetSrcHost, offsetSrcDev, offsetTarHost, sizeTarHost, 
-                        offsetMltHost, Area, normal, xk, wk, xkDev, wkDev, Cells, theta, Nm, II, JJ, KK, 
-                        index, index_large, IndexDev, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr, 
-                        P, kappa, NCRIT, K, threshold, BSZ, GSZ, BlocksPerTwig, twig, eps, time_eval, time_P2P, 
-                        time_P2M, time_M2M, time_M2P, time_an, time_pack, time_trans)
-
+            Vip1 = gmres_dot(V[i,:], surf_array, field_array, ind0, param, timing, kernel)
 
             toc = time.time()
             time_Vi+=toc-tic
@@ -175,15 +105,19 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
             V[i+1,:] = Vip1[:]/H[i+1,i]
 
             tic = time.time()
-            H,cs,sn,s =  PlaneRotation(H, cs, sn, s, i, R)
+            H,cs,sn,s =  PlaneRotation(H, cs, sn, s, i, param.restart)
             toc = time.time()
             time_rotation+=toc-tic
 
-            rel_resid = abs(s[i+1])/b_norm
+            rel_resid = abs(s[i+1])/res_0
 
-            if (i+1==R):
+            if iteration%1==0:
+                print 'iteration: %i, rel resid: %s'%(iteration,rel_resid)
+
+
+            if (i+1==param.restart):
                 print('Residual: %f. Restart...'%rel_resid)
-            if rel_resid<=tol:
+            if rel_resid<=param.tol:
                 break
 
         # Solve the triangular system
@@ -211,17 +145,15 @@ def gmres_solver (Precond, E_hat, vertex, triangle, triHost, triDev, kHost, kDev
 #    print 'Time update  : %fs'%time_update
     print 'GMRES solve'
     print 'Converged after %i iterations to a residual of %s'%(iteration,rel_resid)
-    print 'Time P2M          : %f'%time_P2M
-    print 'Time M2M          : %f'%time_M2M
-    print 'Time packing      : %f'%time_pack
-    print 'Time data transfer: %f'%time_trans
-    print 'Time evaluation   : %f'%time_eval
-    print '\tTime M2P  : %f'%time_M2P
-    print '\tTime P2P  : %f'%time_P2P
-    print '\tTime analy: %f'%time_an
-    print '------------------------------'
+    print 'Time weight vector: %f'%timing.time_mass
+    print 'Time sort         : %f'%timing.time_sort
+    print 'Time data transfer: %f'%timing.time_trans
+    print 'Time P2M          : %f'%timing.time_P2M
+    print 'Time M2M          : %f'%timing.time_M2M
+    print 'Time M2P          : %f'%timing.time_M2P
+    print 'Time P2P          : %f'%timing.time_P2P
+    print '\tTime analy: %f'%timing.time_an
 #    print 'Tolerance: %f, maximum iterations: %f'%(tol, max_iter)
-
 
     return X
 
