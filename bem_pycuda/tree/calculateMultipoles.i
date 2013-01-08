@@ -3,9 +3,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 extern void P2M(double *M, int Msize,
-                double *Mx, int Mxsize,
-                double *My, int Mysize,
-                double *Mz, int Mzsize,
+                double *Md, int Mdsize,
                 double *x, int xSize, 
                 double *y, int ySize, 
                 double *z, int zSize, 
@@ -33,9 +31,7 @@ import_array();
 %}
 
 %apply (double* INPLACE_ARRAY1, int DIM1){(double *M, int Msize)};
-%apply (double* INPLACE_ARRAY1, int DIM1){(double *Mx, int Mxsize)};
-%apply (double* INPLACE_ARRAY1, int DIM1){(double *My, int Mysize)};
-%apply (double* INPLACE_ARRAY1, int DIM1){(double *Mz, int Mzsize)};
+%apply (double* INPLACE_ARRAY1, int DIM1){(double *Md, int Mdsize)};
 %apply (double* INPLACE_ARRAY1, int DIM1){(double *MP, int MPsize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *MC, int MCsize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *x, int xSize)};
@@ -57,9 +53,7 @@ import_array();
 %apply (int* IN_ARRAY1, int DIM1){(int *index, int indexSize)};
 %apply (int* IN_ARRAY1, int DIM1){(int *ptr, int ptrSize)};
 extern void P2M(double *M, int Msize,
-                double *Mx, int Mxsize,
-                double *My, int Mysize,
-                double *Mz, int Mzsize,
+                double *Md, int Mdsize,
                 double *x, int xSize, 
                 double *y, int ySize, 
                 double *z, int zSize, 
@@ -81,9 +75,7 @@ extern void M2M(double *MP, int MPsize,
                 int *index, int indexSize, int *ptr, int ptrSize);
 
 %clear (double *M, int Msize);
-%clear (double *Mx, int Mxsize);
-%clear (double *My, int Mysize);
-%clear (double *Mz, int Mzsize);
+%clear (double *Md, int Mdsize);
 %clear (double *MP, int MPsize);
 %clear (double *MC, int MCsize);
 %clear (double *x, int xSize);
