@@ -27,12 +27,15 @@ from semi_analytical import *
 
 sys.path.append('tree')
 from FMMutils       import *
-from cuda_kernels   import kernels
 
 ### Read parameters
 param = parameters()
-precision = readParameters(param,'input_files/parameters_sphere.txt')
-configFile = 'input_files/config_sphere_stern.txt'
+precision = readParameters(param,'input_files/parameters_lys.txt')
+configFile = 'input_files/config_lys_single.txt'
+
+if param.GPU==1:
+    from cuda_kernels   import kernels
+    import pycuda.driver as cuda
 
 # Derived parameters 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
@@ -65,7 +68,9 @@ computeIndices(param.P, ind0)
 precomputeTerms(param.P, ind0)
 
 ### Load CUDA code
-kernel = kernels(param.BSZ, param.Nm, param.Nk, param.P, precision)
+kernel = 0
+if param.GPU==1:
+    kernel = kernels(param.BSZ, param.Nm, param.Nk, param.P, precision)
 
 ### Generate interaction list
 print 'Generate interaction list'
@@ -136,8 +141,8 @@ E1an *= C0/(4*pi)
 E2an *= C0/(4*pi)
 print '\n E_solv = %s, Analytical solution = %f, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
 '''
-
-# sphere with stern layer
+'''
+# sphere with/without stern layer
 K_sph = 10 # Number of terms in spherical harmonic expansion
 E_1 = field_array[2].E # stern
 #E_1 = field_array[1].E # no stern
@@ -153,4 +158,4 @@ phi_P = an_P(q, xq, E_1, E_2, param.E_0, R1, field_array[0].kappa, R2, K_sph)
 JtoCal = 4.184
 E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
 print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
-
+'''

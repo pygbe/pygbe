@@ -1,9 +1,11 @@
 import sys 
 sys.path.append('tree')
 from FMMutils import *
-import pycuda.autoinit
-import pycuda.driver as cuda
 import time
+
+# PyCUDA libraries
+#import pycuda.autoinit
+import pycuda.driver as cuda
 
 
 def getWeights(K):
