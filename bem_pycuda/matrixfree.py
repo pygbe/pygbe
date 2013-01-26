@@ -8,10 +8,6 @@ import time
 sys.path.append('../util')
 from semi_analytical import GQ_1D
 
-# PyCUDA libraries
-import pycuda.autoinit
-import pycuda.gpuarray as gpuarray
-
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = 2*pi
     V_diag = 0
@@ -47,6 +43,10 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 
 def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     
+    # import PyCUDA library
+    if param.GPU==1:
+        import pycuda.gpuarray as gpuarray
+
     Nfield = len(field_array)
     Nsurf = len(surf_array)
 
@@ -145,6 +145,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel):
 
     F = zeros(2*param.N)
     REAL = param.REAL
+
+    # import PyCUDA library
+    if param.GPU==1:
+        import pycuda.gpuarray as gpuarray
+
     computeRHS_gpu = kernel.get_function("compute_RHS")
     for j in range(len(field_array)):
         Nq = len(field_array[j].q)
