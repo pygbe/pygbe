@@ -2,6 +2,7 @@ from numpy import *
 import sys
 sys.path.append('tree')
 from FMMutils import *
+from direct   import computeDiagonal
 sys.path.append('../util')
 from semi_analytical    import *
 from triangulation      import *
@@ -10,6 +11,7 @@ from readData           import readVertex, readTriangle, readpqr, readcrd, readF
 # PyCUDA libraries
 import pycuda.autoinit
 import pycuda.gpuarray as gpuarray
+import pycuda.driver as cuda
 
 class surfaces():
     def __init__(self):
@@ -27,8 +29,12 @@ class surfaces():
         self.zj       = []  # z component of gauss nodes
         self.Area     = []  # Area of triangles
         self.normal   = []  # normal of triangles
+        self.sglIntY  = []  # singular integrals for V for Yukawa
+        self.sglIntL  = []  # singular integrals for V for Laplace
         self.xk       = []  # position of gauss points on edges
         self.wk       = []  # weight of gauss points on edges
+        self.Xsk      = []  # position of gauss points for near singular integrals
+        self.Wsk      = []  # weight of gauss points for near singular integrals
         self.tree     = []  # tree structure
         self.twig     = []  # tree twigs
         self.xiSort   = []  # sorted x component of center
@@ -41,21 +47,23 @@ class surfaces():
         self.ycSort   = []  # sorted y component box centers according to M2P_list array
         self.zcSort   = []  # sorted z component box centers according to M2P_list array
         self.AreaSort = []  # sorted array of areas
+        self.sglIntYSort  = []  # sorted array of singular integrals for V for Yukawa
+        self.sglIntLSort  = []  # sorted array of singular integrals for V for Laplace
         self.unsort       = []  # array of indices to unsort targets
-        self.triangleSort = [] # sorted array of triangles
+        self.triangleSort = []  # sorted array of triangles
         self.sortTarget   = []  # array of indices to sort targets
         self.sortSource   = []  # array of indices to sort sources
-        self.offsetSource = [] # array with offsets to sorted source array
-        self.offsetTarget = [] # array with offsets to sorted target array
-        self.sizeTarget   = [] # array with number of targets pero twig
-        self.offsetTwigs  = [] # offset to twig in P2P list array
-        self.P2P_list     = [] # pointers to twigs for P2P interaction list
-        self.offsetMlt    = [] # offset to multipoles in M2P list array
-        self.M2P_list     = [] # pointers to boxes for M2P interaction list
-        self.Precond      = [] # Sparse representation of preconditioner for self interaction block
-        self.E_hat        = 0  # ratio of Ein/Eout
-        self.kappa_in     = 0  # kappa inside surface
-        self.kappa_out    = 0  # kappa inside surface
+        self.offsetSource = []  # array with offsets to sorted source array
+        self.offsetTarget = []  # array with offsets to sorted target array
+        self.sizeTarget   = []  # array with number of targets pero twig
+        self.offsetTwigs  = []  # offset to twig in P2P list array
+        self.P2P_list     = []  # pointers to twigs for P2P interaction list
+        self.offsetMlt    = []  # offset to multipoles in M2P list array
+        self.M2P_list     = []  # pointers to boxes for M2P interaction list
+        self.Precond      = []  # Sparse representation of preconditioner for self interaction block
+        self.E_hat        = 0   # ratio of Ein/Eout
+        self.kappa_in     = 0   # kappa inside surface
+        self.kappa_out    = 0   # kappa inside surface
 
         # Device data
         self.xiDev      = []
@@ -68,6 +76,8 @@ class surfaces():
         self.ycDev      = []
         self.zcDev      = []
         self.AreaDev    = []
+        self.sglIntYDev = []
+        self.sglIntLDev = []
         self.vertexDev  = []
         self.sizeTarDev = []
         self.offSrcDev  = []
@@ -77,6 +87,8 @@ class surfaces():
         self.P2P_lstDev = []
         self.xkDev      = []
         self.wkDev      = []
+        self.XskDev     = []
+        self.WskDev     = []
         self.kDev       = []
 
 class fields():
@@ -120,6 +132,7 @@ class parameters():
         self.NCRIT         = 0               # Max number of targets per twig box
         self.theta         = 0.              # MAC criterion for treecode
         self.K             = 0               # Number of Gauss points per element
+        self.K_fine        = 0               # Number of Gauss points per element for near singular integrals
         self.threshold     = 0.              # L/d criterion for semi-analytic intergrals
         self.Nk            = 0               # Gauss points per side for semi-analytical integrals
         self.BSZ           = 0               # CUDA block size
@@ -131,6 +144,7 @@ class parameters():
         self.E_0           = 8.854187818e-12 # Vacuum dielectric constant
         self.REAL          = 0               # Data type
         self.GPU           = -1              # =1: with GPU, =0: no GPU
+
 
 class index_constant():
     def __init__(self):
@@ -160,9 +174,9 @@ def getGaussPoints(y,triangle, n):
     N  = len(triangle) # Number of triangles
     xi = zeros((N*n,3))
     if n==1:
-        for i in range(N):
-            M = transpose(y[triangle[i]])
-            xi[i,:] = dot(M, 1/3.*ones(3))
+        xi[:,0] = average(y[triangle[:],:,0], axis=1)
+        xi[:,1] = average(y[triangle[:],:,1], axis=1)
+        xi[:,2] = average(y[triangle[:],:,2], axis=1)
 
     if n==3:
         for i in range(N):
@@ -192,28 +206,206 @@ def getGaussPoints(y,triangle, n):
 
     return xi[:,0], xi[:,1], xi[:,2]
 
+def quadratureRule_fine(K):
+    
+    # 1 Gauss point
+    if K==1:
+        X = array([1/3., 1/3., 1/3.])
+        W = array([1])
+
+    # 7 Gauss points
+    if K==7:
+        a = 1/3.
+        b1 = 0.059715871789770; b2 = 0.470142064105115
+        c1 = 0.797426985353087; c2 = 0.101286507323456
+
+        wa = 0.225000000000000
+        wb = 0.132394152788506
+        wc = 0.125939180544827
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1])
+        W = array([wa,wb,wb,wb,wc,wc,wc])
+        
+   
+    # 13 Gauss points
+    if K==13:
+        a = 1/3.
+        b1 = 0.479308067841920; b2 = 0.260345966079040
+        c1 = 0.869739794195568; c2 = 0.065130102902216
+        d1 = 0.048690315425316; d2 = 0.312865496004874; d3 = 0.638444188569810
+        wa = -0.149570044467682
+        wb = 0.175615257433208
+        wc = 0.053347235608838
+        wd = 0.077113760890257
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1, 
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1, 
+                    d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1])
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,wd,wd,wd])
+        
+    # 17 Gauss points
+    if K==17:
+        a = 1/3.
+        b1 = 0.081414823414554; b2 = 0.459292588292723
+        c1 = 0.658861384496480; c2 = 0.170569307751760
+        d1 = 0.898905543365938; d2 = 0.050547228317031
+        e1 = 0.008394777409958; e2 = 0.263112829634638; e3 = 0.728492392955404
+        wa = 0.144315607677787
+        wb = 0.095091634267285
+        wc = 0.103217370534718
+        wd = 0.032458497623198
+        we = 0.027230314174435
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1, 
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1, 
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1, 
+                    e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1])
+                    
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,we,we,we])
+
+    # 19 Gauss points
+    if K==19:
+        a = 1/3.
+        b1 = 0.020634961602525; b2 = 0.489682519198738
+        c1 = 0.125820817014127; c2 = 0.437089591492937
+        d1 = 0.623592928761935; d2 = 0.188203535619033
+        e1 = 0.910540973211095; e2 = 0.044729513394453
+        f1 = 0.036838412054736; f2 = 0.221962989160766; f3 = 0.741198598784498
+
+        wa = 0.097135796282799
+        wb = 0.031334700227139
+        wc = 0.077827541004774
+        wd = 0.079647738927210
+        we = 0.025577675658698
+        wf = 0.043283539377289
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,wf,wf,wf])
+
+    # 79 Gauss points
+    if K==79:
+        a  = 1/3.
+        b1 = -0.001900928704400; b2 = 0.500950464352200
+        c1 = 0.023574084130543; c2 = 0.488212957934729
+        d1 = 0.089726636099435; d2 = 0.455136681950283
+        e1 = 0.196007481363421; e2 = 0.401996259318289
+        f1 = 0.488214180481157; f2 = 0.255892909759421
+        g1 = 0.647023488009788; g2 = 0.176488255995106
+        h1 = 0.791658289326483; h2 = 0.104170855336758
+        i1 = 0.893862072318140; i2 = 0.053068963840930
+        j1 = 0.916762569607942; j2 = 0.041618715196029
+        k1 = 0.976836157186356; k2 = 0.011581921406822
+        l1 = 0.048741583664839; l2 = 0.344855770229001; l3 = 0.606402646106160
+        m1 = 0.006314115948605; m2 = 0.377843269594854; m3 = 0.615842614456541
+        n1 = 0.134316520547348; n2 = 0.306635479062357; n3 = 0.559048000390295
+        o1 = 0.013973893962392; o2 = 0.249419362774742; o3 = 0.736606743262866
+        p1 = 0.075549132909764; p2 = 0.212775724802802; p3 = 0.711675142287434
+        q1 = -0.008368153208227; q2 = 0.146965436053239; q3 = 0.861402717154987
+        r1 = 0.026686063258714; r2 = 0.137726978828923; r3 = 0.835586957912363
+        s1 = 0.010547719294141; s2 = 0.059696109149007; s3 = 0.929756171556853
+
+        wa = 0.033057055541624
+        wb = 0.000867019185663
+        wc = 0.011660052716448
+        wd = 0.022876936356421
+        we = 0.030448982673938
+        wf = 0.030624891725355
+        wg = 0.024368057676800
+        wh = 0.015997432032024
+        wi = 0.007698301815602
+        wj = -0.000632060497488
+        wk = 0.001751134301193
+        wl = 0.016465839189576
+        wm = 0.004839033540485
+        wn = 0.025804906534650
+        wo = 0.008471091054441
+        wp = 0.018354914106280
+        wq = 0.000704404677908
+        wr = 0.010112684927462
+        ws = 0.003573909385950
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
+                    i1,i2,i2,i2,i1,i2,i2,i2,i1,
+                    j1,j2,j2,j2,j1,j2,j2,j2,j1,
+                    k1,k2,k2,k2,k1,k2,k2,k2,k1,
+                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
+                    n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
+                    o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1,
+                    p1,p2,p3,p1,p3,p2,p2,p1,p3,p2,p3,p1,p3,p1,p2,p3,p2,p1,
+                    q1,q2,q3,q1,q3,q2,q2,q1,q3,q2,q3,q1,q3,q1,q2,q3,q2,q1,
+                    r1,r2,r3,r1,r3,r2,r2,r1,r3,r2,r3,r1,r3,r1,r2,r3,r2,r1,
+                    s1,s2,s3,s1,s3,s2,s2,s1,s3,s2,s3,s1,s3,s1,s2,s3,s2,s1])
+
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,
+                    wg,wg,wg,
+                    wh,wh,wh,
+                    wi,wi,wi,
+                    wj,wj,wj,
+                    wk,wk,wk,
+                    wl,wl,wl,wl,wl,wl,
+                    wm,wm,wm,wm,wm,wm,
+                    wn,wn,wn,wn,wn,wn,
+                    wo,wo,wo,wo,wo,wo,
+                    wp,wp,wp,wp,wp,wp,
+                    wq,wq,wq,wq,wq,wq,
+                    wr,wr,wr,wr,wr,wr,
+                    ws,ws,ws,ws,ws,ws])
+
+    return X, W
+
 def fill_surface(surf,param):
 
     N  = len(surf.triangle)
     Nj = N*param.K
     # Calculate centers
-    surf.xi = zeros(N)
-    surf.yi = zeros(N)
-    surf.zi = zeros(N)
-    for i in range(N):
-        surf.xi[i] = average(surf.vertex[surf.triangle[i],:,0])
-        surf.yi[i] = average(surf.vertex[surf.triangle[i],:,1])
-        surf.zi[i] = average(surf.vertex[surf.triangle[i],:,2])
+    surf.xi = average(surf.vertex[surf.triangle[:],:,0], axis=1)
+    surf.yi = average(surf.vertex[surf.triangle[:],:,1], axis=1)
+    surf.zi = average(surf.vertex[surf.triangle[:],:,2], axis=1)
 
     surf.normal = zeros((N,3))
     surf.Area = zeros(N)
 
-    for i in range(N):
-        L0 = surf.vertex[surf.triangle[i,1]] - surf.vertex[surf.triangle[i,0]]
-        L2 = surf.vertex[surf.triangle[i,0]] - surf.vertex[surf.triangle[i,2]]
-        surf.normal[i,:] = cross(L0,L2)
-        surf.Area[i] = linalg.norm(surf.normal[i,:])/2
-        surf.normal[i,:] = surf.normal[i,:]/(2*surf.Area[i])
+    L0 = surf.vertex[surf.triangle[:,1]] - surf.vertex[surf.triangle[:,0]]
+    L2 = surf.vertex[surf.triangle[:,0]] - surf.vertex[surf.triangle[:,2]]
+    surf.normal = cross(L0,L2)
+    surf.Area = sqrt(surf.normal[:,0]**2 + surf.normal[:,1]**2 + surf.normal[:,2]**2)/2
+    surf.normal[:,0] = surf.normal[:,0]/(2*surf.Area)
+    surf.normal[:,1] = surf.normal[:,1]/(2*surf.Area)
+    surf.normal[:,2] = surf.normal[:,2]/(2*surf.Area)
 
     '''
     n1 = surf.xi + surf.normal[:,0]
@@ -250,41 +442,42 @@ def fill_surface(surf,param):
 #        C = 0
 #        addSources2(surf.xj,surf.yj,surf.zj,j,surf.tree,C,param.NCRIT)
 
-    tic = time.time()
-    sortPoints(surf, surf.tree, surf.twig, param)
-    toc = time.time()
-    time_sort = toc - tic
-
     surf.xk,surf.wk = GQ_1D(param.Nk)
+    surf.Xsk,surf.Wsk = quadratureRule_fine(param.K_fine) 
+
 
     # Generate preconditioner
     # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
-    dX11 = zeros(N) # Top left block
-    dX12 = zeros(N) # Top right block
-    dX21 = zeros(N) # Bottom left block
-    dX22 = zeros(N) # Bottom right block
     surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
-                            # Order: Top left, top right, bott left, bott right    
-    for i in range(N):
-        panel = surf.vertex[surf.triangle[i]]
-        center = array([surf.xi[i],surf.yi[i],surf.zi[i]])
-        same = array([1], dtype=int32)
-        Aaux = zeros(1, dtype=param.REAL) # Top left
-        Baux = zeros(1, dtype=param.REAL) # Top right
-        Caux = zeros(1, dtype=param.REAL) # Bottom left
-        Daux = zeros(1, dtype=param.REAL) # Bottom right
+                                 # Order: Top left, top right, bott left, bott right    
+    VL = zeros(N) # Top left block
+    KL = zeros(N) # Top right block
+    VY = zeros(N) # Bottom left block
+    KY = zeros(N) # Bottom right block
+    centers = zeros((N,3))
+    centers[:,0] = surf.xi[:]
+    centers[:,1] = surf.yi[:]
+    centers[:,2] = surf.zi[:]
+    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
+                    surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
 
-        SA_wrap_arr(ravel(panel), center, Daux, Caux, Baux, Aaux, surf.kappa_out, same, surf.xk, surf.wk)
-        dX11[i] = Aaux
-        dX12[i] = -Baux
-        dX21[i] = -Caux
-        dX22[i] = surf.E_hat*Daux
+    dX11 = KL
+    dX12 = -VL
+    dX21 = KY
+    dX22 = surf.E_hat*VY
+    surf.sglIntL = VL # Array for singular integral of V for Laplace
+    surf.sglIntY = VY # Array for singular integral of V for Yukawa
 
     d_aux = 1/(dX22-dX21*dX12/dX11)
     surf.Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
     surf.Precond[1,:] = -1/dX11*dX12*d_aux
     surf.Precond[2,:] = -d_aux*dX21/dX11
     surf.Precond[3,:] = d_aux
+
+    tic = time.time()
+    sortPoints(surf, surf.tree, surf.twig, param)
+    toc = time.time()
+    time_sort = toc - tic
 
     return time_sort
 
@@ -342,8 +535,11 @@ def initializeSurf(field_array, filename, param):
         print 'File: '+str(files[i])
         s = surfaces()
         Area_null = []
+        tic = time.time()
         s.vertex = readVertex(files[i]+'.vert', param.REAL)
         triangle_raw = readTriangle(files[i]+'.face')
+        toc = time.time()
+        print 'Time load mesh: %f'%(toc-tic)
         Area_null = zeroAreas(s, triangle_raw, Area_null)
         s.triangle = delete(triangle_raw, Area_null, 0)
         print 'Removed areas=0: %i'%len(Area_null)
@@ -364,7 +560,7 @@ def initializeSurf(field_array, filename, param):
 
     return surf_array
 
-def dataTransfer(surf_array, field_array, ind, param):
+def dataTransfer(surf_array, field_array, ind, param, kernel):
 
     REAL = param.REAL
     Nsurf = len(surf_array)
@@ -376,6 +572,8 @@ def dataTransfer(surf_array, field_array, ind, param):
         surf_array[s].yjDev      = gpuarray.to_gpu(surf_array[s].yjSort.astype(REAL))
         surf_array[s].zjDev      = gpuarray.to_gpu(surf_array[s].zjSort.astype(REAL))
         surf_array[s].AreaDev    = gpuarray.to_gpu(surf_array[s].AreaSort.astype(REAL))
+        surf_array[s].sglIntLDev = gpuarray.to_gpu(surf_array[s].sglIntLSort.astype(REAL))
+        surf_array[s].sglIntYDev = gpuarray.to_gpu(surf_array[s].sglIntYSort.astype(REAL))
         surf_array[s].vertexDev  = gpuarray.to_gpu(ravel(surf_array[s].vertex[surf_array[s].triangleSort]).astype(REAL))
         surf_array[s].xcDev      = gpuarray.to_gpu(ravel(surf_array[s].xcSort.astype(REAL)))
         surf_array[s].ycDev      = gpuarray.to_gpu(ravel(surf_array[s].ycSort.astype(REAL)))
@@ -388,6 +586,8 @@ def dataTransfer(surf_array, field_array, ind, param):
         surf_array[s].P2P_lstDev = gpuarray.to_gpu(ravel(surf_array[s].P2P_list.astype(int32)))
         surf_array[s].xkDev      = gpuarray.to_gpu(surf_array[s].xk.astype(REAL))
         surf_array[s].wkDev      = gpuarray.to_gpu(surf_array[s].wk.astype(REAL))
+        surf_array[s].XskDev     = gpuarray.to_gpu(surf_array[s].Xsk.astype(REAL))
+        surf_array[s].WskDev     = gpuarray.to_gpu(surf_array[s].Wsk.astype(REAL))
         surf_array[s].kDev       = gpuarray.to_gpu((surf_array[s].sortSource%param.K).astype(int32))
 
     ind.indexDev = gpuarray.to_gpu(ind.index_large.astype(int32))
@@ -399,3 +599,5 @@ def dataTransfer(surf_array, field_array, ind, param):
             field_array[f].yq_gpu = gpuarray.to_gpu(field_array[f].xq[:,1].astype(REAL))
             field_array[f].zq_gpu = gpuarray.to_gpu(field_array[f].xq[:,2].astype(REAL))
             field_array[f].q_gpu  = gpuarray.to_gpu(field_array[f].q.astype(REAL))
+
+

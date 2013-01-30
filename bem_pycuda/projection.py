@@ -1,11 +1,9 @@
 import sys 
 sys.path.append('tree')
 from FMMutils import *
-import time
-
-# PyCUDA libraries
-#import pycuda.autoinit
+import pycuda.autoinit
 import pycuda.driver as cuda
+import time
 
 
 def getWeights(K):
@@ -164,8 +162,6 @@ def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):
         X_Kc[i]  = XK[i/K]
         X_Vc[i]  = XV[i/K]
     
-    # The minus sign comes from the chain rule when deriving
-    # with respect to r' in 1/|r-r'|
     toc = time.time()
     time_set = toc - tic
 
@@ -253,6 +249,7 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
     xkDev = cuda.to_device(surface.xk.astype(REAL))
     wkDev = cuda.to_device(surface.wk.astype(REAL))
 
+
     get_phir = kernel.get_function("get_phir")
     
     GSZ = int(ceil(float(Nq)/par_reac.BSZ))
@@ -260,7 +257,7 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
     get_phir(phir, field.xq_gpu, field.yq_gpu, field.zq_gpu, m_gpu, mx_gpu, my_gpu, mz_gpu, mKc_gpu, mVc_gpu, 
             surface.xjDev, surface.yjDev, surface.zjDev, surface.AreaDev, surface.kDev, surface.vertexDev, 
             int32(len(surface.xj)), int32(Nq), int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
-            AI_int_gpu, int32(len(surface.xk)), block=(par_reac.BSZ,1,1), grid=(GSZ,1))
+            AI_int_gpu, int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
 
     AI_aux = zeros(Nq, dtype=int32)
     AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=int32)

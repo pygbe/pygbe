@@ -1,6 +1,6 @@
 from numpy import *
 
-def readVertex(filename, REAL):
+def readVertex2(filename, REAL):
     x = []
     y = []
     z = []
@@ -22,7 +22,14 @@ def readVertex(filename, REAL):
     vertex[:,2] = z
     return vertex 
 
-def readTriangle(filename):
+def readVertex(filename, REAL):
+
+    X = loadtxt(filename, dtype=REAL)
+    vertex = X[:,0:3]
+
+    return vertex
+
+def readTriangle2(filename):
     triangle = []
 
     for line in file(filename):
@@ -37,6 +44,17 @@ def readTriangle(filename):
 
     return triangle
 
+def readTriangle(filename):
+
+    X = loadtxt(filename, dtype=int)
+    triangle = zeros((len(X),3), dtype=int)
+    triangle[:,0] = X[:,0]
+    triangle[:,1] = X[:,2] # v2 and v3 are flipped to match my sign convention!
+    triangle[:,2] = X[:,1]
+
+    triangle -= 1
+
+    return triangle
 
 def readpqr(filename, REAL):
 
@@ -103,17 +121,19 @@ def readParameters(param, filename):
     param.K         = int (val[1])      # Gauss points per element
     param.Nk        = int (val[2])      # Number of Gauss points per side 
                                         # for semi analytical integral
-    param.threshold = REAL(val[3])      # L/d threshold to use analytical integrals
+    param.K_fine    = int (val[3])      # Number of Gauss points per element 
+                                        # for near singular integrals 
+    param.threshold = REAL(val[4])      # L/d threshold to use analytical integrals
                                         # Over: analytical, under: quadrature
-    param.BSZ       = int (val[4])      # CUDA block size
-    param.restart   = int (val[5])      # Restart for GMRES
-    param.tol       = REAL(val[6])      # Tolerance for GMRES
-    param.max_iter  = int (val[7])      # Max number of iteration for GMRES
-    param.P         = int (val[8])      # Order of Taylor expansion for treecode
-    param.eps       = REAL(val[9])      # Epsilon machine
-    param.NCRIT     = int (val[10])     # Max number of targets per twig box of tree
-    param.theta     = REAL(val[11])     # MAC criterion for treecode
-    param.GPU       = int (val[12])     # =1: use GPU, =0 no GPU
+    param.BSZ       = int (val[5])      # CUDA block size
+    param.restart   = int (val[6])      # Restart for GMRES
+    param.tol       = REAL(val[7])      # Tolerance for GMRES
+    param.max_iter  = int (val[8])      # Max number of iteration for GMRES
+    param.P         = int (val[9])      # Order of Taylor expansion for treecode
+    param.eps       = REAL(val[10])     # Epsilon machine
+    param.NCRIT     = int (val[11])     # Max number of targets per twig box of tree
+    param.theta     = REAL(val[12])     # MAC criterion for treecode
+    param.GPU       = int (val[13])     # =1: use GPU, =0 no GPU
 
     return dataType
 

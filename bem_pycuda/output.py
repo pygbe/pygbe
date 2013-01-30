@@ -48,6 +48,7 @@ def printSummary(surf_array, field_array, param):
     print '\tNCRIT                   : %i'%param.NCRIT
     print '\tCUDA block size         : %i'%param.BSZ
     print '\tGauss points per element: %i'%param.K
+    print '\tGauss points near singlr: %i'%param.K_fine
     print '\t1D Gauss points per side: %i'%param.Nk
     print '\tGMRES tolerance         : %s'%param.tol
     print '\tGMRES max iterations    : %i'%param.max_iter
