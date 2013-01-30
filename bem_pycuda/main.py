@@ -27,17 +27,14 @@ from semi_analytical import *
 
 sys.path.append('tree')
 from FMMutils       import *
+from cuda_kernels   import kernels
 
+TIC = time.time()
 ### Read parameters
 param = parameters()
 precision = readParameters(param,'input_files/parameters_lys.txt')
 configFile = 'input_files/config_lys_single.txt'
 
-if param.GPU==1:
-    from cuda_kernels   import kernels
-    import pycuda.driver as cuda
-
-# Derived parameters 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
 param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
 
@@ -60,17 +57,13 @@ for i in range(len(surf_array)):
 print 'Total elements: %i'%param.N
 printSummary(surf_array, field_array, param)
 
-tac = time.time()
-
 ### Precomputation
 ind0 = index_constant()
 computeIndices(param.P, ind0)
 precomputeTerms(param.P, ind0)
 
 ### Load CUDA code
-kernel = 0
-if param.GPU==1:
-    kernel = kernels(param.BSZ, param.Nm, param.Nk, param.P, precision)
+kernel = kernels(param.BSZ, param.Nm, param.K_fine, param.P, precision)
 
 ### Generate interaction list
 print 'Generate interaction list'
@@ -83,7 +76,7 @@ list_time = toc-tic
 print 'Transfer data to GPU'
 tic = time.time()
 if param.GPU==1:
-    dataTransfer(surf_array, field_array, ind0, param)
+    dataTransfer(surf_array, field_array, ind0, param, kernel)
 toc = time.time()
 transfer_time = toc-tic
 
@@ -97,7 +90,7 @@ elif param.GPU==1:
 toc = time.time()
 rhs_time = toc-tic
 
-setup_time = toc-tac
+setup_time = toc-TIC
 print 'List time          : %fs'%list_time
 print 'Data transfer time : %fs'%transfer_time
 print 'RHS generation time: %fs'%rhs_time
@@ -123,12 +116,14 @@ print 'Calculate Esolv'
 tic = time.time()
 E_solv = calculateEsolv(phi, surf_array, field_array, param, kernel)
 toc = time.time()
-print 'Time Esolv: %f'%(toc-tic)
-print 'Esolv: %f'%E_solv
+print 'Time Esolv: %fs'%(toc-tic)
+print 'Total time: %fs'%(toc-TIC)
+print 'Esolv: %f kcal/mol'%E_solv
+print 'Esolv: %f kJ/mol'%(E_solv*4.184)
 
 # Analytic solution
-# two spheres
 '''
+# two spheres
 R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
 dist = norm(field_array[2].xq[0]-field_array[1].xq[0])
 E_1 = field_array[1].E
@@ -142,20 +137,23 @@ E2an *= C0/(4*pi)
 print '\n E_solv = %s, Analytical solution = %f, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
 '''
 '''
-# sphere with/without stern layer
+
+# sphere with stern layer
 K_sph = 10 # Number of terms in spherical harmonic expansion
-E_1 = field_array[2].E # stern
-#E_1 = field_array[1].E # no stern
+#E_1 = field_array[2].E # stern
+E_1 = field_array[1].E # no stern
 E_2 = field_array[0].E
 R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
-R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
-#R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
-q = field_array[2].q # stern
-#q = field_array[1].q # no stern
-xq = field_array[2].xq # stern
-#xq = field_array[1].xq # no stern
+#R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
+R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
+#q = field_array[2].q # stern
+q = field_array[1].q # no stern
+#xq = field_array[2].xq # stern
+xq = field_array[1].xq # no stern
+xq += 1e-12
 phi_P = an_P(q, xq, E_1, E_2, param.E_0, R1, field_array[0].kappa, R2, K_sph)
 JtoCal = 4.184
 E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
 print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
 '''
+

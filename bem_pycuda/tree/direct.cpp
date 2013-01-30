@@ -252,12 +252,87 @@ void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL *x, REAL kappa, int same,
 
 }
 
+void computeDiagonal(REAL *VL, int VLSize, REAL *KL, int KLSize, REAL *VY, int VYSize, REAL *KY, int KYSize, 
+                    REAL *triangle, int triangleSize, REAL *centers, int centersSize, REAL kappa,
+                    REAL K_diag, REAL V_diag, REAL *xk, int xkSize, REAL *wk, int wkSize)
+{
+    int N = VLSize, LorY;
+    REAL PHI_K, PHI_V;
+    for(int i=0; i<N; i++)
+    {
+        REAL panel[9] = {triangle[9*i], triangle[9*i+1], triangle[9*i+2],
+                 triangle[9*i+3], triangle[9*i+4], triangle[9*i+5],
+                 triangle[9*i+6], triangle[9*i+7], triangle[9*i+8]};
+        REAL center[3] = {centers[3*i], centers[3*i+1], centers[3*i+2]};
+    
+        PHI_K = 0.;
+        PHI_V = 0.;
+        LorY = 1; // Laplace
+        SA(PHI_K, PHI_V, panel, center, 1e-12, 1, 
+            K_diag, V_diag, LorY, xk, xkSize, wk);
+
+        VL[i] = PHI_V;
+        KL[i] = PHI_K;
+
+        PHI_K = 0.;
+        PHI_V = 0.;
+        LorY = 2; // Yukawa 
+        SA(PHI_K, PHI_V, panel, center, kappa, 1, 
+            K_diag, V_diag, LorY, xk, xkSize, wk);
+        
+        VY[i] = PHI_V;
+        KY[i] = PHI_K;
+
+    }
+}
+
+void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, REAL xi, REAL yi, REAL zi, 
+            REAL kappa, REAL *Xk, REAL *Wk, int K_fine, REAL Area, int LorY)
+{
+    REAL nx, ny, nz;
+    REAL dx, dy, dz, r, aux;
+
+    PHI_K = 0.;
+    PHI_V = 0.;
+
+    aux = 1/(2*Area);
+    nx = ((panel[4]-panel[1])*(panel[2]-panel[8]) - (panel[5]-panel[2])*(panel[1]-panel[7])) * aux;
+    ny = ((panel[5]-panel[2])*(panel[0]-panel[6]) - (panel[3]-panel[0])*(panel[2]-panel[8])) * aux;
+    nz = ((panel[3]-panel[0])*(panel[1]-panel[7]) - (panel[4]-panel[1])*(panel[0]-panel[6])) * aux;
+
+
+    #pragma unroll
+    for (int kk=0; kk<K_fine; kk++)
+    {
+        dx = xi - (panel[0]*Xk[3*kk] + panel[3]*Xk[3*kk+1] + panel[6]*Xk[3*kk+2]);
+        dy = yi - (panel[1]*Xk[3*kk] + panel[4]*Xk[3*kk+1] + panel[7]*Xk[3*kk+2]);
+        dz = zi - (panel[2]*Xk[3*kk] + panel[5]*Xk[3*kk+1] + panel[8]*Xk[3*kk+2]);
+        r   = 1/sqrt(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+
+        if (LorY==1)
+        {
+            aux = Wk[kk]*Area*r;
+            PHI_V += aux;
+            PHI_K += aux*(nx*dx+ny*dy+nz*dz)*(r*r);
+        }
+
+        else
+        {
+            aux = Wk[kk]*Area*exp(-kappa*1/r)*r;
+            PHI_V += aux;
+            PHI_K += aux*(nx*dx+ny*dy+nz*dz)*r*(kappa+r);
+        }
+
+    }
+}
+
 void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, REAL *triangle, int triangleSize,
         int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
         REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
-        int *target, int targetSize,REAL *Area, int AreaSize, REAL *xk, int xkSize, REAL *wk, int wkSize, 
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglIntL, int sglIntLSize, REAL *sglIntY, int sglIntYSize, 
+        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
         REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
     double start,stop;
@@ -316,7 +391,21 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
                 REAL PHI_K = 0., PHI_V = 0.;
                 
                 start = get_time();
-                SA(PHI_K, PHI_V, panel, center, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk);
+
+                if (same==1)
+                {
+                    PHI_K = K_diag;
+                    if (LorY==1)
+                        PHI_V = sglIntL[j];
+                    else
+                        PHI_V = sglIntY[j];
+                }
+                else
+                {
+                    GQ_fine(PHI_K, PHI_V, panel, xt[i_aux], yt[i_aux], zt[i_aux], kappa, Xsk, Wsk, WskSize, Area[tri[j]], LorY); 
+                }
+
+
                 stop = get_time();
                 aux[1] += stop - start;
 
@@ -337,7 +426,8 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, int *offSrc, int offSrcSize, int *offTwg, int offTwgSize,  
-        int *target, int targetSize,REAL *Area, int AreaSize, REAL *xk, int xkSize, REAL *wk, int wkSize, 
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglIntL, int sglIntLSize, REAL *sglIntY, int sglIntYSize, 
+        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize,
         REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
     double start,stop;
@@ -415,7 +505,18 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                         REAL center[3] = {xt[i], yt[i], zt[i]};
                         REAL PHI_K = 0., PHI_V = 0.;
                         
-                        SA(PHI_K, PHI_V, panel, center, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk);
+                        if (same==1)
+                        {
+                            PHI_K = K_diag;
+                            if (LorY==1)
+                                PHI_V = sglIntL[j];
+                            else
+                                PHI_V = sglIntY[j];
+                        }
+                        else
+                        {
+                            GQ_fine(PHI_K, PHI_V, panel, xt[i], yt[i], zt[i], kappa, Xsk, Wsk, WskSize, Area[j], LorY); 
+                        }
 
         //                printf("%f \t %f\n",PHI_V,mVclean[j]);
 

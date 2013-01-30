@@ -41,8 +41,7 @@ class Cell():
         self.list_ready = 0                          # Flag to know if P2P list is already generated
         self.twig_array = []                         # Position in the twig array
 
-
-def add_child(octant, Cells, i, NCRIT, Nm):
+def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
     # add_child adds child cell to Cells array
     # octant: octant of the child cell
     # Cells : arrays with cells
@@ -54,27 +53,32 @@ def add_child(octant, Cells, i, NCRIT, Nm):
     CN.yc = Cells[i].yc + CN.r*((octant&2)-1)   # Want to make ((octant&X)*Y - Z)=1
     CN.zc = Cells[i].zc + CN.r*((octant&4)/2-1)
     CN.parent = i
-    Cells[i].child[octant] = len(Cells)
+    Cells[i].child[octant] = Ncell 
     Cells[i].nchild|=(1<<octant)
-    Cells.append(CN)
+    Cells[Ncell] = CN
+    Ncell += 1
 
-def split_cell(x, y, z, Cells, C, NCRIT, Nm):
+    return Ncell
+
+def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     # split_cell splits cell with more than NCRIT particles
     # x,y,z: positions of particles
     # Cells: array of cells
     # C    : index of cell to be split in Cells array
 
     for l in Cells[C].target:
-        octant = (x[l]>Cells[C].xc) + ((y[l]>Cells[C].yc) << 1) + ((z[l]>Cells[C].zc) << 2)
+        octant = int(x[l]>Cells[C].xc) + int(y[l]>Cells[C].yc)*2 + int(z[l]>Cells[C].zc)*4
         if (not(Cells[C].nchild & (1<<octant))): # Ask if octant exists already
-            add_child(octant, Cells, C, NCRIT, Nm)
+            Ncell = add_child(octant, Cells, C, NCRIT, Nm, Ncell)
 
         CC = Cells[C].child[octant] # Pointer to child cell
         Cells[CC].target = append(Cells[CC].target, l)
         Cells[CC].ntarget += 1
 
         if (Cells[CC].ntarget >= NCRIT):
-            split_cell(x, y, z, Cells, CC, NCRIT, Nm)
+            Ncell = split_cell(x, y, z, Cells, CC, NCRIT, Nm, Ncell)
+
+    return Ncell
 
 def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
     # Target-based tree
@@ -85,18 +89,18 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
     C0.zc = x_center[2]
     C0.r  = radius
 
-    Cells = []
-    Cells.append(C0)
-
+    Cells = [Cell(NCRIT,Nm)]*N
+    Cells[0] = C0
+    Ncell = 1
     for i in range(N):
 
         C = 0 
         while (Cells[C].ntarget>=NCRIT):
             Cells[C].ntarget+=1
 
-            octant = (xi[i]>Cells[C].xc) + ((yi[i]>Cells[C].yc) << 1) + ((zi[i]>Cells[C].zc) << 2)
+            octant = int(xi[i]>Cells[C].xc) + int(yi[i]>Cells[C].yc)*2 + int(zi[i]>Cells[C].zc)*4
             if (not(Cells[C].nchild & (1<<octant))):
-                add_child(octant, Cells, C, NCRIT, Nm)
+                Ncell = add_child(octant, Cells, C, NCRIT, Nm, Ncell)
         
             C = Cells[C].child[octant]
 
@@ -104,8 +108,9 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
         Cells[C].ntarget += 1
 
         if (Cells[C].ntarget>=NCRIT):
-            split_cell(xi,yi,zi,Cells,C, NCRIT, Nm)
+            Ncell = split_cell(xi,yi,zi,Cells,C, NCRIT, Nm, Ncell)
 
+    Cells = Cells[:Ncell]
     return Cells
 
 def findTwigs(Cells, C, twig, NCRIT):
@@ -215,6 +220,8 @@ def sortPoints(surface, Cells, twig, param):
     surface.yjSort = surface.yj[surface.sortSource]
     surface.zjSort = surface.zj[surface.sortSource]
     surface.AreaSort = surface.Area[surface.sortSource/param.K]
+    surface.sglIntLSort = surface.sglIntL[surface.sortSource/param.K]
+    surface.sglIntYSort = surface.sglIntY[surface.sortSource/param.K]
     surface.triangleSort = surface.triangle[surface.sortSource/param.K]
 
 def computeIndices(P, ind0):
@@ -491,12 +498,13 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
     k    = surfSrc.sortSource%param.K # Gauss point
 
     aux = zeros(2)
+
     direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
             int32(tri), int32(k), surfTar.xi, surfTar.yi, surfTar.zi, 
             s_xj, s_yj, s_zj, xt, yt, zt, m, mx, my, mz, mKc, mVc, 
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
-            surfTar.offsetTwigs[surf],int32(surfTar.tree[0].target), surfSrc.AreaSort, 
-            surfSrc.xk, surfSrc.wk, param.kappa, param.threshold, param.eps, w[0], aux)
+            surfTar.offsetTwigs[surf],int32(surfTar.tree[0].target), surfSrc.AreaSort, surfSrc.sglIntLSort, surfSrc.sglIntYSort,
+            surfSrc.xk, surfSrc.wk, surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, w[0], aux)
 
     timing.AI_int += int(aux[0])
     timing.time_an += aux[1]
@@ -537,11 +545,11 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
 
     direct_gpu(K_gpu, V_gpu, surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
                 surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mxDev, myDev, mzDev, 
-                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev,
-                surfSrc.vertexDev, surfSrc.xkDev, surfSrc.wkDev, int32(ptr_offset), int32(ptr_list), 
+                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, surfSrc.sglIntLDev,
+                surfSrc.sglIntYDev, surfSrc.vertexDev, surfSrc.xkDev, surfSrc.wkDev, int32(ptr_offset), int32(ptr_list), 
                 int32(LorY), REAL(param.kappa), REAL(param.threshold), REAL(param.eps), 
                 int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), REAL(V_diag), AI_int, 
-                block=(param.BSZ,1,1), grid=(GSZ,1))
+                surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
     toc.synchronize()
@@ -635,7 +643,8 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
     direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, ravel(surface.vertex[surface.triangle[:]]), 
             int32(tri), int32(k), surface.xi, surface.yi, surface.zi,
             s_xj, s_yj, s_zj, xq_arr, yq_arr, zq_arr, s_m, s_mx, s_my, s_mz, s_mKc, s_mVc, 
-            array([-1], dtype=int32), surface.Area, surface.xk, surface.wk, 
+            array([-1], dtype=int32), surface.Area, surface.sglIntL, surface.sglIntY,
+            surface.xk, surface.wk, surface.Xsk, surface.Wsk,
             par_reac.kappa, par_reac.threshold, par_reac.eps, w[0], aux)
 
     AI_int += int(aux[0])

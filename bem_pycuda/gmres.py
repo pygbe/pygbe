@@ -84,7 +84,6 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
             tic = time.time()
        
             Vip1 = gmres_dot(V[i,:], surf_array, field_array, ind0, param, timing, kernel)
-
             toc = time.time()
             time_Vi+=toc-tic
 

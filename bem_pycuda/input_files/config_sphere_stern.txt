@@ -1,5 +1,5 @@
-FILE    ../geometry/sphere/sphere2K_R4
-FILE    ../geometry/sphere/sphere2K_R5
+FILE    ../geometry/sphere/sphere8K_R4
+FILE    ../geometry/sphere/sphere8K_R5
 --------------------------------
 PARAM   LorY Pot?   Dielec  kappa   charges?    charge_file                         Nparent     parent      Nchild      children
 FIELD   2    0      80      0.125   0           NA                                  0           NA          1           1

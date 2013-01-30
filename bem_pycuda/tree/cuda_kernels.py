@@ -1,14 +1,15 @@
 from pycuda.compiler import SourceModule
 
-def kernels(BSZ, Nm, xkSize, P, REAL):
+def kernels(BSZ, Nm, K_fine, P, REAL):
     
     mod = SourceModule( """
 
     #define REAL %(precision)s
     #define BSZ %(blocksize)d
     #define Nm  %(Nmult)d
-    #define xkSize %(K_1D)d
+    #define K_fine %(K_near)d
     #define P      %(Ptree)d
+
 
     /*
     __device__ int getIndex(int P, int i, int j, int k)
@@ -506,6 +507,7 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
 
     }
 
+    /*
     __device__ REAL norm(REAL *x)
     {
         return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
@@ -741,6 +743,47 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
         }
         
     }
+    */
+
+    __device__ __inline__ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, int J, REAL xi, REAL yi, REAL zi, 
+                            REAL kappa, REAL *Xk, REAL *Wk, REAL *Area, int LorY)
+    {
+        REAL nx, ny, nz;
+        REAL dx, dy, dz, r, aux;
+
+        PHI_K = 0.;
+        PHI_V = 0.;
+        int j = J/9;
+
+        aux = 1/(2*Area[j]);
+        nx = ((panel[J+4]-panel[J+1])*(panel[J+2]-panel[J+8]) - (panel[J+5]-panel[J+2])*(panel[J+1]-panel[J+7])) * aux;
+        ny = ((panel[J+5]-panel[J+2])*(panel[J+0]-panel[J+6]) - (panel[J+3]-panel[J+0])*(panel[J+2]-panel[J+8])) * aux;
+        nz = ((panel[J+3]-panel[J+0])*(panel[J+1]-panel[J+7]) - (panel[J+4]-panel[J+1])*(panel[J+0]-panel[J+6])) * aux;
+
+        #pragma unroll
+        for (int kk=0; kk<K_fine; kk++)
+        {
+            dx = xi - (panel[J+0]*Xk[3*kk] + panel[J+3]*Xk[3*kk+1] + panel[J+6]*Xk[3*kk+2]);
+            dy = yi - (panel[J+1]*Xk[3*kk] + panel[J+4]*Xk[3*kk+1] + panel[J+7]*Xk[3*kk+2]);
+            dz = zi - (panel[J+2]*Xk[3*kk] + panel[J+5]*Xk[3*kk+1] + panel[J+8]*Xk[3*kk+2]);
+            r   = rsqrt(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+
+            if (LorY==1)
+            {
+                aux = Wk[kk]*Area[j]*r;
+                PHI_V += aux;
+                PHI_K += aux*(nx*dx+ny*dy+nz*dz)*(r*r);
+            }
+
+            else
+            {
+                aux = Wk[kk]*Area[j]*exp(-kappa*1/r)*r;
+                PHI_V += aux;
+                PHI_K += aux*(nx*dx+ny*dy+nz*dz)*r*(kappa+r);
+            }
+
+        }
+    }
 
     __global__ void M2P(REAL *K_gpu, REAL *V_gpu, int *offMlt, int *sizeTar, REAL *xc, REAL *yc, REAL *zc, 
                         REAL *M, REAL *Md, REAL *xt, REAL *yt, REAL *zt,
@@ -837,30 +880,31 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
     
     __global__ void P2P(REAL *K_gpu, REAL *V_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k, 
                         REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc, 
-                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *vertex, REAL *xk, REAL *wk, int ptr_off, 
-                        int ptr_lst, int LorY, REAL kappa, REAL threshold, REAL eps, int BpT, int NCRIT, 
-                        REAL K_diag, REAL V_diag, int *AI_int_gpu)
+                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *sglIntL, REAL *sglIntY, REAL *vertex, 
+                        REAL *xk, REAL *wk, int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold, REAL eps, 
+                        int BpT, int NCRIT, REAL K_diag, REAL V_diag, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
         int list_start = offTwg[ptr_off+blockIdx.x];
         int list_end   = offTwg[ptr_off+blockIdx.x+1];
         
-        REAL xi, yi, zi, dx, dy, dz, r, R_tri, dx_tri, dy_tri, dz_tri, L_d;
+        REAL xi, yi, zi, dx, dy, dz, r, auxK, auxV;
 
-        __shared__ REAL ver_sh[9*BSZ], xc_sh[BSZ], yc_sh[BSZ], zc_sh[BSZ],
-                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ],
-                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ], mVc_sh[BSZ],
-                        xk_sh[xkSize], wk_sh[xkSize];
+        __shared__ REAL ver_sh[9*BSZ],
+                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ], sglIntL_sh[BSZ],
+                        sglIntY_sh[BSZ], m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ], 
+                        mVc_sh[BSZ], Xsk_sh[K_fine*3], Wsk_sh[K_fine];
 
 
-        if (threadIdx.x<xkSize)
+        if (threadIdx.x<K_fine*3)
         {
-            xk_sh[threadIdx.x] = xk[threadIdx.x];
-            wk_sh[threadIdx.x] = wk[threadIdx.x];
+            Xsk_sh[threadIdx.x] = Xsk[threadIdx.x];
+            if (threadIdx.x<K_fine)
+                Wsk_sh[threadIdx.x] = Wsk[threadIdx.x];
         }
         __syncthreads();
 
-        int i, same, CJ_start, Nsrc, CJ;
+        int i, same, near, CJ_start, Nsrc, CJ;
 
         for (int iblock=0; iblock<BpT; iblock++)
         {
@@ -890,6 +934,8 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                     mKc_sh[threadIdx.x] = mKc[CJ_start + jblock*BSZ + threadIdx.x];
                     mVc_sh[threadIdx.x] = mVc[CJ_start + jblock*BSZ + threadIdx.x];
                     A_sh[threadIdx.x]  = Area[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglIntL_sh[threadIdx.x]  = sglIntL[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglIntY_sh[threadIdx.x]  = sglIntY[CJ_start + jblock*BSZ + threadIdx.x];
                     k_sh[threadIdx.x]  = k[CJ_start + jblock*BSZ + threadIdx.x];
 
                     for (int vert=0; vert<9; vert++)
@@ -898,66 +944,61 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                     }
                     __syncthreads();
 
-                    xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
-                    yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
-                    zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
-                    __syncthreads();
-
                     if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
                     {
                         for (int j=0; j<BSZ; j++)
                         {
-                            dx_tri = xi - xc_sh[j];
-                            dy_tri = yi - yc_sh[j];
-                            dz_tri = zi - zc_sh[j];
-                            R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri + eps);
-
-                            L_d = sqrt(2*A_sh[j])/(R_tri);
-
-                            if(L_d<threshold)
+                            dx = xi - (ver_sh[9*j] + ver_sh[9*j+3] + ver_sh[9*j+6])  *0.333333333333333333;
+                            dy = yi - (ver_sh[9*j+1] + ver_sh[9*j+4] + ver_sh[9*j+7])*0.333333333333333333;
+                            dz = zi - (ver_sh[9*j+2] + ver_sh[9*j+5] + ver_sh[9*j+8])*0.333333333333333333;
+                            r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                            same = (r>1e12);
+                            near = ((2*A_sh[j]*r) > threshold*threshold);
+                            auxV = 0.;
+                            auxK = 0.;
+                           
+                            if (near==0)
                             {
                                 dx = xi - xj_sh[j];
                                 dy = yi - yj_sh[j];
                                 dz = zi - zj_sh[j];
-                                r = sqrt(dx*dx + dy*dy + dz*dz + eps);
+                                r = rsqrt(dx*dx + dy*dy + dz*dz + eps); // r is 1/r!!!!
                                 if (LorY==2)
                                 {
-                                    sum_V += m_sh[j] * exp(-kappa*r)/r; 
-                                    sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
+                                    auxV = exp(-kappa*1/r)*r;
+                                    auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*auxV*(r)*(kappa+r);
+                                    auxV *= m_sh[j];
 
                                 }
                                 if (LorY==1)
                                 {
-                                    sum_V += m_sh[j]/r; 
-                                    sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+                                    auxV =  m_sh[j]*r;
+                                    auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*(r*r*r);
                                 }
                             }
-
-                            else if(k_sh[j]==0)
+                            
+                            if ( (near==1) && (k_sh[j]==0))
                             {
-                                REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
-                                                ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
-                                                ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+                                if (same==1)
+                                {
+                                    auxK = K_diag;
+                                    if (LorY==1)
+                                        auxV = sglIntL_sh[j];
+                                    else
+                                        auxV = sglIntY_sh[j];
+                                }
+                                else
+                                {
+                                    GQ_fine(auxK, auxV, ver_sh, 9*j, xi, yi, zi, kappa, Xsk_sh, Wsk_sh, A_sh, LorY);
+                                }
 
-                                // Check if it is same triangle
-                                // same if collocation point matches vertex average
-
-                                dx = xi - xc_sh[j]; 
-                                dy = yi - yc_sh[j]; 
-                                dz = zi - zc_sh[j]; 
-                                r  = sqrt(dx*dx + dy*dy + dz*dz);
-                                if (r<1e-8) same=1;
-                                else        same=0;
-                                
-                                REAL PHI_K=0., PHI_V=0.;
-
-                                SA(PHI_K, PHI_V, panel, xi, yi, zi, K_diag, V_diag, 
-                                    kappa, same, xk_sh, wk_sh, xkSize, LorY);
-                    
-                                sum_V += PHI_V * mVc_sh[j];
-                                sum_K += PHI_K * mKc_sh[j];
+                                auxV *= mVc_sh[j];
+                                auxK *= mKc_sh[j]; 
                                 an_counter += 1;
                             }
+                            
+                            sum_V += auxV;
+                            sum_K += auxK;
                         }
                     }
                 }
@@ -973,6 +1014,8 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                 mKc_sh[threadIdx.x] = mKc[CJ_start + jblock*BSZ + threadIdx.x];
                 mVc_sh[threadIdx.x] = mVc[CJ_start + jblock*BSZ + threadIdx.x];
                 A_sh[threadIdx.x] = Area[CJ_start + jblock*BSZ + threadIdx.x];
+                sglIntL_sh[threadIdx.x] = sglIntL[CJ_start + jblock*BSZ + threadIdx.x];
+                sglIntY_sh[threadIdx.x] = sglIntY[CJ_start + jblock*BSZ + threadIdx.x];
                 k_sh[threadIdx.x] = k[CJ_start + jblock*BSZ + threadIdx.x];
 
                 for (int vert=0; vert<9; vert++)
@@ -981,66 +1024,61 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                 }
                 __syncthreads();
 
-                xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
-                yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
-                zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
-                __syncthreads();
                 if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
                 {
                     for (int j=0; j<Nsrc-(jblock*BSZ); j++)
                     {
-                        dx_tri = xi - xc_sh[j];
-                        dy_tri = yi - yc_sh[j];
-                        dz_tri = zi - zc_sh[j];
-                        R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri + eps);
+                        dx = xi - (ver_sh[9*j] + ver_sh[9*j+3] + ver_sh[9*j+6])  *0.3333333333333333333;
+                        dy = yi - (ver_sh[9*j+1] + ver_sh[9*j+4] + ver_sh[9*j+7])*0.3333333333333333333;
+                        dz = zi - (ver_sh[9*j+2] + ver_sh[9*j+5] + ver_sh[9*j+8])*0.3333333333333333333;
+                        r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                        same = (r>1e12);
+                        near = ((2*A_sh[j]*r) > threshold*threshold);
+                        auxV = 0.;
+                        auxK = 0.;
 
-                        L_d = sqrt(2*A_sh[j])/(R_tri);
-
-                        if (L_d<threshold)
+                        if (near==0)
                         {
                             dx = xi - xj_sh[j];
                             dy = yi - yj_sh[j];
                             dz = zi - zj_sh[j];
-                            r = sqrt(dx*dx + dy*dy + dz*dz + eps);
+                            r = rsqrt(dx*dx + dy*dy + dz*dz + eps);  // r is 1/r!!!
 
                             if (LorY==2)
                             {
-                                sum_V += m_sh[j] * exp(-kappa*r)/r; 
-                                sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*exp(-kappa*r)/(r*r)*(kappa+1/r); 
-
+                                auxV = exp(-kappa*1/r)*r;
+                                auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*auxV*(r)*(kappa+r);
+                                auxV *= m_sh[j];
                             }
                             if (LorY==1)
                             {
-                                sum_V += m_sh[j]/r; 
-                                sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
+                                auxV = m_sh[j]*r;
+                                auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*(r*r*r);
                             }
                         }
-
-                        else if(k_sh[j]==0)
+                        
+                        if ( (near==1) && (k_sh[j]==0))
                         {
-                            REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
-                                            ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
-                                            ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+                            if (same==1)
+                            {
+                                auxK = K_diag;
+                                if (LorY==1)
+                                    auxV = sglIntL_sh[j];
+                                else
+                                    auxV = sglIntY_sh[j];
+                            }
+                            else
+                            {
+                                GQ_fine(auxK, auxV, ver_sh, 9*j, xi, yi, zi, kappa, Xsk_sh, Wsk_sh, A_sh, LorY);
+                            }
 
-                            // Check if it is same triangle
-                            // same if collocation point matches vertex average
-
-                            dx = xi - xc_sh[j]; 
-                            dy = yi - yc_sh[j]; 
-                            dz = zi - zc_sh[j]; 
-                            r  = sqrt(dx*dx + dy*dy + dz*dz);
-                            if (r<1e-8) same=1;
-                            else        same=0;
-
-                            REAL PHI_K=0., PHI_V=0.;
-
-                            SA(PHI_K, PHI_V, panel, xi, yi, zi, K_diag, V_diag, 
-                                    kappa, same, xk_sh, wk_sh, xkSize, LorY);
-                
-                            sum_V += PHI_V * mVc_sh[j];
-                            sum_K += PHI_K * mKc_sh[j];
+                            auxV *= mVc_sh[j];
+                            auxK *= mKc_sh[j];
                             an_counter += 1;
                         }
+                       
+                        sum_V += auxV;
+                        sum_K += auxK;
                     }
                 }
             }
@@ -1059,13 +1097,13 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                             REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc, 
                             REAL *xj, REAL *yj, REAL *zj, REAL *Area, int *k, REAL *vertex, 
                             int Nj, int Nq, int K, REAL *xk, REAL *wk, 
-                            REAL threshold, int *AI_int_gpu, int Nk)
+                            REAL threshold, int *AI_int_gpu, int Nk, REAL *Xsk, REAL *Wsk)
     {
         int i = threadIdx.x + blockIdx.x*BSZ;
-        REAL xi, yi, zi, dx, dy, dz, r, L_d;
+        REAL xi, yi, zi, dx, dy, dz, r;
         int jblock, triangle;
 
-        __shared__ REAL ver_sh[9*BSZ], xc_sh[BSZ], yc_sh[BSZ], zc_sh[BSZ],
+        __shared__ REAL ver_sh[9*BSZ],
                         xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ],
                         m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ],
                         mVc_sh[BSZ];
@@ -1099,21 +1137,14 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
             }
             __syncthreads();
             
-            xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
-            yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
-            zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
-            __syncthreads();
-
             for (int j=0; j<BSZ; j++)
             {
-                dx = xi - xc_sh[j];
-                dy = yi - yc_sh[j];
-                dz = zi - zc_sh[j];
+                dx = xi - (ver_sh[9*j] + ver_sh[9*j+3] + ver_sh[9*j+6])/3;
+                dy = yi - (ver_sh[9*j+1] + ver_sh[9*j+4] + ver_sh[9*j+7])/3;
+                dz = zi - (ver_sh[9*j+2] + ver_sh[9*j+5] + ver_sh[9*j+8])/3;
                 r  = sqrt(dx*dx + dy*dy + dz*dz);
 
-                L_d = sqrt(2*A_sh[j])/r;
-
-                if(L_d<threshold)
+                if((sqrt(2*A_sh[j])/r) < threshold)
                 {
                     dx = xi - xj_sh[j];
                     dy = yi - yj_sh[j];
@@ -1126,12 +1157,8 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                 {
                     REAL PHI_K = 0.;
                     REAL PHI_V = 0.;
-                    REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
-                                    ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
-                                    ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
 
-                    SA(PHI_K, PHI_V, panel, xi, yi, zi, 0, 0, 
-                        1e-15, 0, xk, wk, Nk, 1);
+                    GQ_fine(PHI_K, PHI_V, ver_sh, 9*j, xi, yi, zi, 1e-15, Xsk, Wsk, A_sh, 1);
         
                     sum_V += PHI_V * mVc_sh[j];
                     sum_K += PHI_K * mKc_sh[j];
@@ -1164,26 +1191,17 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
         }
         __syncthreads();
 
-        if (threadIdx.x<Nj-jblock*BSZ)
-        {
-            xc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])/3;
-            yc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])/3;
-            zc_sh[threadIdx.x] = (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])/3;
-        }
-        __syncthreads();
 
         for (int j=0; j<Nj-(jblock*BSZ); j++)
         {
-            dx = xi - xc_sh[j];
-            dy = yi - yc_sh[j];
-            dz = zi - zc_sh[j];
+            dx = xi - (ver_sh[9*j] + ver_sh[9*j+3] + ver_sh[9*j+6])/3;
+            dy = yi - (ver_sh[9*j+1] + ver_sh[9*j+4] + ver_sh[9*j+7])/3;
+            dz = zi - (ver_sh[9*j+2] + ver_sh[9*j+5] + ver_sh[9*j+8])/3;
             r  = sqrt(dx*dx + dy*dy + dz*dz);
-
-            L_d = sqrt(2*A_sh[j])/r;
 
             if (i<Nq)
             {
-                if (L_d<threshold)
+                if ((sqrt(2*A_sh[j])/r) < threshold)
                 {
                     dx = xi - xj_sh[j];
                     dy = yi - yj_sh[j];
@@ -1197,12 +1215,8 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
                 {
                     REAL PHI_K = 0.;
                     REAL PHI_V = 0.;
-                    REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
-                                    ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
-                                    ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
 
-                    SA(PHI_K, PHI_V, panel, xi, yi, zi, 0, 0, 
-                            1e-15, 0, xk, wk, Nk, 1);
+                    GQ_fine(PHI_K, PHI_V, ver_sh, 9*j, xi, yi, zi, 1e-15, Xsk, Wsk, A_sh, 1);
         
                     sum_V += PHI_V * mVc_sh[j];
                     sum_K += PHI_K * mKc_sh[j];
@@ -1290,6 +1304,6 @@ def kernels(BSZ, Nm, xkSize, P, REAL):
     }
 
     
-    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_1D':xkSize, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
+    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_near':K_fine, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
 
     return mod
