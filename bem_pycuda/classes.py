@@ -64,6 +64,7 @@ class surfaces():
         self.E_hat        = 0   # ratio of Ein/Eout
         self.kappa_in     = 0   # kappa inside surface
         self.kappa_out    = 0   # kappa inside surface
+        self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)  
 
         # Device data
         self.xiDev      = []
@@ -303,6 +304,257 @@ def quadratureRule_fine(K):
                     we,we,we,
                     wf,wf,wf,wf,wf,wf])
 
+    # 25 Gauss points
+    if K==25:
+        a  = 1/3.
+        b1 = 0.028844733232685; b2 = 0.485577633383657
+        c1 = 0.781036849029926; c2 = 0.109481575485037
+        d1 = 0.141707219414880; d2 = 0.307939838764121; d3 = 0.550352941820999
+        e1 = 0.025003534762686; e2 = 0.246672560639903; e3 = 0.728323904597411
+        f1 = 0.009540815400299; f2 = 0.066803251012200; f3 = 0.923655933587500
+        
+        wa = 0.090817990382754
+        wb = 0.036725957756467
+        wc = 0.045321059435528
+        wd = 0.072757916845420
+        we = 0.028327242531057
+        wf = 0.009421666963733
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1,
+                    e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1,
+                    f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,wd,wd,wd,
+                    we,we,we,we,we,we,
+                    wf,wf,wf,wf,wf,wf])
+
+    # 37 Gauss points
+    if K==37:
+        a = 1/3.
+        b1 = 0.009903630120591; b2 = 0.495048184939705
+        c1 = 0.062566729780852; c2 = 0.468716635109574
+        d1 = 0.170957326397447; d2 = 0.414521336801277
+        e1 = 0.541200855914337; e2 = 0.229399572042831
+        f1 = 0.771151009607340; f2 = 0.114424495196330
+        g1 = 0.950377217273082; g2 = 0.024811391363459
+        h1 = 0.094853828379579; h2 = 0.268794997058761; h3 = 0.636351174561660
+        i1 = 0.018100773278807; i2 = 0.291730066734288; i3 = 0.690169159986905
+        j1 = 0.022233076674090; j2 = 0.126357385491669; j3 = 0.851409537834241
+
+        wa = 0.052520923400802
+        wb = 0.011280145209330 
+        wc = 0.031423518362454
+        wd = 0.047072502504194 
+        we = 0.047363586536355
+        wf = 0.031167529045794 
+        wg = 0.007975771465074
+        wh = 0.036848402728732 
+        wi = 0.017401463303822
+        wj = 0.015521786839045
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                    h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
+                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1])
+
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,
+                    wg,wg,wg,
+                    wh,wh,wh,wh,wh,wh,
+                    wi,wi,wi,wi,wi,wi,
+                    wj,wj,wj,wj,wj,wj])
+
+    # 48 Gauss points
+    if K==48:
+        a1 =-0.013945833716486; a2 = 0.506972916858243
+        b1 = 0.137187291433955; b2 = 0.431406354283023
+        c1 = 0.444612710305711; c2 = 0.277693644847144
+        d1 = 0.747070217917492; d2 = 0.126464891041254
+        e1 = 0.858383228050628; e2 = 0.070808385974686
+        f1 = 0.962069659517853; f2 = 0.018965170241073
+        g1 = 0.133734161966621; g2 = 0.261311371140087; g3 = 0.604954466893291
+        h1 = 0.036366677396917; h2 = 0.388046767090269; h3 = 0.575586555512814
+        i1 =-0.010174883126571; i2 = 0.285712220049916; i3 = 0.724462663076655
+        j1 = 0.036843869875878; j2 = 0.215599664072284; j3 = 0.747556466051838
+        k1 = 0.012459809331199; k2 = 0.103575616576386; k3 = 0.883964574092416        
+
+        wa = 0.001916875642849
+        wb = 0.044249027271145 
+        wc = 0.051186548718852
+        wd = 0.023687735870688 
+        we = 0.013289775690021
+        wf = 0.004748916608192 
+        wg = 0.038550072599593
+        wh = 0.027215814320624 
+        wi = 0.002182077366797
+        wj = 0.021505319847731
+        wk = 0.007673942631049
+
+        X = array([a1,a2,a2,a2,a1,a2,a2,a2,a1,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                    g1,g2,g3,g1,g3,g2,g2,g1,g3,g2,g3,g1,g3,g1,g2,g3,g2,g1,
+                    h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
+                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1])
+
+        W = array([wa,wa,wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,
+                    wg,wg,wg,wg,wg,wg,
+                    wh,wh,wh,wh,wh,wh,
+                    wi,wi,wi,wi,wi,wi,
+                    wj,wj,wj,wj,wj,wj,
+                    wk,wk,wk,wk,wk,wk])
+
+
+    # 52 Gauss points
+    if K==52:
+        a = 1/3.
+        b1 = 0.005238916103123; b2 = 0.497380541948438
+        c1 = 0.173061122901295; c2 = 0.413469438549352
+        d1 = 0.059082801866017; d2 = 0.470458599066991
+        e1 = 0.518892500060958; e2 = 0.240553749969521
+        f1 = 0.704068411554854; f2 = 0.147965794222573
+        g1 = 0.849069624685052; g2 = 0.075465187657474
+        h1 = 0.966807194753950; h2 = 0.016596402623025
+        i1 = 0.103575692245252; i2 = 0.296555596579887; i3 = 0.599868711174861
+        j1 = 0.020083411655416; j2 = 0.337723063403079; j3 = 0.642193524941505
+        k1 =-0.004341002614139; k2 = 0.204748281642812; k3 = 0.799592720971327
+        l1 = 0.041941786468010; l2 = 0.189358492130623; l3 = 0.768699721401368
+        m1 = 0.014317320230681; m2 = 0.085283615682657; m3 = 0.900399064086661 
+
+        wa = 0.046875697427642 
+        wb = 0.006405878578585 
+        wc = 0.041710296739387
+        wd = 0.026891484250064 
+        we = 0.042132522761650
+        wf = 0.030000266842773 
+        wg = 0.014200098925024
+        wh = 0.003582462351273 
+        wi = 0.032773147460627
+        wj = 0.015298306248441 
+        wk = 0.002386244192839
+        wl = 0.019084792755899 
+        wm = 0.006850054546542
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
+                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
+                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1])
+
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,
+                    wg,wg,wg,
+                    wh,wh,wh,
+                    wi,wi,wi,wi,wi,wi,
+                    wj,wj,wj,wj,wj,wj,
+                    wk,wk,wk,wk,wk,wk,
+                    wl,wl,wl,wl,wl,wl,
+                    wm,wm,wm,wm,wm,wm])
+
+    # 61 Gauss points
+    if K==61:
+        a = 1/3.
+        b1 = 0.005658918886452; b2 = 0.497170540556774
+        c1 = 0.035647354750751; c2 = 0.482176322624625
+        d1 = 0.099520061958437; d2 = 0.450239969020782
+        e1 = 0.199467521245206; e2 = 0.400266239377397
+        f1 = 0.495717464058095; f2 = 0.252141267970953
+        g1 = 0.675905990683077; g2 = 0.162047004658461
+        h1 = 0.848248235478508; h2 = 0.075875882260746
+        i1 = 0.968690546064356; i2 = 0.015654726967822
+        j1 = 0.010186928826919; j2 = 0.334319867363658; j3 = 0.655493203809423
+        k1 = 0.135440871671036; k2 = 0.292221537796944; k3 = 0.572337590532020
+        l1 = 0.054423924290583; l2 = 0.319574885423190; l3 = 0.626001190286228
+        m1 = 0.012868560833637; m2 = 0.190704224192292; m3 = 0.796427214974071
+        n1 = 0.067165782413524; n2 = 0.180483211648746; n3 = 0.752351005937729
+        o1 = 0.014663182224828; o2 = 0.080711313679564; o3 = 0.904625504095608
+
+        wa = 0.033437199290803
+        wb = 0.005093415440507 
+        wc = 0.014670864527638
+        wd = 0.024350878353672 
+        we = 0.031107550868969
+        wf = 0.031257111218620 
+        wg = 0.024815654339665
+        wh = 0.014056073070557 
+        wi = 0.003194676173779
+        wj = 0.008119655318993 
+        wk = 0.026805742283163
+        wl = 0.018459993210822 
+        wm = 0.008476868534328
+        wn = 0.018292796770025
+        wo = 0.006665632004165
+
+        X = array([a,a,a,
+                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
+                    i1,i2,i2,i2,i1,i2,i2,i2,i1,
+                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
+                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
+                    n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
+                    o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1])
+
+        W = array([wa,
+                    wb,wb,wb,
+                    wc,wc,wc,
+                    wd,wd,wd,
+                    we,we,we,
+                    wf,wf,wf,
+                    wg,wg,wg,
+                    wh,wh,wh,
+                    wi,wi,wi,
+                    wj,wj,wj,wj,wj,wj,
+                    wk,wk,wk,wk,wk,wk,
+                    wl,wl,wl,wl,wl,wl,
+                    wm,wm,wm,wm,wm,wm,
+                    wn,wn,wn,wn,wn,wn,
+                    wo,wo,wo,wo,wo,wo])
+
+
     # 79 Gauss points
     if K==79:
         a  = 1/3.
@@ -407,6 +659,7 @@ def fill_surface(surf,param):
     surf.normal[:,1] = surf.normal[:,1]/(2*surf.Area)
     surf.normal[:,2] = surf.normal[:,2]/(2*surf.Area)
 
+
     '''
     n1 = surf.xi + surf.normal[:,0]
     n2 = surf.yi + surf.normal[:,1]
@@ -507,7 +760,7 @@ def initializeField(filename, param):
             for j in range(int(Nchild[i])):
                 field_aux.child.append(int(child[Nchild_aux+j]))    # Loop over children to get pointers
             Nchild_aux += int(Nchild[i])-1                             # Point to child for next surface
-        Nchild_aux += 1
+            Nchild_aux += 1
 
         field_array.append(field_aux)
     return field_array
@@ -527,17 +780,24 @@ def initializeSurf(field_array, filename, param):
 
     surf_array = []
 
-    files = readSurf(filename)      # Read filenames for surfaces
+    files, surf_type = readSurf(filename)      # Read filenames for surfaces
     Nsurf = len(files)
 
     for i in range(Nsurf):
         print 'Reading surface %i'%i
         print 'File: '+str(files[i])
+        print 'Surface type: '+str(surf_type[i])
         s = surfaces()
+
+        if surf_type[i]=='internal_cavity':
+            s.surf_type = 0
+        else:
+            s.surf_type = 1
+
         Area_null = []
         tic = time.time()
         s.vertex = readVertex(files[i]+'.vert', param.REAL)
-        triangle_raw = readTriangle(files[i]+'.face')
+        triangle_raw = readTriangle(files[i]+'.face', s.surf_type)
         toc = time.time()
         print 'Time load mesh: %f'%(toc-tic)
         Area_null = zeroAreas(s, triangle_raw, Area_null)

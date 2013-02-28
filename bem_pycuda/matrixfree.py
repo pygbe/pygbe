@@ -13,6 +13,7 @@ import pycuda.autoinit
 import pycuda.gpuarray as gpuarray
 
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
+#    print 'SELF INTERIOR, surface: %i'%s
     K_diag = 2*pi
     V_diag = 0
     K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, 
@@ -21,6 +22,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     return v
 
 def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
+#    print 'SELF EXTERIOR, surface: %i, E_hat: %f'%(s, surf.E_hat)
     K_diag = -2*pi
     V_diag = 0.
     K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, 
@@ -29,6 +31,7 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     return v, K_lyr, V_lyr
 
 def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
+#    print 'NONSELF EXTERIOR, source: %i, target: %i, E_hat: %f'%(src,tar, surf[src].E_hat)
     K_diag = 0
     V_diag = 0
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src], surf[tar], 
@@ -37,6 +40,7 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     return v
 
 def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
+#    print 'NONSELF INTERIOR, source: %i, target: %i'%(src,tar)
     K_diag = 0
     V_diag = 0
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src], surf[tar], 
@@ -64,6 +68,8 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     for F in range(Nfield):
         LorY = field_array[F].LorY
         param.kappa = field_array[F].kappa
+#        print '\n---------------------'
+#        print 'REGION %i, LorY: %i, kappa: %f'%(F,LorY,param.kappa)
 
 #       if parent surface -> self interior operator
         if len(field_array[F].parent)>0:
@@ -94,7 +100,7 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
                 surf_array[p].Xout_int += v
                 v = nonselfInterior(surf_array, p, c, LorY, param, ind0, timing, kernel)
                 surf_array[c].Xout_ext += v
-            
+ 
 #   Gather results into the result vector
     MV = zeros(len(X))
     Naux = 0
@@ -111,13 +117,36 @@ def generateRHS(field_array, surf_array, N):
     for j in range(len(field_array)):
         Nq = len(field_array[j].q)
         if Nq>0:
-            S = []
-            S[:] = field_array[j].child[:]          # Child surfaces
-            if len(field_array[j].parent)>0:
-                S.append(field_array[j].parent[0])  # Parent surface
-
-            for s in S:                             # Loop over surfaces
+#           First look at CHILD surfaces
+            for s in field_array[j].child:          # Loop over surfaces
 #           Locate position of surface s in RHS
+                s_start = 0
+                for ss in range(s):
+                    s_start += 2*len(surf_array[ss].xi)
+                s_size = len(surf_array[s].xi)
+
+                aux = zeros(len(surf_array[s].xi))
+                for i in range(Nq):
+                    dx_pq = field_array[j].xq[i,0] - surf_array[s].xi
+                    dy_pq = field_array[j].xq[i,1] - surf_array[s].yi
+                    dz_pq = field_array[j].xq[i,2] - surf_array[s].zi
+                    R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
+
+                    aux += field_array[j].q[i]/(field_array[j].E*R_pq)
+
+#               For CHILD surfaces, q contributes to RHS in 
+#               EXTERIOR equation (hence Precond[1,:] and [3,:])
+    
+#               No preconditioner
+#                F[s_start:s_start+s_size] += aux
+#               With preconditioner
+                F[s_start:s_start+s_size] += aux*surf_array[s].Precond[1,:]
+                F[s_start+s_size:s_start+2*s_size] += aux*surf_array[s].Precond[3,:]
+
+#           Now look at PARENT surface
+            if len(field_array[j].parent)>0:
+#           Locate position of surface s in RHS
+                s = field_array[j].parent[0]
                 s_start = 0
                 for ss in range(s):
                     s_start += 2*len(surf_array[ss].xi)
@@ -137,7 +166,7 @@ def generateRHS(field_array, surf_array, N):
 #               With preconditioner
                 F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
                 F[s_start+s_size:s_start+2*s_size] += aux*surf_array[s].Precond[2,:]
-        
+               
     return F
 
 def generateRHS_gpu(field_array, surf_array, param, kernel):
@@ -148,12 +177,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel):
     for j in range(len(field_array)):
         Nq = len(field_array[j].q)
         if Nq>0:
-            S = []
-            S[:] = field_array[j].child[:]          # Child surfaces
-            if len(field_array[j].parent)>0:
-                S.append(field_array[j].parent[0])  # Parent surface
-
-            for s in S:                             # Loop over surfaces
+        
+#           First for CHILD surfaces
+            for s in field_array[j].child[:]:       # Loop over surfaces
 #           Locate position of surface s in RHS
                 s_start = 0
                 for ss in range(s):
@@ -170,6 +196,38 @@ def generateRHS_gpu(field_array, surf_array, param, kernel):
                 aux = zeros(Nround)
                 F_gpu.get(aux)
 
+#               For CHILD surfaces, q contributes to RHS in 
+#               EXTERIOR equation (hence Precond[1,:] and [3,:])
+    
+#               No preconditioner
+#                F[s_start:s_start+s_size] += aux
+#               With preconditioner
+                F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[1,:]
+                F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[3,:]
+
+#           Now for PARENT surface
+            if len(field_array[j].parent)>0:
+                s = field_array[j].parent[0]
+
+#           Locate position of surface s in RHS
+                s_start = 0
+                for ss in range(s):
+                    s_start += 2*len(surf_array[ss].xi)
+                s_size = len(surf_array[s].xi)
+                Nround = len(surf_array[s].twig)*param.NCRIT
+
+                GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
+                F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
+                computeRHS_gpu(F_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
+                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
+                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+
+                aux = zeros(Nround)
+                F_gpu.get(aux)
+
+#               For PARENT surface, q contributes to RHS in 
+#               INTERIOR equation (hence Precond[0,:] and [2,:])
+    
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
 #               With preconditioner
@@ -180,15 +238,12 @@ def generateRHS_gpu(field_array, surf_array, param, kernel):
 
 def calculateEsolv(phi, surf_array, field_array, param, kernel):
 
-    S = []
     REAL = param.REAL
-    S[:] = field_array[param.E_field].child
-    S.append(field_array[param.E_field].parent[0])
 
     par_reac = parameters()
     par_reac = param
     par_reac.threshold = 0.1
-    par_reac.P = 5
+    par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm= (par_reac.P+1)*(par_reac.P+2)*(par_reac.P+3)/6
 
@@ -203,7 +258,13 @@ def calculateEsolv(phi, surf_array, field_array, param, kernel):
     E_solv = 0.
     AI_int = 0
     Naux = 0
-    for i in S:
+    phi_reac = zeros(len(field_array[param.E_field].q))
+
+#   First look at CHILD surfaces
+#   Need to account for normals pointing outwards
+#   and E_hat coefficient (as region is outside and 
+#   dphi_dn is defined inside)
+    for i in field_array[param.E_field].child:
         s = surf_array[i]
         s.xk,s.wk = GQ_1D(par_reac.Nk)
         s.xk = REAL(s.xk)
@@ -213,19 +274,54 @@ def calculateEsolv(phi, surf_array, field_array, param, kernel):
             s.tree[C].Md = zeros(par_reac.Nm)
 
         Naux += len(s.triangle)
-        #   Locate surface "s" in the phi array
+
+#       Locate surface "s" in the phi array
         Nst = 0
         for ii in range(i):
             Nst += 2*len(surf_array[ii].triangle)
         Nsz = len(s.triangle)
+    
+#       Coefficient to account for dphi_dn defined in
+#       interior but calculation done in exterior
+        C1 = s.E_hat
 
         if param.GPU==0:
-            phi_reac, AI = get_phir(phi[Nst:Nst+Nsz], phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field].xq, s.tree, par_reac, ind_reac)
+            phi_aux, AI = get_phir(phi[Nst:Nst+Nsz], C1*phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field].xq, s.tree, par_reac, ind_reac)
         elif param.GPU==1:
-            phi_reac, AI = get_phir_gpu(phi[Nst:Nst+Nsz], phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field], par_reac, kernel)
+            phi_aux, AI = get_phir_gpu(phi[Nst:Nst+Nsz], C1*phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field], par_reac, kernel)
         
         AI_int += AI
-        E_solv += 0.5*C0*sum(field_array[param.E_field].q*phi_reac)
+        phi_reac -= phi_aux # Minus sign to account for normal pointing out
+
+#   Now look at PARENT surface
+    if len(field_array[param.E_field].parent)>0:
+        i = field_array[param.E_field].parent[0]
+        s = surf_array[i]
+        s.xk,s.wk = GQ_1D(par_reac.Nk)
+        s.xk = REAL(s.xk)
+        s.wk = REAL(s.wk)
+        for C in range(len(s.tree)):
+            s.tree[C].M  = zeros(par_reac.Nm)
+            s.tree[C].Md = zeros(par_reac.Nm)
+
+        Naux += len(s.triangle)
+
+#       Locate surface "s" in the phi array
+        Nst = 0
+        for ii in range(i):
+            Nst += 2*len(surf_array[ii].triangle)
+        Nsz = len(s.triangle)
+    
+        if param.GPU==0:
+            phi_aux, AI = get_phir(phi[Nst:Nst+Nsz], phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field].xq, s.tree, par_reac, ind_reac)
+        elif param.GPU==1:
+            phi_aux, AI = get_phir_gpu(phi[Nst:Nst+Nsz], phi[Nst+Nsz:Nst+2*Nsz], s, field_array[param.E_field], par_reac, kernel)
+        
+        AI_int += AI
+        phi_reac += phi_aux 
+
+
+    E_solv += 0.5*C0*sum(field_array[param.E_field].q*phi_reac)
 
     print '%i of %i analytical integrals for phi_reac calculation'%(AI_int/len(field_array[param.E_field].xq),Naux)
     return E_solv      

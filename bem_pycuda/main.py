@@ -29,11 +29,15 @@ sys.path.append('tree')
 from FMMutils       import *
 from cuda_kernels   import kernels
 
+# import modules for testing
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
 TIC = time.time()
 ### Read parameters
 param = parameters()
 precision = readParameters(param,'input_files/parameters_lys.txt')
-configFile = 'input_files/config_lys_single.txt'
+configFile = 'input_files/config_twolys_single.txt'
 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
 param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
@@ -49,12 +53,27 @@ time_sort = 0.
 for i in range(len(surf_array)):
     time_sort += fill_surface(surf_array[i], param)
 
+
+
+'''
+fig = plt.figure()
+ax = Axes3D(fig)
+ss=surf_array[0]
+for i in range(1,4):
+    ss = surf_array[i]
+    ax.scatter(ss.xi,ss.yi,ss.zi,c='b',marker='o')
+    ax.scatter(ss.xi+ss.normal[:,0], ss.yi+ss.normal[:,1], ss.zi+ss.normal[:,2],c='r', marker='o')
+plt.show()
+quit()
+'''
+
+
 ### Output setup summary
 param.N = 0
 for i in range(len(surf_array)):
     N_aux = len(surf_array[i].triangle)
     param.N += N_aux
-print 'Total elements: %i'%param.N
+print '\nTotal elements: %i'%param.N
 printSummary(surf_array, field_array, param)
 
 ### Precomputation
@@ -110,6 +129,7 @@ print 'Solve time        : %fs'%solve_time
 
 savetxt('phi.txt',phi)
 #phi = loadtxt('phi.txt')
+#phi = loadtxt('phi_fftsvd_2cav.txt')/4
 
 ### Calculate solvation energy
 print 'Calculate Esolv'

@@ -35,7 +35,6 @@ def printSummary(surf_array, field_array, param):
         print '\tNumber of charges: %i'%len(field_array[i].q)
         print '\tParent surface   : '+str(field_array[i].parent)
         print '\tChild surfaces   : '+str(field_array[i].child)
-        print '\tNumber of charges: %i'%len(field_array[i].q)
 
     print '----------------------------\n'
 

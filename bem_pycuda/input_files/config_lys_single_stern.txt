@@ -1,5 +1,5 @@
-FILE    ../geometry/Lysozyme/Lys1_stern
-FILE    ../geometry/Lysozyme/Lys1
+FILE    ../geometry/Lysozyme/Lys16_stern     stern_layer
+FILE    ../geometry/Lysozyme/Lys16           dielectric_interface
 --------------------------------
 PARAM   LorY pot?   Dielec  kappa   charges?    charge_file                                 Nparent     parent      Nchild      children
 FIELD   2    0      80      0.125   0           NA                                          0           NA          1           0
