@@ -9,6 +9,10 @@ This file has two parts:
 FILE: indicates in that line a mesh file will be specified. 
 This code interfaces with the MSMS format, which generates a 'filename.vert' and 'filename.face' files. 
 Each 'filename' has the information for the mesh of one surface. To account for more than one surface (ie. for Stern layers, solvent filled cavities, several proteins), more than one FILE line is needed.
+After 'filename', the user must specify what kind of surface 'filename' is. It can be:
+- stern_layer:          surface interfacer stern layer with solvent
+- dielectric_interface: surface interfaces low dielectric (inside protein) and high dielectric (outside protein)
+- internal_cavity:      surface is an internal cavity (a result of '-all_components' flag in MSMS). This is important to specify because by default MSMS changes the vertex ordering for internal cavities.
 
 FIELD: specifies physical parameters of the different regions. 
 Parameters:
