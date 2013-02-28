@@ -44,33 +44,79 @@ def readTriangle2(filename):
 
     return triangle
 
-def readTriangle(filename):
+def readTriangle(filename, surf_type):
 
     X = loadtxt(filename, dtype=int)
     triangle = zeros((len(X),3), dtype=int)
-    triangle[:,0] = X[:,0]
-    triangle[:,1] = X[:,2] # v2 and v3 are flipped to match my sign convention!
-    triangle[:,2] = X[:,1]
+#    if surf_type<=10:
+    if surf_type==1:
+        triangle[:,0] = X[:,0]
+        triangle[:,1] = X[:,2] # v2 and v3 are flipped to match my sign convention!
+        triangle[:,2] = X[:,1]
+    else:
+        triangle[:,0] = X[:,0]
+        triangle[:,1] = X[:,1] 
+        triangle[:,2] = X[:,2]
 
     triangle -= 1
 
     return triangle
 
+def readCheck(aux, REAL):
+    # check if it is not reading more than one term
+    cut = [0]
+    i = 0
+    for c in aux[1:]:
+        i += 1
+        if c=='-':
+            cut.append(i)
+    cut.append(len(aux))
+    X = zeros(len(cut)-1)
+    for i in range(len(cut)-1):
+        X[i] = REAL(aux[cut[i]:cut[i+1]])
+
+    return X
+
+
 def readpqr(filename, REAL):
 
     pos = []
     q   = []
+    
+#    f = open("test","w")
 
     for line in file(filename):
         line = array(line.split())
+        line_aux = []
+
+#        line_test = list(line[0:5])
    
         if line[0]=='ATOM':
-            x = line[5]
-            y = line[6]
-            z = line[7]
-            q.append(REAL(line[8]))
-            pos.append([REAL(x),REAL(y),REAL(z)])
-    
+
+            for l in range(len(line)-6):
+                aux = line[5+len(line_aux)]
+                if len(aux)>14:
+                    X = readCheck(aux,REAL)
+                    for i in range(len(X)):
+                        line_aux.append(X[i])
+#                        line_test.append(str(X[i]))
+                else:
+#                    line_test.append(line[5+len(line_aux)])
+                    line_aux.append(REAL(line[5+len(line_aux)]))
+
+#            line_test.append(line[len(line)-1])
+            x = line_aux[0]
+            y = line_aux[1]
+            z = line_aux[2]
+            q.append(line_aux[3])
+            pos.append([x,y,z])
+
+#           for i in range(10):
+#                f.write("%s\t"%line_test[i])
+#            f.write("\n")
+
+#    f.close()
+#    quit()
     pos = array(pos)
     q   = array(q)
     Nq  = len(q)
@@ -153,27 +199,31 @@ def readFields(filename):
 
     for line in file(filename):
         line = line.split()
-        if line[0]=='FIELD':
-            LorY.append(line[1])
-            pot.append(line[2])
-            E.append(line[3])
-            kappa.append(line[4])
-            charges.append(line[5])
-            qfile.append(line[6])
-            Nparent.append(line[7])
-            parent.append(line[8])
-            Nchild.append(line[9])
-            for i in range(int(Nchild[-1])):
-                child.append(line[10+i])
+        if len(line)>0:
+            if line[0]=='FIELD':
+                LorY.append(line[1])
+                pot.append(line[2])
+                E.append(line[3])
+                kappa.append(line[4])
+                charges.append(line[5])
+                qfile.append(line[6])
+                Nparent.append(line[7])
+                parent.append(line[8])
+                Nchild.append(line[9])
+                for i in range(int(Nchild[-1])):
+                    child.append(line[10+i])
 
     return LorY, pot, E, kappa, charges, qfile, Nparent, parent, Nchild, child
 
 def readSurf(filename):
 
     files = []
+    surf_type = []
     for line in file(filename):
         line = line.split()
-        if line[0]=='FILE':
-            files.append(line[1])
+        if len(line)>0:
+            if line[0]=='FILE':
+                files.append(line[1])
+                surf_type.append(line[2])
 
-    return files
+    return files, surf_type

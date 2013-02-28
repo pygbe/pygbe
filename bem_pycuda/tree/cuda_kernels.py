@@ -507,7 +507,6 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
     }
 
-    /*
     __device__ REAL norm(REAL *x)
     {
         return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
@@ -743,7 +742,6 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         }
         
     }
-    */
 
     __device__ __inline__ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, int J, REAL xi, REAL yi, REAL zi, 
                             REAL kappa, REAL *Xk, REAL *Wk, REAL *Area, int LorY)
@@ -990,6 +988,12 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 else
                                 {
                                     GQ_fine(auxK, auxV, ver_sh, 9*j, xi, yi, zi, kappa, Xsk_sh, Wsk_sh, A_sh, LorY);
+
+                                    //REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                                    //                 ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                                    //                 ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+                                    //SA(auxK, auxV, panel, xi, yi, zi, 
+                                    //   1., 1., kappa, 0, xk, wk, 9, LorY);
                                 }
 
                                 auxV *= mVc_sh[j];
@@ -1070,6 +1074,11 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             else
                             {
                                 GQ_fine(auxK, auxV, ver_sh, 9*j, xi, yi, zi, kappa, Xsk_sh, Wsk_sh, A_sh, LorY);
+                                //REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                                //                 ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                                //                 ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+                                //SA(auxK, auxV, panel, xi, yi, zi, 
+                                //   1., 1., kappa, 0, xk, wk, 9, LorY);
                             }
 
                             auxV *= mVc_sh[j];
@@ -1159,6 +1168,11 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     REAL PHI_V = 0.;
 
                     GQ_fine(PHI_K, PHI_V, ver_sh, 9*j, xi, yi, zi, 1e-15, Xsk, Wsk, A_sh, 1);
+                    //REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
+                    //                 ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
+                    //                 ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
+                    //SA(PHI_K, PHI_V, panel, xi, yi, zi, 
+                    //   1., 1., 1e-15, 0, xk, wk, 9, 1);
         
                     sum_V += PHI_V * mVc_sh[j];
                     sum_K += PHI_K * mKc_sh[j];
