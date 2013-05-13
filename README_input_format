@@ -1,6 +1,5 @@
 In this file, the format for the input files is detailed.
 To run, PyGBe needs two input files: a "config" file and a "parameters" file, which are in the ./bem_pycuda/input_files directory.
-To input files are specified in the ./bem_pycuda/main.py file, line 33 and 34, where the variables 'precision' and 'configFile' are set.
 
 Config file format:
 ------------------
@@ -28,6 +27,9 @@ Parameters:
 
 - charges?:     0: No charges inside this region
                 1: There are charges in this region
+
+- coulomb?:     0: don't calculate coulomb energy in this region
+                1: calculate coulomb energy in this region
 
 - charge_file:  location of the '.pqr' file with the location of the charges
 

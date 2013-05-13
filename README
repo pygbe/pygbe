@@ -24,7 +24,7 @@ compilation will be provided later. So far, the user needs to modify the
 Makefiles at ./bem_pycuda/tree and ./util for their corresponding architectures.
 
 To run:
-    - Type 'python main.py' in ./bem_pycuda
+    - Type './main.py file1.param file2.config' in ./bem_pycuda
 
 Mesh:
 In ./geometry we provide the meshes and .pqr files for a spherical molecule 
