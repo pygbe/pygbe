@@ -25,6 +25,9 @@ extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize,
         int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize,
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize,
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
+
+extern void coulomb_direct(double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize, 
+                            double *m, int mSize, double *K_aux, int K_auxSize);
 %}
 
 %include "numpy.i"
@@ -94,6 +97,9 @@ extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize,
         int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize,
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize, 
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
+
+extern void coulomb_direct(double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize, 
+                            double *m, int mSize, double *K_aux, int K_auxSize);
 
 %clear (double *K_aux, int K_auxSize); 
 %clear (double *V_aux, int V_auxSize); 

@@ -7,6 +7,7 @@ from classes import parameters, index_constant
 import time
 sys.path.append('../util')
 from semi_analytical import GQ_1D
+from direct import coulomb_direct
 
 # PyCUDA libraries
 import pycuda.autoinit
@@ -242,7 +243,7 @@ def calculateEsolv(phi, surf_array, field_array, param, kernel):
 
     par_reac = parameters()
     par_reac = param
-    par_reac.threshold = 0.1
+    par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm= (par_reac.P+1)*(par_reac.P+2)*(par_reac.P+3)/6
@@ -251,7 +252,7 @@ def calculateEsolv(phi, surf_array, field_array, param, kernel):
     computeIndices(par_reac.P, ind_reac)
     precomputeTerms(par_reac.P, ind_reac)
 
-    par_reac.Nk = 9          # Number of Gauss points per side for semi-analytical integrals
+    par_reac.Nk = 13         # Number of Gauss points per side for semi-analytical integrals
 
     JtoCal = 4.184
     C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
@@ -326,3 +327,14 @@ def calculateEsolv(phi, surf_array, field_array, param, kernel):
     print '%i of %i analytical integrals for phi_reac calculation'%(AI_int/len(field_array[param.E_field].xq),Naux)
     return E_solv      
 
+
+def coulombEnergy(f, param):
+
+    point_energy = zeros(len(f.q), param.REAL)
+    coulomb_direct(f.xq[:,0], f.xq[:,1], f.xq[:,2], f.q, point_energy)
+
+    JtoCal = 4.184
+    C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
+
+    Ecoul = sum(point_energy) * 0.5*C0/(4*pi*f.E)
+    return Ecoul

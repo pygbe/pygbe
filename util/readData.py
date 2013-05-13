@@ -132,7 +132,7 @@ def readcrd(filename, REAL):
     for line in file(filename):
         line = array(line.split())
    
-        if len(line)>8:# and start==2:
+        if len(line)>8 and line[0]!='*':# and start==2:
             x = line[4]
             y = line[5]
             z = line[6]
@@ -191,6 +191,7 @@ def readFields(filename):
     E       = []
     kappa   = []
     charges = []
+    coulomb = []
     qfile   = []
     Nparent = []
     parent  = []
@@ -206,14 +207,15 @@ def readFields(filename):
                 E.append(line[3])
                 kappa.append(line[4])
                 charges.append(line[5])
-                qfile.append(line[6])
-                Nparent.append(line[7])
-                parent.append(line[8])
-                Nchild.append(line[9])
+                coulomb.append(line[6])
+                qfile.append(line[7])
+                Nparent.append(line[8])
+                parent.append(line[9])
+                Nchild.append(line[10])
                 for i in range(int(Nchild[-1])):
-                    child.append(line[10+i])
+                    child.append(line[11+i])
 
-    return LorY, pot, E, kappa, charges, qfile, Nparent, parent, Nchild, child
+    return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
 
 def readSurf(filename):
 

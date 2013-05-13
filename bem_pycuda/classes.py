@@ -101,6 +101,8 @@ class fields():
         self.E      = []    # dielectric constant
         self.xq     = []    # position of charges
         self.q      = []    # value of charges
+        self.coul   = []    # 1: perform Coulomb interaction calculation
+                            # 0: don't do Coulomb calculation
 
         # Device data
         self.xq_gpu = []    # x position of charges on gpu
@@ -737,7 +739,7 @@ def fill_surface(surf,param):
 
 def initializeField(filename, param):
     
-    LorY, pot, E, kappa, charges, qfile, Nparent, parent, Nchild, child = readFields(filename)
+    LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(filename)
 
     Nfield = len(LorY)
     field_array = []
@@ -749,9 +751,12 @@ def initializeField(filename, param):
         field_aux.LorY  = int(LorY[i])                              # Laplace of Yukawa
         field_aux.E     = param.REAL(E[i])                          # Dielectric constant
         field_aux.kappa = param.REAL(kappa[i])                      # inverse Debye length
+        field_aux.coulomb = int(coulomb[i])                         # do/don't coulomb interaction
         if int(charges[i])==1:                                      # if there are charges
-#            xq,q,Nq = readcrd(qfile[i], param.REAL)                 # read charges
-            xq,q,Nq = readpqr(qfile[i], param.REAL)                 # read charges
+            if qfile[i][-4:]=='.crd':
+                xq,q,Nq = readcrd(qfile[i], param.REAL)             # read charges
+            if qfile[i][-4:]=='.pqr':
+                xq,q,Nq = readpqr(qfile[i], param.REAL)             # read charges
             field_aux.xq = xq                                       # charges positions
             field_aux.q = q                                         # charges values
         if int(Nparent[i])==1:                                      # if it is an enclosed region

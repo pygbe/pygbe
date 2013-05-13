@@ -1,9 +1,17 @@
 PyGBe: Python GPU code for Boundary elements
 
-This is a boundary element method code that does molecular electrostatics calculations in a continuum approach. It calculates solvation energies for proteins modelled with any number of dielectric regions. We use the formulation presented in Yoon and Lenhoff, "A Boundary Element Method for Molecular Electrostatics with Electrolite Effects", Journal of Computational Chemistry, Vol. 11, No. 9, 1990. Proper user guide is under development.
+This is a boundary element method code that does molecular electrostatics 
+calculations with a continuum approach. It calculates solvation energies for 
+proteins modeled with any number of dielectric regions. We use the formulation 
+presented in Yoon and Lenhoff, "A Boundary Element Method for Molecular 
+Electrostatics with Electrolite Effects", Journal of Computational Chemistry, 
+Vol. 11, No. 9, 1990. Proper user guide is under development.
 
-This code is accelerated using the Barnes-Hut treecode so that each GMRES iteration scales as O(NlogN).
-The code is written in Python putting the most computationally intensive parts on the GPU, interfacing with PyCUDA, and some parts are wrapped in C++ using SWIG. 
+This code is accelerated using the Barnes-Hut treecode so that each GMRES 
+iteration scales as O(NlogN).
+The code is written in Python putting the most computationally intensive 
+parts on the GPU, interfacing with PyCUDA, and some parts are wrapped in 
+C++ using SWIG. 
 
 Required:
     - Python
@@ -11,16 +19,26 @@ Required:
     - PyCUDA
     - SWIG
 
-To compile the C++ code, type "make all" in the ./bem_pycuda directory. Smarter compilation will be provided later. So far, the user needs to modify the Makefiles at ./bem_pycuda/tree and ./util for their corresponding architectures.
+To compile the C++ code, type "make all" in the ./bem_pycuda directory. Smarter 
+compilation will be provided later. So far, the user needs to modify the 
+Makefiles at ./bem_pycuda/tree and ./util for their corresponding architectures.
 
 To run:
     - Type 'python main.py' in ./bem_pycuda
 
 Mesh:
-    In ./geometry we provide the meshes and .pqr files for a spherical molecule and the Lysozyme protein. To plug in your own protein data, download the corresponding .pdb file from the Protein Data Bank, then get its .pqr file using any pdb to pqr converter (there are online tools for this available). Our code interfaces with meshes generated with MSMS (Michel Sanner's Molecular Surface code).  
+In ./geometry we provide the meshes and .pqr files for a spherical molecule 
+and the Lysozyme protein. To plug in your own protein data, download the 
+corresponding .pdb file from the Protein Data Bank, then get its .pqr file 
+using any pdb to pqr converter (there are online tools for this available). 
+Our code interfaces with meshes generated with MSMS (Michel Sanner's i
+Molecular Surface code).  
 
 input files:
-    In ./bem_pycuda/input_files we provide with example input files. For a run you need two input files: a "parameters" file and a "config" file. To change the config/parameter file change lines 34 and 35 of the main.py file. Documentation on the format of these files will be provided in the documentation.
+In ./bem_pycuda/input_files we provide with example input files. For a run 
+you need two input files: a "parameters" file and a "config" file. To change 
+the config/parameter file change lines 34 and 35 of the main.py file. 
+Documentation on the format of these files is provided in README_input_files.
 
 Let us know if you have any questions/feedback.
 
