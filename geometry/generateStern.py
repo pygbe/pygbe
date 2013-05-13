@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 from numpy import *
 
@@ -9,4 +9,4 @@ X = loadtxt(file_in)
 
 X[:,3] += 2
 
-savetxt(file_out, X, fmt='%5.3f')
+savetxt(file_out, X, fmt='%5.5f')

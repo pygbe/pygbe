@@ -1,11 +1,4 @@
-"""
-Spherical molecule with random charge distribution
-Yoon and Lenhoff 1990 formulation
-
-Analytical solution:
-Solvation Energy = -39.4326 kcal/mol
-"""
-
+#!/usr/bin/env python
 from pylab 			import *
 from math  			import pi
 from scipy.misc     import factorial
@@ -17,7 +10,7 @@ from gmres			    import gmres_solver
 from projection         import get_phir
 from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer
 from output             import printSummary
-from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv
+from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy
 
 sys.path.append('../util')
 from readData        import readVertex, readTriangle, readpqr, readParameters
@@ -36,8 +29,8 @@ import matplotlib.pyplot as plt
 TIC = time.time()
 ### Read parameters
 param = parameters()
-precision = readParameters(param,'input_files/parameters_lys.txt')
-configFile = 'input_files/config_twolys_single.txt'
+precision = readParameters(param,sys.argv[1])
+configFile = sys.argv[2]
 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
 param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
@@ -129,7 +122,6 @@ print 'Solve time        : %fs'%solve_time
 
 savetxt('phi.txt',phi)
 #phi = loadtxt('phi.txt')
-#phi = loadtxt('phi_fftsvd_2cav.txt')/4
 
 ### Calculate solvation energy
 print 'Calculate Esolv'
@@ -137,9 +129,23 @@ tic = time.time()
 E_solv = calculateEsolv(phi, surf_array, field_array, param, kernel)
 toc = time.time()
 print 'Time Esolv: %fs'%(toc-tic)
-print 'Total time: %fs'%(toc-TIC)
 print 'Esolv: %f kcal/mol'%E_solv
 print 'Esolv: %f kJ/mol'%(E_solv*4.184)
+
+### Calculate Coulombic interaction
+tic = time.time()
+i = -1
+for f in field_array:
+    i += 1
+    if f.coulomb == 1:
+        print 'Calculate Coulomb interaction for region %i'%i
+        E_coul = coulombEnergy(f, param)
+        print 'Coulomb energy for region %i: %f kcal/mol'%(i,E_coul)
+        print 'Coulomb energy for region %i: %f kJ/mol'%(i,E_coul*4.184)
+toc = time.time()
+print 'Time Ecoul: %fs'%(toc-tic)
+
+print 'Total time: %fs'%(toc-TIC)
 
 # Analytic solution
 '''
@@ -156,24 +162,23 @@ E1an *= C0/(4*pi)
 E2an *= C0/(4*pi)
 print '\n E_solv = %s, Analytical solution = %f, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
 '''
-'''
 
+'''
 # sphere with stern layer
 K_sph = 10 # Number of terms in spherical harmonic expansion
-#E_1 = field_array[2].E # stern
-E_1 = field_array[1].E # no stern
+E_1 = field_array[2].E # stern
+#E_1 = field_array[1].E # no stern
 E_2 = field_array[0].E
 R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
-#R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
-R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
-#q = field_array[2].q # stern
-q = field_array[1].q # no stern
-#xq = field_array[2].xq # stern
-xq = field_array[1].xq # no stern
+R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
+#R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
+q = field_array[2].q # stern
+#q = field_array[1].q # no stern
+xq = field_array[2].xq # stern
+#xq = field_array[1].xq # no stern
 xq += 1e-12
 phi_P = an_P(q, xq, E_1, E_2, param.E_0, R1, field_array[0].kappa, R2, K_sph)
 JtoCal = 4.184
 E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
 print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
 '''
-

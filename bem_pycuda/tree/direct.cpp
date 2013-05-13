@@ -535,3 +535,25 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
     }
 }
 
+
+void coulomb_direct(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize, 
+                    REAL *m, int mSize, REAL *K_aux, int K_auxSize)
+{
+    REAL sum, dx, dy, dz, r;
+    for(int i=0; i<xtSize; i++)
+    {
+        sum = 0.;
+        for(int j=0; j<xtSize; j++)
+        {
+            if (i!=j)
+            {
+                dx = xt[i] - xt[j];
+                dy = yt[i] - yt[j];
+                dz = zt[i] - zt[j];
+                r  = sqrt(dx*dx + dy*dy + dz*dz);
+                sum += m[j]/r;
+            }
+        }
+        K_aux[i] = m[i]*sum;
+    }
+}
