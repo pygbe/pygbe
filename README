@@ -19,9 +19,10 @@ Required:
     - PyCUDA
     - SWIG
 
-To compile the C++ code, type "make all" in the ./bem_pycuda directory. Smarter 
-compilation will be provided later. So far, the user needs to modify the 
-Makefiles at ./bem_pycuda/tree and ./util for their corresponding architectures.
+To compile the C++ code, type 'make all' in the ./bem_pycuda directory. 
+So far, the user needs to modify the Makefiles at ./bem_pycuda/tree and 
+./util for their corresponding architectures. Smarter compilation will be 
+provided later.
 
 To run:
     - Type './main.py file1.param file2.config' in ./bem_pycuda
@@ -31,13 +32,12 @@ In ./geometry we provide the meshes and .pqr files for a spherical molecule
 and the Lysozyme protein. To plug in your own protein data, download the 
 corresponding .pdb file from the Protein Data Bank, then get its .pqr file 
 using any pdb to pqr converter (there are online tools for this available). 
-Our code interfaces with meshes generated with MSMS (Michel Sanner's i
+Our code interfaces with meshes generated with MSMS (Michel Sanner's 
 Molecular Surface code).  
 
 input files:
 In ./bem_pycuda/input_files we provide with example input files. For a run 
-you need two input files: a "parameters" file and a "config" file. To change 
-the config/parameter file change lines 34 and 35 of the main.py file. 
+you need two input files: a "parameters" file and a "config" file. 
 Documentation on the format of these files is provided in README_input_files.
 
 Let us know if you have any questions/feedback.
