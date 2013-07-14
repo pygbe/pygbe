@@ -1,4 +1,4 @@
-from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt
+from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt, shape
 from numpy.linalg           import norm
 from scipy.linalg           import lu_solve, solve
 from scipy.sparse.linalg    import gmres 

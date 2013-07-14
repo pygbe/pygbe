@@ -8,9 +8,9 @@ import time
 import sys 
 from gmres			    import gmres_solver    
 from projection         import get_phir
-from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer
+from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer, fill_phi
 from output             import printSummary
-from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy
+from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf
 
 sys.path.append('../util')
 from readData        import readVertex, readTriangle, readpqr, readParameters
@@ -25,6 +25,12 @@ from cuda_kernels   import kernels
 # import modules for testing
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+
+### Time stamp
+timestamp = time.localtime()
+print 'Run started on:'
+print '\tDate: %i/%i/%i'%(timestamp.tm_year,timestamp.tm_mon,timestamp.tm_mday)
+print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
 
 TIC = time.time()
 ### Read parameters
@@ -62,11 +68,18 @@ quit()
 
 
 ### Output setup summary
-param.N = 0
-for i in range(len(surf_array)):
-    N_aux = len(surf_array[i].triangle)
+param.N   = 0
+param.Neq = 0
+for s in surf_array:
+    N_aux = len(s.triangle)
     param.N += N_aux
-print '\nTotal elements: %i'%param.N
+    if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface':
+        param.Neq += N_aux
+    else:
+        param.Neq += 2*N_aux
+print '\nTotal elements : %i'%param.N
+print 'Total equations: %i'%param.Neq
+
 printSummary(surf_array, field_array, param)
 
 ### Precomputation
@@ -92,13 +105,15 @@ if param.GPU==1:
 toc = time.time()
 transfer_time = toc-tic
 
+timing = timings()
+
 ### Generate RHS
 print 'Generate RHS'
 tic = time.time()
 if param.GPU==0:
-    F = generateRHS(field_array, surf_array, param.N)
+    F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
 elif param.GPU==1:
-    F = generateRHS_gpu(field_array, surf_array, param, kernel)
+    F = generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0)
 toc = time.time()
 rhs_time = toc-tic
 
@@ -113,39 +128,64 @@ tic = time.time()
 
 ### Solve
 print 'Solve'
-timing = timings()
-phi = zeros(2*param.N)
+phi = zeros(param.Neq)
 phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing, kernel) 
 toc = time.time()
 solve_time = toc-tic
 print 'Solve time        : %fs'%solve_time
-
 savetxt('phi.txt',phi)
 #phi = loadtxt('phi.txt')
 
+# Put result phi in corresponding surfaces
+fill_phi(phi, surf_array)
+
 ### Calculate solvation energy
-print 'Calculate Esolv'
+print '\nCalculate Esolv'
 tic = time.time()
-E_solv = calculateEsolv(phi, surf_array, field_array, param, kernel)
+E_solv = calculateEsolv(surf_array, field_array, param, kernel)
 toc = time.time()
 print 'Time Esolv: %fs'%(toc-tic)
-print 'Esolv: %f kcal/mol'%E_solv
-print 'Esolv: %f kJ/mol'%(E_solv*4.184)
+ii = -1
+for f in param.E_field:
+    parent_type = surf_array[field_array[f].parent[0]].surf_type
+    if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+        ii += 1
+        print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol'%(f, E_solv[ii], E_solv[ii]*4.184)
+
+### Calculate surface energy
+print '\nCalculate Esurf'
+tic = time.time()
+E_surf = calculateEsurf(surf_array, field_array, param, kernel)
+toc = time.time()
+ii = -1
+for f in param.E_field:
+    parent_type = surf_array[field_array[f].parent[0]].surf_type
+    if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
+        ii += 1
+        print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol'%(f, E_surf[ii], E_surf[ii]*4.184)
+print 'Time Esurf: %fs'%(toc-tic)
 
 ### Calculate Coulombic interaction
+print '\nCalculate Ecoul'
 tic = time.time()
 i = -1
+E_coul = []
 for f in field_array:
     i += 1
     if f.coulomb == 1:
-        print 'Calculate Coulomb interaction for region %i'%i
-        E_coul = coulombEnergy(f, param)
-        print 'Coulomb energy for region %i: %f kcal/mol'%(i,E_coul)
-        print 'Coulomb energy for region %i: %f kJ/mol'%(i,E_coul*4.184)
+        print 'Calculate Coulomb energy for region %i'%i
+        E_coul.append(coulombEnergy(f, param))
+        print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol'%(i,E_coul[-1],E_coul[-1]*4.184)
 toc = time.time()
 print 'Time Ecoul: %fs'%(toc-tic)
 
-print 'Total time: %fs'%(toc-TIC)
+### Output summary
+print '\n--------------------------------'
+print 'Totals:'
+print 'Esolv = %f kcal/mol'%sum(E_solv)
+print 'Esurf = %f kcal/mol'%sum(E_surf)
+print 'Ecoul = %f kcal/mol'%sum(E_coul)
+print '\nTime = %f s'%(toc-TIC)
 
 # Analytic solution
 '''
@@ -160,22 +200,21 @@ C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
 E_an *= C0/(4*pi)
 E1an *= C0/(4*pi)
 E2an *= C0/(4*pi)
-print '\n E_solv = %s, Analytical solution = %f, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
-'''
+print '\n E_solv = %s kcal/mol, Analytical solution = %f kcal/mol, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
+print '\n E_solv = %s kJ/mol, Analytical solution = %f kJ/mol, Error: %s'%(E_solv*JtoCal, E2an*JtoCal, abs(E_solv-E2an)/abs(E2an))
 
-'''
 # sphere with stern layer
 K_sph = 10 # Number of terms in spherical harmonic expansion
-E_1 = field_array[2].E # stern
-#E_1 = field_array[1].E # no stern
+#E_1 = field_array[2].E # stern
+E_1 = field_array[1].E # no stern
 E_2 = field_array[0].E
 R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
-R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
-#R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
-q = field_array[2].q # stern
-#q = field_array[1].q # no stern
-xq = field_array[2].xq # stern
-#xq = field_array[1].xq # no stern
+#R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
+R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
+#q = field_array[2].q # stern
+q = field_array[1].q # no stern
+#xq = field_array[2].xq # stern
+xq = field_array[1].xq # no stern
 xq += 1e-12
 phi_P = an_P(q, xq, E_1, E_2, param.E_0, R1, field_array[0].kappa, R2, K_sph)
 JtoCal = 4.184
