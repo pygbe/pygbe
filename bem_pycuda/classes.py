@@ -61,10 +61,15 @@ class surfaces():
         self.offsetMlt    = []  # offset to multipoles in M2P list array
         self.M2P_list     = []  # pointers to boxes for M2P interaction list
         self.Precond      = []  # Sparse representation of preconditioner for self interaction block
+        self.Ein          = 0   # Permitivitty inside surface
+        self.Eout         = 0   # Permitivitty outside surface
         self.E_hat        = 0   # ratio of Ein/Eout
         self.kappa_in     = 0   # kappa inside surface
         self.kappa_out    = 0   # kappa inside surface
         self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)  
+        self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
+        self.phi          = []  # Potential on surface
+        self.dphi         = []  # Derivative of potential on surface
 
         # Device data
         self.xiDev      = []
@@ -142,10 +147,12 @@ class parameters():
         self.Nround        = 0               # Max size of sorted target array
         self.BlocksPerTwig = 0               # Number of CUDA blocks that fit per tree twig
         self.N             = 0               # Total number of elements
+        self.Neq           = 0               # Total number of equations
         self.qe            = 1.60217646e-19  # Charge of an electron
         self.Na            = 6.0221415e23    # Avogadro's number
         self.E_0           = 8.854187818e-12 # Vacuum dielectric constant
         self.REAL          = 0               # Data type
+        self.E_field       = []              # Regions where energy will be calculated
         self.GPU           = -1              # =1: with GPU, =0: no GPU
 
 
@@ -723,12 +730,17 @@ def fill_surface(surf,param):
     surf.sglIntL = VL # Array for singular integral of V for Laplace
     surf.sglIntY = VY # Array for singular integral of V for Yukawa
 
-    d_aux = 1/(dX22-dX21*dX12/dX11)
-    surf.Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
-    surf.Precond[1,:] = -1/dX11*dX12*d_aux
-    surf.Precond[2,:] = -d_aux*dX21/dX11
-    surf.Precond[3,:] = d_aux
-
+    if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
+        d_aux = 1/(dX22-dX21*dX12/dX11)
+        surf.Precond[0,:] = 1#1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
+        surf.Precond[1,:] = 0#-1/dX11*dX12*d_aux
+        surf.Precond[2,:] = 0#-d_aux*dX21/dX11
+        surf.Precond[3,:] = 1#d_aux
+    elif surf.surf_type=='dirichlet_surface':
+        surf.Precond[0,:] = 1#1/VY  # So far only for Yukawa outside
+    elif surf.surf_type=='neumann_surface':
+        surf.Precond[0,:] = 1#1/(2*pi)
+    
     tic = time.time()
     sortPoints(surf, surf.tree, surf.twig, param)
     toc = time.time()
@@ -746,11 +758,22 @@ def initializeField(filename, param):
     Nchild_aux = 0
     for i in range(Nfield):
         if int(pot[i])==1:
-            param.E_field = i                                       # This field is where the energy will be calculated
+            param.E_field.append(i)                                 # This field is where the energy will be calculated
         field_aux = fields()
-        field_aux.LorY  = int(LorY[i])                              # Laplace of Yukawa
-        field_aux.E     = param.REAL(E[i])                          # Dielectric constant
-        field_aux.kappa = param.REAL(kappa[i])                      # inverse Debye length
+
+        try:
+            field_aux.LorY  = int(LorY[i])                              # Laplace of Yukawa
+        except ValueError:
+            field_aux.LorY  = 0
+        try:
+            field_aux.E     = param.REAL(E[i])                          # Dielectric constant
+        except ValueError:
+            field_aux.E  = 0
+        try:
+            field_aux.kappa = param.REAL(kappa[i])                      # inverse Debye length
+        except ValueError:
+            field_aux.kappa = 0
+
         field_aux.coulomb = int(coulomb[i])                         # do/don't coulomb interaction
         if int(charges[i])==1:                                      # if there are charges
             if qfile[i][-4:]=='.crd':
@@ -785,19 +808,18 @@ def initializeSurf(field_array, filename, param):
 
     surf_array = []
 
-    files, surf_type = readSurf(filename)      # Read filenames for surfaces
+    files, surf_type, phi0_file = readSurf(filename)      # Read filenames for surfaces
     Nsurf = len(files)
 
     for i in range(Nsurf):
-        print 'Reading surface %i'%i
-        print 'File: '+str(files[i])
-        print 'Surface type: '+str(surf_type[i])
+        print '\nReading surface %i from file '%i + files[i]
+
         s = surfaces()
 
-        if surf_type[i]=='internal_cavity':
-            s.surf_type = 0
-        else:
-            s.surf_type = 1
+        s.surf_type = surf_type[i]
+
+        if s.surf_type=='dirichlet_surface' or s.surf_type=='neumann_surface':
+            s.phi0 = loadtxt(phi0_file[i])
 
         Area_null = []
         tic = time.time()
@@ -814,15 +836,18 @@ def initializeSurf(field_array, filename, param):
             if len(field_array[j].parent)>0:
                 if field_array[j].parent[0]==i:                 # Inside region
                     s.kappa_in = field_array[j].kappa
-                    Ein = field_array[j].E
+                    s.Ein = field_array[j].E
             if len(field_array[j].child)>0:
                 if i in field_array[j].child:                # Outside region
                     s.kappa_out = field_array[j].kappa
-                    Eout = field_array[j].E
-        s.E_hat = Ein/Eout
+                    s.Eout = field_array[j].E
+
+        if s.surf_type!='dirichlet_surface' and s.surf_type!='neumann_surface':
+            s.E_hat = s.Ein/s.Eout
+        else:
+            s.E_hat = 1
 
         surf_array.append(s)
-
     return surf_array
 
 def dataTransfer(surf_array, field_array, ind, param, kernel):
@@ -864,5 +889,30 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
             field_array[f].yq_gpu = gpuarray.to_gpu(field_array[f].xq[:,1].astype(REAL))
             field_array[f].zq_gpu = gpuarray.to_gpu(field_array[f].xq[:,2].astype(REAL))
             field_array[f].q_gpu  = gpuarray.to_gpu(field_array[f].q.astype(REAL))
+
+
+
+def fill_phi(phi, surf_array):
+# Places the result vector on surf structure 
+
+    s_start = 0
+    for i in range(len(surf_array)):
+        s_size = len(surf_array[i].xi)
+        if surf_array[i].surf_type=='dirichlet_surface':
+            surf_array[i].phi = surf_array[i].phi0
+            surf_array[i].dphi = phi[s_start:s_start+s_size]
+            s_start += s_size
+        elif surf_array[i].surf_type=='neumann_surface':
+            surf_array[i].dphi = surf_array[i].phi0
+            surf_array[i].phi  = phi[s_start:s_start+s_size]
+            s_start += s_size
+        else:
+            surf_array[i].phi  = phi[s_start:s_start+s_size]
+            surf_array[i].dphi = phi[s_start+s_size:s_start+2*s_size]
+            s_start += 2*s_size
+
+        
+
+
 
 

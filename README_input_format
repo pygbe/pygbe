@@ -12,14 +12,18 @@ After 'filename', the user must specify what kind of surface 'filename' is. It c
 - stern_layer:          surface interfacer stern layer with solvent
 - dielectric_interface: surface interfaces low dielectric (inside protein) and high dielectric (outside protein)
 - internal_cavity:      surface is an internal cavity (a result of '-all_components' flag in MSMS). This is important to specify because by default MSMS changes the vertex ordering for internal cavities.
+- dirichlet_surface:    surface of specified potential. The value of this potential is read from a text file which has to be specified next to 'dirichlet_surface'. (See .phi0 file in example)
+- neumann_surface:      surface of specified potential. The value of this potential is read from a text file which has to be specified next to 'neumann_surface'. (See .phi0 file in example) 
 
 FIELD: specifies physical parameters of the different regions. 
 Parameters:
 - LorY:         1: Laplace, 
                 2: Yukawa
 
-- pot?:         1: calculate the potential in the charge locations of this region, 
-                0: don't calculate potential inside this region
+- E?:           1: calculate the energy in this region 
+                0: don't calculate energy in this region
+                Note: if region is surrounded by a dirichlet or neumann surface,
+                      surface energy will be calculated.
 
 - Dielec:       Dielectric constant
 

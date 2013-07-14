@@ -124,7 +124,6 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag,
         toc.synchronize()
         timing.time_trans += tic.time_till(toc)*1e-3
 
-
     tic.record()
     K_lyr = K_aux[surfTar.unsort]
     V_lyr = V_aux[surfTar.unsort]

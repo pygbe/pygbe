@@ -49,14 +49,14 @@ def readTriangle(filename, surf_type):
     X = loadtxt(filename, dtype=int)
     triangle = zeros((len(X),3), dtype=int)
 #    if surf_type<=10:
-    if surf_type==1:
-        triangle[:,0] = X[:,0]
-        triangle[:,1] = X[:,2] # v2 and v3 are flipped to match my sign convention!
-        triangle[:,2] = X[:,1]
-    else:
+    if surf_type=='internal_cavity':
         triangle[:,0] = X[:,0]
         triangle[:,1] = X[:,1] 
         triangle[:,2] = X[:,2]
+    else:
+        triangle[:,0] = X[:,0]
+        triangle[:,1] = X[:,2] # v2 and v3 are flipped to match my sign convention!
+        triangle[:,2] = X[:,1]
 
     triangle -= 1
 
@@ -221,11 +221,16 @@ def readSurf(filename):
 
     files = []
     surf_type = []
+    phi0_file = []
     for line in file(filename):
         line = line.split()
         if len(line)>0:
             if line[0]=='FILE':
                 files.append(line[1])
                 surf_type.append(line[2])
+                if line[2]=='dirichlet_surface' or line[2]=='neumann_surface':
+                    phi0_file.append(line[3])
+                else:
+                    phi0_file.append('no_file')
 
-    return files, surf_type
+    return files, surf_type, phi0_file

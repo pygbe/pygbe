@@ -13,6 +13,7 @@ def printSummary(surf_array, field_array, param):
 
         print 'Surface %i:'%i
         print '\t%i elements'%(N_aux)
+        print '\tSurface type       : '+surf_array[i].surf_type
         print '\tCells              : %i'%len(surf_array[i].tree)
         print '\tTwigs              : %i'%len(surf_array[i].twig)
         print '\tLevels             : %i'%Levels
