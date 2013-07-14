@@ -732,14 +732,14 @@ def fill_surface(surf,param):
 
     if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
         d_aux = 1/(dX22-dX21*dX12/dX11)
-        surf.Precond[0,:] = 1#1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
-        surf.Precond[1,:] = 0#-1/dX11*dX12*d_aux
-        surf.Precond[2,:] = 0#-d_aux*dX21/dX11
-        surf.Precond[3,:] = 1#d_aux
+        surf.Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
+        surf.Precond[1,:] = -1/dX11*dX12*d_aux
+        surf.Precond[2,:] = -d_aux*dX21/dX11
+        surf.Precond[3,:] = d_aux
     elif surf.surf_type=='dirichlet_surface':
-        surf.Precond[0,:] = 1#1/VY  # So far only for Yukawa outside
+        surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
     elif surf.surf_type=='neumann_surface':
-        surf.Precond[0,:] = 1#1/(2*pi)
+        surf.Precond[0,:] = 1/(2*pi)
     
     tic = time.time()
     sortPoints(surf, surf.tree, surf.twig, param)
