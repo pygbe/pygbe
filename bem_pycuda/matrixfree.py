@@ -253,11 +253,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-#                   if s=sd, the surface has only one equation, 
+#                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and K_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
-                    if sd==s:
+                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
                         F[s_start:s_start+s_size] += K_lyr * surf_array[sd].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
@@ -280,11 +280,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-#                   if s=sn, the surface has only one equation, 
+#                   if s is a charge surface, the surface has only one equation, 
 #                   else, s has 2 equations and V_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
-                    if sn==s:
+                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[sn].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
@@ -470,11 +470,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-#                   if s=sd, the surface has only one equation, 
+#                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and K_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
-                    if sd==s:
+                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
                         F[s_start:s_start+s_size] += K_lyr * surf_array[sd].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
@@ -497,11 +497,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-#                   if s=sn, the surface has only one equation, 
+#                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and V_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
-                    if sn==s:
+                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[sn].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
@@ -580,8 +580,8 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
     par_reac.Nk = 13         # Number of Gauss points per side for semi-analytical integrals
 
-    JtoCal = 4.184
-    C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
+    cal2J = 4.184
+    C0 = param.qe**2*param.Na*1e-3*1e10/(cal2J*param.E_0)
     E_solv = []
 
     ff = -1
@@ -659,8 +659,8 @@ def coulombEnergy(f, param):
     point_energy = zeros(len(f.q), param.REAL)
     coulomb_direct(f.xq[:,0], f.xq[:,1], f.xq[:,2], f.q, point_energy)
 
-    JtoCal = 4.184
-    C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
+    cal2J = 4.184
+    C0 = param.qe**2*param.Na*1e-3*1e10/(cal2J*param.E_0)
 
     Ecoul = sum(point_energy) * 0.5*C0/(4*pi*f.E)
     return Ecoul
@@ -683,8 +683,8 @@ def calculateEsurf(surf_array, field_array, param, kernel):
 
     par_reac.Nk = 13         # Number of Gauss points per side for semi-analytical integrals
 
-    JtoCal = 4.184
-    C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0*4*pi)
+    cal2J = 4.184
+    C0 = param.qe**2*param.Na*1e-3*1e10/(cal2J*param.E_0)
     E_surf = []
 
     ff = -1
