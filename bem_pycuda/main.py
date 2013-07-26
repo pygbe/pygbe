@@ -204,7 +204,7 @@ print '\n E_solv = %s kcal/mol, Analytical solution = %f kcal/mol, Error: %s'%(E
 print '\n E_solv = %s kJ/mol, Analytical solution = %f kJ/mol, Error: %s'%(E_solv*JtoCal, E2an*JtoCal, abs(E_solv-E2an)/abs(E2an))
 
 # sphere with stern layer
-K_sph = 10 # Number of terms in spherical harmonic expansion
+K_sph = 20 # Number of terms in spherical harmonic expansion
 #E_1 = field_array[2].E # stern
 E_1 = field_array[1].E # no stern
 E_2 = field_array[0].E
@@ -216,7 +216,8 @@ q = field_array[1].q # no stern
 #xq = field_array[2].xq # stern
 xq = field_array[1].xq # no stern
 xq += 1e-12
-phi_P = an_P(q, xq, E_1, E_2, param.E_0, R1, field_array[0].kappa, R2, K_sph)
+print q, xq, E_1, E_2, R1, field_array[0].kappa, R2, K_sph
+phi_P = an_P(q, xq, E_1, E_2, R1, field_array[0].kappa, R2, K_sph)
 JtoCal = 4.184
 E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
 print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))

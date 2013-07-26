@@ -1,6 +1,5 @@
 """
-Analytical solution of spherical molecule in ionic solution
-From Kirkwood 1934
+All functions output the analytical solution in kcal/mol
 """
 from numpy import *
 from scipy import special
@@ -46,7 +45,12 @@ def get_K(x,n):
     return K
 
 
-def an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N):
+def an_P(q, xq, E_1, E_2, R, kappa, a, N):
+
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
 
     PHI = zeros(len(q))
     for K in range(len(q)):
@@ -81,11 +85,19 @@ def an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N):
 
         PHI[K] = real(phi)/(4*pi)
 
-    return PHI
+    C0 = qe**2*Na*1e-3*1e10/(cal2J)
+    E_P = 0.5*C0*sum(q*PHI)
+
+    return E_P
 
 def two_sphere_KimSong(a, R, kappa, E_1, E_2, q):
 
     E_hat = E_2/E_1
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     C0 = -q/(a*a*E_hat*kappa*E_1)
     k0a = exp(-kappa*a)/(kappa*a)
     k0R = exp(-kappa*R)/(kappa*R)
@@ -93,15 +105,22 @@ def two_sphere_KimSong(a, R, kappa, E_1, E_2, q):
     i0 = sinh(kappa*a)/(kappa*a)
     i1 = cosh(kappa*a)/(kappa*a) - i0/(kappa*a)
 
-    Einter = 0.5*q*C0*( (k0a+k0R*i0)/(k1a+k0R*i1) - k0a/k1a)
-    E1sphere = 0.5*q*C0*(k0a/k1a) - 0.5*q**2/(a*E_1)
-    E2sphere = 0.5*q*C0*(k0a+k0R*i0)/(k1a+k0R*i1) - 0.5*q**2/(a*E_1)
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0*4*pi)
+
+    Einter = 0.5*q*C0*CC0*( (k0a+k0R*i0)/(k1a+k0R*i1) - k0a/k1a)
+    E1sphere = 0.5*q*C0*CC0*(k0a/k1a) - 0.5*CC0*q**2/(a*E_1)
+    E2sphere = 0.5*q*C0*CC0*(k0a+k0R*i0)/(k1a+k0R*i1) - 0.5*CC0*q**2/(a*E_1)
 
     return Einter, E1sphere, E2sphere
 
 def two_sphere(a, R, kappa, E_1, E_2, q):
 
     N = 20 # Number of terms in expansion
+
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
 
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
@@ -144,31 +163,41 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
                 M[i,j] += kappa*k1p[i] - E_hat*i*k1[i]/a
 
     RHS = zeros(N)
-    RHS[0] = -E_hat*q/(E_1*a*a)
+    RHS[0] = -E_hat*q/(4*pi*E_1*a*a)
 
     a_coeff = solve(M,RHS)
 
     a0 = a_coeff[0] 
-    a0_inf = -E_hat*q/(E_1*a*a)*1/(kappa*k1p[0])
+    a0_inf = -E_hat*q/(4*pi*E_1*a*a)*1/(kappa*k1p[0])
    
-    phi_2 = a0*k1[0] + i1[0]*sum(a_coeff*B[:,0]) - q/(E_1*a)
-    phi_1 = a0_inf*k1[0] - q/(E_1*a)
+    phi_2 = a0*k1[0] + i1[0]*sum(a_coeff*B[:,0]) - q/(4*pi*E_1*a)
+    phi_1 = a0_inf*k1[0] - q/(4*pi*E_1*a)
     phi_inter = phi_2-phi_1 
 
-    Einter = 0.5*q*phi_inter
-    E1sphere = 0.5*q*phi_1
-    E2sphere = 0.5*q*phi_2
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+
+    Einter = 0.5*CC0*q*phi_inter
+    E1sphere = 0.5*CC0*q*phi_1
+    E2sphere = 0.5*CC0*q*phi_2
 
     return Einter, E1sphere, E2sphere
 
 
+def constant_potential_single_point(phi0, a, r, kappa):
+    phi = a/r * phi0 * exp(kappa*(a-r))
+    return phi
 
-def constant_potential_single(phi0, radius, kappa, epsilon):
+def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
+    dphi0 = -sigma0/epsilon
+    phi = -dphi0 * a*a/(1+kappa*a) * exp(kappa*(a-r))/r 
+    return phi
+
+def constant_potential_single_charge(phi0, radius, kappa, epsilon):
     dphi = -phi0*((1.+kappa*radius)/radius)
     sigma = -epsilon*dphi # Surface charge
     return sigma
 
-def constant_charge_single(sigma0, radius, kappa, epsilon):
+def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
     dphi = -sigma0/epsilon 
     phi = -dphi * radius/(1.+kappa*radius) # Surface potential
     return phi
@@ -178,6 +207,11 @@ def constant_charge_twosphere_HsuLiu(sigma01, sigma02, r1, r2, R, kappa, epsilon
     gamma1 = -0.5*(1/(kappa*r1) - (1 + 1/(kappa*r1))*exp(-2*kappa*r1))
     gamma2 = -0.5*(1/(kappa*r2) - (1 + 1/(kappa*r2))*exp(-2*kappa*r2))
 
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     f1 = (0.5+gamma1)/(0.5-gamma1)
     f2 = (0.5+gamma2)/(0.5-gamma2)
 
@@ -186,14 +220,16 @@ def constant_charge_twosphere_HsuLiu(sigma01, sigma02, r1, r2, R, kappa, epsilon
     else:
         A = arctanh(sqrt(f1*f2)*exp(-kappa*(R-r1-r2)))
 
-    phi01 = constant_charge_single(sigma01, r1, kappa, epsilon)
-    phi02 = constant_charge_single(sigma02, r2, kappa, epsilon)
+    phi01 = constant_charge_single_potential(sigma01, r1, kappa, epsilon)
+    phi02 = constant_charge_single_potential(sigma02, r2, kappa, epsilon)
 
     C0 = pi*epsilon*r1*r2/R
     C1 = (f2*phi01*phi01 + f1*phi02*phi02)/(f1*f2) * log(1-f1*f2*exp(-2*kappa*(R-r1-r2)))
     C2 = 4*phi01*phi02/sqrt(abs(f1*f2)) * A
 
-    E_inter = C0*(C1 + C2)
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+
+    E_inter = CC0*C0*(C1 + C2)
 
     return E_inter
 
@@ -201,14 +237,22 @@ def constant_charge_twosphere_bell(sigma01, sigma02, r1, r2, R, kappa, epsilon):
 
     E_inter = 4*pi/epsilon*(sigma01*r1*r1/(1+kappa*r1))*(sigma02*r2*r2/(1+kappa*r2))*exp(-kappa*(R-r1-r2))/R
 
-    return E_inter
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+
+    return CC0*E_inter
 
 def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     kT = 4.1419464e-21 # at 300K
-    e = 1.60217657e-19
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
     E_0 = 8.854187818e-12
-    C0 = kT/e
+    cal2J = 4.184 
+    C0 = kT/qe
 
     phi01 /= C0
     phi02 /= C0
@@ -236,25 +280,90 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
     u1 = U1*C1
     u2 = U2*C1
 
-    E_inter = u1+u2
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+
+    E_inter = CC0*(u1+u2)
 
     return E_inter
 
 def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     kT = 4.1419464e-21 # at 300K
-    e = 1.60217657e-19
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
     h = R-r1-r2
 #    E_inter = r1*r2*epsilon/(4*R) * ( (phi01+phi02)**2 * log(1+exp(-kappa*h)) + (phi01-phi02)**2*log(1-exp(-kappa*h)) )
 #    E_inter = epsilon*r1*phi01**2/2 * log(1+exp(-kappa*h))
     E_inter = epsilon*r1*r2*(phi01**2+phi02**2)/(4*(r1+r2)) * ( (2*phi01*phi02)/(phi01**2+phi02**2) * log((1+exp(-kappa*h))/(1-exp(-kappa*h))) + log(1-exp(-2*kappa*h)) )
 
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    E_inter *= CC0
+    return E_inter
+
+def constant_potential_single_energy(phi0, r1, kappa, epsilon):
+
+    N = 1 # Number of terms in expansion
+     
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
+    index2 = arange(N+1, dtype=float) + 0.5
+    index  = index2[0:-1]
+
+    K1 = special.kv(index2, kappa*r1)
+    K1p = index/(kappa*r1)*K1[0:-1] - K1[1:]
+    k1 = special.kv(index, kappa*r1)*sqrt(pi/(2*kappa*r1))
+    k1p = -sqrt(pi/2)*1/(2*(kappa*r1)**(3/2.))*special.kv(index, kappa*r1) + sqrt(pi/(2*kappa*r1))*K1p
+
+    a0_inf = phi0/k1[0]
+    U1_inf = a0_inf*k1p[0]
+ 
+    C1 = 2*pi*kappa*phi0*r1*r1*epsilon
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    E = C0*C1*U1_inf
+    
+    return E
+
+def constant_charge_single_energy(phi0, r1, kappa, epsilon):
+
+    N = 1 # Number of terms in expansion
+     
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
+    index2 = arange(N+1, dtype=float) + 0.5
+    index  = index2[0:-1]
+
+    K1 = special.kv(index2, kappa*r1)
+    K1p = index/(kappa*r1)*K1[0:-1] - K1[1:]
+    k1 = special.kv(index, kappa*r1)*sqrt(pi/(2*kappa*r1))
+    k1p = -sqrt(pi/2)*1/(2*(kappa*r1)**(3/2.))*special.kv(index, kappa*r1) + sqrt(pi/(2*kappa*r1))*K1p
+
+    a0_inf = -phi0/(epsilon*kappa*k1p[0])
+   
+    U1_inf = a0_inf*k1[0]
+ 
+    C1 = 2*pi*phi0*r1*r1
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    E_inter = C0*C1*U1_inf
+    
     return E_inter
 
 def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     N = 20 # Number of terms in expansion
      
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
 
@@ -327,7 +436,8 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa, epsi
 
     C1 = 2*pi*kappa*phi01*r1*r1*epsilon
     C2 = 2*pi*kappa*phi02*r2*r2*epsilon
-    E_inter = C1*(U1_h-U1_inf) + C2*(U2_h-U2_inf) 
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    E_inter = C0*(C1*(U1_h-U1_inf) + C2*(U2_h-U2_inf))
     
     return E_inter
 
@@ -335,6 +445,11 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa, epsilon
 
     N = 20 # Number of terms in expansion
      
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
 
@@ -407,14 +522,20 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa, epsilon
 
     C1 = 2*pi*phi01*r1*r1
     C2 = 2*pi*phi02*r2*r2
-    E_inter = C1*(U1_h-U1_inf) + C2*(U2_h-U2_inf) 
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    E_inter = C0*(C1*(U1_h-U1_inf) + C2*(U2_h-U2_inf))
     
     return E_inter
 
 def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
     N = 20 # Number of terms in expansion
-     
+
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
 
@@ -467,7 +588,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
                 M[j+N,n+N] = 1
 
     RHS = zeros(2*N)
-    RHS[0] = -E_hat*q/(E_1*r1*r1)
+    RHS[0] = -E_hat*q/(4*pi*E_1*r1*r1)
     RHS[N] = phi02
 
     coeff = solve(M,RHS)
@@ -476,21 +597,22 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     b = coeff[N:2*N]/k2
 
     a0 = a[0] 
-    a0_inf = -E_hat*q/(E_1*r1*r1)*1/(kappa*k1p[0]) 
+    a0_inf = -E_hat*q/(4*pi*E_1*r1*r1)*1/(kappa*k1p[0]) 
     b0 = b[0] 
     b0_inf = phi02/k2[0]
    
-    phi_inf = a0_inf*k1[0] - q/(E_1*r1)
-    phi_h   = a0*k1[0] + i1[0]*sum(b*B[:,0]) - q/(E_1*r1) 
+    phi_inf = a0_inf*k1[0] - q/(4*pi*E_1*r1)
+    phi_h   = a0*k1[0] + i1[0]*sum(b*B[:,0]) - q/(4*pi*E_1*r1) 
     phi_inter = phi_h - phi_inf
  
     U_inf = b0_inf*k2p[0]
     U_h   = b0*k2p[0]+i2p[0]*sum(a*B[:,0])
     U_inter = U_h - U_inf
 
-    C1 = q 
-    C2 = 4*pi*kappa*phi02*r2*r2*E_2
-    E_inter = C1*phi_inter + C2*U_inter 
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    C1 = q * 0.5
+    C2 = 2*pi*kappa*phi02*r2*r2*E_2
+    E_inter = C0*(C1*phi_inter + C2*U_inter)
     
     return E_inter
 
@@ -498,6 +620,11 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
     N = 20 # Number of terms in expansion
      
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
 
@@ -550,7 +677,7 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
                 M[j+N,n+N] = 1
 
     RHS = zeros(2*N)
-    RHS[0] = -E_hat*q/(E_1*r1*r1)
+    RHS[0] = -E_hat*q/(4*pi*E_1*r1*r1)
     RHS[N] = -phi02/E_2
 
     coeff = solve(M,RHS)
@@ -559,29 +686,36 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
     b = coeff[N:2*N]/(kappa*k2p)
 
     a0 = a[0] 
-    a0_inf = -E_hat*q/(E_1*r1*r1)*1/(kappa*k1p[0]) 
+    a0_inf = -E_hat*q/(4*pi*E_1*r1*r1)*1/(kappa*k1p[0]) 
     b0 = b[0] 
     b0_inf = -phi02/(E_2*kappa*k2p[0])
    
-    phi_inf = a0_inf*k1[0] - q/(E_1*r1)
-    phi_h   = a0*k1[0] + i1[0]*sum(b*B[:,0]) - q/(E_1*r1) 
+    phi_inf = a0_inf*k1[0] - q/(4*pi*E_1*r1)
+    phi_h   = a0*k1[0] + i1[0]*sum(b*B[:,0]) - q/(4*pi*E_1*r1) 
     phi_inter = phi_h - phi_inf
  
     U_inf = b0_inf*k2[0]
     U_h   = b0*k2[0]+i2[0]*sum(a*B[:,0])
     U_inter = U_h - U_inf
 
-    C1 = q 
-    C2 = 4*pi*phi02*r2*r2
-    E_inter = C1*phi_inter + C2*U_inter 
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
+    C1 = q * 0.5
+    C2 = 2*pi*phi02*r2*r2
+    E_inter = C0*(C1*phi_inter + C2*U_inter)
     
     return E_inter
 
 
 def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa, epsilon):
+#   From Carnie+Chan 1993
 
     N = 20 # Number of terms in expansion
     
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index = arange(N, dtype=float) + 0.5
 
     k1 = special.kv(index, kappa*r1)*sqrt(pi/(2*kappa*r1))
@@ -625,16 +759,23 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa, epsil
     U = 4*pi * ( -pi/2 * a0/phi01 * 1/sinh(kappa*r1) + kappa*r1 + kappa*r1/tanh(kappa*r1) )
 
 #    print 'E: %f'%U
+    C0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
     C1 = r1*epsilon*phi01*phi01
-    E_inter = U*C1          
+    E_inter = U*C1*C0
                             
     return E_inter
 
 def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
+#   From Carnie+Chan 1993
 
     N = 10 # Number of terms in expansion
     E_p = 0 # Permitivitty inside sphere
     
+    qe = 1.60217646e-19
+    Na = 6.0221415e23
+    E_0 = 8.854187818e-12
+    cal2J = 4.184 
+
     index2 = arange(N+1, dtype=float) + 0.5
     index  = index2[0:-1]
 
@@ -683,8 +824,9 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     a0 = a_coeff[0] 
    
     C0 = a*sigma/epsilon
+    CC0 = qe**2*Na*1e-3*1e10/(cal2J*E_0)
     
-    E_inter = 4*pi*a*epsilon*C0*C0*( pi*a0/(2*C0*(kappa*a*cosh(kappa*a)-sinh(kappa*a))) - 1/(1+kappa*a) - 1/(kappa*a*1/tanh(kappa*a)-1) )
+    E_inter = 4*pi*a*epsilon*C0*C0*CC0( pi*a0/(2*C0*(kappa*a*cosh(kappa*a)-sinh(kappa*a))) - 1/(1+kappa*a) - 1/(kappa*a*1/tanh(kappa*a)-1) )
 
     return E_inter
 
