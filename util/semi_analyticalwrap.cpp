@@ -229,8 +229,8 @@ void SA_wrap(REAL *PHI, REAL *y, REAL *x, REAL kappa,
 
     if (same==1)
     {
-        PHI[1] = -2*M_PI;
-        PHI[3] = 2*M_PI;
+        PHI[1] = 0.;
+        PHI[3] = 0.;
     }
 
 //    printf("PHI: %f, %f, %f, %f\n",PHI[0],PHI[1],PHI[2], PHI[3]);

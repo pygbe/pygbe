@@ -22,8 +22,9 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
 #    print 'SELF INTERIOR, surface: %i'%s
     K_diag = 2*pi
     V_diag = 0
-    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, 
-                            K_diag, V_diag, s, param, ind0, timing, kernel)
+    IorE   = 1
+    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf,
+                            K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
     v = K_lyr - V_lyr
     return v
 
@@ -31,8 +32,9 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
 #    print 'SELF EXTERIOR, surface: %i, E_hat: %f'%(s, surf.E_hat)
     K_diag = -2*pi
     V_diag = 0.
+    IorE   = 2
     K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, 
-                            K_diag, V_diag, s, param, ind0, timing, kernel)
+                            K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
     v = -K_lyr + surf.E_hat*V_lyr
     return v, K_lyr, V_lyr
 
@@ -40,8 +42,9 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 #    print 'NONSELF EXTERIOR, source: %i, target: %i, E_hat: %f'%(src,tar, surf[src].E_hat)
     K_diag = 0
     V_diag = 0
+    IorE   = 1
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src], surf[tar], 
-                            K_diag, V_diag, src, param, ind0, timing, kernel)
+                            K_diag, V_diag, IorE, src, param, ind0, timing, kernel)
     v = -K_lyr + surf[src].E_hat*V_lyr
     return v
 
@@ -49,8 +52,9 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 #    print 'NONSELF INTERIOR, source: %i, target: %i'%(src,tar)
     K_diag = 0
     V_diag = 0
+    IorE   = 2
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src], surf[tar], 
-                            K_diag, V_diag, src, param, ind0, timing, kernel)
+                            K_diag, V_diag, IorE, src, param, ind0, timing, kernel)
     v = K_lyr - V_lyr
     return v
 
@@ -212,7 +216,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 #               With preconditioner
                 F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
                 F[s_start+s_size:s_start+2*s_size] += aux*surf_array[s].Precond[2,:]
-           
+
 #   Dirichlet/Neumann contribution to RHS
     for j in range(len(field_array)):
 
@@ -228,7 +232,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 dirichlet.append(s)
             elif surf_array[s].surf_type=='neumann_surface':
                 neumann.append(s)
-
+    
         if len(neumann)>0 or len(dirichlet)>0:
             
 #           First look at influence on SIBLING surfaces
@@ -240,8 +244,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 for sd in dirichlet:
                     K_diag = -2*pi*(sd==s)
                     V_diag = 0
+                    IorE   = 2
                     K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
-                            surf_array[s], K_diag, V_diag, sd, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -255,10 +260,10 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
 #                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and K_lyr affects the external
-#                   equation, which is placed after the internal one, hence
-#                   Precond[1,:] and Precond[3,:].
+#                   equation (SIBLING surfaces), which is placed after the internal 
+#                   one, hence Precond[1,:] and Precond[3,:].
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
-                        F[s_start:s_start+s_size] += K_lyr * surf_array[sd].Precond[0,:]
+                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
                         F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[3,:]
@@ -267,8 +272,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 for sn in neumann:
                     K_diag = 0
                     V_diag = 0
+                    IorE   = 2
                     K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
-                            surf_array[s], K_diag, V_diag, sn, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -285,7 +291,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
-                        F[s_start:s_start+s_size] += -V_lyr * surf_array[sn].Precond[0,:]
+                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
                         F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[3,:]
@@ -304,8 +310,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 for sd in dirichlet:
                     K_diag = 0  
                     V_diag = 0
+                    IorE   = 2
                     K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
-                            surf_array[s], K_diag, V_diag, sd, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -326,8 +333,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 for sn in neumann:
                     K_diag = 0
                     V_diag = 0
+                    IorE   = 2
                     K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
-                            surf_array[s], K_diag, V_diag, sn, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -457,8 +465,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 for sd in dirichlet:
                     K_diag = -2*pi*(sd==s)
                     V_diag = 0
+                    IorE   = 2 
                     K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
-                            surf_array[s], K_diag, V_diag, sd, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -475,7 +484,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
-                        F[s_start:s_start+s_size] += K_lyr * surf_array[sd].Precond[0,:]
+                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
                         F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[3,:]
@@ -484,8 +493,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 for sn in neumann:
                     K_diag = 0
                     V_diag = 0
+                    IorE = 2
                     K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
-                            surf_array[s], K_diag, V_diag, sn, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -502,7 +512,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
-                        F[s_start:s_start+s_size] += -V_lyr * surf_array[sn].Precond[0,:]
+                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
                     else:
                         F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
                         F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[3,:]
@@ -520,8 +530,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 for sd in dirichlet:
                     K_diag = 0  
                     V_diag = 0
+                    IorE   = 1
                     K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
-                            surf_array[s], K_diag, V_diag, sd, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0
@@ -542,8 +553,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 for sn in neumann:
                     K_diag = 0
                     V_diag = 0
+                    IorE   = 1
                     K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
-                            surf_array[s], K_diag, V_diag, sn, param, ind0, timing, kernel)
+                            surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
                     s_start = 0

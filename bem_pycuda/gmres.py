@@ -86,6 +86,9 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
             Vip1 = gmres_dot(V[i,:], surf_array, field_array, ind0, param, timing, kernel)
             toc = time.time()
             time_Vi+=toc-tic
+    
+            if iteration<6:
+                savetxt('Vip1%i.txt'%iteration, Vip1)
 
             tic = time.time()
             Vk = V[0:i+1,:]

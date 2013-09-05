@@ -326,12 +326,12 @@ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, REAL xi, REAL yi, REAL zi,
     }
 }
 
-void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, REAL *triangle, int triangleSize,
+void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
         int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
         REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
-        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglIntL, int sglIntLSize, REAL *sglIntY, int sglIntYSize, 
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
         REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
@@ -363,7 +363,7 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
                 dx = xt[i_aux] - s_xj[j];
                 dy = yt[i_aux] - s_yj[j];
                 dz = zt[i_aux] - s_zj[j];
-                R  = sqrt(dx*dx + dy*dy + dz*dz + eps);
+                R  = sqrt(dx*dx + dy*dy + dz*dz + eps*eps);
                 R2 = R*R;
                 R3 = R2*R;
                 if (LorY==2)
@@ -395,10 +395,10 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
                 if (same==1)
                 {
                     PHI_K = K_diag;
-                    if (LorY==1)
-                        PHI_V = sglIntL[j];
+                    if (IorE==1)
+                        PHI_V = sglInt_int[j];
                     else
-                        PHI_V = sglIntY[j];
+                        PHI_V = sglInt_ext[j];
                 }
                 else
                 {
@@ -420,13 +420,13 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
 
 }
 
-void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, REAL *triangle, int triangleSize,
+void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
         int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
         REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, int *offSrc, int offSrcSize, int *offTwg, int offTwgSize,  
-        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglIntL, int sglIntLSize, REAL *sglIntY, int sglIntYSize, 
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize,
         REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
@@ -480,7 +480,7 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                         dx = xt[i] - s_xj[j];
                         dy = yt[i] - s_yj[j];
                         dz = zt[i] - s_zj[j];
-                        R  = sqrt(dx*dx + dy*dy + dz*dz + eps);
+                        R  = sqrt(dx*dx + dy*dy + dz*dz + eps*eps);
                         R2 = R*R;
                         R3 = R2*R;
                         if (LorY==2)
@@ -508,10 +508,10 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                         if (same==1)
                         {
                             PHI_K = K_diag;
-                            if (LorY==1)
-                                PHI_V = sglIntL[j];
+                            if (IorE==1)
+                                PHI_V = sglInt_int[j];
                             else
-                                PHI_V = sglIntY[j];
+                                PHI_V = sglInt_ext[j];
                         }
                         else
                         {

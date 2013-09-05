@@ -878,9 +878,9 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     
     __global__ void P2P(REAL *K_gpu, REAL *V_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k, 
                         REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc, 
-                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *sglIntL, REAL *sglIntY, REAL *vertex, 
+                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *sglInt_int, REAL *sglInt_ext, REAL *vertex, 
                         REAL *xk, REAL *wk, int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold, REAL eps, 
-                        int BpT, int NCRIT, REAL K_diag, REAL V_diag, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
+                        int BpT, int NCRIT, REAL K_diag, REAL V_diag, int IorE, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
         int list_start = offTwg[ptr_off+blockIdx.x];
@@ -889,8 +889,8 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         REAL xi, yi, zi, dx, dy, dz, r, auxK, auxV;
 
         __shared__ REAL ver_sh[9*BSZ],
-                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ], sglIntL_sh[BSZ],
-                        sglIntY_sh[BSZ], m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ], 
+                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ], sglInt_int_sh[BSZ],
+                        sglInt_ext_sh[BSZ], m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ], 
                         mVc_sh[BSZ], Xsk_sh[K_fine*3], Wsk_sh[K_fine];
 
 
@@ -932,8 +932,8 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     mKc_sh[threadIdx.x] = mKc[CJ_start + jblock*BSZ + threadIdx.x];
                     mVc_sh[threadIdx.x] = mVc[CJ_start + jblock*BSZ + threadIdx.x];
                     A_sh[threadIdx.x]  = Area[CJ_start + jblock*BSZ + threadIdx.x];
-                    sglIntL_sh[threadIdx.x]  = sglIntL[CJ_start + jblock*BSZ + threadIdx.x];
-                    sglIntY_sh[threadIdx.x]  = sglIntY[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglInt_int_sh[threadIdx.x]  = sglInt_int[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglInt_ext_sh[threadIdx.x]  = sglInt_ext[CJ_start + jblock*BSZ + threadIdx.x];
                     k_sh[threadIdx.x]  = k[CJ_start + jblock*BSZ + threadIdx.x];
 
                     for (int vert=0; vert<9; vert++)
@@ -980,10 +980,10 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 if (same==1)
                                 {
                                     auxK = K_diag;
-                                    if (LorY==1)
-                                        auxV = sglIntL_sh[j];
+                                    if (IorE==1)
+                                        auxV = sglInt_int_sh[j];
                                     else
-                                        auxV = sglIntY_sh[j];
+                                        auxV = sglInt_ext_sh[j];
                                 }
                                 else
                                 {
@@ -1008,23 +1008,26 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                 }
                 __syncthreads();
                 int jblock = (Nsrc-1)/BSZ;
-                xj_sh[threadIdx.x] = xj[CJ_start + jblock*BSZ + threadIdx.x];
-                yj_sh[threadIdx.x] = yj[CJ_start + jblock*BSZ + threadIdx.x];
-                zj_sh[threadIdx.x] = zj[CJ_start + jblock*BSZ + threadIdx.x];
-                m_sh[threadIdx.x] = m[CJ_start + jblock*BSZ + threadIdx.x];
-                mx_sh[threadIdx.x] = mx[CJ_start + jblock*BSZ + threadIdx.x];
-                my_sh[threadIdx.x] = my[CJ_start + jblock*BSZ + threadIdx.x];
-                mz_sh[threadIdx.x] = mz[CJ_start + jblock*BSZ + threadIdx.x];
-                mKc_sh[threadIdx.x] = mKc[CJ_start + jblock*BSZ + threadIdx.x];
-                mVc_sh[threadIdx.x] = mVc[CJ_start + jblock*BSZ + threadIdx.x];
-                A_sh[threadIdx.x] = Area[CJ_start + jblock*BSZ + threadIdx.x];
-                sglIntL_sh[threadIdx.x] = sglIntL[CJ_start + jblock*BSZ + threadIdx.x];
-                sglIntY_sh[threadIdx.x] = sglIntY[CJ_start + jblock*BSZ + threadIdx.x];
-                k_sh[threadIdx.x] = k[CJ_start + jblock*BSZ + threadIdx.x];
-
-                for (int vert=0; vert<9; vert++)
+                if (jblock*BSZ + threadIdx.x < Nsrc)
                 {
-                    ver_sh[9*threadIdx.x+vert] = vertex[9*(CJ_start+jblock*BSZ+threadIdx.x)+vert];
+                    xj_sh[threadIdx.x] = xj[CJ_start + jblock*BSZ + threadIdx.x];
+                    yj_sh[threadIdx.x] = yj[CJ_start + jblock*BSZ + threadIdx.x];
+                    zj_sh[threadIdx.x] = zj[CJ_start + jblock*BSZ + threadIdx.x];
+                    m_sh[threadIdx.x] = m[CJ_start + jblock*BSZ + threadIdx.x];
+                    mx_sh[threadIdx.x] = mx[CJ_start + jblock*BSZ + threadIdx.x];
+                    my_sh[threadIdx.x] = my[CJ_start + jblock*BSZ + threadIdx.x];
+                    mz_sh[threadIdx.x] = mz[CJ_start + jblock*BSZ + threadIdx.x];
+                    mKc_sh[threadIdx.x] = mKc[CJ_start + jblock*BSZ + threadIdx.x];
+                    mVc_sh[threadIdx.x] = mVc[CJ_start + jblock*BSZ + threadIdx.x];
+                    A_sh[threadIdx.x] = Area[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglInt_int_sh[threadIdx.x] = sglInt_int[CJ_start + jblock*BSZ + threadIdx.x];
+                    sglInt_ext_sh[threadIdx.x] = sglInt_ext[CJ_start + jblock*BSZ + threadIdx.x];
+                    k_sh[threadIdx.x] = k[CJ_start + jblock*BSZ + threadIdx.x];
+
+                    for (int vert=0; vert<9; vert++)
+                    {
+                        ver_sh[9*threadIdx.x+vert] = vertex[9*(CJ_start+jblock*BSZ+threadIdx.x)+vert];
+                    }
                 }
                 __syncthreads();
 
@@ -1066,10 +1069,10 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             if (same==1)
                             {
                                 auxK = K_diag;
-                                if (LorY==1)
-                                    auxV = sglIntL_sh[j];
+                                if (IorE==1)
+                                    auxV = sglInt_int_sh[j];
                                 else
-                                    auxV = sglIntY_sh[j];
+                                    auxV = sglInt_ext_sh[j];
                             }
                             else
                             {

@@ -30,7 +30,7 @@ def getWeights(K):
         w[6] = 0.13239415
     return w
 
-def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag,
+def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
             self, param, ind0, timing, kernel):
 
     tic = cuda.Event()
@@ -103,7 +103,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag,
                                 ind0.index_large, param, LorY, timing)
 
         K_aux, V_aux = P2P_sort(surfSrc, surfTar, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, 
-                                K_aux, V_aux, self, LorY, K_diag, V_diag, L, w, param, timing)
+                                K_aux, V_aux, self, LorY, K_diag, V_diag, IorE, L, w, param, timing)
 
     ### GPU code
     elif param.GPU==1:
@@ -115,7 +115,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag,
                                     ind0, param, LorY, timing, kernel)
 
         K_gpu, V_gpu = P2P_gpu(surfSrc, surfTar, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, 
-                                K_gpu, V_gpu, self, LorY, K_diag, V_diag, L, w, param, timing, kernel)
+                                K_gpu, V_gpu, self, LorY, K_diag, V_diag, IorE, L, w, param, timing, kernel)
 
         tic.record()
         K_aux = cuda.from_device(K_gpu, len(K_aux), dtype=REAL)
@@ -183,6 +183,7 @@ def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):
     time_M2M = toc - tic
 
     # Evaluation
+    IorE = 0    # This evaluation is on charge points, no self-operator
     AI_int = 0
     phi_reac = zeros(len(xq))
     time_P2P = 0.
@@ -195,7 +196,7 @@ def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):
         Kval, Vval, source, time_M2P = M2P_nonvec(Cells, CJ, xq[i], Kval, Vval,
                                                  ind_reac.index_large, par_reac, source, time_M2P)
         Kval, Vval, AI_int, time_P2P = P2P_nonvec(Cells, surface, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc,
-                                        xq[i], Kval, Vval, par_reac, w, source, AI_int, time_P2P)
+                                        xq[i], Kval, Vval, IorE, par_reac, w, source, AI_int, time_P2P)
         phi_reac[i] = (-Kval + Vval)/(4*pi)
 #    print '\tTime set: %f'%time_P2M
 #    print '\tTime P2M: %f'%time_P2M
