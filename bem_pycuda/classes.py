@@ -29,8 +29,8 @@ class surfaces():
         self.zj       = []  # z component of gauss nodes
         self.Area     = []  # Area of triangles
         self.normal   = []  # normal of triangles
-        self.sglIntY  = []  # singular integrals for V for Yukawa
-        self.sglIntL  = []  # singular integrals for V for Laplace
+        self.sglInt_int = []  # singular integrals for V for internal equation
+        self.sglInt_ext = []  # singular integrals for V for external equation
         self.xk       = []  # position of gauss points on edges
         self.wk       = []  # weight of gauss points on edges
         self.Xsk      = []  # position of gauss points for near singular integrals
@@ -47,8 +47,8 @@ class surfaces():
         self.ycSort   = []  # sorted y component box centers according to M2P_list array
         self.zcSort   = []  # sorted z component box centers according to M2P_list array
         self.AreaSort = []  # sorted array of areas
-        self.sglIntYSort  = []  # sorted array of singular integrals for V for Yukawa
-        self.sglIntLSort  = []  # sorted array of singular integrals for V for Laplace
+        self.sglInt_intSort  = []  # sorted array of singular integrals for V for internal equation
+        self.sglInt_extSort  = []  # sorted array of singular integrals for V for external equation
         self.unsort       = []  # array of indices to unsort targets
         self.triangleSort = []  # sorted array of triangles
         self.sortTarget   = []  # array of indices to sort targets
@@ -66,6 +66,8 @@ class surfaces():
         self.E_hat        = 0   # ratio of Ein/Eout
         self.kappa_in     = 0   # kappa inside surface
         self.kappa_out    = 0   # kappa inside surface
+        self.LorY_in      = 0   # Laplace or Yukawa in inner region
+        self.LorY_out     = 0   # Laplace or Yukawa in outer region
         self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)  
         self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
         self.phi          = []  # Potential on surface
@@ -82,8 +84,8 @@ class surfaces():
         self.ycDev      = []
         self.zcDev      = []
         self.AreaDev    = []
-        self.sglIntYDev = []
-        self.sglIntLDev = []
+        self.sglInt_intDev = []
+        self.sglInt_extDev = []
         self.vertexDev  = []
         self.sizeTarDev = []
         self.offSrcDev  = []
@@ -712,23 +714,46 @@ def fill_surface(surf,param):
     # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
     surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
                                  # Order: Top left, top right, bott left, bott right    
-    VL = zeros(N) # Top left block
-    KL = zeros(N) # Top right block
-    VY = zeros(N) # Bottom left block
-    KY = zeros(N) # Bottom right block
     centers = zeros((N,3))
     centers[:,0] = surf.xi[:]
     centers[:,1] = surf.yi[:]
     centers[:,2] = surf.zi[:]
+
+#   Compute diagonal integral for internal equation
+    VL = zeros(N) 
+    KL = zeros(N) 
+    VY = zeros(N)
+    KY = zeros(N)
+    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
+                    surf.kappa_in, 2*pi, 0., surf.xk, surf.wk)
+    if surf.LorY_in == 1:
+        dX11 = KL
+        dX12 = -VL
+        surf.sglInt_int = VL # Array for singular integral of V through interior
+    elif surf.LorY_in == 2:
+        dX11 = KY
+        dX12 = -VY
+        surf.sglInt_int = VY # Array for singular integral of V through interior
+    else:
+        surf.sglInt_int = zeros(N)
+
+#   Compute diagonal integral for external equation
+    VL = zeros(N) 
+    KL = zeros(N) 
+    VY = zeros(N)
+    KY = zeros(N)
     computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
                     surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
-
-    dX11 = KL
-    dX12 = -VL
-    dX21 = KY
-    dX22 = surf.E_hat*VY
-    surf.sglIntL = VL # Array for singular integral of V for Laplace
-    surf.sglIntY = VY # Array for singular integral of V for Yukawa
+    if surf.LorY_out == 1:
+        dX21 = KL
+        dX22 = surf.E_hat*VL
+        surf.sglInt_ext = VL # Array for singular integral of V through exterior
+    elif surf.LorY_out == 2:
+        dX21 = KY
+        dX22 = surf.E_hat*VY
+        surf.sglInt_ext = VY # Array for singular integral of V through exterior
+    else:
+        surf.sglInt_ext = zeros(N)
 
     if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
         d_aux = 1/(dX22-dX21*dX12/dX11)
@@ -836,11 +861,13 @@ def initializeSurf(field_array, filename, param):
             if len(field_array[j].parent)>0:
                 if field_array[j].parent[0]==i:                 # Inside region
                     s.kappa_in = field_array[j].kappa
-                    s.Ein = field_array[j].E
+                    s.Ein      = field_array[j].E
+                    s.LorY_in  = field_array[j].LorY
             if len(field_array[j].child)>0:
                 if i in field_array[j].child:                # Outside region
                     s.kappa_out = field_array[j].kappa
-                    s.Eout = field_array[j].E
+                    s.Eout      = field_array[j].E
+                    s.LorY_out  = field_array[j].LorY
 
         if s.surf_type!='dirichlet_surface' and s.surf_type!='neumann_surface':
             s.E_hat = s.Ein/s.Eout
@@ -862,8 +889,8 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
         surf_array[s].yjDev      = gpuarray.to_gpu(surf_array[s].yjSort.astype(REAL))
         surf_array[s].zjDev      = gpuarray.to_gpu(surf_array[s].zjSort.astype(REAL))
         surf_array[s].AreaDev    = gpuarray.to_gpu(surf_array[s].AreaSort.astype(REAL))
-        surf_array[s].sglIntLDev = gpuarray.to_gpu(surf_array[s].sglIntLSort.astype(REAL))
-        surf_array[s].sglIntYDev = gpuarray.to_gpu(surf_array[s].sglIntYSort.astype(REAL))
+        surf_array[s].sglInt_intDev = gpuarray.to_gpu(surf_array[s].sglInt_intSort.astype(REAL))
+        surf_array[s].sglInt_extDev = gpuarray.to_gpu(surf_array[s].sglInt_extSort.astype(REAL))
         surf_array[s].vertexDev  = gpuarray.to_gpu(ravel(surf_array[s].vertex[surf_array[s].triangleSort]).astype(REAL))
         surf_array[s].xcDev      = gpuarray.to_gpu(ravel(surf_array[s].xcSort.astype(REAL)))
         surf_array[s].ycDev      = gpuarray.to_gpu(ravel(surf_array[s].ycSort.astype(REAL)))

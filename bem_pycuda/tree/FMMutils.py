@@ -220,8 +220,8 @@ def sortPoints(surface, Cells, twig, param):
     surface.yjSort = surface.yj[surface.sortSource]
     surface.zjSort = surface.zj[surface.sortSource]
     surface.AreaSort = surface.Area[surface.sortSource/param.K]
-    surface.sglIntLSort = surface.sglIntL[surface.sortSource/param.K]
-    surface.sglIntYSort = surface.sglIntY[surface.sortSource/param.K]
+    surface.sglInt_intSort = surface.sglInt_int[surface.sortSource/param.K]
+    surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource/param.K]
     surface.triangleSort = surface.triangle[surface.sortSource/param.K]
 
 def computeIndices(P, ind0):
@@ -482,7 +482,7 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, ker
 
 
 def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, 
-            surf, LorY, K_diag, V_diag, L, w, param, timing):
+            surf, LorY, K_diag, V_diag, IorE, L, w, param, timing):
 
     tic = time.time()
 
@@ -499,11 +499,11 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
 
     aux = zeros(2)
 
-    direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
+    direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
             int32(tri), int32(k), surfTar.xi, surfTar.yi, surfTar.zi, 
             s_xj, s_yj, s_zj, xt, yt, zt, m, mx, my, mz, mKc, mVc, 
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
-            surfTar.offsetTwigs[surf],int32(surfTar.tree[0].target), surfSrc.AreaSort, surfSrc.sglIntLSort, surfSrc.sglIntYSort,
+            surfTar.offsetTwigs[surf],int32(surfTar.tree[0].target), surfSrc.AreaSort, surfSrc.sglInt_intSort, surfSrc.sglInt_extSort,
             surfSrc.xk, surfSrc.wk, surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, w[0], aux)
 
     timing.AI_int += int(aux[0])
@@ -516,19 +516,19 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
 
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, 
-            surf, LorY, K_diag, V_diag, L, w, param, timing, kernel):
+            surf, LorY, K_diag, V_diag, IorE, L, w, param, timing, kernel):
 
     tic = cuda.Event() 
     toc = cuda.Event() 
 
     tic.record()
     REAL = param.REAL
-    mDev   = cuda.to_device(m)
-    mxDev  = cuda.to_device(mx)
-    myDev  = cuda.to_device(my)
-    mzDev  = cuda.to_device(mz)
-    mKcDev = cuda.to_device(mKc)
-    mVcDev = cuda.to_device(mVc)
+    mDev   = cuda.to_device(m.astype(REAL))
+    mxDev  = cuda.to_device(mx.astype(REAL))
+    myDev  = cuda.to_device(my.astype(REAL))
+    mzDev  = cuda.to_device(mz.astype(REAL))
+    mKcDev = cuda.to_device(mKc.astype(REAL))
+    mVcDev = cuda.to_device(mVc.astype(REAL))
     toc.record()
     toc.synchronize()
     timing.time_trans += tic.time_till(toc)*1e-3
@@ -545,10 +545,10 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
 
     direct_gpu(K_gpu, V_gpu, surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
                 surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mxDev, myDev, mzDev, 
-                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, surfSrc.sglIntLDev,
-                surfSrc.sglIntYDev, surfSrc.vertexDev, surfSrc.xkDev, surfSrc.wkDev, int32(ptr_offset), int32(ptr_list), 
+                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, surfSrc.sglInt_intDev,
+                surfSrc.sglInt_extDev, surfSrc.vertexDev, surfSrc.xkDev, surfSrc.wkDev, int32(ptr_offset), int32(ptr_list), 
                 int32(LorY), REAL(param.kappa), REAL(param.threshold), REAL(param.eps), 
-                int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), REAL(V_diag), AI_int, 
+                int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), REAL(V_diag), int32(IorE), AI_int, 
                 surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -611,7 +611,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     return Kval, Vval, source, time_M2P
 
 def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
-                xq, Kval, Vval, par_reac, w, source, AI_int, time_P2P):
+                xq, Kval, Vval, IorE, par_reac, w, source, AI_int, time_P2P):
 
     tic = time.time()
     LorY = 1
@@ -640,10 +640,10 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
     aux = zeros(2)
     K_diag = 0
     V_diag = 0
-    direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, ravel(surface.vertex[surface.triangle[:]]), 
+    direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surface.vertex[surface.triangle[:]]), 
             int32(tri), int32(k), surface.xi, surface.yi, surface.zi,
             s_xj, s_yj, s_zj, xq_arr, yq_arr, zq_arr, s_m, s_mx, s_my, s_mz, s_mKc, s_mVc, 
-            array([-1], dtype=int32), surface.Area, surface.sglIntL, surface.sglIntY,
+            array([-1], dtype=int32), surface.Area, surface.sglInt_int, surface.sglInt_ext,
             surface.xk, surface.wk, surface.Xsk, surface.Wsk,
             par_reac.kappa, par_reac.threshold, par_reac.eps, w[0], aux)
 

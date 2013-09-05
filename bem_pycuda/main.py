@@ -117,6 +117,8 @@ elif param.GPU==1:
 toc = time.time()
 rhs_time = toc-tic
 
+savetxt('RHS.txt',F)
+
 setup_time = toc-TIC
 print 'List time          : %fs'%list_time
 print 'Data transfer time : %fs'%transfer_time

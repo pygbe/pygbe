@@ -7,22 +7,22 @@ extern void computeDiagonal(double *VL, int VLSize, double *KL, int KLSize, doub
                     double *triangle, int triangleSize, double *centers, int centersSize, double kappa,
                     double K_diag, double V_diag, double *xk, int xkSize, double *wk, int wkSize); 
 
-extern void direct_sort(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, double *triangle, int triangleSize, 
+extern void direct_sort(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, int IorE, double *triangle, int triangleSize, 
         int *tri, int triSize, int *k, int kSize, double *xi, int xiSize, double *yi, int yiSize, 
         double *zi, int ziSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, 
         double *s_zj, int s_zjSize,double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
         double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mKc, int mKcSize, double *mVc, int mVcSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, int *offSrc, int offSrcSize, int *offTwg, int offTwgSize,
-        int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize,
+        int *targets, int targetsSize, double *Area, int AreaSize, double *sglInt_int, int sglInt_intSize, double *sglInt_ext, int sglInt_extSize,
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize,
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 
-extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, double *triangle, int triangleSize, 
+extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, int IorE, double *triangle, int triangleSize, 
         int *tri, int triSize, int *k, int kSize, double *xi, int xiSize, double *yi, int yiSize, 
         double *zi, int ziSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, 
         double *s_zj, int s_zjSize,double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
         double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mKc, int mKcSize, double *mVc, int mVcSize,
-        int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize,
+        int *targets, int targetsSize, double *Area, int AreaSize, double *sglInt_int, int sglInt_intSize, double *sglInt_ext, int sglInt_extSize,
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize,
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 
@@ -67,8 +67,8 @@ import_array();
 %apply (double* IN_ARRAY1, int DIM1){(double *mVc, int mVcSize)};
 %apply (int* IN_ARRAY1, int DIM1){(int *targets, int targetsSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *Area, int AreaSize)};
-%apply (double* IN_ARRAY1, int DIM1){(double *sglIntL, int sglIntLSize)};
-%apply (double* IN_ARRAY1, int DIM1){(double *sglIntY, int sglIntYSize)};
+%apply (double* IN_ARRAY1, int DIM1){(double *sglInt_int, int sglInt_intSize)};
+%apply (double* IN_ARRAY1, int DIM1){(double *sglInt_ext, int sglInt_extSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *xk, int xkSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *wk, int wkSize)};
 %apply (double* IN_ARRAY1, int DIM1){(double *Xsk, int XskSize)};
@@ -79,22 +79,22 @@ extern void computeDiagonal(double *VL, int VLSize, double *KL, int KLSize, doub
                     double *triangle, int triangleSize, double *centers, int centersSize, double kappa,
                     double K_diag, double V_diag, double *xk, int xkSize, double *wk, int wkSize); 
 
-extern void direct_sort(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, double *triangle, int triangleSize, 
+extern void direct_sort(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, int IorE, double *triangle, int triangleSize, 
         int *tri, int triSize, int *k, int kSize, double *xi, int xiSize, double *yi, int yiSize, 
         double *zi, int ziSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, 
         double *s_zj, int s_zjSize,double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
         double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mKc, int mKcSize, double *mVc, int mVcSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, int *offSrc, int offSrcSize, int *offTwg, int offTwgSize,
-        int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize, 
+        int *targets, int targetsSize, double *Area, int AreaSize, double *sglInt_int, int sglInt_intSize, double *sglInt_ext, int sglInt_extSize, 
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize,
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 
-extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, double *triangle, int triangleSize, 
+extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, int IorE, double *triangle, int triangleSize, 
         int *tri, int triSize, int *k, int kSize, double *xi, int xiSize, double *yi, int yiSize, 
         double *zi, int ziSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, 
         double *s_zj, int s_zjSize,double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
         double *m, int mSize, double *mx, int mxSize, double *my, int mySize, double *mz, int mzSize, double *mKc, int mKcSize, double *mVc, int mVcSize,
-        int *targets, int targetsSize, double *Area, int AreaSize, double *sglIntL, int sglIntLSize, double *sglIntY, int sglIntYSize,
+        int *targets, int targetsSize, double *Area, int AreaSize, double *sglInt_int, int sglInt_intSize, double *sglInt_ext, int sglInt_extSize,
         double *xk, int xkSize, double *wk, int wkSize, double *Xsk, int XskSize, double *Wsk, int WskSize, 
         double kappa, double threshold, double eps, double w0, double *aux, int auxSize);
 
@@ -133,8 +133,8 @@ extern void coulomb_direct(double *xt, int xtSize, double *yt, int ytSize, doubl
 %clear (double *mVc, int mVcSize); 
 %clear (int *targets, int targetsSize); 
 %clear (double *Area, int AreaSize); 
-%clear (double *sglIntL, int sglIntLSize); 
-%clear (double *sglIntY, int sglIntYSize); 
+%clear (double *sglInt_int, int sglInt_intSize); 
+%clear (double *sglInt_ext, int sglInt_extSize); 
 %clear (double *xk, int xkSize); 
 %clear (double *wk, int wkSize); 
 %clear (double *Xsk, int XskSize); 
