@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
   Copyright (C) 2013 by Christopher Cooper, Lorena Barba
 
@@ -20,7 +21,6 @@
   THE SOFTWARE.
 '''
 
-#!/usr/bin/env python
 import sys
 from numpy import *
 
