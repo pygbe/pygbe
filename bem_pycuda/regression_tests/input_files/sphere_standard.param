@@ -1,0 +1,14 @@
+Precision   double
+K           3
+Nk          7  
+K_fine      19
+thresold    0.5
+BSZ         128
+restart     100
+tolerance   1e-6
+max_iter    1000
+P           12
+eps         1e-16
+NCRIT       300
+theta       0.5
+GPU         1

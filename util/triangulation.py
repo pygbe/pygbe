@@ -1,4 +1,9 @@
-'''Create a unitsphere recursively by subdividing all triangles in an octahedron recursivly.
+'''
+Taken from https://sites.google.com/site/dlampetest/python/triangulating-a-sphere-recursively 
+Really appreciate you putting this code out there, thanks!
+'''
+'''
+Create a unitsphere recursively by subdividing all triangles in an octahedron recursivly.
 
 A unitsphere has a radius of 1, which also means that all points in this sphere
 have an absolute value of 1. Another feature of an unitsphere is that the normals 
@@ -12,7 +17,7 @@ value in the vertex array with this new radius
 (although this will break the "vertex array equal to normal array" property)
 '''
 import numpy
-import pylab
+#import pylab
 
 octahedron_vertices = numpy.array( [ 
     [ 1.0, 0.0, 0.0], # 0 
