@@ -45,6 +45,8 @@ def printSummary(surf_array, field_array, param):
         print '\tRbox/theta         : %f'%(min(rr)/param.theta)
         print '\tAnalytic distance  : %f'%(average(sqrt(2*surf_array[i].Area))/param.threshold)
         print '\tElem. per sq Ang   : %f'%(1/average(surf_array[i].Area))
+        print '\tMax, min, avg elem.: %s, %s, %s'%(max(surf_array[i].Area),min(surf_array[i].Area),average(surf_array[i].Area))
+        print '\tTotal area         : %f'%(sum(surf_array[i].Area))
 
     print '----------------------------\n'
 

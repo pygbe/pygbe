@@ -74,20 +74,17 @@ time_sort = 0.
 for i in range(len(surf_array)):
     time_sort += fill_surface(surf_array[i], param)
 
-
-
 '''
 fig = plt.figure()
 ax = Axes3D(fig)
-ss=surf_array[0]
-for i in range(1,4):
+#ss=surf_array[0]
+for i in range(1):
     ss = surf_array[i]
     ax.scatter(ss.xi,ss.yi,ss.zi,c='b',marker='o')
     ax.scatter(ss.xi+ss.normal[:,0], ss.yi+ss.normal[:,1], ss.zi+ss.normal[:,2],c='r', marker='o')
 plt.show()
 quit()
 '''
-
 
 ### Output setup summary
 param.N   = 0

@@ -231,12 +231,12 @@ def getGaussPoints(y,triangle, n):
         for i in range(N):
             M = transpose(y[triangle[i]])
             xi[n*i+0,:] = dot(M, array([1/3.,1/3.,1/3.]))
-            xi[n*i+1,:] = dot(M, array([.79742699,.10128651,.10128651]))
-            xi[n*i+2,:] = dot(M, array([.10128651,.79742699,.10128651]))
-            xi[n*i+3,:] = dot(M, array([.10128651,.10128651,.79742699]))
-            xi[n*i+4,:] = dot(M, array([.05971587,.47014206,.47014206]))
-            xi[n*i+5,:] = dot(M, array([.47014206,.05971587,.47014206]))
-            xi[n*i+6,:] = dot(M, array([.47014206,.47014206,.05971587]))
+            xi[n*i+1,:] = dot(M, array([.797426985353087,.101286507323456,.101286507323456]))
+            xi[n*i+2,:] = dot(M, array([.101286507323456,.797426985353087,.101286507323456]))
+            xi[n*i+3,:] = dot(M, array([.101286507323456,.101286507323456,.797426985353087]))
+            xi[n*i+4,:] = dot(M, array([.059715871789770,.470142064105115,.470142064105115]))
+            xi[n*i+5,:] = dot(M, array([.470142064105115,.059715871789770,.470142064105115]))
+            xi[n*i+6,:] = dot(M, array([.470142064105115,.470142064105115,.059715871789770]))
 
     return xi[:,0], xi[:,1], xi[:,2]
 
@@ -825,8 +825,10 @@ def initializeField(filename, param):
         if int(charges[i])==1:                                      # if there are charges
             if qfile[i][-4:]=='.crd':
                 xq,q,Nq = readcrd(qfile[i], param.REAL)             # read charges
+                print '\nReading crd for region %i from '%i+qfile[i]
             if qfile[i][-4:]=='.pqr':
                 xq,q,Nq = readpqr(qfile[i], param.REAL)             # read charges
+                print '\nReading pqr for region %i from '%i+qfile[i]
             field_aux.xq = xq                                       # charges positions
             field_aux.q = q                                         # charges values
         if int(Nparent[i])==1:                                      # if it is an enclosed region
@@ -867,6 +869,7 @@ def initializeSurf(field_array, filename, param):
 
         if s.surf_type=='dirichlet_surface' or s.surf_type=='neumann_surface':
             s.phi0 = loadtxt(phi0_file[i])
+            print '\nReading phi0 file for surface %i from '%i+phi0_file[i]
 
         Area_null = []
         tic = time.time()
