@@ -352,7 +352,7 @@ def constant_potential_single_energy(phi0, r1, kappa, epsilon):
 
 def constant_charge_single_energy(phi0, r1, kappa, epsilon):
 
-    N = 1 # Number of terms in expansion
+    N = 20 # Number of terms in expansion
      
     qe = 1.60217646e-19
     Na = 6.0221415e23
