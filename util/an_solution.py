@@ -25,7 +25,7 @@ All functions output the analytical solution in kcal/mol
 """
 from numpy import *
 from scipy import special
-from scipy.special._cephes import lpmv
+from scipy.special import lpmv
 from scipy.misc import factorial
 from math import gamma
 from scipy.linalg import solve
