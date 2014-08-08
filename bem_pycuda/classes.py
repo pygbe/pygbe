@@ -208,9 +208,9 @@ def getGaussPoints(y,triangle, n):
     N  = len(triangle) # Number of triangles
     xi = zeros((N*n,3))
     if n==1:
-        xi[:,0] = average(y[triangle[:],:,0], axis=1)
-        xi[:,1] = average(y[triangle[:],:,1], axis=1)
-        xi[:,2] = average(y[triangle[:],:,2], axis=1)
+        xi[:,0] = average(y[triangle[:],0], axis=1)
+        xi[:,1] = average(y[triangle[:],1], axis=1)
+        xi[:,2] = average(y[triangle[:],2], axis=1)
 
     if n==3:
         for i in range(N):
@@ -677,9 +677,9 @@ def fill_surface(surf,param):
     N  = len(surf.triangle)
     Nj = N*param.K
     # Calculate centers
-    surf.xi = average(surf.vertex[surf.triangle[:],:,0], axis=1)
-    surf.yi = average(surf.vertex[surf.triangle[:],:,1], axis=1)
-    surf.zi = average(surf.vertex[surf.triangle[:],:,2], axis=1)
+    surf.xi = average(surf.vertex[surf.triangle[:],0], axis=1)
+    surf.yi = average(surf.vertex[surf.triangle[:],1], axis=1)
+    surf.zi = average(surf.vertex[surf.triangle[:],2], axis=1)
 
     surf.normal = zeros((N,3))
     surf.Area = zeros(N)

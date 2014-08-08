@@ -40,6 +40,7 @@ print '\nDirichlet surface'
 print '-----------------'
 comm = 'CUDA_DEVICE=%i python regression_tests/sphere_dirichlet.py'%DEVICE
 os.system(comm)
+
 print '\nNeumann surface'
 print '---------------'
 comm = 'CUDA_DEVICE=%i python regression_tests/sphere_neumann.py'%DEVICE
