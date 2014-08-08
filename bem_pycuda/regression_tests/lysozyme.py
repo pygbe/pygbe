@@ -19,13 +19,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 '''
-
 import os
 from numpy import zeros, array
 import math
-from matplotlib import *
-from matplotlib.pyplot import *
-from matplotlib.backends.backend_pdf import PdfFile, PdfPages, FigureCanvasPdf
 import sys
 sys.path.append('../util')
 from an_solution import *
