@@ -30,7 +30,7 @@ def calculate_phir(phi, dphi, s, xq, K_fine, eps, LorY, kappa):
     for i in range(len(s.triangle)):
         panel = s.vertex[s.triangle[i]]
 
-        K, V = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], K_fine, kappa, LorY, eps)
+        K, V = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], s.normal, K_fine, kappa, LorY, eps)
         phir += (-K*phi[i] + V*dphi[i])/(4*pi)
         
     return phir
