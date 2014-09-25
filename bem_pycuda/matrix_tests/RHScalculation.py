@@ -39,7 +39,7 @@ def charge2surf(s, xq, q, E):
 
     return F
 
-def generateRHS(surf_array, field_array, Neq):
+def generateRHS(surf_array, field_array, Neq, Efield=0.):
 
     F = zeros(Neq)
     F_sym = []
@@ -129,9 +129,32 @@ def generateRHS(surf_array, field_array, Neq):
                 X_sym[j][0] += ' phi%i'%j
                 X_sym[j][1] += 'dphi%i'%j
 
+#       Effect of an incomming electric field (only on outmost region)
+#       Field comes in the z direction
+        if len(f.parent)==0 and abs(Efield)>1e-12:
+
+#           On child surfaces (exterior equation)
+            for i in f.child:
+                tar = surf_array[i]
+
+#               TO BE IMPLEMENTED: Dirichlet and neumann surface have only one equation
+                if tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface':
+                    F[tar.N0:tar.N0+tar.N] += 0 #dot(-tar.Kext[j], src.phi0)
+                    F_sym[i][0] += 0 #'-'+tar.KextSym[j]
+
+#               Rest have two equations: put in exterior
+                else:
+                    phi_field = Efield*tar.normal[:,2]
+                    F[tar.N0+tar.N:tar.N0+2*tar.N] += (1/tar.Ehat-1) * dot(tar.Kext[i], phi_field)
+                    F_sym[i][1] += tar.VextSym[i]+'_E(1/Eh-1)'
+
+        
+
     for i in range(len(F_sym)):
         for j in range(len(F_sym[i])):
             if len(F_sym[i][j])==0:
                 F_sym[i][j] = '           0'
+
+        
 
     return F, F_sym, X_sym, Nblock

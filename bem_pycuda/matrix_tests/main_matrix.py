@@ -89,7 +89,7 @@ computeInter(surf_array, field_array, param)
 
 #### Generate RHS
 print '\nGenerate RHS'
-F, F_sym, X_sym, Nblock = generateRHS(surf_array, field_array, Neq)
+F, F_sym, X_sym, Nblock = generateRHS(surf_array, field_array, Neq, -1)
 
 print '\nRHS generated...'
 
