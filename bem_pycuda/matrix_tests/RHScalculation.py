@@ -41,7 +41,17 @@ def charge2surf(s, xq, q, E):
 
 def generateRHS(surf_array, field_array, Neq, ElectricField=0.):
 
-    F = zeros(Neq)
+#   Check if there is a complex dielectric
+    complexDiel = 0
+    for f in field_array:
+        if type(f.E)==complex:
+            complexDiel = 1
+
+    if complexDiel==1:
+        F = zeros(Neq, complex)
+    else:
+        F = zeros(Neq)
+
     F_sym = []
     X_sym = []
     Nblock = 0
@@ -144,8 +154,8 @@ def generateRHS(surf_array, field_array, Neq, ElectricField=0.):
 
 #               Rest have two equations: put in exterior
                 else:
-                    phi_field = ElectricField*tar.normal[:,2]
-                    F[tar.N0+tar.N:tar.N0+2*tar.N] += (1/tar.Ehat-1) * dot(tar.Kext[i], phi_field)
+                    phi_field = ElectricField*tar.normal[:,2] #Assuming field comes in z direction
+                    F[tar.N0+tar.N:tar.N0+2*tar.N] += (1/tar.Ehat-1) * dot(tar.Vext[i], phi_field)
                     F_sym[i][1] += tar.VextSym[i]+'_E(1/Eh-1)'
 
         

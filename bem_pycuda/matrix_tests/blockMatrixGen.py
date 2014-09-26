@@ -198,18 +198,35 @@ def blockMatrix(tar, src, WK, kappa, threshold, LorY, xk, wk, K_fine, eps):
 
 def generateMatrix(surf_array, Neq):
     
-    M = zeros((Neq,Neq))
+#   Check if there is a complex dielectric
+    complexDiel = 0 
+    if type(surf_array[0].Kext[0][0,0])==numpy.complex128:
+        complexDiel = 1 
+
+    if complexDiel==1:
+        M = zeros((Neq,Neq), complex)
+    else:
+        M = zeros((Neq,Neq))
     
     M_sym = []
     for i in range(len(surf_array)):
         tar = surf_array[i]
 
-        tar.KextDiag = zeros(tar.N)
-        tar.KpextDiag = zeros(tar.N)
-        tar.VextDiag = zeros(tar.N)
-        tar.KintDiag = zeros(tar.N)
-        tar.KpintDiag = zeros(tar.N)
-        tar.VintDiag = zeros(tar.N)
+        if complexDiel==1:
+            tar.KextDiag = zeros(tar.N, complex)
+            tar.KpextDiag = zeros(tar.N, complex)
+            tar.VextDiag = zeros(tar.N, complex)
+            tar.KintDiag = zeros(tar.N, complex)
+            tar.KpintDiag = zeros(tar.N, complex)
+            tar.VintDiag = zeros(tar.N, complex)
+        
+        else:
+            tar.KextDiag = zeros(tar.N)
+            tar.KpextDiag = zeros(tar.N)
+            tar.VextDiag = zeros(tar.N)
+            tar.KintDiag = zeros(tar.N)
+            tar.KpintDiag = zeros(tar.N)
+            tar.VintDiag = zeros(tar.N)
 
         if tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface' or tar.surf_type=='neumann_surface_hyper':
             M_sym.append([[]])
