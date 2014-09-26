@@ -42,7 +42,7 @@ from gmres              import gmres_solver
 from blockMatrixGen     import blockMatrix, generateMatrix, generatePreconditioner
 from RHScalculation     import charge2surf, generateRHS
 from interactionCalculation import computeInter
-from energyCalculation      import fill_phi, solvationEnergy, coulombicEnergy, surfaceEnergy
+from energyCalculation      import fill_phi, solvationEnergy, coulombicEnergy, surfaceEnergy, dipoleMoment, extCrossSection
 
 tic = time.time()
 param_file = sys.argv[1]
@@ -75,7 +75,10 @@ for f in field_array:
         print 'Contains surfaces ' + str(f.child)
     else:
         print 'Is an inner-most region'
-    print 'Parameters: kappa: %f, E: %f'%(f.kappa, f.E)
+    if type(f.E)==complex:
+        print 'Parameters: kappa: %f, E: %f+%fj'%(f.kappa, f.E.real, f.E.imag)
+    else:
+        print 'Parameters: kappa: %f, E: %f'%(f.kappa, f.E)
 
 print '\nTotal elements : %i'%param.N
 print 'Total equations: %i'%param.Neq
@@ -89,7 +92,8 @@ computeInter(surf_array, field_array, param)
 
 #### Generate RHS
 print '\nGenerate RHS'
-F, F_sym, X_sym, Nblock = generateRHS(surf_array, field_array, Neq, -1)
+electricField = -1.
+F, F_sym, X_sym, Nblock = generateRHS(surf_array, field_array, Neq, electricField)
 
 print '\nRHS generated...'
 
@@ -123,16 +127,24 @@ FF = Ainv*F
 #MM = M
 #FF = F
 
-savetxt('RHS_matrix.txt',FF)
+if type(MM[0,0]) != numpy.complex128:
+    savetxt('RHS_matrix.txt',FF)
 
-print '\nCalculation for both spheres'
+print '\nSolve system'
 tec = time.time()
 phi = zeros(len(F))
-phi = gmres_solver(MM, phi, FF, param.restart, param.tol, param.max_iter) # Potential both spheres
+
+if type(MM[0,0]) == numpy.complex128:
+    phi = gmres(MM, FF, tol=param.tol, restart=param.restart, maxiter=param.max_iter)[0]
+else:
+    phi = gmres_solver(MM, phi, FF, param.restart, param.tol, param.max_iter) 
+
 converged = -1
 toc = time.time()
 
-savetxt('phi_matrix.txt',phi)
+if type(MM[0,0]) != numpy.complex128:
+    savetxt('phi_matrix.txt',phi)
+
 
 print '\nEnergy calculation'
 fill_phi(phi, surf_array)
@@ -142,6 +154,10 @@ Esolv, field_Esolv = solvationEnergy(surf_array, field_array, param)
 Ecoul, field_Ecoul = coulombicEnergy(field_array, param)
 
 Esurf, surf_Esurf = surfaceEnergy(surf_array, param)
+
+dipoleMoment(surf_array, electricField)
+
+extCrossSection(surf_array, array([1,0,0]), array([0,0,1]), 187.9, electricField)
 
 toc = time.time()
 
