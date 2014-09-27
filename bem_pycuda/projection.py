@@ -138,7 +138,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
                                     ind0, param, LorY, timing, kernel)
 
         K_gpu, V_gpu = P2P_gpu(surfSrc, surfTar, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, 
-                                K_gpu, V_gpu, self, LorY, K_diag, V_diag, IorE, L, w, param, timing, kernel)
+                                K_gpu, V_gpu, self, LorY, K_diag, IorE, L, w, param, timing, kernel)
 
         tic.record()
         K_aux = cuda.from_device(K_gpu, len(K_aux), dtype=REAL)
