@@ -538,7 +538,7 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
 
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, 
-            surf, LorY, K_diag, V_diag, IorE, L, w, param, timing, kernel):
+            surf, LorY, K_diag, IorE, L, w, param, timing, kernel):
 
     tic = cuda.Event() 
     toc = cuda.Event() 
@@ -565,12 +565,19 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
     ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
 
+    # Check if internal or external to send correct singular integral
+    if IorE==1:
+        sglInt = surfSrc.sglInt_intDev
+    else:
+        sglInt = surfSrc.sglInt_extDev
+
+
     direct_gpu(K_gpu, V_gpu, surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
                 surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mxDev, myDev, mzDev, 
-                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, surfSrc.sglInt_intDev,
-                surfSrc.sglInt_extDev, surfSrc.vertexDev, surfSrc.xkDev, surfSrc.wkDev, int32(ptr_offset), int32(ptr_list), 
-                int32(LorY), REAL(param.kappa), REAL(param.threshold), REAL(param.eps), 
-                int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), REAL(V_diag), int32(IorE), AI_int, 
+                mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, sglInt,
+                surfSrc.vertexDev, int32(ptr_offset), int32(ptr_list), 
+                int32(LorY), REAL(param.kappa), REAL(param.threshold),
+                int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), AI_int, 
                 surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
