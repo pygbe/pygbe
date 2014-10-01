@@ -1,15 +1,34 @@
+"""
+Script to run matrix version of PyGBe with different dielectric constants
+
+Parameters (command line arguments)
+----------
+file_param : PyGBe parameter file
+file_base:      PyGBe input file used as a base
+complex_region: Region number in file_base with refraction index specified in file_refr
+file_refr:      File with refractive index for each wavelength
+                    At this point, all file_refr must have matching wavelengths
+For more than one region with varying refraction index, alternate the region number with the 
+corresponding file_refr
+
+Output
+-----
+Plot of extinction cross section with wavelength
+"""
+
 import matplotlib
 matplotlib.use('Agg')
 import numpy
 import matplotlib.pyplot as plt
 import sys
+import os
 
 def createInputFile(file_base, file_new, complex_region, diel):
 # Creates input file with complex dielectric constant
-# file_base     : base input filename
-# file_new      : new input filename
-# complex_region: array with regions that have complex dielectric (based on order of base_input)
-# diel          : array with complex dielectric constant of corresponding regions
+# file_base     : (string) base input filename
+# file_new      : (string) new input filename
+# complex_region: (array of int) array with regions that have complex dielectric (based on order of base_input)
+# diel          : (array of complex) array with complex dielectric constant of corresponding regions
 
     fn = open(file_new, 'w')
     region = -1
@@ -23,23 +42,87 @@ def createInputFile(file_base, file_new, complex_region, diel):
             region += 1
             if region in complex_region:
                 index = numpy.where(complex_region==region)[0][0]
-                new_line = line[:3] + '\t' + str(diel[index]) + '\t' + line[4:]
-                fn.write(new_line)
+                new_line = line[0] + '\t'
+                for i in range(1,len(line)):
+                    if i==3:
+                        new_line += str(diel[index])[1:-1] + '\t'
+                    else:
+                        new_line += line[i] + '\t'
+
+                fn.write(new_line+'\n')
+            else:
+                fn.write(line_full)
         else:
             fn.write(line_full)
-            
+
     fn.close()
 
-file_base = sys.argv[1]
 
-n_file = len(sys.argv)
+def scanOutput(filename):
+
+    flag = 0
+    Cext = []
+    surf = []
+    for line in file(filename):
+        line = line.split()
+        if len(line)>0:
+            if flag == 1 and line[0] == 'Surface':
+                surf.append(int(line[1][:-1]))
+                Cext.append(float(line[2]))
+            elif line[0] == 'Cext:':
+                flag = 1
+            
+    return surf, Cext
+
+file_param = sys.argv[1]
+file_base = sys.argv[2]
+
+n_file = (len(sys.argv)-2)/2
 data = []
-for i in range(2, n_file):
-    data.append(numpy.loadtxt(sys.argv[i]))
+region = []
+for i in range(n_file):
+    i_region = 2*i+3
+    i_file = 2*i+4
+
+    region.append(int(sys.argv[i_region]))
+    data.append(numpy.loadtxt(sys.argv[i_file]))
+
+region = numpy.array(region)
+diel = numpy.zeros(n_file, dtype=complex)
+
+Cext = numpy.zeros((len(data[0]), n_file))
+surf = numpy.zeros((len(data[0]), n_file))
+wavelength = data[0][:,0]*1e3 # nanometers
 
 for i in range(len(data[0])):
-    ref_index = complex(data
+
+    for j in range(n_file):
+        ref_index = complex(data[j][i,1], data[j][i,2])
+        diel[j] = ref_index*ref_index
+
+    newFile = 'matrix_tests/input_files/sphere_complex_aux.config'
+    outputFile = 'matrix_tests/output_aux'
+
+    createInputFile(file_base, newFile, region, diel)
+
+    command = 'python matrix_tests/main_matrix.py ' + file_param + ' ' + newFile + ' ' + str(wavelength[i]) + ' ' + ' > ' + outputFile
+
+    os.system(command)
+
+    surf[i,:], Cext[i,:] = scanOutput(outputFile)
 
 
+data_save = numpy.zeros((len(wavelength),n_file+1))
+data_save[:,0] = wavelength
+for i in range(n_file):
+    data_save[:,i+1] = Cext[:,i]
 
+filename = 'matrix_tests/Cext_wavelength'
+numpy.savetxt(filename, data_save)
 
+font = {'family':'serif','size':10}
+fig = plt.figure(figsize=(3,2))
+ax = fig.add_subplot(111)
+ax.plot(wavelength, Cext[:,0])
+plt.rc('font',**font)
+fig.savefig('matrix_tests/Cext_wavelength.pdf', dpi=80, format='pdf')

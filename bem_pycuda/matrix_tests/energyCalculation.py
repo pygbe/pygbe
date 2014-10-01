@@ -164,6 +164,8 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
 # k: unit vector in direction of wave propagation
 # n: unit vector in direction of electric field
 
+    Cext = []
+    surf_Cext = []
     for i in range(len(surf_array)):
         s = surf_array[i]
 
@@ -171,8 +173,8 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
         v2 = cross(v1, k)
 
         C1 = dot(n, v2)/s.Eout
-        C_ext = 2*pi/(electricField*wavelength) * C1.imag
 
-        s.C_ext = C_ext
+        Cext.append(2*pi/(electricField*wavelength) * C1.imag)
+        surf_Cext.append(i)
 
-
+    return Cext, surf_Cext

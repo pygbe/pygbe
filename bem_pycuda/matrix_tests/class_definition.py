@@ -71,7 +71,6 @@ class surfaces():
         self.phi        = []        # Store value of potential on surface
         self.dphi       = []        # Store value of derivative of potential on surface
         self.dipole     = []        # Store dipole moment vector from surface
-        self.C_ext      = []        # Store extinction cross section due to this surface
 
 class parameters():
     def __init__(self):
@@ -294,3 +293,18 @@ def initializeSurf(field_array, param, filename):
             tar.VextSym.append('')
             
     return surf_array, Neq
+
+def readElectricField(filename):
+
+    electricField = 0
+    wavelength = 0
+    for line in file(filename):
+        line = line.split()
+
+        if len(line)>0:
+            if line[0]=='WAVE':
+                electricField = float(line[1])
+                wavelength = float(line[2])
+
+    return electricField, wavelength
+

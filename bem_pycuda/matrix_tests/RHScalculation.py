@@ -149,8 +149,9 @@ def generateRHS(surf_array, field_array, Neq, ElectricField=0.):
 
 #               TO BE IMPLEMENTED: Dirichlet and neumann surface have only one equation
                 if tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface':
-                    F[tar.N0:tar.N0+tar.N] += 0 #dot(-tar.Kext[j], src.phi0)
-                    F_sym[i][0] += 0 #'-'+tar.KextSym[j]
+                    pass
+#                    F[tar.N0:tar.N0+tar.N] += 0 #dot(-tar.Kext[j], src.phi0)
+#                    F_sym[i][0] += 0 #'-'+tar.KextSym[j]
 
 #               Rest have two equations: put in exterior
                 else:
