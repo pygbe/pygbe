@@ -90,8 +90,6 @@ for i in range(n_file):
 region = numpy.array(region)
 diel = numpy.zeros(n_file, dtype=complex)
 
-Cext = numpy.zeros((len(data[0]), n_file))
-surf = numpy.zeros((len(data[0]), n_file))
 wavelength = data[0][:,0]*1e3 # nanometers
 
 for i in range(len(data[0])):
@@ -109,12 +107,20 @@ for i in range(len(data[0])):
 
     os.system(command)
 
-    surf[i,:], Cext[i,:] = scanOutput(outputFile)
+#   surf[i,:], Cext[i,:] = scanOutput(outputFile)
+    surf_aux, Cext_aux = scanOutput(outputFile)
+
+    if i==0:
+        Cext = numpy.zeros((len(data[0]), len(surf_aux)))
+        surf = numpy.zeros((len(data[0]), len(surf_aux)))
+
+    surf[i,:] = surf_aux
+    Cext[i,:] = Cext_aux
 
 
-data_save = numpy.zeros((len(wavelength),n_file+1))
+data_save = numpy.zeros((len(wavelength),len(Cext[0])+1))
 data_save[:,0] = wavelength
-for i in range(n_file):
+for i in range(len(Cext[0])):
     data_save[:,i+1] = Cext[:,i]
 
 filename = 'matrix_tests/Cext_wavelength'

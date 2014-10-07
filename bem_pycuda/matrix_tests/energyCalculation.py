@@ -27,10 +27,11 @@ from GaussIntegration import gaussIntegration_fine
 def calculate_phir(phi, dphi, s, xq, K_fine, eps, LorY, kappa):
 
     phir = 0
+    dummy = array([[0,0,0]])
     for i in range(len(s.triangle)):
         panel = s.vertex[s.triangle[i]]
 
-        K, V, Kp = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], s.normal, K_fine, kappa, LorY, eps)
+        K, V, Kp = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], dummy, K_fine, kappa, LorY, eps)
         # s.normal is dummy: needed for Kp, which we don't use here.
         phir += (-K*phi[i] + V*dphi[i])/(4*pi)
         
@@ -160,7 +161,7 @@ def dipoleMoment(surf_array, electricField):
         s.dipole = s.Eout*(I1-I2)
 
 def extCrossSection(surf_array, k, n, wavelength, electricField):
-# Computes the extinction cross section
+# Computes the extinction cross section (According to Mischenko2007)
 # k: unit vector in direction of wave propagation
 # n: unit vector in direction of electric field
 
@@ -169,12 +170,15 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
     for i in range(len(surf_array)):
         s = surf_array[i]
 
+        diffractionCoeff = sqrt(s.Eout)
+        waveNumber = 2*pi*diffractionCoeff/wavelength
+
         v1 = cross(k, s.dipole)
         v2 = cross(v1, k)
 
-        C1 = dot(n, v2)/s.Eout
+        C1 = dot(n, v2) * waveNumber**2/(s.Eout*electricField)
 
-        Cext.append(2*pi/(electricField*wavelength) * C1.imag)
+        Cext.append(1/waveNumber.real * C1.imag)
         surf_Cext.append(i)
 
     return Cext, surf_Cext
