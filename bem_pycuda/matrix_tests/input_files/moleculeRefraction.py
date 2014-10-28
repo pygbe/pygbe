@@ -20,9 +20,9 @@ C=0.016
 D=0.0647
 E=0.521
 
-N=21
+N=41
 
-wl = numpy.linspace(0.38, 0.39, N)
+wl = numpy.linspace(0.515, 0.535, N)
 
 n2 = A + B/(1-C/wl**2) + D/(1-E/wl**2)
 

@@ -23,12 +23,13 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-def createInputFile(file_base, file_new, complex_region, diel):
+def createInputFile(file_base, file_new, complex_region, diel, wavelength):
 # Creates input file with complex dielectric constant
 # file_base     : (string) base input filename
 # file_new      : (string) new input filename
 # complex_region: (array of int) array with regions that have complex dielectric (based on order of base_input)
 # diel          : (array of complex) array with complex dielectric constant of corresponding regions
+# wavelength    : (float) wavelength of incoming field
 
     fn = open(file_new, 'w')
     region = -1
@@ -52,6 +53,11 @@ def createInputFile(file_base, file_new, complex_region, diel):
                 fn.write(new_line+'\n')
             else:
                 fn.write(line_full)
+
+        elif line[0]=='WAVE':
+            new_line = line[0] + '\t' + line[1] + '\t' + str(wavelength)
+            fn.write(new_line+'\n')
+        
         else:
             fn.write(line_full)
 
@@ -101,9 +107,9 @@ for i in range(len(data[0])):
     newFile = 'matrix_tests/input_files/sphere_complex_aux.config'
     outputFile = 'matrix_tests/output_aux'
 
-    createInputFile(file_base, newFile, region, diel)
+    createInputFile(file_base, newFile, region, diel, wavelength[i])
 
-    command = 'python matrix_tests/main_matrix.py ' + file_param + ' ' + newFile + ' ' + str(wavelength[i]) + ' ' + ' > ' + outputFile
+    command = 'python matrix_tests/main_matrix.py ' + file_param + ' ' + newFile  + ' ' + ' > ' + outputFile
 
     os.system(command)
 
