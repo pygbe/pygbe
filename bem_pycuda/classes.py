@@ -921,15 +921,14 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
         surf_array[s].ycDev      = gpuarray.to_gpu(ravel(surf_array[s].ycSort.astype(REAL)))
         surf_array[s].zcDev      = gpuarray.to_gpu(ravel(surf_array[s].zcSort.astype(REAL)))
         
+#       Avoid transferring size 1 arrays to GPU (some systems crash)
         Nbuff = 5
         if len(surf_array[s].sizeTarget)<Nbuff:
             sizeTarget_buffer = zeros(Nbuff, dtype=int32)    
             sizeTarget_buffer[:len(surf_array[s].sizeTarget)] = surf_array[s].sizeTarget[:]    
             surf_array[s].sizeTarDev = gpuarray.to_gpu(sizeTarget_buffer)
-            print s, sizeTarget_buffer
         else:
             surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
-            print s, surf_array[s].sizeTarget
        
 #        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
         surf_array[s].offSrcDev  = gpuarray.to_gpu(surf_array[s].offsetSource.astype(int32))
