@@ -106,7 +106,6 @@ rot_N = 1
 til_angles_aux = numpy.linspace(til_min, til_max, num=til_N)  # Tilt angles (inclusive end point)
 rot_angles_aux = numpy.linspace(rot_min, rot_max, num=rot_N, endpoint=False)  # Rotation angles
 
-print til_angles_aux, rot_angles_aux
 
 til_angles = []
 rot_angles = []
@@ -125,11 +124,11 @@ for i in range(len(til_angles)):
     cmd_move = './scripts/move_protein.py ' + prot_file + ' ' + pqr_file + ' ' + str(rot_angles[i]) + ' ' + str(til_angles[i]) + ' ' + name
     os.system(cmd_move)
 
-    cmd_run = 'CUDA_DEVICE=' + cuda_device + ' ./main.py ' + param_file + ' ' + config_file_moved +' > output_aux' + name
-#    cmd_run = './main.py ' + param_file + ' ' + config_file_moved +' > output_aux' + name
+    cmd_run = 'CUDA_DEVICE=' + cuda_device + ' ./main.py ' + param_file + ' ' + config_file_moved +' > output_aux_' + output_file + name
+#    cmd_run = './main.py ' + param_file + ' ' + config_file_moved +' > output_aux_' + output_file  + name
     os.system(cmd_run)
     
-    N_run, iterations_run, Esolv_run, Esurf_run, Ecoul_run, Time_run, files = scanOutput('output_aux' + name)
+    N_run, iterations_run, Esolv_run, Esurf_run, Ecoul_run, Time_run, files = scanOutput('output_aux_' + output_file + name)
 
     fout = open(output_file,'a')
     fout.write('Angles: %2.2f tilt, %2.2f rotation; \tEtot: %f kcal/mol\n'%(til_angles[i], rot_angles[i], (Esolv_run+Esurf_run)))
@@ -149,7 +148,7 @@ for i in range(len(til_angles)):
 Etotal = numpy.array(Esolv) + numpy.array(Esurf) + numpy.array(Ecoul)
 EsurfEsolv = numpy.array(Esolv) + numpy.array(Esurf)
 
-os.system('rm output_aux' + name + ' ' + config_file_moved + ' ' + prot_file_moved+'.vert ' + prot_file_moved+'.face' + ' ' + pqr_file_moved)
+os.system('rm output_aux_' + output_file + name + ' ' + config_file_moved + ' ' + prot_file_moved+'.vert ' + prot_file_moved+'.face' + ' ' + pqr_file_moved)
 
 fout = open(output_file, 'a')
 
