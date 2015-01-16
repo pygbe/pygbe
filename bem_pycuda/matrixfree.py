@@ -80,6 +80,15 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     v = K_lyr - V_lyr
     return v
 
+def selfASC(surf, src, tar, param, ind0, timing, kernel):
+
+    Kt_diag = -2*pi * (surf[src].Ein+surf[src].Eout)/(surf[src].Ein-surf[src].Eout)
+    V_diag = 0
+    
+    Kt_lyr = project_Kt(surf[src].XinK, LorY, surf[src], surf[tar], 
+                            Kt_diag, src, param, ind0, timing, kernel)
+    v = -Kt_lyr
+    return v
 
 def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     
@@ -179,7 +188,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 #           Locate position of surface s in RHS
                 s_start = 0
                 for ss in range(s):
-                    if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface':
+                    if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
                         s_start += len(surf_array[ss].xi)
                     else:
                         s_start += 2*len(surf_array[ss].xi)
@@ -193,7 +202,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     dz_pq = field_array[j].xq[i,2] - surf_array[s].zi
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
-                    aux += field_array[j].q[i]/(field_array[j].E*R_pq)
+                    if surf_array[s].surf_type=='asc_surface':
+                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
+                                                                    + dy_pq*surf_array[s].normal[:,1] \
+                                                                    + dz_pq*surf_array[s].normal[:,2])
+                    else:
+                        aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
 #               For CHILD surfaces, q contributes to RHS in 
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
@@ -205,7 +219,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 #               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
 #               We do this only here (and not in the parent case) because interaction of charges 
 #               with dirichlet or neumann surface happens only for the surface as a child surfaces.
-                if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
+                if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface' or  surf_array[s].surf_type=='asc_surface':
                     F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
                 else:
                     F[s_start:s_start+s_size] += aux*surf_array[s].Precond[1,:]
@@ -217,7 +231,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 s = field_array[j].parent[0]
                 s_start = 0
                 for ss in range(s):
-                    if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface':
+                    if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
                         s_start += len(surf_array[ss].xi)
                     else:
                         s_start += 2*len(surf_array[ss].xi)
@@ -231,13 +245,21 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     dz_pq = field_array[j].xq[i,2] - surf_array[s].zi
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
-                    aux += field_array[j].q[i]/(field_array[j].E*R_pq)
+                    if surf_array[s].surf_type=='asc_surface':
+                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
+                                                                    + dy_pq*surf_array[s].normal[:,1] \
+                                                                    + dz_pq*surf_array[s].normal[:,2])
+                    else:
+                        aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
 #               With preconditioner
-                F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
-                F[s_start+s_size:s_start+2*s_size] += aux*surf_array[s].Precond[2,:]
+                if surf_array[s].surf_type=='asc_surface':
+                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+                else:
+                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+                    F[s_start+s_size:s_start+2*s_size] += aux*surf_array[s].Precond[2,:]
 
 #   Dirichlet/Neumann contribution to RHS
     for j in range(len(field_array)):

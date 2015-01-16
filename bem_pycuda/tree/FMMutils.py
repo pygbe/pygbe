@@ -23,7 +23,7 @@
 from numpy              import *
 from numpy              import sum as npsum
 from scipy.misc         import factorial
-from scipy.misc.common  import comb
+from scipy.misc         import comb
 
 # Wrapped code
 from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort
@@ -535,6 +535,38 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
     timing.time_P2P += toc-tic
 
     return K_aux, V_aux
+
+def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, 
+            surf, LorY, w, param, timing):
+
+    tic = time.time()
+
+    s_xj = surfSrc.xjSort
+    s_yj = surfSrc.yjSort
+    s_zj = surfSrc.zjSort
+
+    xt = surfTar.xiSort
+    yt = surfTar.yiSort
+    zt = surfTar.ziSort
+
+    tri  = surfSrc.sortSource/param.K # Triangle
+    k    = surfSrc.sortSource%param.K # Gauss point
+
+    aux = zeros(2)
+
+    directKt_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
+            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
+            surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
+            surfTar.offsetTwigs[surf], surfSrc.AreaSort,
+            surfSrc.xk, surfSrc.wk, surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, w[0], aux)
+
+    timing.AI_int += int(aux[0])
+    timing.time_an += aux[1]
+
+    toc = time.time()
+    timing.time_P2P += toc-tic
+
+    return Ktx_aux, Kty_aux, Ktz_aux
 
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, 
