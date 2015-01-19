@@ -202,23 +202,26 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
 
     tic.record()
     X_Kt = X_Kt[surfSrc.sortSource]
-    X_Ktc = X_Kc[surfSrc.sortSource]
+    X_Ktc = X_Ktc[surfSrc.sortSource]
     toc.record()
     toc.synchronize()
     timing.time_sort += tic.time_till(toc)*1e-3
 
     param.Nround = len(surfTar.twig)*param.NCRIT
-    Kt_aux  = zeros(param.Nround)
+    Ktx_aux  = zeros(param.Nround)
+    Kty_aux  = zeros(param.Nround)
+    Ktz_aux  = zeros(param.Nround)
     Dummy_aux  = zeros(param.Nround)  # Dummy variable
     AI_int = 0
 
     ### CPU code
     if param.GPU==0:
-        Dummy_aux, Kt_aux = M2P_sort(surfSrc, surfTar, Dummy_aux, Kt_aux, self, 
-                                ind0.index_large, param, LorY, timing)
+        if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
+            Kt_aux, Dummy_aux = M2P_sort(surfSrc, surfTar, Kt_aux, Dummy_aux, self, 
+                                    ind0.index_large, param, LorY, timing)
 
-        Kt_aux, V_aux = P2P_sort(surfSrc, surfTar, X_aux, X_Kt, X_aux, X_aux, X_Ktc, X_aux, 
-                                Kt_aux, V_aux, self, LorY, Kt_diag, V_diag, IorE, L, w, param, timing)
+        Ktx_aux, Kty_aux, Ktz_aux = P2PKt_sort(surfSrc, surfTar, X_Kt, X_Ktc, 
+                            Ktx_aux, Kty_aux, Ktz_aux, self, LorY, w, param, timing)
 
     ### GPU code
     elif param.GPU==1:
