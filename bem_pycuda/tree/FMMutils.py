@@ -27,7 +27,7 @@ from scipy.misc         import comb
 
 # Wrapped code
 from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort
-from direct             import direct_c, direct_sort
+from direct             import direct_c, direct_sort, directKt_sort
 from calculateMultipoles import P2M, M2M
 
 # CUDA libraries
@@ -558,8 +558,8 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
             int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
             surfTar.offsetTwigs[surf], surfSrc.AreaSort,
-            surfSrc.xk, surfSrc.wk, surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, w[0], aux)
-
+            surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)
+    
     timing.AI_int += int(aux[0])
     timing.time_an += aux[1]
 

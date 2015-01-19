@@ -24,7 +24,7 @@ from numpy import *
 import sys
 sys.path.append('tree')
 from FMMutils import *
-from projection import project, get_phir, get_phir_gpu
+from projection import project, project_Kt, get_phir, get_phir_gpu
 from classes import parameters, index_constant
 import time
 sys.path.append('../util')
@@ -80,13 +80,14 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     v = K_lyr - V_lyr
     return v
 
-def selfASC(surf, src, tar, param, ind0, timing, kernel):
+def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
 
-    Kt_diag = -2*pi * (surf[src].Ein+surf[src].Eout)/(surf[src].Ein-surf[src].Eout)
+    Kt_diag = -2*pi * (surf.Eout+surf.Ein)/(surf.Eout-surf.Ein)
     V_diag = 0
     
-    Kt_lyr = project_Kt(surf[src].XinK, LorY, surf[src], surf[tar], 
+    Kt_lyr = project_Kt(surf.XinK, LorY, surf, surf, 
                             Kt_diag, src, param, ind0, timing, kernel)
+    
     v = -Kt_lyr
     return v
 
@@ -103,7 +104,7 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
             surf_array[i].XinK = zeros(N) 
             surf_array[i].XinV = X[Naux:Naux+N] 
             Naux += N
-        elif surf_array[i].surf_type=='neumann_surface':
+        elif surf_array[i].surf_type=='neumann_surface' or surf_array[i].surf_type=='asc_surface':
             surf_array[i].XinK = X[Naux:Naux+N] 
             surf_array[i].XinV = zeros(N)
             Naux += N
@@ -122,7 +123,14 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
         if len(field_array[F].parent)>0:
             parent_type = surf_array[field_array[F].parent[0]].surf_type
 
-        if parent_type!='dirichlet_surface' and parent_type!='neumann_surface':
+        if parent_type=='asc_surface':
+#           ASC only for self-interaction so far 
+            LorY = field_array[F].LorY
+            p = field_array[F].parent[0]
+            v = selfASC(surf_array[p], p, p, LorY, param, ind0, timing, kernel)
+            surf_array[p].Xout_int += v
+
+        if parent_type!='dirichlet_surface' and parent_type!='neumann_surface' and parent_type!='asc_surface':
             LorY = field_array[F].LorY
             param.kappa = field_array[F].kappa
 #           print '\n---------------------'
@@ -169,6 +177,9 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
         elif surf_array[i].surf_type=='neumann_surface':
             MV[Naux:Naux+N]     = surf_array[i].Xout_ext*surf_array[i].Precond[0,:] 
             Naux += N
+        elif surf_array[i].surf_type=='asc_surface':
+            MV[Naux:Naux+N]     = surf_array[i].Xout_int*surf_array[i].Precond[0,:] 
+            Naux += N
         else:
             MV[Naux:Naux+N]     = surf_array[i].Xout_int*surf_array[i].Precond[0,:] + surf_array[i].Xout_ext*surf_array[i].Precond[1,:] 
             MV[Naux+N:Naux+2*N] = surf_array[i].Xout_int*surf_array[i].Precond[2,:] + surf_array[i].Xout_ext*surf_array[i].Precond[3,:] 
@@ -197,9 +208,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                 aux = zeros(len(surf_array[s].xi))
                 for i in range(Nq):
-                    dx_pq = field_array[j].xq[i,0] - surf_array[s].xi
-                    dy_pq = field_array[j].xq[i,1] - surf_array[s].yi
-                    dz_pq = field_array[j].xq[i,2] - surf_array[s].zi
+                    dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
+                    dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
+                    dz_pq = surf_array[s].zi - field_array[j].xq[i,2]
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':
@@ -240,9 +251,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                 aux = zeros(len(surf_array[s].xi))
                 for i in range(Nq):
-                    dx_pq = field_array[j].xq[i,0] - surf_array[s].xi
-                    dy_pq = field_array[j].xq[i,1] - surf_array[s].yi
-                    dz_pq = field_array[j].xq[i,2] - surf_array[s].zi
+                    dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
+                    dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
+                    dz_pq = surf_array[s].zi - field_array[j].xq[i,2]
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':

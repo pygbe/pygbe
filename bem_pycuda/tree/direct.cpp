@@ -368,7 +368,7 @@ void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel,
 
         if (LorY==1)
         {
-            aux = Wk[kk]*Area;
+            aux = Wk[kk]*Area*r*r*r;
             PHI_Ktx -= aux*dx;
             PHI_Kty -= aux*dy;
             PHI_Ktz -= aux*dz;
@@ -593,6 +593,7 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
     }
 }
 
+
 void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
         int LorY, REAL *triangle, int triangleSize,
         int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
@@ -600,7 +601,7 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
         REAL *m, int mSize, REAL *mKclean, int mKcleanSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
         int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, REAL *Area, int AreaSize,
-        REAL *Xsk, int XskSize, REAL *Wsk, REAL kappa, int WskSize, REAL threshold, REAL eps, REAL *aux, int auxSize)
+        REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, REAL kappa, REAL threshold, REAL eps, REAL *aux, int auxSize)
 {
     double start,stop;
     int CI_start, CI_end, CJ_start, CJ_end, list_start, list_end, CJ;
