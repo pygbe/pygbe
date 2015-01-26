@@ -211,13 +211,12 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
     Ktx_aux  = zeros(param.Nround)
     Kty_aux  = zeros(param.Nround)
     Ktz_aux  = zeros(param.Nround)
-    Dummy_aux  = zeros(param.Nround)  # Dummy variable
     AI_int = 0
 
     ### CPU code
     if param.GPU==0:
         if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
-            Kt_aux, Dummy_aux = M2P_sort(surfSrc, surfTar, Kt_aux, Dummy_aux, self, 
+            Ktx_aux, Kty_aux, Ktz_aux = M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, self, 
                                     ind0.index_large, param, LorY, timing)
 
         Ktx_aux, Kty_aux, Ktz_aux = P2PKt_sort(surfSrc, surfTar, X_Kt, X_Ktc, 
