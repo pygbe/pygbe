@@ -969,7 +969,7 @@ def fill_phi(phi, surf_array):
             surf_array[i].phi  = phi[s_start:s_start+s_size]
             s_start += s_size
         elif surf_array[i].surf_type=='asc_surface':
-            surf_array[i].dphi = phi[s_start:s_start+s_size]
+            surf_array[i].dphi = phi[s_start:s_start+s_size]/surf_array[i].Ein
             surf_array[i].phi  = zeros(s_size)
             s_start += s_size
         else:

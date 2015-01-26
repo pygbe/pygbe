@@ -26,7 +26,7 @@ from scipy.misc         import factorial
 from scipy.misc         import comb
 
 # Wrapped code
-from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort
+from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
 from direct             import direct_c, direct_sort, directKt_sort
 from calculateMultipoles import P2M, M2M
 
@@ -432,7 +432,6 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK, IIm
     M2M(Cells[PC].M, Cells[CC].M, dx, dy, dz, II, JJ, KK, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
     M2M(Cells[PC].Md, Cells[CC].Md, dx, dy, dz, II, JJ, KK, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
 
-
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 
     tic = time.time()
@@ -455,6 +454,28 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     timing.time_M2P += toc-tic
 
     return K_aux, V_aux
+
+def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param, LorY, timing):
+
+    tic = time.time()
+    M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
+    MSort  = zeros(param.Nm*M2P_size)
+    MdSort = zeros(param.Nm*M2P_size)
+
+    i = -1
+    for C in surfTar.M2P_list[surf,0:M2P_size]:
+        i+=1
+        MSort[i*param.Nm:i*param.Nm+param.Nm] = surfSrc.tree[C].M
+
+    multipoleKt_sort(Ktx_aux, Kty_aux, Ktz_aux, surfTar.offsetTarget, surfTar.sizeTarget, surfTar.offsetMlt[surf], 
+                    MSort, surfTar.xiSort, surfTar.yiSort, surfTar.ziSort, 
+                    surfTar.xcSort[surf], surfTar.ycSort[surf], surfTar.zcSort[surf], index, 
+                    param.P, param.kappa, int(param.Nm), int(LorY) )
+
+    toc = time.time()
+    timing.time_M2P += toc-tic
+
+    return Ktx_aux, Kty_aux, Ktz_aux
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, kernel):
 
