@@ -224,18 +224,22 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
 
     ### GPU code
     elif param.GPU==1:
-        Kt_gpu = cuda.to_device(Kt_aux.astype(REAL))
-        V_gpu = cuda.to_device(V_aux.astype(REAL))
+        Ktx_gpu = cuda.to_device(Ktx_aux.astype(REAL))
+        Kty_gpu = cuda.to_device(Kty_aux.astype(REAL))
+        Ktz_gpu = cuda.to_device(Ktz_aux.astype(REAL))
 
         if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
-            Kt_gpu, V_gpu = M2P_gpu(surfSrc, surfTar, Kt_gpu, V_gpu, self, 
+            Ktx_gpu, Kty_gpu, Ktz_gpu = M2PKt_gpu(surfSrc, surfTar, 
+                                    Ktx_gpu, Kty_gpu, Ktz_gpu, self, 
                                     ind0, param, LorY, timing, kernel)
 
-        Kt_gpu, V_gpu = P2P_gpu(surfSrc, surfTar, X_aux, X_Kt, X_aux, X_aux, X_Ktc, X_aux, 
-                                Kt_gpu, V_gpu, self, LorY, Kt_diag, IorE, L, w, param, timing, kernel)
+        Ktx_gpu, Kty_gpu, Ktz_gpu = P2PKt_gpu(surfSrc, surfTar, X_Kt, X_Ktc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+                                self, LorY, w, param, timing, kernel)
 
         tic.record()
-        Kt_aux = cuda.from_device(Kt_gpu, len(Kt_aux), dtype=REAL)
+        Ktx_aux = cuda.from_device(Ktx_gpu, len(Ktx_aux), dtype=REAL)
+        Kty_aux = cuda.from_device(Kty_gpu, len(Kty_aux), dtype=REAL)
+        Ktz_aux = cuda.from_device(Ktz_gpu, len(Ktz_aux), dtype=REAL)
         toc.record()
         toc.synchronize()
         timing.time_trans += tic.time_till(toc)*1e-3
