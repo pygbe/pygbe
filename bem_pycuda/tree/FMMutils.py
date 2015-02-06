@@ -23,11 +23,11 @@
 from numpy              import *
 from numpy              import sum as npsum
 from scipy.misc         import factorial
-from scipy.misc.common  import comb
+from scipy.misc         import comb
 
 # Wrapped code
-from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort
-from direct             import direct_c, direct_sort
+from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
+from direct             import direct_c, direct_sort, directKt_sort
 from calculateMultipoles import P2M, M2M
 
 # CUDA libraries
@@ -432,7 +432,6 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK, IIm
     M2M(Cells[PC].M, Cells[CC].M, dx, dy, dz, II, JJ, KK, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
     M2M(Cells[PC].Md, Cells[CC].Md, dx, dy, dz, II, JJ, KK, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
 
-
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 
     tic = time.time()
@@ -455,6 +454,28 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     timing.time_M2P += toc-tic
 
     return K_aux, V_aux
+
+def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param, LorY, timing):
+
+    tic = time.time()
+    M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
+    MSort  = zeros(param.Nm*M2P_size)
+    MdSort = zeros(param.Nm*M2P_size)
+
+    i = -1
+    for C in surfTar.M2P_list[surf,0:M2P_size]:
+        i+=1
+        MSort[i*param.Nm:i*param.Nm+param.Nm] = surfSrc.tree[C].M
+
+    multipoleKt_sort(Ktx_aux, Kty_aux, Ktz_aux, surfTar.offsetTarget, surfTar.sizeTarget, surfTar.offsetMlt[surf], 
+                    MSort, surfTar.xiSort, surfTar.yiSort, surfTar.ziSort, 
+                    surfTar.xcSort[surf], surfTar.ycSort[surf], surfTar.zcSort[surf], index, 
+                    param.P, param.kappa, int(param.Nm), int(LorY) )
+
+    toc = time.time()
+    timing.time_M2P += toc-tic
+
+    return Ktx_aux, Kty_aux, Ktz_aux
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, kernel):
 
@@ -501,6 +522,48 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, ker
 
     return K_gpu, V_gpu
 
+def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param, LorY, timing, kernel):
+
+    tic = cuda.Event()
+    toc = cuda.Event()
+
+    REAL = param.REAL
+
+    tic.record()
+    M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
+    MSort  = zeros(param.Nm*M2P_size)
+
+    i = -1
+    for C in surfTar.M2P_list[surf,0:M2P_size]:
+        i+=1
+        MSort[i*param.Nm:i*param.Nm+param.Nm] = surfSrc.tree[C].M
+
+#    (free, total) = cuda.mem_get_info()
+#    print 'Global memory occupancy: %f%% free'%(free*100/total)
+    MDev = cuda.to_device(MSort.astype(REAL))
+#    (free, total) = cuda.mem_get_info()
+#    print 'Global memory occupancy: %f%% free'%(free*100/total)
+
+    # GPU arrays are flattened, need to point to first element 
+    ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
+    ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
+
+    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    multipoleKt_gpu = kernel.get_function("M2PKt")
+
+    multipoleKt_gpu(Ktx_gpu, Kty_gpu, Ktz_gpu, surfTar.offMltDev, surfTar.sizeTarDev,  
+                    surfTar.xcDev, surfTar.ycDev, surfTar.zcDev,
+                    MDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, 
+                    ind0.indexDev, int32(ptr_offset), int32(ptr_list), REAL(param.kappa), 
+                    int32(param.BlocksPerTwig), int32(param.NCRIT), int32(LorY), 
+                    block=(param.BSZ,1,1), grid=(GSZ,1))
+
+    toc.record()
+    toc.synchronize()
+    timing.time_M2P += tic.time_till(toc)*1e-3
+
+    return Ktx_gpu, Kty_gpu, Ktz_gpu
+
 
 
 def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, 
@@ -535,6 +598,38 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
     timing.time_P2P += toc-tic
 
     return K_aux, V_aux
+
+def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, 
+            surf, LorY, w, param, timing):
+
+    tic = time.time()
+
+    s_xj = surfSrc.xjSort
+    s_yj = surfSrc.yjSort
+    s_zj = surfSrc.zjSort
+
+    xt = surfTar.xiSort
+    yt = surfTar.yiSort
+    zt = surfTar.ziSort
+
+    tri  = surfSrc.sortSource/param.K # Triangle
+    k    = surfSrc.sortSource%param.K # Gauss point
+
+    aux = zeros(2)
+
+    directKt_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
+            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
+            surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
+            surfTar.offsetTwigs[surf], surfSrc.AreaSort,
+            surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)
+    
+    timing.AI_int += int(aux[0])
+    timing.time_an += aux[1]
+
+    toc = time.time()
+    timing.time_P2P += toc-tic
+
+    return Ktx_aux, Kty_aux, Ktz_aux
 
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, 
@@ -594,6 +689,55 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
     timing.time_trans += tic.time_till(toc)*1e-3
 
     return K_gpu, V_gpu
+
+def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+            surf, LorY, w, param, timing, kernel):
+
+    tic = cuda.Event() 
+    toc = cuda.Event() 
+
+    tic.record()
+    REAL = param.REAL
+    mDev   = cuda.to_device(m.astype(REAL))
+    mKtcDev = cuda.to_device(mKtc.astype(REAL))
+    toc.record()
+    toc.synchronize()
+    timing.time_trans += tic.time_till(toc)*1e-3
+
+
+    tic.record()
+    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    directKt_gpu = kernel.get_function("P2PKt")
+    AI_int = cuda.to_device(zeros(param.Nround, dtype=int32))
+
+    # GPU arrays are flattened, need to point to first element 
+    ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
+    ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
+
+
+    directKt_gpu(Ktx_gpu, Kty_gpu, Ktz_gpu, 
+                surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
+                surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mKtcDev, 
+                surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, 
+                surfSrc.vertexDev, int32(ptr_offset), int32(ptr_list), 
+                int32(LorY), REAL(param.kappa), REAL(param.threshold),
+                int32(param.BlocksPerTwig), int32(param.NCRIT), AI_int, 
+                surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
+
+    toc.record()
+    toc.synchronize()
+    timing.time_P2P += tic.time_till(toc)*1e-3
+
+
+    tic.record()
+    AI_aux = zeros(param.Nround, dtype=int32)
+    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=int32)
+    timing.AI_int += sum(AI_aux[surfTar.unsort])
+    toc.record()
+    toc.synchronize()
+    timing.time_trans += tic.time_till(toc)*1e-3
+
+    return Ktx_gpu, Kty_gpu, Ktz_gpu
 
 def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     # Cells     : array of Cells
