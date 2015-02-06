@@ -70,6 +70,7 @@ class surfaces():
         self.VintDiag   = []        # Store diagonal of V internal 
         self.phi        = []        # Store value of potential on surface
         self.dphi       = []        # Store value of derivative of potential on surface
+        self.dipole     = []        # Store dipole moment vector from surface
 
 class parameters():
     def __init__(self):
@@ -135,13 +136,17 @@ def initializeField(filename, param):
         field_aux = fields()
 
         try:
-            field_aux.LorY  = int(LorY[i])                              # Laplace of Yukawa
+            field_aux.LorY  = int(LorY[i])                          # Laplace of Yukawa
         except ValueError:
             field_aux.LorY  = 0 
-        try:
-            field_aux.E     = float(E[i])                          # Dielectric constant
-        except ValueError:
-            field_aux.E  = 0 
+                                                                    # Dielectric constant
+        if 'j' in E[i]:                                             # If dielectric constant is complex
+            field_aux.E = complex(E[i])
+        else:
+            try:
+                field_aux.E  = float(E[i])                          
+            except ValueError:
+                field_aux.E  = 0 
         try:
             field_aux.kappa = float(kappa[i])                      # inverse Debye length
         except ValueError:
@@ -150,9 +155,9 @@ def initializeField(filename, param):
         field_aux.coulomb = int(coulomb[i])                         # do/don't coulomb interaction
         if int(charges[i])==1:                                      # if there are charges
             if qfile[i][-4:]=='.crd':
-                xq,q,Nq = readcrd(qfile[i], float)             # read charges
+                xq,q,Nq = readcrd(qfile[i], float)                  # read charges
             if qfile[i][-4:]=='.pqr':
-                xq,q,Nq = readpqr(qfile[i], float)             # read charges
+                xq,q,Nq = readpqr(qfile[i], float)                  # read charges
             field_aux.xq = xq                                       # charges positions
             field_aux.q = q                                         # charges values
         if int(Nparent[i])==1:                                      # if it is an enclosed region
@@ -160,7 +165,7 @@ def initializeField(filename, param):
         if int(Nchild[i])>0:                                        # if there are enclosed regions inside
             for j in range(int(Nchild[i])):
                 field_aux.child.append(int(child[Nchild_aux+j]))    # Loop over children to get pointers
-            Nchild_aux += int(Nchild[i])-1                             # Point to child for next surface
+            Nchild_aux += int(Nchild[i])-1                          # Point to child for next surface
             Nchild_aux += 1
 
         field_array.append(field_aux)
@@ -218,9 +223,9 @@ def initializeSurf(field_array, param, filename):
         else:
             s.Ehat = 1
 
-        s.xi = average(s.vertex[s.triangle[:],:,0], axis=1)
-        s.yi = average(s.vertex[s.triangle[:],:,1], axis=1)
-        s.zi = average(s.vertex[s.triangle[:],:,2], axis=1)
+        s.xi = average(s.vertex[s.triangle[:],0], axis=1)
+        s.yi = average(s.vertex[s.triangle[:],1], axis=1)
+        s.zi = average(s.vertex[s.triangle[:],2], axis=1)
 
         N = len(s.xi)
 
@@ -257,15 +262,29 @@ def initializeSurf(field_array, param, filename):
         else:
             Neq += 2*s.N
 
+#   Check if there is a complex dielectric
+    complexDiel = 0 
+    for f in field_array:
+        if type(f.E)==complex:
+            complexDiel = 1 
+
 #   Allocate K and V and prepare symbolic arrays
     for tar in surf_array:
         for src in surf_array:
-            tar.Kint.append(zeros((tar.N,src.N)))
-            tar.Kpint.append(zeros((tar.N,src.N)))
-            tar.Vint.append(zeros((tar.N,src.N)))
-            tar.Kext.append(zeros((tar.N,src.N)))
-            tar.Kpext.append(zeros((tar.N,src.N)))
-            tar.Vext.append(zeros((tar.N,src.N)))
+            if complexDiel==1:
+                tar.Kint.append(zeros((tar.N,src.N), complex))
+                tar.Kpint.append(zeros((tar.N,src.N), complex))
+                tar.Vint.append(zeros((tar.N,src.N), complex))
+                tar.Kext.append(zeros((tar.N,src.N), complex))
+                tar.Kpext.append(zeros((tar.N,src.N), complex))
+                tar.Vext.append(zeros((tar.N,src.N), complex))
+            else:
+                tar.Kint.append(zeros((tar.N,src.N)))
+                tar.Kpint.append(zeros((tar.N,src.N)))
+                tar.Vint.append(zeros((tar.N,src.N)))
+                tar.Kext.append(zeros((tar.N,src.N)))
+                tar.Kpext.append(zeros((tar.N,src.N)))
+                tar.Vext.append(zeros((tar.N,src.N)))
             tar.KintSym.append('') 
             tar.KpintSym.append('') 
             tar.VintSym.append('')
@@ -274,3 +293,18 @@ def initializeSurf(field_array, param, filename):
             tar.VextSym.append('')
             
     return surf_array, Neq
+
+def readElectricField(filename):
+
+    electricField = 0
+    wavelength = 0
+    for line in file(filename):
+        line = line.split()
+
+        if len(line)>0:
+            if line[0]=='WAVE':
+                electricField = float(line[1])
+                wavelength = float(line[2])
+
+    return electricField, wavelength
+

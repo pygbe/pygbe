@@ -146,9 +146,9 @@ def blockMatrix(tar, src, WK, kappa, threshold, LorY, xk, wk, K_fine, eps):
             same[i,i]   = 1 
 
     tri_ctr = average(src.vertex[src.triangle[:]], axis=1)
-    dx = transpose(ones((Nt,Nt))*tar.xi) - tri_ctr[:,0]
-    dy = transpose(ones((Nt,Nt))*tar.yi) - tri_ctr[:,1]
-    dz = transpose(ones((Nt,Nt))*tar.zi) - tri_ctr[:,2]
+    dx = transpose(ones((Ns,Nt))*tar.xi) - tri_ctr[:,0]
+    dy = transpose(ones((Ns,Nt))*tar.yi) - tri_ctr[:,1]
+    dz = transpose(ones((Ns,Nt))*tar.zi) - tri_ctr[:,2]
     r_tri = sqrt(dx*dx+dy*dy+dz*dz)
     L_d  = logical_and(greater_equal(sqrt(2*src.Area)/(r_tri+eps),threshold), same==0) 
 
@@ -172,24 +172,25 @@ def blockMatrix(tar, src, WK, kappa, threshold, LorY, xk, wk, K_fine, eps):
 
         N_analytical += len(an_integrals)
 
-        if same[i,i] == 1:
-            local_center = array([tar.xi[i], tar.yi[i], tar.zi[i]])
-            G_Y  = zeros(1)
-            dG_Y = zeros(1)
-            G_L  = zeros(1)
-            dG_L = zeros(1)
-            SA_wrap_arr(ravel(panel), local_center, G_Y, dG_Y, G_L, dG_L, kappa, array([1], dtype=int32), xk, wk) 
+        if abs(src.xi[0]-tar.xi[0])<1e-10:
+            if same[i,i] == 1:
+                local_center = array([tar.xi[i], tar.yi[i], tar.zi[i]])
+                G_Y  = zeros(1)
+                dG_Y = zeros(1)
+                G_L  = zeros(1)
+                dG_L = zeros(1)
+                SA_wrap_arr(ravel(panel), local_center, G_Y, dG_Y, G_L, dG_L, kappa, array([1], dtype=int32), xk, wk) 
 
-            if LorY==1:   # if Laplace
-                K_lyr[i,i]  = dG_L
-                V_lyr[i,i]  = G_L
-                Kp_lyr[i,i] = dG_L
-            else:           # if Yukawa
-                K_lyr[i,i]  = dG_Y
-                V_lyr[i,i]  = G_Y  
-                Kp_lyr[i,i] = dG_Y
+                if LorY==1:   # if Laplace
+                    K_lyr[i,i]  = dG_L
+                    V_lyr[i,i]  = G_L
+                    Kp_lyr[i,i] = dG_L
+                else:           # if Yukawa
+                    K_lyr[i,i]  = dG_Y
+                    V_lyr[i,i]  = G_Y  
+                    Kp_lyr[i,i] = dG_Y
 
-            N_analytical += 1
+                N_analytical += 1
 
     print '\t%i analytical integrals'%(N_analytical/Ns)
 
@@ -198,18 +199,35 @@ def blockMatrix(tar, src, WK, kappa, threshold, LorY, xk, wk, K_fine, eps):
 
 def generateMatrix(surf_array, Neq):
     
-    M = zeros((Neq,Neq))
+#   Check if there is a complex dielectric
+    complexDiel = 0 
+    if type(surf_array[0].Kext[0][0,0])==numpy.complex128:
+        complexDiel = 1 
+
+    if complexDiel==1:
+        M = zeros((Neq,Neq), complex)
+    else:
+        M = zeros((Neq,Neq))
     
     M_sym = []
     for i in range(len(surf_array)):
         tar = surf_array[i]
 
-        tar.KextDiag = zeros(tar.N)
-        tar.KpextDiag = zeros(tar.N)
-        tar.VextDiag = zeros(tar.N)
-        tar.KintDiag = zeros(tar.N)
-        tar.KpintDiag = zeros(tar.N)
-        tar.VintDiag = zeros(tar.N)
+        if complexDiel==1:
+            tar.KextDiag = zeros(tar.N, complex)
+            tar.KpextDiag = zeros(tar.N, complex)
+            tar.VextDiag = zeros(tar.N, complex)
+            tar.KintDiag = zeros(tar.N, complex)
+            tar.KpintDiag = zeros(tar.N, complex)
+            tar.VintDiag = zeros(tar.N, complex)
+        
+        else:
+            tar.KextDiag = zeros(tar.N)
+            tar.KpextDiag = zeros(tar.N)
+            tar.VextDiag = zeros(tar.N)
+            tar.KintDiag = zeros(tar.N)
+            tar.KpintDiag = zeros(tar.N)
+            tar.VintDiag = zeros(tar.N)
 
         if tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface' or tar.surf_type=='neumann_surface_hyper':
             M_sym.append([[]])

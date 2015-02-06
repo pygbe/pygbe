@@ -12,7 +12,7 @@ value in the vertex array with this new radius
 (although this will break the "vertex array equal to normal array" property)
 '''
 import numpy
-import pylab
+#import pylab
 
 octahedron_vertices = numpy.array( [ 
     [ 1.0, 0.0, 0.0], # 0 
