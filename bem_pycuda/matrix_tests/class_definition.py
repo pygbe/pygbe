@@ -223,9 +223,9 @@ def initializeSurf(field_array, param, filename):
         else:
             s.Ehat = 1
 
-        s.xi = average(s.vertex[s.triangle[:],:,0], axis=1)
-        s.yi = average(s.vertex[s.triangle[:],:,1], axis=1)
-        s.zi = average(s.vertex[s.triangle[:],:,2], axis=1)
+        s.xi = average(s.vertex[s.triangle[:],0], axis=1)
+        s.yi = average(s.vertex[s.triangle[:],1], axis=1)
+        s.zi = average(s.vertex[s.triangle[:],2], axis=1)
 
         N = len(s.xi)
 
