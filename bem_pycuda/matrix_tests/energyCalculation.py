@@ -27,10 +27,12 @@ from GaussIntegration import gaussIntegration_fine
 def calculate_phir(phi, dphi, s, xq, K_fine, eps, LorY, kappa):
 
     phir = 0
+    dummy = array([[0,0,0]])
     for i in range(len(s.triangle)):
         panel = s.vertex[s.triangle[i]]
 
-        K, V = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], K_fine, kappa, LorY, eps)
+        K, V, Kp = gaussIntegration_fine(xq, panel, s.normal[i], s.Area[i], dummy, K_fine, kappa, LorY, eps)
+        # s.normal is dummy: needed for Kp, which we don't use here.
         phir += (-K*phi[i] + V*dphi[i])/(4*pi)
         
     return phir
@@ -140,3 +142,43 @@ def fill_phi(phi, surf_array):
             surf_array[i].phi  = phi[s_start:s_start+s_size]
             surf_array[i].dphi = phi[s_start+s_size:s_start+2*s_size]
             s_start += 2*s_size
+
+def dipoleMoment(surf_array, electricField):
+# Computes dipole moment on a surface
+# Dipole is expressed as a boundary integral
+
+    for i in range(len(surf_array)):
+        s = surf_array[i]
+
+        xc = array([s.xi, s.yi, s.zi])
+
+#       Change dphi to outer side of surface
+        dphi = s.dphi*s.Ehat - (1-s.Ehat)*electricField*s.normal[:,2]
+
+        I1 = sum(xc*dphi*s.Area, axis=1)
+        I2 = sum(transpose(s.normal)*s.phi*s.Area, axis=1)
+
+        s.dipole = s.Eout*(I1-I2)
+
+def extCrossSection(surf_array, k, n, wavelength, electricField):
+# Computes the extinction cross section (According to Mischenko2007)
+# k: unit vector in direction of wave propagation
+# n: unit vector in direction of electric field
+
+    Cext = []
+    surf_Cext = []
+    for i in range(len(surf_array)):
+        s = surf_array[i]
+
+        diffractionCoeff = sqrt(s.Eout)
+        waveNumber = 2*pi*diffractionCoeff/wavelength
+
+        v1 = cross(k, s.dipole)
+        v2 = cross(v1, k)
+
+        C1 = dot(n, v2) * waveNumber**2/(s.Eout*electricField)
+
+        Cext.append(1/waveNumber.real * C1.imag)
+        surf_Cext.append(i)
+
+    return Cext, surf_Cext
