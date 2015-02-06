@@ -138,7 +138,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
                                     ind0, param, LorY, timing, kernel)
 
         K_gpu, V_gpu = P2P_gpu(surfSrc, surfTar, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, 
-                                K_gpu, V_gpu, self, LorY, K_diag, V_diag, IorE, L, w, param, timing, kernel)
+                                K_gpu, V_gpu, self, LorY, K_diag, IorE, L, w, param, timing, kernel)
 
         tic.record()
         K_aux = cuda.from_device(K_gpu, len(K_aux), dtype=REAL)
@@ -155,6 +155,108 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
     timing.time_sort += tic.time_till(toc)*1e-3
 
     return K_lyr, V_lyr 
+
+def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
+                self, param, ind0, timing, kernel):
+
+    tic = cuda.Event()
+    toc = cuda.Event()
+
+    REAL = param.REAL
+    Ns = len(surfSrc.triangle)
+    Nt = len(surfTar.triangle)
+    L = sqrt(2*surfSrc.Area) # Representative length
+
+    tic.record()
+    K = param.K
+    w    = getWeights(K)
+    X_Kt = zeros(Ns*K)
+    X_Ktc = zeros(Ns*K)
+
+    NsK = arange(Ns*K)
+    X_Kt[:]  = XKt[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]
+    X_Ktc[:] = XKt[NsK/K]
+
+    toc.record()
+    toc.synchronize()
+    timing.time_mass += tic.time_till(toc)*1e-3
+
+    tic.record()
+    C = 0
+    X_aux = zeros(Ns*K)
+    getMultipole(surfSrc.tree, C, surfSrc.xj, surfSrc.yj, surfSrc.zj, 
+                    X_Kt, X_aux, X_aux, X_aux, ind0, param.P, param.NCRIT)
+    toc.record()
+    toc.synchronize()
+    timing.time_P2M += tic.time_till(toc)*1e-3
+
+
+    tic.record()
+    for C in reversed(range(1,len(surfSrc.tree))):
+        PC = surfSrc.tree[C].parent
+        upwardSweep(surfSrc.tree, C, PC, param.P, ind0.II, ind0.JJ, ind0.KK, ind0.index, ind0.combII, ind0.combJJ, 
+                    ind0.combKK, ind0.IImii, ind0.JJmjj, ind0.KKmkk, ind0.index_small, ind0.index_ptr)
+    toc.record()
+    toc.synchronize()
+    timing.time_M2M += tic.time_till(toc)*1e-3
+
+    tic.record()
+    X_Kt = X_Kt[surfSrc.sortSource]
+    X_Ktc = X_Ktc[surfSrc.sortSource]
+    toc.record()
+    toc.synchronize()
+    timing.time_sort += tic.time_till(toc)*1e-3
+
+    param.Nround = len(surfTar.twig)*param.NCRIT
+    Ktx_aux  = zeros(param.Nround)
+    Kty_aux  = zeros(param.Nround)
+    Ktz_aux  = zeros(param.Nround)
+    AI_int = 0
+
+    ### CPU code
+    if param.GPU==0:
+        if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
+            Ktx_aux, Kty_aux, Ktz_aux = M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, self, 
+                                    ind0.index_large, param, LorY, timing)
+
+        Ktx_aux, Kty_aux, Ktz_aux = P2PKt_sort(surfSrc, surfTar, X_Kt, X_Ktc, 
+                            Ktx_aux, Kty_aux, Ktz_aux, self, LorY, w, param, timing)
+
+    ### GPU code
+    elif param.GPU==1:
+        Ktx_gpu = cuda.to_device(Ktx_aux.astype(REAL))
+        Kty_gpu = cuda.to_device(Kty_aux.astype(REAL))
+        Ktz_gpu = cuda.to_device(Ktz_aux.astype(REAL))
+
+        if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
+            Ktx_gpu, Kty_gpu, Ktz_gpu = M2PKt_gpu(surfSrc, surfTar, 
+                                    Ktx_gpu, Kty_gpu, Ktz_gpu, self, 
+                                    ind0, param, LorY, timing, kernel)
+
+        Ktx_gpu, Kty_gpu, Ktz_gpu = P2PKt_gpu(surfSrc, surfTar, X_Kt, X_Ktc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+                                self, LorY, w, param, timing, kernel)
+
+        tic.record()
+        Ktx_aux = cuda.from_device(Ktx_gpu, len(Ktx_aux), dtype=REAL)
+        Kty_aux = cuda.from_device(Kty_gpu, len(Kty_aux), dtype=REAL)
+        Ktz_aux = cuda.from_device(Ktz_gpu, len(Ktz_aux), dtype=REAL)
+        toc.record()
+        toc.synchronize()
+        timing.time_trans += tic.time_till(toc)*1e-3
+
+    tic.record()
+    Kt_lyr = Ktx_aux[surfTar.unsort]*surfTar.normal[:,0] \
+           + Kty_aux[surfTar.unsort]*surfTar.normal[:,1] \
+           + Ktz_aux[surfTar.unsort]*surfTar.normal[:,2] 
+
+    if abs(Kt_diag)>1e-12: # if same surface
+        Kt_lyr += Kt_diag * XKt
+
+    toc.record()
+    toc.synchronize()
+    timing.time_sort += tic.time_till(toc)*1e-3
+
+    return Kt_lyr
 
 
 def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):

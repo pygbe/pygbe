@@ -785,7 +785,7 @@ def fill_surface(surf,param):
         surf.Precond[3,:] = d_aux
     elif surf.surf_type=='dirichlet_surface':
         surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
-    elif surf.surf_type=='neumann_surface':
+    elif surf.surf_type=='neumann_surface' or surf.surf_type=='asc_surface':
         surf.Precond[0,:] = 1/(2*pi)
     
     tic = time.time()
@@ -920,7 +920,17 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
         surf_array[s].xcDev      = gpuarray.to_gpu(ravel(surf_array[s].xcSort.astype(REAL)))
         surf_array[s].ycDev      = gpuarray.to_gpu(ravel(surf_array[s].ycSort.astype(REAL)))
         surf_array[s].zcDev      = gpuarray.to_gpu(ravel(surf_array[s].zcSort.astype(REAL)))
-        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
+        
+#       Avoid transferring size 1 arrays to GPU (some systems crash)
+        Nbuff = 5
+        if len(surf_array[s].sizeTarget)<Nbuff:
+            sizeTarget_buffer = zeros(Nbuff, dtype=int32)    
+            sizeTarget_buffer[:len(surf_array[s].sizeTarget)] = surf_array[s].sizeTarget[:]    
+            surf_array[s].sizeTarDev = gpuarray.to_gpu(sizeTarget_buffer)
+        else:
+            surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
+       
+#        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
         surf_array[s].offSrcDev  = gpuarray.to_gpu(surf_array[s].offsetSource.astype(int32))
         surf_array[s].offTwgDev  = gpuarray.to_gpu(ravel(surf_array[s].offsetTwigs.astype(int32)))
         surf_array[s].offMltDev  = gpuarray.to_gpu(ravel(surf_array[s].offsetMlt.astype(int32)))
@@ -957,6 +967,10 @@ def fill_phi(phi, surf_array):
         elif surf_array[i].surf_type=='neumann_surface':
             surf_array[i].dphi = surf_array[i].phi0
             surf_array[i].phi  = phi[s_start:s_start+s_size]
+            s_start += s_size
+        elif surf_array[i].surf_type=='asc_surface':
+            surf_array[i].dphi = phi[s_start:s_start+s_size]/surf_array[i].Ein
+            surf_array[i].phi  = zeros(s_size)
             s_start += s_size
         else:
             surf_array[i].phi  = phi[s_start:s_start+s_size]
