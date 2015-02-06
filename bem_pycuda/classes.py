@@ -785,7 +785,7 @@ def fill_surface(surf,param):
         surf.Precond[3,:] = d_aux
     elif surf.surf_type=='dirichlet_surface':
         surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
-    elif surf.surf_type=='neumann_surface':
+    elif surf.surf_type=='neumann_surface' or surf.surf_type=='asc_surface':
         surf.Precond[0,:] = 1/(2*pi)
     
     tic = time.time()
@@ -967,6 +967,10 @@ def fill_phi(phi, surf_array):
         elif surf_array[i].surf_type=='neumann_surface':
             surf_array[i].dphi = surf_array[i].phi0
             surf_array[i].phi  = phi[s_start:s_start+s_size]
+            s_start += s_size
+        elif surf_array[i].surf_type=='asc_surface':
+            surf_array[i].dphi = phi[s_start:s_start+s_size]/surf_array[i].Ein
+            surf_array[i].phi  = zeros(s_size)
             s_start += s_size
         else:
             surf_array[i].phi  = phi[s_start:s_start+s_size]
