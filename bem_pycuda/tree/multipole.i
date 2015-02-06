@@ -26,6 +26,21 @@ extern void multipole_sort( double *K, int KSize,
                             double *zc, int zcSize,
                             int *index, int indexSize, 
                             int P, double kappa, int Nm, int LorY);
+extern void multipoleKt_sort(double *Ktx, int KtxSize, 
+                    double *Kty, int KtySize,
+                    double *Ktz, int KtzSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    double *M , int MSize, 
+                    double *xi, int xiSize, 
+                    double *yi, int yiSize, 
+                    double *zi, int ziSize,
+                    double *xc, int xcSize, 
+                    double *yc, int ycSize, 
+                    double *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, double kappa, int Nm, int LorY);
 extern void getIndex_arr(int P, int N,  
                         int *indices, int indicesSize,
                         int * ii    , int iiSize,
@@ -40,6 +55,9 @@ import_array();
 %}
 
 %apply (double* INPLACE_ARRAY1, int DIM1){(double *K, int KSize)};
+%apply (double* INPLACE_ARRAY1, int DIM1){(double *Ktx, int KtxSize)};
+%apply (double* INPLACE_ARRAY1, int DIM1){(double *Kty, int KtySize)};
+%apply (double* INPLACE_ARRAY1, int DIM1){(double *Ktz, int KtzSize)};
 %apply (double* INPLACE_ARRAY1, int DIM1){(double *V, int VSize)};
 %apply (int* INPLACE_ARRAY1, int DIM1){(int *indices, int indicesSize)};
 %apply (int* IN_ARRAY1, int DIM1){(int *offTar, int offTarSize)};
@@ -84,6 +102,21 @@ extern void multipole_sort( double *K, int KSize,
                             double *zc, int zcSize,
                             int *index, int indexSize, 
                             int P, double kappa, int Nm, int LorY);
+extern void multipoleKt_sort(double *Ktx, int KtxSize, 
+                    double *Kty, int KtySize,
+                    double *Ktz, int KtzSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    double *M , int MSize, 
+                    double *xi, int xiSize, 
+                    double *yi, int yiSize, 
+                    double *zi, int ziSize,
+                    double *xc, int xcSize, 
+                    double *yc, int ycSize, 
+                    double *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, double kappa, int Nm, int LorY);
 extern void getIndex_arr(int P, int N, 
                         int *indices, int indicesSize,
                         int * ii    , int iiSize,
@@ -91,6 +124,9 @@ extern void getIndex_arr(int P, int N,
                         int * kk    , int kkSize);
 extern int setIndex(int P, int i, int j, int k);
 %clear (double *K, int KSize);
+%clear (double *Ktx, int KtxSize);
+%clear (double *Kty, int KtySize);
+%clear (double *Ktz, int KtzSize);
 %clear (double *V, int VSize);
 %clear (double *M, int MSize);
 %clear (double *Md, int MdSize);
