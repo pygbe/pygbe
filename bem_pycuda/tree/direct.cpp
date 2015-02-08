@@ -593,7 +593,6 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
     }
 }
 
-
 void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
         int LorY, REAL *triangle, int triangleSize,
         int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
@@ -699,6 +698,125 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
                         sum_Ktx += PHI_Ktx * mKclean[j]; 
                         sum_Kty += PHI_Kty * mKclean[j]; 
                         sum_Ktz += PHI_Ktz * mKclean[j]; 
+                        stop = get_time();
+                        aux[1] += stop - start;
+
+                    }
+                }
+            }
+
+            Ktx_aux[i] += sum_Ktx;
+            Kty_aux[i] += sum_Kty;
+            Ktz_aux[i] += sum_Ktz;
+        }
+    }
+}
+
+void directKtqual_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
+        int LorY, REAL *triangle, int triangleSize,
+        int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
+        REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+        REAL *m, int mSize,
+        int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
+        int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, REAL *Area, int AreaSize,
+        REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, REAL kappa, REAL threshold, REAL eps, REAL *aux, int auxSize)
+{
+    double start,stop;
+    int CI_start, CI_end, CJ_start, CJ_end, list_start, list_end, CJ;
+    REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr, sum_Ktx, sum_Kty, sum_Ktz;
+    bool L_d, same, condition_an, condition_gq;
+
+    for (int tarTwg=0; tarTwg<offTarSize; tarTwg++)
+    {
+        CI_start = offTar[tarTwg];
+        CI_end   = offTar[tarTwg] + sizeTar[tarTwg];
+        list_start = offTwg[tarTwg];
+        list_end   = offTwg[tarTwg+1];
+
+        for(int i=CI_start; i<CI_end; i++)
+        {  
+            sum_Ktx = 0.;
+            sum_Kty = 0.;
+            sum_Ktz = 0.;
+
+            for (int lst=list_start; lst<list_end; lst++)
+            {
+                CJ = interList[lst];
+                CJ_start = offSrc[CJ];
+                CJ_end = offSrc[CJ+1];
+
+                for(int j=CJ_start; j<CJ_end; j++)
+                {   
+                    // Check if panels are far enough for Gauss quadrature
+                    //start = get_time();
+                    int ptr = 9*i;
+                    REAL panel[9]  = {triangle[ptr], triangle[ptr+1], triangle[ptr+2],
+                                    triangle[ptr+3], triangle[ptr+4], triangle[ptr+5],
+                                    triangle[ptr+6], triangle[ptr+7], triangle[ptr+8]};
+
+                    dx_tri = s_xj[j] - (panel[0]+panel[3]+panel[6])/3;
+                    dy_tri = s_yj[j] - (panel[1]+panel[4]+panel[7])/3;
+                    dz_tri = s_zj[j] - (panel[2]+panel[5]+panel[8])/3;
+                    R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri);
+                    
+                    L_d  = (sqrt(2*Area[i])/(R_tri+eps)>=threshold);
+                    same = (R_tri<1e-12);
+                    condition_an = ((L_d) && (k[i]==0));
+                    condition_gq = (!L_d);
+                    //stop = get_time();
+                    //aux[1] += stop - start;
+
+                    if(condition_gq)
+                    {
+                        //start = get_time();
+                        dx = xt[i] - s_xj[j];
+                        dy = yt[i] - s_yj[j];
+                        dz = zt[i] - s_zj[j];
+                        R  = sqrt(dx*dx + dy*dy + dz*dz + eps*eps);
+                        R2 = R*R;
+                        R3 = R2*R;
+                        if (LorY==2)
+                        {
+                            expKr = m[j]*exp(-kappa*R)/R2*(kappa+1/R);
+                            sum_Ktx -= expKr * dx;
+                            sum_Kty -= expKr * dy;
+                            sum_Ktz -= expKr * dz;
+                        }
+                        if (LorY==1)
+                        {
+                            expKr = m[j]/R3;
+                            sum_Ktx -= expKr*dx;
+                            sum_Kty -= expKr*dy;
+                            sum_Ktz -= expKr*dz;
+                        }
+                        //stop = get_time();
+                        //aux[1] += stop - start;
+                    }
+                    
+                    if(condition_an)
+                    {
+                        start = get_time();
+                        aux[0] += 1;
+                        REAL PHI_Ktx = 0.;
+                        REAL PHI_Kty = 0.;
+                        REAL PHI_Ktz = 0.;
+                        
+                        if (same==1)
+                        {
+                            PHI_Ktx = 0;
+                            PHI_Kty = 0;
+                            PHI_Ktz = 0;
+                        }
+                        else
+                        {
+                            GQ_fineKt(PHI_Ktx, PHI_Kty, PHI_Ktz, panel, s_xj[j], s_yj[j], s_zj[j], kappa, Xsk, Wsk, WskSize, -1, LorY); // -1 because dx is flipped inside GQ_fineKt
+                        }
+
+        //                printf("%f \t %f\n",PHI_V,mVclean[j]);
+
+                        sum_Ktx += PHI_Ktx * m[j]; 
+                        sum_Kty += PHI_Kty * m[j]; 
+                        sum_Ktz += PHI_Ktz * m[j]; 
                         stop = get_time();
                         aux[1] += stop - start;
 

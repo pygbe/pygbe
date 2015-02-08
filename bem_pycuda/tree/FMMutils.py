@@ -27,7 +27,7 @@ from scipy.misc         import comb
 
 # Wrapped code
 from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
-from direct             import direct_c, direct_sort, directKt_sort
+from direct             import direct_c, direct_sort, directKt_sort, directKtqual_sort
 from calculateMultipoles import P2M, M2M
 
 # CUDA libraries
@@ -216,6 +216,9 @@ def sortPoints(surface, Cells, twig, param):
 
     Nround = len(twig)*param.NCRIT
 
+    if param.linearSys == 'qualocation':
+        Nround *= param.K
+
     surface.sortTarget   = zeros(Nround, dtype=int32)
     surface.unsort       = zeros(len(surface.xi), dtype=int32)
     surface.sortSource   = zeros(len(surface.xj), dtype=int32)
@@ -241,10 +244,17 @@ def sortPoints(surface, Cells, twig, param):
     surface.xjSort = surface.xj[surface.sortSource]
     surface.yjSort = surface.yj[surface.sortSource]
     surface.zjSort = surface.zj[surface.sortSource]
-    surface.AreaSort = surface.Area[surface.sortSource/param.K]
-    surface.sglInt_intSort = surface.sglInt_int[surface.sortSource/param.K]
-    surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource/param.K]
-    surface.triangleSort = surface.triangle[surface.sortSource/param.K]
+    
+    if param.linearSys == 'qualocation':
+        surface.AreaSort = surface.Area[surface.sortTarget/param.K]
+        surface.sglInt_intSort = surface.sglInt_int[surface.sortSource]
+        surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource]
+        surface.triangleSort = surface.triangle[surface.sortTarget/param.K]
+    else:
+        surface.AreaSort = surface.Area[surface.sortSource/param.K]
+        surface.sglInt_intSort = surface.sglInt_int[surface.sortSource/param.K]
+        surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource/param.K]
+        surface.triangleSort = surface.triangle[surface.sortSource/param.K]
 
 def computeIndices(P, ind0):
     II = []
@@ -612,7 +622,6 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
     yt = surfTar.yiSort
     zt = surfTar.ziSort
 
-    tri  = surfSrc.sortSource/param.K # Triangle
     k    = surfSrc.sortSource%param.K # Gauss point
 
     aux = zeros(2)
@@ -621,6 +630,38 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
             int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
             surfTar.offsetTwigs[surf], surfSrc.AreaSort,
+            surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)
+    
+    timing.AI_int += int(aux[0])
+    timing.time_an += aux[1]
+
+    toc = time.time()
+    timing.time_P2P += toc-tic
+
+    return Ktx_aux, Kty_aux, Ktz_aux
+
+
+def P2PKtqual_sort(surfSrc, surfTar, m, Ktx_aux, Kty_aux, Ktz_aux, 
+            surf, LorY, w, param, timing):
+
+    tic = time.time()
+
+    s_xj = surfSrc.xjSort
+    s_yj = surfSrc.yjSort
+    s_zj = surfSrc.zjSort
+
+    xt = surfTar.xiSort
+    yt = surfTar.yiSort
+    zt = surfTar.ziSort
+
+    k    = surfTar.sortTarget%param.K # Gauss point
+
+    aux = zeros(2)
+
+    directKtqual_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfTar.vertex[surfTar.triangleSort[:]]), 
+            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m,
+            surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
+            surfTar.offsetTwigs[surf], surfTar.AreaSort,
             surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)
     
     timing.AI_int += int(aux[0])

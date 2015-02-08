@@ -178,6 +178,7 @@ class parameters():
         self.REAL          = 0               # Data type
         self.E_field       = []              # Regions where energy will be calculated
         self.GPU           = -1              # =1: with GPU, =0: no GPU
+        self.linearSys     = 'collocation'   # method for linear system. Can be collocation (default) or qualocation
 
 
 class index_constant():
@@ -731,15 +732,43 @@ def fill_surface(surf,param):
     surf.xk,surf.wk = GQ_1D(param.Nk)
     surf.Xsk,surf.Wsk = quadratureRule_fine(param.K_fine) 
 
+    # If qualocation, Gauss points are targets and sources are in the middle of the panel
+    if param.linearSys == 'qualocation':
+        x_aux = copy(surf.xi)
+        surf.xi = copy(surf.xj)
+        surf.xj = copy(x_aux)
+
+        x_aux = copy(surf.yi)
+        surf.yi = copy(surf.yj)
+        surf.yj = copy(x_aux)
+
+        x_aux = copy(surf.zi)
+        surf.zi = copy(surf.zj)
+        surf.zj = copy(x_aux)
+    
+        for Cells in surf.tree:
+            x_aux = copy(Cells.source)
+            Cells.source = copy(Cells.target)
+            Cells.target = copy(x_aux)
+
+            x_aux = Cells.ntarget
+            Cells.ntarget = Cells.nsource
+            Cells.nsource = x_aux
+
 
     # Generate preconditioner
     # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
     surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
                                  # Order: Top left, top right, bott left, bott right    
     centers = zeros((N,3))
-    centers[:,0] = surf.xi[:]
-    centers[:,1] = surf.yi[:]
-    centers[:,2] = surf.zi[:]
+    if param.linearSys == 'qualocation':
+        centers[:,0] = surf.xj[:]
+        centers[:,1] = surf.yj[:]
+        centers[:,2] = surf.zj[:]
+    else:
+        centers[:,0] = surf.xi[:]
+        centers[:,1] = surf.yi[:]
+        centers[:,2] = surf.zi[:]
 
 #   Compute diagonal integral for internal equation
     VL = zeros(N) 

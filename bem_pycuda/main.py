@@ -60,6 +60,9 @@ param = parameters()
 precision = readParameters(param,sys.argv[1])
 configFile = sys.argv[2]
 
+if len(sys.argv)>3:
+    param.linearSys = sys.argv[3]
+
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
 param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
 

@@ -155,7 +155,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
     timing.time_sort += tic.time_till(toc)*1e-3
 
     return K_lyr, V_lyr 
-
+    
 def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
                 self, param, ind0, timing, kernel):
 
@@ -248,6 +248,118 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
     Kt_lyr = Ktx_aux[surfTar.unsort]*surfTar.normal[:,0] \
            + Kty_aux[surfTar.unsort]*surfTar.normal[:,1] \
            + Ktz_aux[surfTar.unsort]*surfTar.normal[:,2] 
+
+    if abs(Kt_diag)>1e-12: # if same surface
+        Kt_lyr += Kt_diag * XKt
+
+    toc.record()
+    toc.synchronize()
+    timing.time_sort += tic.time_till(toc)*1e-3
+
+    return Kt_lyr
+
+
+def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
+                self, param, ind0, timing, kernel):
+
+    tic = cuda.Event()
+    toc = cuda.Event()
+
+    REAL = param.REAL
+    Ns = len(surfSrc.triangle)
+    Nt = len(surfTar.triangle)
+
+    tic.record()
+    K = param.K
+    w = getWeights(K)
+
+    X_Kt = XKt*surfSrc.Area
+
+    toc.record()
+    toc.synchronize()
+    timing.time_mass += tic.time_till(toc)*1e-3
+
+    tic.record()
+    C = 0
+    X_aux = zeros(Ns)
+#   Here we use xi because in qualocation sources are the center of the panel
+    getMultipole(surfSrc.tree, C, surfSrc.xj, surfSrc.yj, surfSrc.zj, 
+                    X_Kt, X_aux, X_aux, X_aux, ind0, param.P, param.NCRIT)
+    toc.record()
+    toc.synchronize()
+    timing.time_P2M += tic.time_till(toc)*1e-3
+
+
+    tic.record()
+    for C in reversed(range(1,len(surfSrc.tree))):
+        PC = surfSrc.tree[C].parent
+        upwardSweep(surfSrc.tree, C, PC, param.P, ind0.II, ind0.JJ, ind0.KK, ind0.index, ind0.combII, ind0.combJJ, 
+                    ind0.combKK, ind0.IImii, ind0.JJmjj, ind0.KKmkk, ind0.index_small, ind0.index_ptr)
+    toc.record()
+    toc.synchronize()
+    timing.time_M2M += tic.time_till(toc)*1e-3
+
+    tic.record()
+    X_Kt = X_Kt[surfSrc.sortSource]
+    toc.record()
+    toc.synchronize()
+    timing.time_sort += tic.time_till(toc)*1e-3
+
+    param.Nround = len(surfTar.twig)*param.NCRIT
+    Ktx_aux  = zeros(param.Nround)
+    Kty_aux  = zeros(param.Nround)
+    Ktz_aux  = zeros(param.Nround)
+    AI_int = 0
+
+    ### CPU code
+    if param.GPU==0:
+        if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
+            Ktx_aux, Kty_aux, Ktz_aux = M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, self, 
+                                    ind0.index_large, param, LorY, timing)
+
+        Ktx_aux, Kty_aux, Ktz_aux = P2PKtqual_sort(surfSrc, surfTar, X_Kt, X_Ktc, 
+                            Ktx_aux, Kty_aux, Ktz_aux, self, LorY, w, param, timing)
+
+    ### GPU code
+    elif param.GPU==1:
+        Ktx_gpu = cuda.to_device(Ktx_aux.astype(REAL))
+        Kty_gpu = cuda.to_device(Kty_aux.astype(REAL))
+        Ktz_gpu = cuda.to_device(Ktz_aux.astype(REAL))
+
+        if surfTar.offsetMlt[self,len(surfTar.twig)]>0:
+            Ktx_gpu, Kty_gpu, Ktz_gpu = M2PKt_gpu(surfSrc, surfTar, 
+                                    Ktx_gpu, Kty_gpu, Ktz_gpu, self, 
+                                    ind0, param, LorY, timing, kernel)
+
+        Ktx_gpu, Kty_gpu, Ktz_gpu = P2PKt_gpu(surfSrc, surfTar, X_Kt, X_Ktc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+                                self, LorY, w, param, timing, kernel)
+
+        tic.record()
+        Ktx_aux = cuda.from_device(Ktx_gpu, len(Ktx_aux), dtype=REAL)
+        Kty_aux = cuda.from_device(Kty_gpu, len(Kty_aux), dtype=REAL)
+        Ktz_aux = cuda.from_device(Ktz_gpu, len(Ktz_aux), dtype=REAL)
+        toc.record()
+        toc.synchronize()
+        timing.time_trans += tic.time_till(toc)*1e-3
+
+    tic.record()
+
+    Ktx_aux = Ktx_aux[surfTar.unsort]
+    Kty_aux = Kty_aux[surfTar.unsort]
+    Ktz_aux = Ktz_aux[surfTar.unsort]
+
+    Ktx = zeros(Nt)
+    Kty = zeros(Nt)
+    Ktz = zeros(Nt)
+
+    for i in range(Nt):
+        Ktx = sum(Ktx_aux[i*param.K:i*param.K+param.K])
+        Kty = sum(Kty_aux[i*param.K:i*param.K+param.K])
+        Ktz = sum(Ktz_aux[i*param.K:i*param.K+param.K])
+
+    Kt_lyr = surfTar.Area * (Ktx*surfTar.normal[:,0] \
+                           + Kty*surfTar.normal[:,1] \
+                           + Ktz*surfTar.normal[:,2])
 
     if abs(Kt_diag)>1e-12: # if same surface
         Kt_lyr += Kt_diag * XKt

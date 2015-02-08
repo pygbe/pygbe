@@ -26,6 +26,15 @@ extern void directKt_sort(double *Ktx_aux, int Ktx_auxSize, double *Kty_aux, int
         int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, double *Area, int AreaSize,
         double *Xsk, int XskSize, double *Wsk, int WskSize, double kappa, double threshold, double eps, double *aux, int auxSize);
 
+extern void directKtqual_sort(double *Ktx_aux, int Ktx_auxSize, double *Kty_aux, int Kty_auxSize, double *Ktz_aux, int Ktz_auxSize, 
+        int LorY, double *triangle, int triangleSize,
+        int *k, int kSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, double *s_zj, int s_zjSize, 
+        double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
+        double *m, int mSize,
+        int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
+        int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, double *Area, int AreaSize,
+        double *Xsk, int XskSize, double *Wsk, int WskSize, double kappa, double threshold, double eps, double *aux, int auxSize);
+
 extern void direct_c(double *K_aux, int K_auxSize, double *V_aux, int V_auxSize, int LorY, double K_diag, double V_diag, int IorE, double *triangle, int triangleSize, 
         int *tri, int triSize, int *k, int kSize, double *xi, int xiSize, double *yi, int yiSize, 
         double *zi, int ziSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, 
@@ -107,6 +116,15 @@ extern void directKt_sort(double *Ktx_aux, int Ktx_auxSize, double *Kty_aux, int
         double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
         double *m, int mSize, double *mKc, int mKcSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize,
+        int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, double *Area, int AreaSize,
+        double *Xsk, int XskSize, double *Wsk, int WskSize, double kappa, double threshold, double eps, double *aux, int auxSize);
+
+extern void directKtqual_sort(double *Ktx_aux, int Ktx_auxSize, double *Kty_aux, int Kty_auxSize, double *Ktz_aux, int Ktz_auxSize, 
+        int LorY, double *triangle, int triangleSize,
+        int *k, int kSize, double *s_xj, int s_xjSize, double *s_yj, int s_yjSize, double *s_zj, int s_zjSize, 
+        double *xt, int xtSize, double *yt, int ytSize, double *zt, int ztSize,
+        double *m, int mSize,
+        int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
         int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, double *Area, int AreaSize,
         double *Xsk, int XskSize, double *Wsk, int WskSize, double kappa, double threshold, double eps, double *aux, int auxSize);
 

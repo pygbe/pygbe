@@ -91,6 +91,17 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     v = -Kt_lyr
     return v
 
+def selfASCqual(surf, src, tar, LorY, param, ind0, timing, kernel):
+
+    Kt_diag = -2*pi * (surf.Eout+surf.Ein)/(surf.Eout-surf.Ein) * surf.Area
+    V_diag = 0
+    
+    Kt_lyr = project_Ktqual(surf.XinK, LorY, surf, surf, 
+                            Kt_diag, src, param, ind0, timing, kernel)
+    
+    v = -Kt_lyr
+    return v
+
 def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     
     Nfield = len(field_array)
@@ -127,7 +138,11 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
 #           ASC only for self-interaction so far 
             LorY = field_array[F].LorY
             p = field_array[F].parent[0]
-            v = selfASC(surf_array[p], p, p, LorY, param, ind0, timing, kernel)
+            if param.linearSys == 'collocation':
+                v = selfASC(surf_array[p], p, p, LorY, param, ind0, timing, kernel)
+            elif param.linearSys == 'qualocation':
+                v = selfASCqual(surf_array[p], p, p, LorY, param, ind0, timing, kernel)
+
             surf_array[p].Xout_int += v
 
         if parent_type!='dirichlet_surface' and parent_type!='neumann_surface' and parent_type!='asc_surface':
