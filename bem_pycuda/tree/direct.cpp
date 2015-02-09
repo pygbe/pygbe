@@ -716,7 +716,7 @@ void directKtqual_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_au
         int LorY, REAL *triangle, int triangleSize,
         int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
         REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
-        REAL *m, int mSize,
+        REAL *m, int mSize, REAL *mKclean, int mKcleanSize,
         int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
         int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, REAL *Area, int AreaSize,
         REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, REAL kappa, REAL threshold, REAL eps, REAL *aux, int auxSize)
@@ -739,6 +739,11 @@ void directKtqual_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_au
             sum_Kty = 0.;
             sum_Ktz = 0.;
 
+            int ptr = 9*i;
+            REAL panel[9]  = {triangle[ptr], triangle[ptr+1], triangle[ptr+2],
+                            triangle[ptr+3], triangle[ptr+4], triangle[ptr+5],
+                            triangle[ptr+6], triangle[ptr+7], triangle[ptr+8]};
+
             for (int lst=list_start; lst<list_end; lst++)
             {
                 CJ = interList[lst];
@@ -749,10 +754,6 @@ void directKtqual_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_au
                 {   
                     // Check if panels are far enough for Gauss quadrature
                     //start = get_time();
-                    int ptr = 9*i;
-                    REAL panel[9]  = {triangle[ptr], triangle[ptr+1], triangle[ptr+2],
-                                    triangle[ptr+3], triangle[ptr+4], triangle[ptr+5],
-                                    triangle[ptr+6], triangle[ptr+7], triangle[ptr+8]};
 
                     dx_tri = s_xj[j] - (panel[0]+panel[3]+panel[6])/3;
                     dy_tri = s_yj[j] - (panel[1]+panel[4]+panel[7])/3;
@@ -814,9 +815,9 @@ void directKtqual_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_au
 
         //                printf("%f \t %f\n",PHI_V,mVclean[j]);
 
-                        sum_Ktx += PHI_Ktx * m[j]; 
-                        sum_Kty += PHI_Kty * m[j]; 
-                        sum_Ktz += PHI_Ktz * m[j]; 
+                        sum_Ktx += PHI_Ktx * mKclean[j]; 
+                        sum_Kty += PHI_Kty * mKclean[j]; 
+                        sum_Ktz += PHI_Ktz * mKclean[j]; 
                         stop = get_time();
                         aux[1] += stop - start;
 

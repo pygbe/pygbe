@@ -218,10 +218,12 @@ def addSources3(Cells, twig, K):
 
 def sortPoints(surface, Cells, twig, param):
 
-    Nround = len(twig)*param.NCRIT
-
     if param.linearSys == 'qualocation':
-        Nround *= param.K
+        NCRIT_aux = param.NCRIT*param.K
+    else:
+        NCRIT_aux = param.NCRIT
+
+    Nround = len(twig)*NCRIT_aux
 
     surface.sortTarget   = zeros(Nround, dtype=int32)
     surface.unsort       = zeros(len(surface.xi), dtype=int32)
@@ -233,12 +235,12 @@ def sortPoints(surface, Cells, twig, param):
     offSrc = 0
     i = 0
     for C in twig:
-        surface.sortTarget[param.NCRIT*i:param.NCRIT*i+Cells[C].ntarget] = Cells[C].target
-        surface.unsort[Cells[C].target] = range(param.NCRIT*i,param.NCRIT*i+Cells[C].ntarget)
+        surface.sortTarget[NCRIT_aux*i:NCRIT_aux*i+Cells[C].ntarget] = Cells[C].target
+        surface.unsort[Cells[C].target] = range(NCRIT_aux*i,NCRIT_aux*i+Cells[C].ntarget)
         surface.sortSource[offSrc:offSrc+Cells[C].nsource]   = Cells[C].source
         offSrc += Cells[C].nsource
         surface.offsetSource[i+1] = offSrc
-        surface.offsetTarget[i]   = i*param.NCRIT
+        surface.offsetTarget[i]   = i*NCRIT_aux
         surface.sizeTarget[i]     = Cells[C].ntarget
         i += 1
 
@@ -645,7 +647,7 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
     return Ktx_aux, Kty_aux, Ktz_aux
 
 
-def P2PKtqual_sort(surfSrc, surfTar, m, Ktx_aux, Kty_aux, Ktz_aux, 
+def P2PKtqual_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, 
             surf, LorY, w, param, timing):
 
     tic = time.time()
@@ -663,7 +665,7 @@ def P2PKtqual_sort(surfSrc, surfTar, m, Ktx_aux, Kty_aux, Ktz_aux,
     aux = zeros(2)
 
     directKtqual_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfTar.vertex[surfTar.triangleSort[:]]), 
-            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m,
+            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
             surfTar.offsetTwigs[surf], surfTar.AreaSort,
             surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)

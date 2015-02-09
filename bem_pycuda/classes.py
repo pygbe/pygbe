@@ -988,7 +988,7 @@ def fill_phi(phi, surf_array):
 
     s_start = 0
     for i in range(len(surf_array)):
-        s_size = len(surf_array[i].xi)
+        s_size = len(surf_array[i].triangle)
         if surf_array[i].surf_type=='dirichlet_surface':
             surf_array[i].phi = surf_array[i].phi0
             surf_array[i].dphi = phi[s_start:s_start+s_size]

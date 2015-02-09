@@ -24,7 +24,7 @@ from numpy import *
 import sys
 sys.path.append('tree')
 from FMMutils import *
-from projection import project, project_Kt, get_phir, get_phir_gpu
+from projection import project, project_Kt, project_Ktqual, get_phir, get_phir_gpu, getWeights
 from classes import parameters, index_constant
 import time
 sys.path.append('../util')
@@ -162,8 +162,9 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
             if len(field_array[F].child)>0:
                 C = field_array[F].child
                 for c1 in C:
-                    v,t1,t2 = selfExterior(surf_array[c1], c1, LorY, param, ind0, timing, kernel)
-                    surf_array[c1].Xout_ext += v
+                    if surf_array[c1].surf_type!='asc_surface':
+                        v,t1,t2 = selfExterior(surf_array[c1], c1, LorY, param, ind0, timing, kernel)
+                        surf_array[c1].Xout_ext += v
                     for c2 in C:
                         if c1!=c2:
                             v = nonselfExterior(surf_array, c2, c1, LorY, param, ind0, timing, kernel)
@@ -204,6 +205,7 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
 
 def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     F = zeros(param.Neq)
+    w = getWeights(param.K)
 
 #   Point charge contribution to RHS
     for j in range(len(field_array)):
@@ -240,10 +242,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                             aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
 
                             for ii in range(len(surf_array[s].triangle)):
-                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,0] \
-                                         + sum(aux_y[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,1] \
-                                         + sum(aux_z[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,2] 
+                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,0] \
+                                         + sum(aux_y[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,1] \
+                                         + sum(aux_z[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,2] 
 
+                            aux *= surf_array[s].Area
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
@@ -298,6 +301,8 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                 aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,0] \
                                          + sum(aux_y[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,1] \
                                          + sum(aux_z[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,2] 
+
+                            aux *= surf_array[s].Area
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)

@@ -273,7 +273,8 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     K = param.K
     w = getWeights(K)
 
-    X_Kt = XKt*surfSrc.Area
+    X_Kt  = XKt*surfSrc.Area
+    X_Ktc = X_Kt/w[0]       # k=0 will store the fine integration
 
     toc.record()
     toc.synchronize()
@@ -306,6 +307,10 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     timing.time_sort += tic.time_till(toc)*1e-3
 
     param.Nround = len(surfTar.twig)*param.NCRIT
+
+    if param.linearSys == 'qualocation':
+        param.Nround *= param.K
+
     Ktx_aux  = zeros(param.Nround)
     Kty_aux  = zeros(param.Nround)
     Ktz_aux  = zeros(param.Nround)
@@ -317,7 +322,7 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
             Ktx_aux, Kty_aux, Ktz_aux = M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, self, 
                                     ind0.index_large, param, LorY, timing)
 
-        Ktx_aux, Kty_aux, Ktz_aux = P2PKtqual_sort(surfSrc, surfTar, X_Kt, X_Ktc, 
+        Ktx_aux, Kty_aux, Ktz_aux = P2PKtqual_sort(surfSrc, surfTar, X_Kt, X_Ktc,
                             Ktx_aux, Kty_aux, Ktz_aux, self, LorY, w, param, timing)
 
     ### GPU code
@@ -353,15 +358,15 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     Ktz = zeros(Nt)
 
     for i in range(Nt):
-        Ktx[i] = sum(Ktx_aux[i*param.K:i*param.K+param.K])
-        Kty[i] = sum(Kty_aux[i*param.K:i*param.K+param.K])
-        Ktz[i] = sum(Ktz_aux[i*param.K:i*param.K+param.K])
+        Ktx[i] = sum(Ktx_aux[i*param.K:i*param.K+param.K]*w)
+        Kty[i] = sum(Kty_aux[i*param.K:i*param.K+param.K]*w)
+        Ktz[i] = sum(Ktz_aux[i*param.K:i*param.K+param.K]*w)
 
     Kt_lyr = surfTar.Area * (Ktx*surfTar.normal[:,0] \
                            + Kty*surfTar.normal[:,1] \
                            + Ktz*surfTar.normal[:,2])
 
-    if abs(Kt_diag)>1e-12: # if same surface
+    if abs(Kt_diag.any())>1e-12: # if same surface
         Kt_lyr += Kt_diag * XKt
 
     toc.record()
