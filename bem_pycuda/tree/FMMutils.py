@@ -38,8 +38,9 @@ import time
 
 class Cell():
     def __init__ (self, NCRIT, Nm):
-        self.nsource   = 0       # Number of source particles
-        self.ntarget = 0       # Number of target particles
+        self.nsource = 0      # Number of source particles
+        self.ntarget = 0      # Number of target particles
+        self.npanel  = 0      # Number of panels
         self.nchild  = 0      # Number of child boxes in binary
                               # This will be a 8bit value and if certain 
                               # child exists, that bit will be 1.
@@ -96,8 +97,9 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
         CC = Cells[C].child[octant] # Pointer to child cell
         Cells[CC].target = append(Cells[CC].target, l)
         Cells[CC].ntarget += 1
+        Cells[CC].npanel  += 1
 
-        if (Cells[CC].ntarget >= NCRIT):
+        if (Cells[CC].npanel >= NCRIT):
             Ncell = split_cell(x, y, z, Cells, CC, NCRIT, Nm, Ncell)
 
     return Ncell
@@ -117,8 +119,9 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
     for i in range(N):
 
         C = 0 
-        while (Cells[C].ntarget>=NCRIT):
+        while (Cells[C].npanel >=NCRIT):
             Cells[C].ntarget+=1
+            Cells[C].npanel +=1
 
             octant = int(xi[i]>Cells[C].xc) + int(yi[i]>Cells[C].yc)*2 + int(zi[i]>Cells[C].zc)*4
             if (not(Cells[C].nchild & (1<<octant))):
@@ -128,8 +131,9 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
 
         Cells[C].target = append(Cells[C].target, i) 
         Cells[C].ntarget += 1
+        Cells[C].npanel  += 1
 
-        if (Cells[C].ntarget>=NCRIT):
+        if (Cells[C].npanel>=NCRIT):
             Ncell = split_cell(xi,yi,zi,Cells,C, NCRIT, Nm, Ncell)
 
     Cells = Cells[:Ncell]
@@ -140,7 +144,7 @@ def findTwigs(Cells, C, twig, NCRIT):
     # C         : index of cell in Cells array 
     # twig      : array with indices of twigs in Cells array
 
-    if (Cells[C].ntarget>=NCRIT):
+    if (Cells[C].npanel>=NCRIT):
         for c in range(8):
             if (Cells[C].nchild & (1<<c)):
                 twig = findTwigs(Cells, Cells[C].child[c], twig, NCRIT)
@@ -158,7 +162,7 @@ def addSources2(x,y,z,j,Cells,C,NCRIT):
     # C    : index of cell in Cells array
     # NCRIT: max number of target particles per cell
 
-    if (Cells[C].ntarget>=NCRIT):
+    if (Cells[C].npanel>=NCRIT):
         octant = (x[j]>Cells[C].xc) + ((y[j]>Cells[C].yc) << 1) + ((z[j]>Cells[C].zc) << 2)
         if (Cells[C].nchild & (1<<octant)): # If child cell exists, use
             O = octant
@@ -309,7 +313,7 @@ def interactionList(surfSrc,surfTar,CJ,CI,theta,NCRIT,offTwg,offMlt,s_src):
     # theta     : MAC criteron 
     # NCRIT     : max number of particles per cell
 
-    if (surfSrc.tree[CJ].ntarget>=NCRIT):
+    if (surfSrc.tree[CJ].npanel>=NCRIT):
         for c in range(8):
             if (surfSrc.tree[CJ].nchild & (1<<c)):
                 CC = surfSrc.tree[CJ].child[c]  # Points at child cell
@@ -410,7 +414,7 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
     # II,JJ,KK  : x,y,z powers of multipole expansion
     # index     : 1D mapping of II,JJ,KK (index of multipoles)
 
-    if (Cells[C].ntarget>=NCRIT):
+    if (Cells[C].npanel>=NCRIT):
 
         Cells[C].M[:] = 0.0 # Initialize multipoles
         Cells[C].Md[:] = 0.0
@@ -789,7 +793,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     # P         : order of Taylor expansion
     # NCRIT     : max number of particles per cell
 
-    if (Cells[CJ].ntarget>=par_reac.NCRIT): # if not a twig
+    if (Cells[CJ].npanel>=par_reac.NCRIT): # if not a twig
         for c in range(8):
             if (Cells[CJ].nchild & (1<<c)):
                 CC = Cells[CJ].child[c]  # Points at child cell

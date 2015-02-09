@@ -353,9 +353,9 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     Ktz = zeros(Nt)
 
     for i in range(Nt):
-        Ktx = sum(Ktx_aux[i*param.K:i*param.K+param.K])
-        Kty = sum(Kty_aux[i*param.K:i*param.K+param.K])
-        Ktz = sum(Ktz_aux[i*param.K:i*param.K+param.K])
+        Ktx[i] = sum(Ktx_aux[i*param.K:i*param.K+param.K])
+        Kty[i] = sum(Kty_aux[i*param.K:i*param.K+param.K])
+        Ktz[i] = sum(Ktz_aux[i*param.K:i*param.K+param.K])
 
     Kt_lyr = surfTar.Area * (Ktx*surfTar.normal[:,0] \
                            + Kty*surfTar.normal[:,1] \

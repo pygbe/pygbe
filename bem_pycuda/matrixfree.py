@@ -215,13 +215,13 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 s_start = 0
                 for ss in range(s):
                     if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
-                        s_start += len(surf_array[ss].xi)
+                        s_start += len(surf_array[ss].triangle)
                     else:
-                        s_start += 2*len(surf_array[ss].xi)
+                        s_start += 2*len(surf_array[ss].triangle)
 
-                s_size = len(surf_array[s].xi)
+                s_size = len(surf_array[s].triangle)
 
-                aux = zeros(len(surf_array[s].xi))
+                aux = zeros(len(surf_array[s].triangle))
                 for i in range(Nq):
                     dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
                     dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
@@ -229,9 +229,21 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
+
+                        if param.linearSys == 'collocation':
+                            aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
+                                                                        + dy_pq*surf_array[s].normal[:,1] \
+                                                                        + dz_pq*surf_array[s].normal[:,2])
+                        elif param.linearSys == 'qualocation':
+                            aux_x = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dx_pq
+                            aux_y = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dy_pq
+                            aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
+
+                            for ii in range(len(surf_array[s].triangle)):
+                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,0] \
+                                         + sum(aux_y[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,1] \
+                                         + sum(aux_z[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,2] 
+
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
@@ -258,13 +270,13 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                 s_start = 0
                 for ss in range(s):
                     if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
-                        s_start += len(surf_array[ss].xi)
+                        s_start += len(surf_array[ss].triangle)
                     else:
-                        s_start += 2*len(surf_array[ss].xi)
+                        s_start += 2*len(surf_array[ss].triangle)
 
-                s_size = len(surf_array[s].xi)
+                s_size = len(surf_array[s].triangle)
 
-                aux = zeros(len(surf_array[s].xi))
+                aux = zeros(len(surf_array[s].triangle))
                 for i in range(Nq):
                     dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
                     dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
@@ -272,9 +284,21 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
+
+                        if param.linearSys == 'collocation':
+                            aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
+                                                                        + dy_pq*surf_array[s].normal[:,1] \
+                                                                        + dz_pq*surf_array[s].normal[:,2])
+                        elif param.linearSys == 'qualocation':
+                            aux_x = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dx_pq
+                            aux_y = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dy_pq
+                            aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
+
+                            for ii in range(len(surf_array[s].triangle)):
+                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,0] \
+                                         + sum(aux_y[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,1] \
+                                         + sum(aux_z[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,2] 
+
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
@@ -322,11 +346,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and K_lyr affects the external
@@ -350,11 +374,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   if s is a charge surface, the surface has only one equation, 
 #                   else, s has 2 equations and V_lyr affects the external
@@ -388,11 +412,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
@@ -411,11 +435,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
@@ -440,11 +464,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 s_start = 0
                 for ss in range(s):
                     if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
-                        s_start += len(surf_array[ss].xi)
+                        s_start += len(surf_array[ss].triangle)
                     else:
-                        s_start += 2*len(surf_array[ss].xi)
+                        s_start += 2*len(surf_array[ss].triangle)
 
-                s_size = len(surf_array[s].xi)
+                s_size = len(surf_array[s].triangle)
                 Nround = len(surf_array[s].twig)*param.NCRIT
 
                 GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
@@ -506,11 +530,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 s_start = 0
                 for ss in range(s):
                     if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[ss].surf_type=='asc_surface':
-                        s_start += len(surf_array[ss].xi)
+                        s_start += len(surf_array[ss].triangle)
                     else:
-                        s_start += 2*len(surf_array[ss].xi)
+                        s_start += 2*len(surf_array[ss].triangle)
 
-                s_size = len(surf_array[s].xi)
+                s_size = len(surf_array[s].triangle)
                 Nround = len(surf_array[s].twig)*param.NCRIT
 
                 GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
@@ -589,11 +613,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and K_lyr affects the external
@@ -617,11 +641,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   if s is a charged surface, the surface has only one equation, 
 #                   else, s has 2 equations and V_lyr affects the external
@@ -654,11 +678,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
@@ -677,11 +701,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     s_start = 0
                     for ss in range(s):
                         if surf_array[ss].surf_type=='dirichlet_surface' or surf_array[ss].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                            s_start += len(surf_array[ss].xi)
+                            s_start += len(surf_array[ss].triangle)
                         else:
-                            s_start += 2*len(surf_array[ss].xi)
+                            s_start += 2*len(surf_array[ss].triangle)
 
-                    s_size = len(surf_array[s].xi)
+                    s_size = len(surf_array[s].triangle)
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
