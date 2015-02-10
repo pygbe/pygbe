@@ -242,11 +242,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                             aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
 
                             for ii in range(len(surf_array[s].triangle)):
-                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,0] \
-                                         + sum(aux_y[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,1] \
-                                         + sum(aux_z[ii*param.K:ii*param.K+param.K]*w)*surf_array[s].normal[ii,2] 
+#                                indices = int32(linspace(ii, len(surf_array[s].triangle)*(param.K-1)+ii, num=param.K))
+                                indices = arange(param.K*ii,param.K*ii+param.K)
+                                aux[ii] += surf_array[s].Area[ii]*(sum(aux_x[indices]*w)*surf_array[s].normal[ii,0] \
+                                                                 + sum(aux_y[indices]*w)*surf_array[s].normal[ii,1] \
+                                                                 + sum(aux_z[indices]*w)*surf_array[s].normal[ii,2]) 
 
-                            aux *= surf_array[s].Area
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
 
@@ -298,11 +299,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                             aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
 
                             for ii in range(len(surf_array[s].triangle)):
-                                aux[ii] += sum(aux_x[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,0] \
-                                         + sum(aux_y[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,1] \
-                                         + sum(aux_z[ii*param.K:ii*param.K+param.K])*surf_array[s].normal[ii,2] 
+#                                indices = int32(linspace(ii, len(surf_array[s].triangle)*(param.K-1)+ii, num=param.K))
+                                indices = arange(param.K*ii,param.K*ii+param.K)
+                                aux[ii] += surf_array[s].Area[ii]*(sum(aux_x[indices]*w)*surf_array[s].normal[ii,0] \
+                                                                 + sum(aux_y[indices]*w)*surf_array[s].normal[ii,1] \
+                                                                 + sum(aux_z[indices]*w)*surf_array[s].normal[ii,2]) 
 
-                            aux *= surf_array[s].Area
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
