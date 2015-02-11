@@ -283,7 +283,7 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     tic.record()
     C = 0
     X_aux = zeros(Ns)
-#   Here we use xi because in qualocation sources are the center of the panel
+
     getMultipole(surfSrc.tree, C, surfSrc.xj, surfSrc.yj, surfSrc.zj, 
                     X_Kt, X_aux, X_aux, X_aux, ind0, param.P, param.NCRIT)
     toc.record()
@@ -301,15 +301,13 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     timing.time_M2M += tic.time_till(toc)*1e-3
 
     tic.record()
-    X_Kt = X_Kt[surfSrc.sortSource]
+    X_Kt  = X_Kt[surfSrc.sortSource]
+    X_Ktc = X_Ktc[surfSrc.sortSource]
     toc.record()
     toc.synchronize()
     timing.time_sort += tic.time_till(toc)*1e-3
 
-    param.Nround = len(surfTar.twig)*param.NCRIT
-
-    if param.linearSys == 'qualocation':
-        param.Nround *= param.K
+    param.Nround = len(surfTar.twig)*param.NCRIT*param.K
 
     Ktx_aux  = zeros(param.Nround)
     Kty_aux  = zeros(param.Nround)
@@ -370,6 +368,9 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
 
     if abs(Kt_diag.any())>1e-12: # if same surface
         Kt_lyr += Kt_diag * XKt
+#    if sum(abs(Ktx))>1e-10:
+#        savetxt('test1',Kt_lyr)
+#        quit()
 
     toc.record()
     toc.synchronize()

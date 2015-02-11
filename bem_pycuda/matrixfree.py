@@ -726,6 +726,30 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
     REAL = param.REAL
 
+#   To compute phir with qualocation, I'll use the targets as Gauss nodes, need to flip back
+    if param.linearSys == 'qualocation':
+        for surf in surf_array:
+            x_aux = copy(surf.xi)
+            surf.xi = copy(surf.xj)
+            surf.xj = copy(x_aux)
+
+            x_aux = copy(surf.yi)
+            surf.yi = copy(surf.yj)
+            surf.yj = copy(x_aux)
+
+            x_aux = copy(surf.zi)
+            surf.zi = copy(surf.zj)
+            surf.zj = copy(x_aux)
+        
+            for Cells in surf.tree:
+                x_aux = copy(Cells.source)
+                Cells.source = copy(Cells.target)
+                Cells.target = copy(x_aux)
+
+                x_aux = Cells.ntarget
+                Cells.ntarget = Cells.nsource
+                Cells.nsource = x_aux
+            
     par_reac = parameters()
     par_reac = param
     par_reac.threshold = 0.05
