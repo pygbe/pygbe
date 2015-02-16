@@ -351,16 +351,13 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
     Kty_aux = Kty_aux[surfTar.unsort]
     Ktz_aux = Ktz_aux[surfTar.unsort]
 
-    Ktx = zeros(Nt)
-    Kty = zeros(Nt)
-    Ktz = zeros(Nt)
+    Ktx_aux = reshape(Ktx_aux, (Nt, param.K))
+    Kty_aux = reshape(Kty_aux, (Nt, param.K))
+    Ktz_aux = reshape(Ktz_aux, (Nt, param.K))
 
-    for i in range(Nt):
-#        indices = int32(linspace(i, Nt*(param.K-1)+i, num=param.K))
-        indices = arange(param.K*i,param.K*i+param.K)
-        Ktx[i] = sum(Ktx_aux[indices]*w)
-        Kty[i] = sum(Kty_aux[indices]*w)
-        Ktz[i] = sum(Ktz_aux[indices]*w)
+    Ktx = sum(Ktx_aux*w, axis=1)
+    Kty = sum(Kty_aux*w, axis=1)
+    Ktz = sum(Ktz_aux*w, axis=1)
 
     Kt_lyr = surfTar.Area * (Ktx*surfTar.normal[:,0] \
                            + Kty*surfTar.normal[:,1] \

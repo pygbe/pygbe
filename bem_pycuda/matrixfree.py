@@ -237,16 +237,21 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                                                         + dy_pq*surf_array[s].normal[:,1] \
                                                                         + dz_pq*surf_array[s].normal[:,2])
                         elif param.linearSys == 'qualocation':
-                            aux_x = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dx_pq
-                            aux_y = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dy_pq
-                            aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
 
-                            for ii in range(len(surf_array[s].triangle)):
-#                                indices = int32(linspace(ii, len(surf_array[s].triangle)*(param.K-1)+ii, num=param.K))
-                                indices = arange(param.K*ii,param.K*ii+param.K)
-                                aux[ii] += surf_array[s].Area[ii]*(sum(aux_x[indices]*w)*surf_array[s].normal[ii,0] \
-                                                                 + sum(aux_y[indices]*w)*surf_array[s].normal[ii,1] \
-                                                                 + sum(aux_z[indices]*w)*surf_array[s].normal[ii,2]) 
+                            aux2 = -field_array[j].q[i]/(R_pq*R_pq*R_pq)
+
+                            aux2 = reshape(aux2,(len(surf_array[s].triangle), param.K))
+                            dx_pq = reshape(dx_pq,(len(surf_array[s].triangle), param.K))
+                            dy_pq = reshape(dy_pq,(len(surf_array[s].triangle), param.K))
+                            dz_pq = reshape(dz_pq,(len(surf_array[s].triangle), param.K))
+
+                            aux_x = sum(aux2*dx_pq*w, axis=1)
+                            aux_y = sum(aux2*dy_pq*w, axis=1)
+                            aux_z = sum(aux2*dz_pq*w, axis=1)
+                            
+                            aux += surf_array[s].Area * (aux_x*surf_array[s].normal[:,0] \
+                                                    + aux_y*surf_array[s].normal[:,1] \
+                                                    + aux_z*surf_array[s].normal[:,2])
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
@@ -294,17 +299,21 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                                                         + dy_pq*surf_array[s].normal[:,1] \
                                                                         + dz_pq*surf_array[s].normal[:,2])
                         elif param.linearSys == 'qualocation':
-                            aux_x = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dx_pq
-                            aux_y = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dy_pq
-                            aux_z = -field_array[j].q[i]/(R_pq*R_pq*R_pq) * dz_pq
 
-                            for ii in range(len(surf_array[s].triangle)):
-#                                indices = int32(linspace(ii, len(surf_array[s].triangle)*(param.K-1)+ii, num=param.K))
-                                indices = arange(param.K*ii,param.K*ii+param.K)
-                                aux[ii] += surf_array[s].Area[ii]*(sum(aux_x[indices]*w)*surf_array[s].normal[ii,0] \
-                                                                 + sum(aux_y[indices]*w)*surf_array[s].normal[ii,1] \
-                                                                 + sum(aux_z[indices]*w)*surf_array[s].normal[ii,2]) 
+                            aux2 = -field_array[j].q[i]/(R_pq*R_pq*R_pq)
 
+                            aux2 = reshape(aux2,(len(surf_array[s].triangle), param.K))
+                            dx_pq = reshape(dx_pq,(len(surf_array[s].triangle), param.K))
+                            dy_pq = reshape(dy_pq,(len(surf_array[s].triangle), param.K))
+                            dz_pq = reshape(dz_pq,(len(surf_array[s].triangle), param.K))
+
+                            aux_x = sum(aux2*dx_pq*w, axis=1)
+                            aux_y = sum(aux2*dy_pq*w, axis=1)
+                            aux_z = sum(aux2*dz_pq*w, axis=1)
+                            
+                            aux += surf_array[s].Area * (aux_x*surf_array[s].normal[:,0] \
+                                                    + aux_y*surf_array[s].normal[:,1] \
+                                                    + aux_z*surf_array[s].normal[:,2])
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
