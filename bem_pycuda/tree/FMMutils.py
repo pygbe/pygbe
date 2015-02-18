@@ -564,14 +564,18 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param, Lo
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
     ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
 
-    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    NCRIT = param.NCRIT
+    if param.linearSys=='qualocation':
+        NCRIT *= param.K
+
+    GSZ = int(ceil(float(param.Nround)/NCRIT)) # CUDA grid size
     multipoleKt_gpu = kernel.get_function("M2PKt")
 
     multipoleKt_gpu(Ktx_gpu, Kty_gpu, Ktz_gpu, surfTar.offMltDev, surfTar.sizeTarDev,  
                     surfTar.xcDev, surfTar.ycDev, surfTar.zcDev,
                     MDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, 
                     ind0.indexDev, int32(ptr_offset), int32(ptr_list), REAL(param.kappa), 
-                    int32(param.BlocksPerTwig), int32(param.NCRIT), int32(LorY), 
+                    int32(param.BlocksPerTwig), int32(NCRIT), int32(LorY), 
                     block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -769,6 +773,57 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu,
                 surfSrc.vertexDev, int32(ptr_offset), int32(ptr_list), 
                 int32(LorY), REAL(param.kappa), REAL(param.threshold),
                 int32(param.BlocksPerTwig), int32(param.NCRIT), AI_int, 
+                surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
+
+    toc.record()
+    toc.synchronize()
+    timing.time_P2P += tic.time_till(toc)*1e-3
+
+
+    tic.record()
+    AI_aux = zeros(param.Nround, dtype=int32)
+    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=int32)
+    timing.AI_int += sum(AI_aux[surfTar.unsort])
+    toc.record()
+    toc.synchronize()
+    timing.time_trans += tic.time_till(toc)*1e-3
+
+    return Ktx_gpu, Kty_gpu, Ktz_gpu
+
+
+def P2PKtqual_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+            surf, LorY, w, param, timing, kernel):
+
+    tic = cuda.Event() 
+    toc = cuda.Event() 
+
+    tic.record()
+    REAL = param.REAL
+    mDev   = cuda.to_device(m.astype(REAL))
+    mKtcDev = cuda.to_device(mKtc.astype(REAL))
+    toc.record()
+    toc.synchronize()
+    timing.time_trans += tic.time_till(toc)*1e-3
+
+
+    NCRIT = param.NCRIT*param.K
+
+    tic.record()
+    GSZ = int(ceil(float(param.Nround)/NCRIT)) # CUDA grid size
+    directKtqual_gpu = kernel.get_function("P2PKtqual")
+    AI_int = cuda.to_device(zeros(param.Nround, dtype=int32))
+
+    # GPU arrays are flattened, need to point to first element 
+    ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
+    ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
+
+    directKtqual_gpu(Ktx_gpu, Kty_gpu, Ktz_gpu, 
+                surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
+                surfTar.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mKtcDev, 
+                surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfTar.AreaDev, 
+                surfTar.vertexDev, int32(ptr_offset), int32(ptr_list), 
+                int32(LorY), REAL(param.kappa), REAL(param.threshold),
+                int32(param.BlocksPerTwig), int32(NCRIT), AI_int, 
                 surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()

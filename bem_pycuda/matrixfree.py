@@ -467,6 +467,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
     F = zeros(param.Neq)
+    w = getWeights(param.K)
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
@@ -486,8 +487,13 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                 s_size = len(surf_array[s].triangle)
                 Nround = len(surf_array[s].twig)*param.NCRIT
+                NCRIT = param.NCRIT
 
-                GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
+                if param.linearSys=='qualocation':
+                    Nround *= param.K
+                    NCRIT *= param.K
+
+                GSZ = int(ceil(float(Nround)/NCRIT)) # CUDA grid size
 
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
@@ -504,7 +510,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
                     aux_x = zeros(Nround)
                     aux_y = zeros(Nround)
                     aux_z = zeros(Nround)
@@ -512,10 +518,23 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    if param.linearSys=='collocation':
+                        aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
+                              aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
+                              aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
+                    elif param.linearSys=='qualocation':
+                        aux_x = aux_x[surf_array[s].unsort]
+                        aux_y = aux_y[surf_array[s].unsort]
+                        aux_z = aux_z[surf_array[s].unsort]
+
+                        aux_x = reshape(aux_x, (len(surf_array[s].triangle),param.K))
+                        aux_y = reshape(aux_y, (len(surf_array[s].triangle),param.K))
+                        aux_z = reshape(aux_z, (len(surf_array[s].triangle),param.K))
+
+                        aux = surf_array[s].Area * (sum(aux_x*w,axis=1)*surf_array[s].normal[:,0] + \
+                                                    sum(aux_y*w,axis=1)*surf_array[s].normal[:,1] + \
+                                                    sum(aux_z*w,axis=1)*surf_array[s].normal[:,2]) 
 #               For CHILD surfaces, q contributes to RHS in 
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
     
@@ -553,8 +572,14 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 s_size = len(surf_array[s].triangle)
                 Nround = len(surf_array[s].twig)*param.NCRIT
 
-                GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
+                NCRIT = param.NCRIT
                 
+                if param.linearSys=='qualocation':
+                    Nround *= param.K
+                    NCRIT *= param.K
+
+                GSZ = int(ceil(float(Nround)/NCRIT)) # CUDA grid size
+
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHS_gpu(F_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
@@ -570,7 +595,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
                     aux_x = zeros(Nround)
                     aux_y = zeros(Nround)
                     aux_z = zeros(Nround)
@@ -578,9 +603,24 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    
+                    if param.linearSys=='collocation':
+                        aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
+                              aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
+                              aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+
+                    elif param.linearSys=='qualocation':
+                        aux_x = aux_x[surf_array[s].unsort]
+                        aux_y = aux_y[surf_array[s].unsort]
+                        aux_z = aux_z[surf_array[s].unsort]
+
+                        aux_x = reshape(aux_x, (len(surf_array[s].triangle),param.K))
+                        aux_y = reshape(aux_y, (len(surf_array[s].triangle),param.K))
+                        aux_z = reshape(aux_z, (len(surf_array[s].triangle),param.K))
+
+                        aux = surf_array[s].Area * (sum(aux_x*w,axis=1)*surf_array[s].normal[:,0] + \
+                                                    sum(aux_y*w,axis=1)*surf_array[s].normal[:,1] + \
+                                                    sum(aux_z*w,axis=1)*surf_array[s].normal[:,2]) 
 
 #               For PARENT surface, q contributes to RHS in 
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
@@ -737,28 +777,47 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
 #   To compute phir with qualocation, I'll use the targets as Gauss nodes, need to flip back
     if param.linearSys == 'qualocation':
-        for surf in surf_array:
-            x_aux = copy(surf.xi)
-            surf.xi = copy(surf.xj)
-            surf.xj = copy(x_aux)
+#       If CPU only need to flip the unsorted arrays on the CPU
+        if param.GPU==0: 
+            for surf in surf_array:
+                x_aux = copy(surf.xi)
+                surf.xi = copy(surf.xj)
+                surf.xj = copy(x_aux)
 
-            x_aux = copy(surf.yi)
-            surf.yi = copy(surf.yj)
-            surf.yj = copy(x_aux)
+                x_aux = copy(surf.yi)
+                surf.yi = copy(surf.yj)
+                surf.yj = copy(x_aux)
 
-            x_aux = copy(surf.zi)
-            surf.zi = copy(surf.zj)
-            surf.zj = copy(x_aux)
-        
-            for Cells in surf.tree:
-                x_aux = copy(Cells.source)
-                Cells.source = copy(Cells.target)
-                Cells.target = copy(x_aux)
-
-                x_aux = Cells.ntarget
-                Cells.ntarget = Cells.nsource
-                Cells.nsource = x_aux
+                x_aux = copy(surf.zi)
+                surf.zi = copy(surf.zj)
+                surf.zj = copy(x_aux)
             
+                for Cells in surf.tree:
+                    x_aux = copy(Cells.source)
+                    Cells.source = copy(Cells.target)
+                    Cells.target = copy(x_aux)
+
+                    x_aux = Cells.ntarget
+                    Cells.ntarget = Cells.nsource
+                    Cells.nsource = x_aux
+
+#       If GPU, need to flip and resort, as targets are sorted with voids
+        elif param.GPU==1:
+            for surf in surf_array:
+                sort_aux = zeros(len(surf.xi), dtype=int)
+                counter = 0
+                for C in surf.twig:
+                    sort_aux[counter:counter+surf.tree[C].ntarget] = surf.tree[C].target
+                    counter += surf.tree[C].ntarget
+
+                surf.xjDev = gpuarray.to_gpu(surf.xi[sort_aux].astype(REAL))
+                surf.yjDev = gpuarray.to_gpu(surf.yi[sort_aux].astype(REAL))
+                surf.zjDev = gpuarray.to_gpu(surf.zi[sort_aux].astype(REAL))
+                surf.AreaDev = gpuarray.to_gpu(surf.Area[sort_aux/param.K].astype(REAL))
+                surf.kDev = gpuarray.to_gpu((sort_aux%param.K).astype(int32))
+                surf.vertexDev = gpuarray.to_gpu(surf.vertex[surf.triangle[sort_aux/param.K]].astype(REAL))
+                surf.sortSource = sort_aux
+
     par_reac = parameters()
     par_reac = param
     par_reac.threshold = 0.05

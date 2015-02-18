@@ -334,7 +334,7 @@ def project_Ktqual(XKt, LorY, surfSrc, surfTar, Kt_diag,
                                     Ktx_gpu, Kty_gpu, Ktz_gpu, self, 
                                     ind0, param, LorY, timing, kernel)
 
-        Ktx_gpu, Kty_gpu, Ktz_gpu = P2PKt_gpu(surfSrc, surfTar, X_Kt, X_Ktc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
+        Ktx_gpu, Kty_gpu, Ktz_gpu = P2PKtqual_gpu(surfSrc, surfTar, X_Kt, X_Ktc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
                                 self, LorY, w, param, timing, kernel)
 
         tic.record()
@@ -498,7 +498,7 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
 
     get_phir(phir, field.xq_gpu, field.yq_gpu, field.zq_gpu, m_gpu, mx_gpu, my_gpu, mz_gpu, mKc_gpu, mVc_gpu, 
             surface.xjDev, surface.yjDev, surface.zjDev, surface.AreaDev, surface.kDev, surface.vertexDev, 
-            int32(len(surface.xj)), int32(Nq), int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
+            int32(len(surface.triangle)*K), int32(Nq), int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
             AI_int_gpu, int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
 
     AI_aux = zeros(Nq, dtype=int32)

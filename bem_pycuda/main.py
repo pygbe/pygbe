@@ -64,7 +64,12 @@ if len(sys.argv)>3:
     param.linearSys = sys.argv[3]
 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
-param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
+
+if param.linearSys=='collocation':
+    param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
+elif param.linearSys=='qualocation':
+    param.BlocksPerTwig = int(ceil(param.NCRIT*param.K/float(param.BSZ)))   # CUDA blocks that fit per twig
+
 
 ### Generate array of fields
 field_array = initializeField(configFile, param)

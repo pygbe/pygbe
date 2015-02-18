@@ -973,7 +973,10 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
         surf_array[s].wkDev      = gpuarray.to_gpu(surf_array[s].wk.astype(REAL))
         surf_array[s].XskDev     = gpuarray.to_gpu(surf_array[s].Xsk.astype(REAL))
         surf_array[s].WskDev     = gpuarray.to_gpu(surf_array[s].Wsk.astype(REAL))
-        surf_array[s].kDev       = gpuarray.to_gpu((surf_array[s].sortSource%param.K).astype(int32))
+        if param.linearSys=='collocation':
+            surf_array[s].kDev = gpuarray.to_gpu((surf_array[s].sortSource%param.K).astype(int32))
+        elif param.linearSys=='qualocation':
+            surf_array[s].kDev = gpuarray.to_gpu((surf_array[s].sortTarget%param.K).astype(int32))
 
     ind.indexDev = gpuarray.to_gpu(ind.index_large.astype(int32))
 

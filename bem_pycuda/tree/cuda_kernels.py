@@ -1356,7 +1356,6 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         }
     }
 
-
     __device__ __inline__ void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, int J, 
                             REAL xi, REAL yi, REAL zi, REAL kappa, REAL *Xk, REAL *Wk, REAL *Area, int LorY)
     {
@@ -1386,6 +1385,41 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             else
             {
                 aux = Wk[kk]*Area[j]*exp(-kappa*1/r)*r*r*(kappa+r);
+                PHI_Ktx -= aux*dx;
+                PHI_Kty -= aux*dy;
+                PHI_Ktz -= aux*dz;
+            }
+        }
+    }
+
+    __device__ __inline__ void GQ_fineKtqual(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, int J, 
+                            REAL xj, REAL yj, REAL zj, REAL kappa, REAL *Xk, REAL *Wk, int LorY)
+    {
+        REAL dx, dy, dz, r, aux;
+
+        PHI_Ktx = 0.;
+        PHI_Kty = 0.;
+        PHI_Ktz = 0.;
+
+        #pragma unroll
+        for (int kk=0; kk<K_fine; kk++)
+        {
+            dx = (panel[J+0]*Xk[3*kk] + panel[J+3]*Xk[3*kk+1] + panel[J+6]*Xk[3*kk+2]) - xj;
+            dy = (panel[J+1]*Xk[3*kk] + panel[J+4]*Xk[3*kk+1] + panel[J+7]*Xk[3*kk+2]) - yj;
+            dz = (panel[J+2]*Xk[3*kk] + panel[J+5]*Xk[3*kk+1] + panel[J+8]*Xk[3*kk+2]) - zj;
+            r   = rsqrt(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+
+            if (LorY==1)
+            {
+                aux = Wk[kk]*r*r*r;
+                PHI_Ktx -= aux*dx;
+                PHI_Kty -= aux*dy;
+                PHI_Ktz -= aux*dz;
+            }
+
+            else
+            {
+                aux = Wk[kk]*exp(-kappa*1/r)*r*r*(kappa+r);
                 PHI_Ktx -= aux*dx;
                 PHI_Kty -= aux*dy;
                 PHI_Ktz -= aux*dz;
@@ -1995,6 +2029,214 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             else
                             {
                                 GQ_fineKt(auxKtx, auxKty, auxKtz, ver_sh, 9*j, xi, yi, zi, kappa, Xsk_sh, Wsk_sh, A_sh, LorY);
+                            }
+
+                            auxKtx *= mKtc_sh[j];
+                            auxKty *= mKtc_sh[j];
+                            auxKtz *= mKtc_sh[j];
+                            an_counter += 1;
+                        }
+                       
+                        sum_Ktx += auxKtx;
+                        sum_Kty += auxKty;
+                        sum_Ktz += auxKtz;
+                    }
+                }
+            }
+        
+            if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+            {
+                Ktx_gpu[i] += sum_Ktx;
+                Kty_gpu[i] += sum_Kty;
+                Ktz_gpu[i] += sum_Ktz;
+
+                AI_int_gpu[i] = an_counter;
+            }
+        }
+    }
+
+
+    __global__ void P2PKtqual(REAL *Ktx_gpu, REAL *Kty_gpu, REAL *Ktz_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k, 
+                        REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mKtc,
+                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *vertex, 
+                        int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold, 
+                        int BpT, int NCRIT, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
+    {
+        int I = threadIdx.x + blockIdx.x*NCRIT;
+        int list_start = offTwg[ptr_off+blockIdx.x];
+        int list_end   = offTwg[ptr_off+blockIdx.x+1];
+        
+        REAL xi, yi, zi, dx, dy, dz, r, auxKtx, auxKty, auxKtz;
+
+        __shared__ REAL ver_sh[9*BSZ],
+                        xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], 
+                        m_sh[BSZ], mKtc_sh[BSZ], 
+                        Xsk_sh[K_fine*3], Wsk_sh[K_fine];
+
+
+        if (threadIdx.x<K_fine*3)
+        {
+            Xsk_sh[threadIdx.x] = Xsk[threadIdx.x];
+            if (threadIdx.x<K_fine)
+                Wsk_sh[threadIdx.x] = Wsk[threadIdx.x];
+        }
+        __syncthreads();
+
+        int i, same, near, CJ_start, Nsrc, CJ;
+
+        for (int iblock=0; iblock<BpT; iblock++)
+        {
+            REAL sum_Ktx = 0., sum_Kty = 0., sum_Ktz = 0.;
+            i  = I + iblock*BSZ;
+            xi = xt[i];
+            yi = yt[i];
+            zi = zt[i];
+            int an_counter = 0;
+
+            for (int vert=0; vert<9; vert++)
+            {
+                ver_sh[9*threadIdx.x+vert] = vertex[9*i+vert];
+            }
+            __syncthreads();
+
+            for (int lst=list_start; lst<list_end; lst++)
+            {
+                CJ = P2P_list[ptr_lst+lst];
+                CJ_start = offSrc[CJ];
+                Nsrc = offSrc[CJ+1] - CJ_start;
+
+                for(int jblock=0; jblock<(Nsrc-1)/BSZ; jblock++)
+                {
+                    __syncthreads();
+                    xj_sh[threadIdx.x]   = xj[CJ_start + jblock*BSZ + threadIdx.x];
+                    yj_sh[threadIdx.x]   = yj[CJ_start + jblock*BSZ + threadIdx.x];
+                    zj_sh[threadIdx.x]   = zj[CJ_start + jblock*BSZ + threadIdx.x];
+                    m_sh[threadIdx.x]    = m[CJ_start + jblock*BSZ + threadIdx.x];
+                    mKtc_sh[threadIdx.x] = mKtc[CJ_start + jblock*BSZ + threadIdx.x];
+
+                    __syncthreads();
+
+                    if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+                    {
+                        for (int j=0; j<BSZ; j++)
+                        {
+                            dx = xj_sh[j] - (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])*0.333333333333333333;
+                            dy = yj_sh[j] - (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])*0.333333333333333333;
+                            dz = zj_sh[j] - (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])*0.333333333333333333;
+                            r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                            same = (r>1e12);
+                            near = ((2*Area[i]*r) > threshold*threshold);
+                            auxKtx = 0.;
+                            auxKty = 0.;
+                            auxKtz = 0.;
+                           
+                            if (near==0)
+                            {
+                                dx = xi - xj_sh[j];
+                                dy = yi - yj_sh[j];
+                                dz = zi - zj_sh[j];
+                                r = rsqrt(dx*dx + dy*dy + dz*dz); // r is 1/r!!!!
+                                if (LorY==2)
+                                {
+                                    auxKtx  = -m_sh[j]*exp(-kappa*1/r)*r*r*(kappa+r);
+                                    auxKty  = auxKtx*dy;
+                                    auxKtz  = auxKtx*dz;
+                                    auxKtx *= dx;
+                                }
+                                if (LorY==1)
+                                {
+                                    auxKtx  = -m_sh[j]*r*r*r;
+                                    auxKty  = auxKtx*dy;
+                                    auxKtz  = auxKtx*dz;
+                                    auxKtx *= dx;
+                                }
+                            }
+                            
+                            if ( (near==1) && (k[i]==0))
+                            {
+                                if (same==1)
+                                {
+                                    auxKtx = 0.0;
+                                    auxKty = 0.0;
+                                    auxKtz = 0.0;
+                                }
+                                else
+                                {
+                                    GQ_fineKtqual(auxKtx, auxKty, auxKtz, ver_sh, 9*threadIdx.x, xj_sh[j], yj_sh[j], zj_sh[j], kappa, Xsk_sh, Wsk_sh, LorY);
+                                }
+
+                                auxKtx *= mKtc_sh[j];
+                                auxKty *= mKtc_sh[j];
+                                auxKtz *= mKtc_sh[j];
+                                an_counter += 1;
+                            }
+                            
+                            sum_Ktx += auxKtx;
+                            sum_Kty += auxKty;
+                            sum_Ktz += auxKtz;
+                        }
+                    }
+                }
+                __syncthreads();
+                int jblock = (Nsrc-1)/BSZ;
+                if (jblock*BSZ + threadIdx.x < Nsrc)
+                {
+                    xj_sh[threadIdx.x] = xj[CJ_start + jblock*BSZ + threadIdx.x];
+                    yj_sh[threadIdx.x] = yj[CJ_start + jblock*BSZ + threadIdx.x];
+                    zj_sh[threadIdx.x] = zj[CJ_start + jblock*BSZ + threadIdx.x];
+                    m_sh[threadIdx.x] = m[CJ_start + jblock*BSZ + threadIdx.x];
+                    mKtc_sh[threadIdx.x] = mKtc[CJ_start + jblock*BSZ + threadIdx.x];
+                }
+                __syncthreads();
+
+                if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+                {
+                    for (int j=0; j<Nsrc-(jblock*BSZ); j++)
+                    {
+                        dx = xj_sh[j] - (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])*0.3333333333333333333;
+                        dy = yj_sh[j] - (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])*0.3333333333333333333;
+                        dz = zj_sh[j] - (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])*0.3333333333333333333;
+                        r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                        same = (r>1e12);
+                        near = ((2*Area[i]*r) > threshold*threshold);
+                        auxKtx = 0.;
+                        auxKty = 0.;
+                        auxKtz = 0.;
+
+                        if (near==0)
+                        {
+                            dx = xi - xj_sh[j];
+                            dy = yi - yj_sh[j];
+                            dz = zi - zj_sh[j];
+                            r = rsqrt(dx*dx + dy*dy + dz*dz);  // r is 1/r!!!
+
+                            if (LorY==2)
+                            {
+                                auxKtx  = -m_sh[j]*exp(-kappa*1/r)*r*r*(kappa+r);
+                                auxKty  = auxKtx*dy;
+                                auxKtz  = auxKtx*dz;
+                                auxKtx *= dx;
+                            }
+                            if (LorY==1)
+                            {
+                                auxKtx  = -m_sh[j]*r*r*r;
+                                auxKty  = auxKtx*dy;
+                                auxKtz  = auxKtx*dz;
+                                auxKtx *= dx;
+                            }
+                        }
+                        
+                        if ( (near==1) && (k[i]==0))
+                        {
+                            if (same==1)
+                            {
+                                auxKtx = 0.0;
+                                auxKty = 0.0;
+                                auxKtz = 0.0;
+                            }
+                            else
+                            {
+                                GQ_fineKtqual(auxKtx, auxKty, auxKtz, ver_sh, 9*threadIdx.x, xj_sh[j], yj_sh[j], zj_sh[j], kappa, Xsk_sh, Wsk_sh, LorY);
                             }
 
                             auxKtx *= mKtc_sh[j];
