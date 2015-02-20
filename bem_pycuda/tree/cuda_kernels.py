@@ -2556,6 +2556,152 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         }
     }
 
+    __global__ void compute_RHSKtqual(REAL *Fx, REAL *Fy, REAL *Fz, REAL *xq, REAL *yq, REAL *zq,
+                                      REAL *q, REAL *xi, REAL *yi, REAL *zi, REAL *vertex, REAL *Area,
+                                      int *sizeTar, int *k, REAL *Wsk, REAL *Xsk, int Nq, 
+                                      REAL threshold, REAL w0, int NCRIT, int BpT)
+    {
+        int II = threadIdx.x + blockIdx.x*NCRIT;
+        int I, near;
+        REAL x, y, z, sum_x, sum_y, sum_z, aux_x, aux_y, aux_z;
+        REAL dx, dy, dz, r, aux;
+        __shared__ REAL xq_sh[BSZ], yq_sh[BSZ], zq_sh[BSZ], q_sh[BSZ], ver_sh[9*BSZ], Wsk_sh[1], Xsk_sh[3];
+
+        if (threadIdx.x<1*3)
+        {
+            Xsk_sh[threadIdx.x] = Xsk[threadIdx.x];
+            if (threadIdx.x<1)
+                Wsk_sh[threadIdx.x] = Wsk[threadIdx.x];
+        }
+        
+        __syncthreads();
+        for (int iblock=0; iblock<BpT; iblock++)
+        {
+            I = II + iblock*BSZ;
+            x = xi[I];
+            y = yi[I];
+            z = zi[I];
+            sum_x = 0., sum_y = 0, sum_z = 0;
+
+            for (int vert=0; vert<9; vert++)
+            {
+                ver_sh[9*threadIdx.x+vert] = vertex[9*I+vert];
+            }
+
+            for (int block=0; block<(Nq-1)/BSZ; block++)
+            {
+                __syncthreads();
+                xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
+                yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
+                zq_sh[threadIdx.x] = zq[block*BSZ+threadIdx.x];
+                q_sh[threadIdx.x]  = q[block*BSZ+threadIdx.x];
+                __syncthreads();
+
+                if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+                {
+                    for (int i=0; i<BSZ; i++)
+                    {
+                        dx = xq_sh[i] - (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])*0.333333333333333333;
+                        dy = yq_sh[i] - (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])*0.333333333333333333;
+                        dz = zq_sh[i] - (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])*0.333333333333333333;
+                        r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                        near = 1;//((2*Area[I]*r) > threshold*threshold);
+
+                        if (near==0)
+                        {
+                            dx = x - xq_sh[i];
+                            dy = y - yq_sh[i];
+                            dz = z - zq_sh[i];
+                            r  = sqrt(dx*dx + dy*dy + dz*dz);
+                            aux = -q_sh[i]/(r*r*r);
+                            sum_x += aux*dx;
+                            sum_y += aux*dy;
+                            sum_z += aux*dz;
+                        }
+
+                        else if ((near==1) && (k[I]==0))
+                        {
+                            //aux_x=0.;
+                            //aux_y=0.;
+                            //aux_z=0.;
+                            //GQ_fineKtqual(aux_x, aux_y, aux_z, ver_sh, 9*threadIdx.x, xq_sh[i], yq_sh[i], zq_sh[i], 0., Xsk_sh, Wsk_sh, 1);
+                            //sum_x += aux_x*q_sh[i]/w0;
+                            //sum_y += aux_y*q_sh[i]/w0;
+                            //sum_z += aux_z*q_sh[i]/w0;
+                            dx = x - xq_sh[i];
+                            dy = y - yq_sh[i];
+                            dz = z - zq_sh[i];
+                            r  = sqrt(dx*dx + dy*dy + dz*dz);
+                            aux = -q_sh[i]/(r*r*r*w0);
+                            sum_x += aux*dx;
+                            sum_y += aux*dy;
+                            sum_z += aux*dz;
+                        }
+
+                    }
+                }
+            }
+
+            int block = (Nq-1)/BSZ; 
+            __syncthreads();
+            xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
+            yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
+            zq_sh[threadIdx.x] = zq[block*BSZ+threadIdx.x];
+            q_sh[threadIdx.x]  = q[block*BSZ+threadIdx.x];
+            __syncthreads();
+
+            if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+            {
+                for (int i=0; i<Nq-block*BSZ; i++)
+                {
+                    dx = xq_sh[i] - (ver_sh[9*threadIdx.x] + ver_sh[9*threadIdx.x+3] + ver_sh[9*threadIdx.x+6])*0.333333333333333333;
+                    dy = yq_sh[i] - (ver_sh[9*threadIdx.x+1] + ver_sh[9*threadIdx.x+4] + ver_sh[9*threadIdx.x+7])*0.333333333333333333;
+                    dz = zq_sh[i] - (ver_sh[9*threadIdx.x+2] + ver_sh[9*threadIdx.x+5] + ver_sh[9*threadIdx.x+8])*0.333333333333333333;
+                    r  = 1/(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+                    near = 1;//((2*Area[I]*r) > threshold*threshold);
+
+                    if (near==0)
+                    {
+                        dx = x - xq_sh[i];
+                        dy = y - yq_sh[i];
+                        dz = z - zq_sh[i];
+                        r  = sqrt(dx*dx + dy*dy + dz*dz);
+                        aux = -q_sh[i]/(r*r*r);
+                        sum_x += aux*dx;
+                        sum_y += aux*dy;
+                        sum_z += aux*dz;
+                    }
+
+                    else if ((near==1) && (k[I]==0))
+                    {
+                        //aux_x=0.;
+                        //aux_y=0.;
+                        //aux_z=0.;
+                        //GQ_fineKtqual(aux_x, aux_y, aux_z, ver_sh, 9*threadIdx.x, xq_sh[i], yq_sh[i], zq_sh[i], 0., Xsk_sh, Wsk_sh, 1);
+                        //sum_x += aux_x*q_sh[i]/w0;
+                        //sum_y += aux_y*q_sh[i]/w0;
+                        //sum_z += aux_z*q_sh[i]/w0;
+                        dx = x - xq_sh[i];
+                        dy = y - yq_sh[i];
+                        dz = z - zq_sh[i];
+                        r  = sqrt(dx*dx + dy*dy + dz*dz);
+                        aux = -q_sh[i]/(r*r*r*w0);
+                        sum_x += aux*dx;
+                        sum_y += aux*dy;
+                        sum_z += aux*dz;
+                    }
+                }
+            }
+
+            if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
+            {
+                Fx[I] = sum_x;
+                Fy[I] = sum_y;
+                Fz[I] = sum_z;
+            }
+        }
+    }
+
     
     """%{'blocksize':BSZ, 'Nmult':Nm, 'K_near':K_fine, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
 

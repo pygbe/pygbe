@@ -240,18 +240,39 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                             aux2 = -field_array[j].q[i]/(R_pq*R_pq*R_pq)
 
-                            aux2 = reshape(aux2,(len(surf_array[s].triangle), param.K))
-                            dx_pq = reshape(dx_pq,(len(surf_array[s].triangle), param.K))
-                            dy_pq = reshape(dy_pq,(len(surf_array[s].triangle), param.K))
-                            dz_pq = reshape(dz_pq,(len(surf_array[s].triangle), param.K))
+                            aux_x = aux2*dx_pq
+                            aux_y = aux2*dy_pq
+                            aux_z = aux2*dz_pq
 
-                            aux_x = sum(aux2*dx_pq*w, axis=1)
-                            aux_y = sum(aux2*dy_pq*w, axis=1)
-                            aux_z = sum(aux2*dz_pq*w, axis=1)
+                            aux_x = reshape(aux_x,(len(surf_array[s].triangle), param.K))
+                            aux_y = reshape(aux_y,(len(surf_array[s].triangle), param.K))
+                            aux_z = reshape(aux_z,(len(surf_array[s].triangle), param.K))
+
+                            R_pq = reshape(R_pq,(len(surf_array[s].triangle), param.K))
+
+                            far_indices = where(sqrt(2*surf_array[s].Area)/R_pq[:,0] < param.threshold)
+                            close_indices = where(sqrt(2*surf_array[s].Area)/R_pq[:,0] > param.threshold)
+
+#                           If close, I'll use only one Gauss point. For some reason this works better.
+#                           Need to check this
+
+                            aux_x2 = zeros(len(surf_array[s].triangle))
+                            aux_y2 = zeros(len(surf_array[s].triangle))
+                            aux_z2 = zeros(len(surf_array[s].triangle))
+
+                            aux_x2[far_indices] = sum(aux_x[far_indices]*w, axis=1)
+                            aux_y2[far_indices] = sum(aux_y[far_indices]*w, axis=1)
+                            aux_z2[far_indices] = sum(aux_z[far_indices]*w, axis=1)
                             
-                            aux += surf_array[s].Area * (aux_x*surf_array[s].normal[:,0] \
-                                                    + aux_y*surf_array[s].normal[:,1] \
-                                                    + aux_z*surf_array[s].normal[:,2])
+                            w_close = zeros(param.K)
+                            w_close[0] = 1.
+                            aux_x2[close_indices] = sum(aux_x[close_indices]*w_close, axis=1)
+                            aux_y2[close_indices] = sum(aux_y[close_indices]*w_close, axis=1)
+                            aux_z2[close_indices] = sum(aux_z[close_indices]*w_close, axis=1)
+
+                            aux += surf_array[s].Area * (aux_x2*surf_array[s].normal[:,0] \
+                                                    + aux_y2*surf_array[s].normal[:,1] \
+                                                    + aux_z2*surf_array[s].normal[:,2])
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
@@ -302,18 +323,38 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                             aux2 = -field_array[j].q[i]/(R_pq*R_pq*R_pq)
 
-                            aux2 = reshape(aux2,(len(surf_array[s].triangle), param.K))
-                            dx_pq = reshape(dx_pq,(len(surf_array[s].triangle), param.K))
-                            dy_pq = reshape(dy_pq,(len(surf_array[s].triangle), param.K))
-                            dz_pq = reshape(dz_pq,(len(surf_array[s].triangle), param.K))
+                            aux_x = aux2*dx_pq
+                            aux_y = aux2*dy_pq
+                            aux_z = aux2*dz_pq
 
-                            aux_x = sum(aux2*dx_pq*w, axis=1)
-                            aux_y = sum(aux2*dy_pq*w, axis=1)
-                            aux_z = sum(aux2*dz_pq*w, axis=1)
+                            aux_x = reshape(aux_x,(len(surf_array[s].triangle), param.K))
+                            aux_y = reshape(aux_y,(len(surf_array[s].triangle), param.K))
+                            aux_z = reshape(aux_z,(len(surf_array[s].triangle), param.K))
+                            R_pq = reshape(R_pq,(len(surf_array[s].triangle), param.K))
+
+                            far_indices = where(sqrt(2*surf_array[s].Area)/R_pq[:,0] < param.threshold)
+                            close_indices = where(sqrt(2*surf_array[s].Area)/R_pq[:,0] > param.threshold)
+
+#                           If close, I'll use only one Gauss point. For some reason this works better.
+#                           Need to check this
+
+                            aux_x2 = zeros(len(surf_array[s].triangle))
+                            aux_y2 = zeros(len(surf_array[s].triangle))
+                            aux_z2 = zeros(len(surf_array[s].triangle))
+
+                            aux_x2[far_indices] = sum(aux_x[far_indices]*w, axis=1)
+                            aux_y2[far_indices] = sum(aux_y[far_indices]*w, axis=1)
+                            aux_z2[far_indices] = sum(aux_z[far_indices]*w, axis=1)
                             
-                            aux += surf_array[s].Area * (aux_x*surf_array[s].normal[:,0] \
-                                                    + aux_y*surf_array[s].normal[:,1] \
-                                                    + aux_z*surf_array[s].normal[:,2])
+                            w_close = zeros(param.K)
+                            w_close[0] = 1.
+                            aux_x2[close_indices] = sum(aux_x[close_indices]*w_close, axis=1)
+                            aux_y2[close_indices] = sum(aux_y[close_indices]*w_close, axis=1)
+                            aux_z2[close_indices] = sum(aux_z[close_indices]*w_close, axis=1)
+
+                            aux += surf_array[s].Area * (aux_x2*surf_array[s].normal[:,0] \
+                                                    + aux_y2*surf_array[s].normal[:,1] \
+                                                    + aux_z2*surf_array[s].normal[:,2])
 
                     else:
                         aux += field_array[j].q[i]/(field_array[j].E*R_pq)
@@ -471,6 +512,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
+    computeRHSKtqual_gpu = kernel.get_function("compute_RHSKtqual")
     for j in range(len(field_array)):
         Nq = len(field_array[j].q)
         if Nq>0:
@@ -508,22 +550,34 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fy_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
-                    computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
-                    aux_x = zeros(Nround)
-                    aux_y = zeros(Nround)
-                    aux_z = zeros(Nround)
-                    Fx_gpu.get(aux_x)
-                    Fy_gpu.get(aux_y)
-                    Fz_gpu.get(aux_z)
-
                     if param.linearSys=='collocation':
+                        computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
+                                    surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
+                                    REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                        aux_x = zeros(Nround)
+                        aux_y = zeros(Nround)
+                        aux_z = zeros(Nround)
+                        Fx_gpu.get(aux_x)
+                        Fy_gpu.get(aux_y)
+                        Fz_gpu.get(aux_z)
+
                         aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
                               aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
                               aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
                     elif param.linearSys=='qualocation':
+                        computeRHSKtqual_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
+                                    surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].vertexDev, surf_array[s].AreaDev, 
+                                    surf_array[s].sizeTarDev, surf_array[s].kDev, surf_array[s].XskDev, surf_array[s].WskDev, int32(Nq), int32(param.K_fine),
+                                    REAL(param.threshold), REAL(w[0]), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+
+                        aux_x = zeros(Nround)
+                        aux_y = zeros(Nround)
+                        aux_z = zeros(Nround)
+                        Fx_gpu.get(aux_x)
+                        Fy_gpu.get(aux_y)
+                        Fz_gpu.get(aux_z)
+
                         aux_x = aux_x[surf_array[s].unsort]
                         aux_y = aux_y[surf_array[s].unsort]
                         aux_z = aux_z[surf_array[s].unsort]
@@ -535,6 +589,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                         aux = surf_array[s].Area * (sum(aux_x*w,axis=1)*surf_array[s].normal[:,0] + \
                                                     sum(aux_y*w,axis=1)*surf_array[s].normal[:,1] + \
                                                     sum(aux_z*w,axis=1)*surf_array[s].normal[:,2]) 
+
+
 #               For CHILD surfaces, q contributes to RHS in 
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
     
@@ -584,7 +640,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHS_gpu(F_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
 
                     aux = zeros(Nround)
                     F_gpu.get(aux)
@@ -593,23 +649,37 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fy_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
-                    computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
-                    aux_x = zeros(Nround)
-                    aux_y = zeros(Nround)
-                    aux_z = zeros(Nround)
-                    Fx_gpu.get(aux_x)
-                    Fy_gpu.get(aux_y)
-                    Fz_gpu.get(aux_z)
 
-                    
                     if param.linearSys=='collocation':
+                        computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
+                                    surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
+                                    REAL(field_array[j].E), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                        aux_x = zeros(Nround)
+                        aux_y = zeros(Nround)
+                        aux_z = zeros(Nround)
+                        Fx_gpu.get(aux_x)
+                        Fy_gpu.get(aux_y)
+                        Fz_gpu.get(aux_z)
+
                         aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
                               aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
                               aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
                     elif param.linearSys=='qualocation':
+                        Xsk_aux = gpuarray.to_gpu(array([1/3.,1/3.,1/3.]).astype(REAL))
+                        Wsk_aux = gpuarray.to_gpu(array([1.]).astype(REAL))
+                        computeRHSKtqual_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
+                                    surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].vertexDev, surf_array[s].AreaDev, 
+                                    surf_array[s].sizeTarDev, surf_array[s].kDev, Xsk_aux, Wsk_aux, int32(Nq), 
+                                    REAL(param.threshold), REAL(w[0]), int32(NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+
+                        aux_x = zeros(Nround)
+                        aux_y = zeros(Nround)
+                        aux_z = zeros(Nround)
+                        Fx_gpu.get(aux_x)
+                        Fy_gpu.get(aux_y)
+                        Fz_gpu.get(aux_z)
+
                         aux_x = aux_x[surf_array[s].unsort]
                         aux_y = aux_y[surf_array[s].unsort]
                         aux_z = aux_z[surf_array[s].unsort]
@@ -621,6 +691,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                         aux = surf_array[s].Area * (sum(aux_x*w,axis=1)*surf_array[s].normal[:,0] + \
                                                     sum(aux_y*w,axis=1)*surf_array[s].normal[:,1] + \
                                                     sum(aux_z*w,axis=1)*surf_array[s].normal[:,2]) 
+
+
 
 #               For PARENT surface, q contributes to RHS in 
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
