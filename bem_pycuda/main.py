@@ -24,6 +24,7 @@
 from numpy 			import *
 from math  			import pi
 from scipy.misc     import factorial
+import argparse
 import time
 
 # Import self made modules
@@ -48,6 +49,17 @@ from cuda_kernels   import kernels
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
 
+### Parse command line arguments
+print ('PyGBe: Python GPU code for Boundary elements')
+parser = argparse.ArgumentParser(description='To run: ./main.py parameter_file config_file optional_flags')
+parser.add_argument('parameter_file', help='Parameter file, see input_files/file.param for format details')
+parser.add_argument('config_file', help='Configuration file, see input_files/file.config for format details')
+parser.add_argument('--asymmetric', help='Activates nonlinear BCs and Picard iteration to consider asymmetric charging energy', action='store_true')
+
+args = parser.parse_args()
+
+print args.asymmetric
+
 ### Time stamp
 timestamp = time.localtime()
 print 'Run started on:'
@@ -57,8 +69,8 @@ print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
 TIC = time.time()
 ### Read parameters
 param = parameters()
-precision = readParameters(param,sys.argv[1])
-configFile = sys.argv[2]
+precision = readParameters(param, args.parameter_file)
+configFile = args.config_file
 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
 param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
