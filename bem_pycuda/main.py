@@ -21,7 +21,7 @@
   THE SOFTWARE.
 '''
 
-from numpy 			import *
+import numpy
 from math  			import pi
 from scipy.misc     import factorial
 import time
@@ -61,7 +61,7 @@ precision = readParameters(param,sys.argv[1])
 configFile = sys.argv[2]
 
 param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
-param.BlocksPerTwig = int(ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
+param.BlocksPerTwig = int(numpy.ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
 
 ### Generate array of fields
 field_array = initializeField(configFile, param)
@@ -149,7 +149,7 @@ tic = time.time()
 
 ### Solve
 print 'Solve'
-phi = zeros(param.Neq)
+phi = numpy.zeros(param.Neq)
 phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing, kernel) 
 toc = time.time()
 solve_time = toc-tic
