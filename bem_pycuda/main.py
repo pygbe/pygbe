@@ -136,7 +136,7 @@ elif param.GPU==1:
 toc = time.time()
 rhs_time = toc-tic
 
-savetxt('RHS.txt',F)
+numpy.savetxt('RHS.txt',F)
 
 setup_time = toc-TIC
 print 'List time          : %fs'%list_time
@@ -154,7 +154,7 @@ phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing, kernel)
 toc = time.time()
 solve_time = toc-tic
 print 'Solve time        : %fs'%solve_time
-savetxt('phi.txt',phi)
+numpy.savetxt('phi.txt',phi)
 #phi = loadtxt('phi.txt')
 
 # Put result phi in corresponding surfaces
