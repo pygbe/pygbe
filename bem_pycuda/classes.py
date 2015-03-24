@@ -21,6 +21,7 @@
 '''
 
 import numpy
+from scipy import linalg
 import sys
 sys.path.append('tree')
 from FMMutils import *
@@ -848,7 +849,7 @@ def zeroAreas(s, triangle_raw, Area_null):
         L0 = s.vertex[triangle_raw[i,1]] - s.vertex[triangle_raw[i,0]]
         L2 = s.vertex[triangle_raw[i,0]] - s.vertex[triangle_raw[i,2]]
         normal_aux = numpy.cross(L0,L2)
-        Area_aux = numpy.linalg.norm(normal_aux)/2
+        Area_aux = linalg.norm(normal_aux)/2
         if Area_aux<1e-10:
             Area_null.append(i)
     return Area_null 
