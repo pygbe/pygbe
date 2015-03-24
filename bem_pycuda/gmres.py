@@ -20,10 +20,8 @@
   THE SOFTWARE.
 '''
 
-from numpy  import zeros, array, dot, arange, exp, sqrt, random, transpose, sum, savetxt, shape
-from numpy.linalg           import norm
-from scipy.linalg           import lu_solve, solve
-from scipy.sparse.linalg    import gmres 
+import numpy
+from scipy import linalg
 import time
 from matrixfree import gmres_dot as gmres_dot
 
@@ -34,11 +32,11 @@ def GeneratePlaneRotation(dx, dy, cs, sn):
         sn = 0. 
     elif (abs(dy)>abs(dx)):
         temp = dx/dy
-        sn = 1/sqrt(1+temp*temp)
+        sn = 1/numpy.sqrt(1+temp*temp)
         cs = temp*sn
     else:
         temp = dy/dx
-        cs = 1/sqrt(1+temp*temp)
+        cs = 1/numpy.sqrt(1+temp*temp)
         sn = temp*cs
 
     return cs, sn
@@ -63,8 +61,8 @@ def PlaneRotation (H, cs, sn, s, i, R):
 def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     N = len(b)
-    V = zeros((param.restart+1, N))
-    H = zeros((param.restart+1,param.restart))
+    V = numpy.zeros((param.restart+1, N))
+    H = numpy.zeros((param.restart+1,param.restart))
 
     time_Vi = 0.
     time_Vk = 0.
@@ -74,18 +72,18 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     # Initializing varibles
     rel_resid = 1.
-    cs, sn = zeros(N), zeros(N)
+    cs, sn = numpy.zeros(N), numpy.zeros(N)
 
     iteration = 0
 
-    b_norm = norm(b)
+    b_norm = linalg.norm(b)
 
     while (iteration < param.max_iter and rel_resid>=param.tol): # Outer iteration
         
         aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
         
         r = b - aux
-        beta = norm(r)
+        beta = linalg.norm(r)
 
         if iteration==0: 
             print 'Analytical integrals: %i of %i, %i'%(timing.AI_int/param.N, param.N, 100*timing.AI_int/param.N**2)+'%'
@@ -94,7 +92,7 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
         if iteration==0:
             res_0 = b_norm
 
-        s = zeros(param.restart+1)
+        s = numpy.zeros(param.restart+1)
         s[0] = beta
         i = -1
 
@@ -110,22 +108,22 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
             time_Vi+=toc-tic
     
             if iteration<6:
-                savetxt('Vip1%i.txt'%iteration, Vip1)
+                numpy.savetxt('Vip1%i.txt'%iteration, Vip1)
 
             tic = time.time()
             Vk = V[0:i+1,:]
-            H[0:i+1,i] = dot(Vip1,transpose(Vk))
+            H[0:i+1,i] = numpy.dot(Vip1,numpy.transpose(Vk))
 
             # This ends up being slower than looping           
-#            HVk = H[0:i+1,i]*transpose(Vk)
-#            Vip1 -= HVk.sum(axis=1)
+#            HVk = H[0:i+1,i]*numpy.transpose(Vk)
+#            Vip1 -= HVk.numpy.sum(axis=1)
 
             for k in range(i+1):
                 Vip1 -= H[k,i]*Vk[k] 
             toc = time.time()
             time_Vk+=toc-tic
 
-            H[i+1,i] = norm(Vip1)
+            H[i+1,i] = linalg.norm(Vip1)
             V[i+1,:] = Vip1[:]/H[i+1,i]
 
             tic = time.time()
@@ -146,14 +144,14 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
         # Solve the triangular system
         tic = time.time()
-        piv = arange(i+1)
-        y = lu_solve((H[0:i+1,0:i+1], piv), s[0:i+1], trans=0)
+        piv = numpy.arange(i+1)
+        y = linalg.lu_solve((H[0:i+1,0:i+1], piv), s[0:i+1], trans=0)
         toc = time.time()
         time_lu+=toc-tic
 
         # Update solution
         tic = time.time()
-        Vj = zeros(N)
+        Vj = numpy.zeros(N)
         for j in range(i+1):
             # Compute Vj
             Vj[:] = V[j,:]
@@ -183,18 +181,20 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
 """
 ## Testing
+from scipy.sparse.linalg  import gmres 
+
 xmin = -1.
 xmax = 1.
 N = 5000
 h = (xmax-xmin)/(N-1)
-x = arange(xmin, xmax+h/2, h)
+x = numpy.arange(xmin, xmax+h/2, h)
 
-A = zeros((N,N))
+A = numpy.zeros((N,N))
 for i in range(N):
-    A[i] = exp(-abs(x-x[i])**2/(2*h**2))
+    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2))
 
-b = random.random(N)
-x = zeros(N)
+b = numpy.random.random(N)
+x = numpy.zeros(N)
 R = 50
 max_iter = 5000
 tol = 1e-8
@@ -205,7 +205,7 @@ toc = time.time()
 print 'Time for my GMRES: %fs'%(toc-tic)
 
 tic = time.time()
-xs = solve(A, b)
+xs = linalg.solve(A, b)
 toc = time.time()
 print 'Time for stright solve: %fs'%(toc-tic)
 
@@ -216,6 +216,6 @@ toc = time.time()
 print 'Time for scipy GMRES: %fs'%(toc-tic)
 
 
-error = sqrt(sum((xs-x)**2)/sum(xs**2))
+error = numpy.sqrt(numpy.sum((xs-x)**2)/numpy.sum(xs**2))
 print 'error: %s'%error
 """
