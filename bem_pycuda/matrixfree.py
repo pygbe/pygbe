@@ -474,13 +474,20 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
 #               We do this only here (and not in the parent case) because interaction of charges 
 #               with dirichlet or neumann surface happens only for the surface as a child surfaces.
+#                if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
+#                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[0,:]
+#                elif surf_array[s].surf_type=='asc_surface':
+#                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+#                else:
+#                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[1,:]
+#                    F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[3,:]
+
                 if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface':
-                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[0,:]
+                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]
                 elif surf_array[s].surf_type=='asc_surface':
-                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+                    F[s_start:s_start+s_size] += aux
                 else:
-                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[1,:]
-                    F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[3,:]
+                    F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]
 
 
 #           Now for PARENT surface
@@ -533,11 +540,16 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
 #               With preconditioner
+#                if surf_array[s].surf_type=='asc_surface':
+#                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+#                else:
+#                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[0,:]
+#                    F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[2,:]
+
                 if surf_array[s].surf_type=='asc_surface':
-                    F[s_start:s_start+s_size] += aux*surf_array[s].Precond[0,:]
+                    F[s_start:s_start+s_size] += aux
                 else:
-                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[0,:]
-                    F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[2,:]
+                    F[s_start:s_start+s_size] += aux[surf_array[s].unsort]
 
 #   Dirichlet/Neumann contribution to RHS
     for j in range(len(field_array)):
@@ -584,11 +596,16 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #                   else, s has 2 equations and K_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
+#                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
+#                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
+#                    else:
+#                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
+#                        F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[3,:]
+
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
+                        F[s_start:s_start+s_size] += K_lyr 
                     else:
-                        F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[1,:]
-                        F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[3,:]
+                        F[s_start+s_size:s_start+2*s_size] += K_lyr
 
 #               Effect of neumann surfaces
                 for sn in neumann:
@@ -612,11 +629,16 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #                   else, s has 2 equations and V_lyr affects the external
 #                   equation, which is placed after the internal one, hence
 #                   Precond[1,:] and Precond[3,:].
+#                    if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
+#                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
+#                    else:
+#                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
+#                        F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[3,:]
+
                     if surf_array[s].surf_type=='dirichlet_surface' or surf_array[s].surf_type=='neumann_surface' or surf_array[s].surf_type=='asc_surface':
-                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
+                        F[s_start:s_start+s_size] += -V_lyr
                     else:
-                        F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[1,:]
-                        F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[3,:]
+                        F[s_start+s_size:s_start+2*s_size] += -V_lyr 
 
 #           Now look at influence on PARENT surface
 #           The dirichlet/neumann surface will never be the parent, 
@@ -647,8 +669,10 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
-                    F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[2,:]
+#                    F[s_start:s_start+s_size] += K_lyr * surf_array[s].Precond[0,:]
+#                    F[s_start+s_size:s_start+2*s_size] += K_lyr * surf_array[s].Precond[2,:]
+
+                    F[s_start:s_start+s_size] += K_lyr 
 
 #               Effect of neumann surfaces
                 for sn in neumann:
@@ -670,8 +694,10 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
 #                   Surface s has 2 equations and K_lyr affects the internal
 #                   equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
-                    F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[2,:]
+#                    F[s_start:s_start+s_size] += -V_lyr * surf_array[s].Precond[0,:]
+#                    F[s_start+s_size:s_start+2*s_size] += -V_lyr * surf_array[s].Precond[2,:]
+
+                    F[s_start:s_start+s_size] += -V_lyr
 
 
     return F

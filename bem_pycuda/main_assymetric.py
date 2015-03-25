@@ -192,6 +192,7 @@ for picardIter in range(Npicard):
 
 #   Put result phi in corresponding surfaces
     fill_phi(phi, surf_array)
+    timing.AI_int = 0
 
 toc = time.time()
 solve_time = toc-tic

@@ -60,11 +60,30 @@ def PlaneRotation (H, cs, sn, s, i, R):
 
     return H, cs, sn, s
 
-def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
+def gmres_solver (surf_array, field_array, X, b_clean, param, ind0, timing, kernel):
 
-    N = len(b)
+    N = len(b_clean)
+    b = zeros(N)
     V = zeros((param.restart+1, N))
     H = zeros((param.restart+1,param.restart))
+
+#   Apply Preconditioner on RHS
+    Naux = 0
+    for i in range(len(surf_array)):
+        Nt = len(surf_array[i].triangle)
+        if surf_array[i].surf_type=='dirichlet_surface':
+            b[Naux:Naux+Nt]     = b_clean[Naux:Naux+Nt]*surf_array[i].Precond[0,:] 
+            Naux += Nt
+        elif surf_array[i].surf_type=='neumann_surface':
+            b[Naux:Naux+Nt]     = b_clean[Naux:Naux+Nt]*surf_array[i].Precond[0,:] 
+            Naux += Nt
+        elif surf_array[i].surf_type=='asc_surface':
+            b[Naux:Naux+Nt]     = b_clean[Naux:Naux+Nt]*surf_array[i].Precond[0,:] 
+            Naux += Nt
+        else:
+            b[Naux:Naux+Nt]     = b_clean[Naux:Naux+Nt]*surf_array[i].Precond[0,:] + b_clean[Naux+Nt:Naux+2*Nt]*surf_array[i].Precond[1,:] 
+            b[Naux+Nt:Naux+2*Nt]     = b_clean[Naux:Naux+Nt]*surf_array[i].Precond[2,:] + b_clean[Naux+Nt:Naux+2*Nt]*surf_array[i].Precond[3,:] 
+            Naux += 2*Nt 
 
     time_Vi = 0.
     time_Vk = 0.
