@@ -20,7 +20,7 @@
   THE SOFTWARE.
 '''
 
-from numpy import *
+import numpy 
 
 def printSummary(surf_array, field_array, param):
     Nsurf = len(surf_array)
@@ -28,10 +28,10 @@ def printSummary(surf_array, field_array, param):
     print '%i surfaces:\n'%Nsurf
     for i in range(len(surf_array)):
         N_aux = len(surf_array[i].triangle)
-        rr = zeros(len(surf_array[i].tree))
+        rr = numpy.zeros(len(surf_array[i].tree))
         for ii in range(len(surf_array[i].tree)):
             rr[ii] = surf_array[i].tree[ii].r
-        Levels = log(surf_array[i].tree[0].r/min(rr))/log(2) + 1 
+        Levels = numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1 
 
         print 'Surface %i:'%i
         print '\t%i elements'%(N_aux)
@@ -41,12 +41,12 @@ def printSummary(surf_array, field_array, param):
         print '\tLevels             : %i'%Levels
         print '\tC0 size            : %f'%surf_array[i].tree[0].r
         print '\tC0 box center      : %f, %f, %f'%(surf_array[i].tree[0].xc, surf_array[i].tree[0].yc, surf_array[i].tree[0].zc)
-        print '\tTwig cell size     : %f'%(min(rr))
-        print '\tRbox/theta         : %f'%(min(rr)/param.theta)
-        print '\tAnalytic distance  : %f'%(average(sqrt(2*surf_array[i].Area))/param.threshold)
-        print '\tElem. per sq Ang   : %f'%(1/average(surf_array[i].Area))
-        print '\tMax, min, avg elem.: %s, %s, %s'%(max(surf_array[i].Area),min(surf_array[i].Area),average(surf_array[i].Area))
-        print '\tTotal area         : %f'%(sum(surf_array[i].Area))
+        print '\tTwig cell size     : %f'%(numpy.min(rr))
+        print '\tRbox/theta         : %f'%(numpy.min(rr)/param.theta)
+        print '\tAnalytic distance  : %f'%(numpy.average(numpy.sqrt(2*surf_array[i].Area))/param.threshold)
+        print '\tElem. per sq Ang   : %f'%(1/numpy.average(surf_array[i].Area))
+        print '\tMax, min, avg elem.: %s, %s, %s'%(numpy.max(surf_array[i].Area),numpy.min(surf_array[i].Area),numpy.average(surf_array[i].Area))
+        print '\tTotal area         : %f'%(numpy.sum(surf_array[i].Area))
 
     print '----------------------------\n'
 
