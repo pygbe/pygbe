@@ -173,6 +173,7 @@ for picardIter in range(Npicard):
         print '\nPicard iteration %i'%picardIter
         for s in surf_array:
             if s.surf_type == 'dielectric_interface':
+                h_nonlinear = -beta*s.dphi-gamma
                 h_nonlinear = alpha*tanh(-beta*s.dphi-gamma) + mu
                 f_nonlinear = s.Ein/(s.Eout-s.Ein) - h_nonlinear
                 s.E_hat = f_nonlinear/(1+f_nonlinear)

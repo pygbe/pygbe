@@ -899,6 +899,9 @@ def initializeSurf(field_array, filename, param):
         else:
             s.E_hat = 1
 
+        s.dphi = zeros(len(s.triangle))
+        s.phi = zeros(len(s.triangle))
+
         surf_array.append(s)
     return surf_array
 
