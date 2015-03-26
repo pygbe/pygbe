@@ -199,6 +199,65 @@ class index_constant():
         # Device data
         self.indexDev = []
 
+def computePrecond(surf):
+
+    # Generate preconditioner
+    # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
+    N = len(surf.triangle)
+    surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
+                                 # Order: Top left, top right, bott left, bott right    
+    centers = zeros((N,3))
+    centers[:,0] = surf.xi[:]
+    centers[:,1] = surf.yi[:]
+    centers[:,2] = surf.zi[:]
+
+#   Compute diagonal integral for internal equation
+    VL = zeros(N) 
+    KL = zeros(N) 
+    VY = zeros(N)
+    KY = zeros(N)
+    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
+                    surf.kappa_in, 2*pi, 0., surf.xk, surf.wk)
+    if surf.LorY_in == 1:
+        dX11 = KL
+        dX12 = -VL
+        surf.sglInt_int = VL # Array for singular integral of V through interior
+    elif surf.LorY_in == 2:
+        dX11 = KY
+        dX12 = -VY
+        surf.sglInt_int = VY # Array for singular integral of V through interior
+    else:
+        surf.sglInt_int = zeros(N)
+
+#   Compute diagonal integral for external equation
+    VL = zeros(N) 
+    KL = zeros(N) 
+    VY = zeros(N)
+    KY = zeros(N)
+    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
+                    surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
+    if surf.LorY_out == 1:
+        dX21 = KL
+        dX22 = surf.E_hat*VL
+        surf.sglInt_ext = VL # Array for singular integral of V through exterior
+    elif surf.LorY_out == 2:
+        dX21 = KY
+        dX22 = surf.E_hat*VY
+        surf.sglInt_ext = VY # Array for singular integral of V through exterior
+    else:
+        surf.sglInt_ext = zeros(N)
+
+    if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
+        d_aux = 1/(dX22-dX21*dX12/dX11)
+        surf.Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
+        surf.Precond[1,:] = -1/dX11*dX12*d_aux
+        surf.Precond[2,:] = -d_aux*dX21/dX11
+        surf.Precond[3,:] = d_aux
+    elif surf.surf_type=='dirichlet_surface':
+        surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
+    elif surf.surf_type=='neumann_surface' or surf.surf_type=='asc_surface':
+        surf.Precond[0,:] = 1/(2*pi)
+
 
 def getGaussPoints(y,triangle, n):
     # y         : vertices
@@ -731,63 +790,9 @@ def fill_surface(surf,param):
     surf.xk,surf.wk = GQ_1D(param.Nk)
     surf.Xsk,surf.Wsk = quadratureRule_fine(param.K_fine) 
 
+#   Compute preconditioner
+    computePrecond(surf)
 
-    # Generate preconditioner
-    # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
-    surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
-                                 # Order: Top left, top right, bott left, bott right    
-    centers = zeros((N,3))
-    centers[:,0] = surf.xi[:]
-    centers[:,1] = surf.yi[:]
-    centers[:,2] = surf.zi[:]
-
-#   Compute diagonal integral for internal equation
-    VL = zeros(N) 
-    KL = zeros(N) 
-    VY = zeros(N)
-    KY = zeros(N)
-    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
-                    surf.kappa_in, 2*pi, 0., surf.xk, surf.wk)
-    if surf.LorY_in == 1:
-        dX11 = KL
-        dX12 = -VL
-        surf.sglInt_int = VL # Array for singular integral of V through interior
-    elif surf.LorY_in == 2:
-        dX11 = KY
-        dX12 = -VY
-        surf.sglInt_int = VY # Array for singular integral of V through interior
-    else:
-        surf.sglInt_int = zeros(N)
-
-#   Compute diagonal integral for external equation
-    VL = zeros(N) 
-    KL = zeros(N) 
-    VY = zeros(N)
-    KY = zeros(N)
-    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
-                    surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
-    if surf.LorY_out == 1:
-        dX21 = KL
-        dX22 = surf.E_hat*VL
-        surf.sglInt_ext = VL # Array for singular integral of V through exterior
-    elif surf.LorY_out == 2:
-        dX21 = KY
-        dX22 = surf.E_hat*VY
-        surf.sglInt_ext = VY # Array for singular integral of V through exterior
-    else:
-        surf.sglInt_ext = zeros(N)
-
-    if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
-        d_aux = 1/(dX22-dX21*dX12/dX11)
-        surf.Precond[0,:] = 1/dX11 + 1/dX11*dX12*d_aux*dX21/dX11
-        surf.Precond[1,:] = -1/dX11*dX12*d_aux
-        surf.Precond[2,:] = -d_aux*dX21/dX11
-        surf.Precond[3,:] = d_aux
-    elif surf.surf_type=='dirichlet_surface':
-        surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
-    elif surf.surf_type=='neumann_surface' or surf.surf_type=='asc_surface':
-        surf.Precond[0,:] = 1/(2*pi)
-    
     tic = time.time()
     sortPoints(surf, surf.tree, surf.twig, param)
     toc = time.time()
