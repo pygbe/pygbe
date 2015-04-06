@@ -29,11 +29,11 @@ import time
 
 # Import self made modules
 import sys 
-from gmres			    import gmres_solver    
+from gmres			    import gmres_solver, gmres_sigma
 from projection         import get_phir
-from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer, fill_phi
+from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer, fill_phi, computePrecond
 from output             import printSummary
-from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf
+from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf, selfExterior, selfInterior, computeNormalElectricField_gpu
 
 sys.path.append('../util')
 from readData        import readVertex, readTriangle, readpqr, readParameters
@@ -54,6 +54,7 @@ parser = argparse.ArgumentParser(description='PyGBe: Python GPU code for boundar
 parser.add_argument('parameter_file', help='Parameter file, see input_files/file.param for format details')
 parser.add_argument('config_file', help='Configuration file, see input_files/file.config for format details')
 parser.add_argument('--asymmetric', help='Activates nonlinear BCs and Picard iteration to consider asymmetric charging energy', action='store_true')
+parser.add_argument('--chargeForm', help='Use apparent surface charge to compute the normal electric field', action='store_true')
 
 args = parser.parse_args()
 
@@ -159,7 +160,7 @@ tic = time.time()
 ### Solve
 print 'Solve'
 if args.asymmetric == True:
-    Npicard = 10   
+    Npicard = 10
 else:
     Npicard = 1
 
@@ -167,13 +168,13 @@ alpha = 0.5
 beta = -60
 gamma = -0.5
 mu = -alpha*tanh(-gamma)
+phi = zeros(param.Neq)
 for picardIter in range(Npicard):
 
-    if args.asymmetric == True:
+    if args.asymmetric == True and args.chargeForm == False:
         print '\nPicard iteration %i'%picardIter
         for s in surf_array:
             if s.surf_type == 'dielectric_interface':
-                h_nonlinear = -beta*s.dphi-gamma
                 h_nonlinear = alpha*tanh(-beta*s.dphi-gamma) + mu
                 f_nonlinear = s.Ein/(s.Eout-s.Ein) - h_nonlinear
                 s.E_hat = f_nonlinear/(1+f_nonlinear)
@@ -186,8 +187,44 @@ for picardIter in range(Npicard):
                 if abs(sigma_total)<1e-10:
                     sigma_total = -qtotal/s.Eout
                 s.E_hat = -(qtotal/s.Eout)/sigma_total
+            computePrecond(s)
 
-    phi = zeros(param.Neq)
+    if args.asymmetric == True and args.chargeForm == True:
+        print '\nPicard iteration %i'%picardIter
+        for ss in range(len(surf_array)):
+            s = surf_array[ss]
+            if s.surf_type == 'dielectric_interface':
+                s.XinV = s.dphi 
+                s.XinK = s.phi
+                s.E_hat = 1.
+                RHS_sigma, t1, t2 = selfExterior(s, ss, 1, param, ind0, timing, kernel)
+                if picardIter==0: 
+                    sigma = zeros(len(RHS_sigma))
+
+                if sum(abs(RHS_sigma))>1e-12:
+                    sigma = gmres_sigma(s, ss, sigma, RHS_sigma, param, ind0, timing, kernel)
+                for ff in field_array:
+                    if len(ff.parent)>0:
+                        if ff.parent[0]==ss:
+                            child_field = ff
+
+                ElecField = computeNormalElectricField_gpu(s, ss, child_field, param, sigma, ind0, kernel, timing) 
+
+                h_nonlinear = alpha*tanh(beta*ElecField-gamma) + mu
+                f_nonlinear = s.Ein/(s.Eout-s.Ein) - h_nonlinear
+                s.E_hat = f_nonlinear/(1+f_nonlinear)
+            if s.surf_type == 'stern_layer':
+                qtotal = 0
+                for f in field_array:
+                    if len(f.q)>0:
+                        qtotal += sum(f.q)
+                sigma_total = sum(s.dphi*s.Area)
+                if abs(sigma_total)<1e-10:
+                    sigma_total = -qtotal/s.Eout
+                s.E_hat = -(qtotal/s.Eout)/sigma_total
+            computePrecond(s)
+
+
     phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing, kernel) 
 
 #   Put result phi in corresponding surfaces

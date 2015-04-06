@@ -55,9 +55,9 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = -2*pi
     V_diag = 0.
     IorE   = 2
-    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, 
+    K_lyr, V_lyr = project(surf.XinK, surf.E_hat*surf.XinV, LorY, surf, surf, 
                             K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
-    v = -K_lyr + surf.E_hat*V_lyr
+    v = -K_lyr + V_lyr
     return v, K_lyr, V_lyr
 
 def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
@@ -65,9 +65,9 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     K_diag = 0
     V_diag = 0
     IorE   = 1
-    K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src], surf[tar], 
+    K_lyr, V_lyr = project(surf[src].XinK, surf[src].E_hat*surf[src].XinV, LorY, surf[src], surf[tar], 
                             K_diag, V_diag, IorE, src, param, ind0, timing, kernel)
-    v = -K_lyr + surf[src].E_hat*V_lyr
+    v = -K_lyr + V_lyr
     return v
 
 def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
@@ -843,3 +843,33 @@ def calculateEsurf(surf_array, field_array, param, kernel):
             E_surf.append(0.5*C0*Esurf_aux)
 
     return E_surf
+
+
+def computeNormalElectricField_gpu(surf, s, field, param, sigma, ind0, kernel, timing):
+
+    computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
+    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+
+    Fx_gpu = gpuarray.zeros(param.Nround, dtype=param.REAL)     
+    Fy_gpu = gpuarray.zeros(param.Nround, dtype=param.REAL)     
+    Fz_gpu = gpuarray.zeros(param.Nround, dtype=param.REAL)     
+    Nq = len(field.q)
+    computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field.xq_gpu, field.yq_gpu, field.zq_gpu, field.q_gpu,
+            surf.xiDev, surf.yiDev, surf.ziDev, surf.sizeTarDev, int32(Nq), 
+            param.REAL(field.E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+    aux_x = zeros(param.Nround)
+    aux_y = zeros(param.Nround)
+    aux_z = zeros(param.Nround)
+    Fx_gpu.get(aux_x)
+    Fy_gpu.get(aux_y)
+    Fz_gpu.get(aux_z)
+
+    ElecField = -aux_x[surf.unsort]*surf.normal[:,0] - \
+                aux_y[surf.unsort]*surf.normal[:,1] - \
+                aux_z[surf.unsort]*surf.normal[:,2]
+
+    ElecField -= project_Kt(sigma, 1, surf, surf, 
+                    0., s, param, ind0, timing, kernel)
+
+    return ElecField
+

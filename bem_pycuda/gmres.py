@@ -26,6 +26,7 @@ from scipy.linalg           import lu_solve, solve
 from scipy.sparse.linalg    import gmres 
 import time
 from matrixfree import gmres_dot as gmres_dot
+from projection import project
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
 
@@ -125,6 +126,130 @@ def gmres_solver (surf_array, field_array, X, b_clean, param, ind0, timing, kern
             tic = time.time()
        
             Vip1 = gmres_dot(V[i,:], surf_array, field_array, ind0, param, timing, kernel)
+            toc = time.time()
+            time_Vi+=toc-tic
+    
+            if iteration<6:
+                savetxt('Vip1%i.txt'%iteration, Vip1)
+
+            tic = time.time()
+            Vk = V[0:i+1,:]
+            H[0:i+1,i] = dot(Vip1,transpose(Vk))
+
+            # This ends up being slower than looping           
+#            HVk = H[0:i+1,i]*transpose(Vk)
+#            Vip1 -= HVk.sum(axis=1)
+
+            for k in range(i+1):
+                Vip1 -= H[k,i]*Vk[k] 
+            toc = time.time()
+            time_Vk+=toc-tic
+
+            H[i+1,i] = norm(Vip1)
+            V[i+1,:] = Vip1[:]/H[i+1,i]
+
+            tic = time.time()
+            H,cs,sn,s =  PlaneRotation(H, cs, sn, s, i, param.restart)
+            toc = time.time()
+            time_rotation+=toc-tic
+
+            rel_resid = abs(s[i+1])/res_0
+
+            if iteration%1==0:
+                print 'iteration: %i, rel resid: %s'%(iteration,rel_resid)
+
+
+            if (i+1==param.restart):
+                print('Residual: %f. Restart...'%rel_resid)
+            if rel_resid<=param.tol:
+                break
+
+        # Solve the triangular system
+        tic = time.time()
+        piv = arange(i+1)
+        y = lu_solve((H[0:i+1,0:i+1], piv), s[0:i+1], trans=0)
+        toc = time.time()
+        time_lu+=toc-tic
+
+        # Update solution
+        tic = time.time()
+        Vj = zeros(N)
+        for j in range(i+1):
+            # Compute Vj
+            Vj[:] = V[j,:]
+            X += y[j]*Vj
+        toc = time.time()
+        time_update+=toc-tic
+
+
+#    print 'Time Vip1    : %fs'%time_Vi
+#    print 'Time Vk      : %fs'%time_Vk
+#    print 'Time rotation: %fs'%time_rotation
+#    print 'Time lu      : %fs'%time_lu
+#    print 'Time update  : %fs'%time_update
+    print 'GMRES solve'
+    print 'Converged after %i iterations to a residual of %s'%(iteration,rel_resid)
+    print 'Time weight vector: %f'%timing.time_mass
+    print 'Time sort         : %f'%timing.time_sort
+    print 'Time data transfer: %f'%timing.time_trans
+    print 'Time P2M          : %f'%timing.time_P2M
+    print 'Time M2M          : %f'%timing.time_M2M
+    print 'Time M2P          : %f'%timing.time_M2P
+    print 'Time P2P          : %f'%timing.time_P2P
+    print '\tTime analy: %f'%timing.time_an
+#    print 'Tolerance: %f, maximum iterations: %f'%(tol, max_iter)
+
+    return X
+
+def gmres_sigma (surf, ss, X, b, param, ind0, timing, kernel):
+
+    N = len(b)
+    V = zeros((param.restart+1, N))
+    H = zeros((param.restart+1,param.restart))
+
+    time_Vi = 0.
+    time_Vk = 0.
+    time_rotation = 0.
+    time_lu = 0.
+    time_update = 0.
+
+    # Initializing varibles
+    rel_resid = 1.
+    cs, sn = zeros(N), zeros(N)
+
+    iteration = 0
+
+    b_norm = norm(b)
+
+    while (iteration < param.max_iter and rel_resid>=param.tol): # Outer iteration
+        
+        dummy, aux = project(zeros(len(X)), X, 1, surf, surf,
+                            0., 0., 1, ss, param, ind0, timing, kernel)
+        
+        r = b - aux
+        beta = norm(r)
+
+        if iteration==0: 
+            print 'Analytical integrals: %i of %i, %i'%(timing.AI_int/param.N, param.N, 100*timing.AI_int/param.N**2)+'%'
+
+        V[0,:] = r[:]/beta
+        if iteration==0:
+            res_0 = b_norm
+
+        s = zeros(param.restart+1)
+        s[0] = beta
+        i = -1
+
+        while (i+1<param.restart and iteration+1<=param.max_iter): # Inner iteration
+            i+=1 
+            iteration+=1
+
+            # Compute Vip1
+            tic = time.time()
+       
+            dummy, Vip1 = project(zeros(len(V[i,:])), V[i,:], 1, surf, surf,
+                            0., 0., 1, ss, param, ind0, timing, kernel)
+
             toc = time.time()
             time_Vi+=toc-tic
     
