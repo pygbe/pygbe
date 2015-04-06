@@ -33,7 +33,7 @@ from gmres			    import gmres_solver, gmres_sigma
 from projection         import get_phir
 from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer, fill_phi, computePrecond
 from output             import printSummary
-from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf, selfExterior, selfInterior, computeNormalElectricField_gpu
+from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf, selfExterior, selfInterior, computeNormalElectricField
 
 sys.path.append('../util')
 from readData        import readVertex, readTriangle, readpqr, readParameters
@@ -202,13 +202,14 @@ for picardIter in range(Npicard):
                     sigma = zeros(len(RHS_sigma))
 
                 if sum(abs(RHS_sigma))>1e-12:
+                    timing.AI_int = 0
                     sigma = gmres_sigma(s, ss, sigma, RHS_sigma, param, ind0, timing, kernel)
                 for ff in field_array:
                     if len(ff.parent)>0:
                         if ff.parent[0]==ss:
                             child_field = ff
 
-                ElecField = computeNormalElectricField_gpu(s, ss, child_field, param, sigma, ind0, kernel, timing) 
+                ElecField = computeNormalElectricField(s, ss, child_field, param, sigma, ind0, kernel, timing) 
 
                 h_nonlinear = alpha*tanh(beta*ElecField-gamma) + mu
                 f_nonlinear = s.Ein/(s.Eout-s.Ein) - h_nonlinear
