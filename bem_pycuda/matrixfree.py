@@ -903,8 +903,11 @@ def computeNormalElectricField(surf, s, field, param, sigma, ind0, kernel, timin
                                                     + dy_pq*surf.normal[:,1] \
                                                     + dz_pq*surf.normal[:,2])
 
-    ElecField -= project_Kt(sigma, 1, surf, surf, 
-                    0., s, param, ind0, timing, kernel)
+    if sum(abs(sigma))>1e-10:
+        ElecField -= project_Kt(sigma, 1, surf, surf, 
+                        0., s, param, ind0, timing, kernel)
+
+    ElecField /= 4*pi
 
     return ElecField
 
