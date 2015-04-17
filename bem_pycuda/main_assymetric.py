@@ -173,8 +173,18 @@ for picardIter in range(Npicard):
 
     if args.asymmetric == True and args.chargeForm == False:
         print '\nPicard iteration %i'%picardIter
-        for s in surf_array:
+        for ss in range(len(surf_array)):
+            s = surf_array[ss]
             if s.surf_type == 'dielectric_interface':
+
+                if picardIter==0:
+                    for ff in field_array:
+                        if len(ff.parent)>0:
+                            if ff.parent[0]==ss:
+                                child_field = ff
+
+                    s.dphi = -computeNormalElectricField(s, ss, child_field, param, zeros(len(s.triangle)), ind0, kernel, timing)
+
                 h_nonlinear = alpha*tanh(-beta*s.dphi-gamma) + mu
                 f_nonlinear = s.Ein/(s.Eout-s.Ein) - h_nonlinear
                 s.E_hat = f_nonlinear/(1+f_nonlinear)

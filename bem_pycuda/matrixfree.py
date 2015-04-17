@@ -872,6 +872,7 @@ def computeNormalElectricField(surf, s, field, param, sigma, ind0, kernel, timin
 
     if param.GPU==1:
         computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
+        param.Nround = len(surf.twig)*param.NCRIT
         GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
 
         Fx_gpu = gpuarray.zeros(param.Nround, dtype=param.REAL)     
