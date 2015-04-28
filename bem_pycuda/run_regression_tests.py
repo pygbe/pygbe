@@ -21,7 +21,6 @@
 '''
 
 import os
-import numpy
 import time
 
 print '*****REGRESSION TESTS*****'
