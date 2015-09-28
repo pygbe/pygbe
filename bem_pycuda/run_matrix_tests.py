@@ -21,11 +21,9 @@
 '''
 
 import os
-from numpy import zeros, array
-import math
-from matplotlib import *
-from matplotlib.pyplot import *
-from matplotlib.backends.backend_pdf import PdfFile, PdfPages, FigureCanvasPdf
+import matplotlib 
+matplotlib.use('Agg')
+import matplotlib.pyplot
 import sys
 sys.path.append('../util')
 from an_solution import *

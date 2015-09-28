@@ -20,7 +20,8 @@
   THE SOFTWARE.
 '''
 
-from numpy import *
+import numpy
+from scipy import linalg
 import sys
 sys.path.append('tree')
 from FMMutils import *
@@ -206,37 +207,37 @@ def getGaussPoints(y,triangle, n):
     # n         : Gauss points per element
 
     N  = len(triangle) # Number of triangles
-    xi = zeros((N*n,3))
+    xi = numpy.zeros((N*n,3))
     if n==1:
-        xi[:,0] = average(y[triangle[:],0], axis=1)
-        xi[:,1] = average(y[triangle[:],1], axis=1)
-        xi[:,2] = average(y[triangle[:],2], axis=1)
+        xi[:,0] = numpy.average(y[triangle[:],0], axis=1)
+        xi[:,1] = numpy.average(y[triangle[:],1], axis=1)
+        xi[:,2] = numpy.average(y[triangle[:],2], axis=1)
 
     if n==3:
         for i in range(N):
-            M = transpose(y[triangle[i]])
-            xi[n*i,:] = dot(M, array([0.5, 0.5, 0.]))
-            xi[n*i+1,:] = dot(M, array([0., 0.5, 0.5]))
-            xi[n*i+2,:] = dot(M, array([0.5, 0., 0.5]))
+            M = numpy.transpose(y[triangle[i]])
+            xi[n*i,:] = numpy.dot(M, numpy.array([0.5, 0.5, 0.]))
+            xi[n*i+1,:] = numpy.dot(M, numpy.array([0., 0.5, 0.5]))
+            xi[n*i+2,:] = numpy.dot(M, numpy.array([0.5, 0., 0.5]))
 
     if n==4:
         for i in range(N):
-            M = transpose(y[triangle[i]])
-            xi[n*i,:] = dot(M, array([1/3., 1/3., 1/3.]))
-            xi[n*i+1,:] = dot(M, array([3/5., 1/5., 1/5.]))
-            xi[n*i+2,:] = dot(M, array([1/5., 3/5., 1/5.]))
-            xi[n*i+3,:] = dot(M, array([1/5., 1/5., 3/5.]))
+            M = numpy.transpose(y[triangle[i]])
+            xi[n*i,:] = numpy.dot(M, numpy.array([1/3., 1/3., 1/3.]))
+            xi[n*i+1,:] = numpy.dot(M, numpy.array([3/5., 1/5., 1/5.]))
+            xi[n*i+2,:] = numpy.dot(M, numpy.array([1/5., 3/5., 1/5.]))
+            xi[n*i+3,:] = numpy.dot(M, numpy.array([1/5., 1/5., 3/5.]))
 
     if n==7:
         for i in range(N):
-            M = transpose(y[triangle[i]])
-            xi[n*i+0,:] = dot(M, array([1/3.,1/3.,1/3.]))
-            xi[n*i+1,:] = dot(M, array([.797426985353087,.101286507323456,.101286507323456]))
-            xi[n*i+2,:] = dot(M, array([.101286507323456,.797426985353087,.101286507323456]))
-            xi[n*i+3,:] = dot(M, array([.101286507323456,.101286507323456,.797426985353087]))
-            xi[n*i+4,:] = dot(M, array([.059715871789770,.470142064105115,.470142064105115]))
-            xi[n*i+5,:] = dot(M, array([.470142064105115,.059715871789770,.470142064105115]))
-            xi[n*i+6,:] = dot(M, array([.470142064105115,.470142064105115,.059715871789770]))
+            M = numpy.transpose(y[triangle[i]])
+            xi[n*i+0,:] = numpy.dot(M, numpy.array([1/3.,1/3.,1/3.]))
+            xi[n*i+1,:] = numpy.dot(M, numpy.array([.797426985353087,.101286507323456,.101286507323456]))
+            xi[n*i+2,:] = numpy.dot(M, numpy.array([.101286507323456,.797426985353087,.101286507323456]))
+            xi[n*i+3,:] = numpy.dot(M, numpy.array([.101286507323456,.101286507323456,.797426985353087]))
+            xi[n*i+4,:] = numpy.dot(M, numpy.array([.059715871789770,.470142064105115,.470142064105115]))
+            xi[n*i+5,:] = numpy.dot(M, numpy.array([.470142064105115,.059715871789770,.470142064105115]))
+            xi[n*i+6,:] = numpy.dot(M, numpy.array([.470142064105115,.470142064105115,.059715871789770]))
 
     return xi[:,0], xi[:,1], xi[:,2]
 
@@ -244,8 +245,8 @@ def quadratureRule_fine(K):
     
     # 1 Gauss point
     if K==1:
-        X = array([1/3., 1/3., 1/3.])
-        W = array([1])
+        X = numpy.array([1/3., 1/3., 1/3.])
+        W = numpy.array([1])
 
     # 7 Gauss points
     if K==7:
@@ -257,10 +258,10 @@ def quadratureRule_fine(K):
         wb = 0.132394152788506
         wc = 0.125939180544827
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1])
-        W = array([wa,wb,wb,wb,wc,wc,wc])
+        X = numpy.array([a,a,a,
+                       b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                       c1,c2,c2,c2,c1,c2,c2,c2,c1])
+        W = numpy.array([wa,wb,wb,wb,wc,wc,wc])
         
    
     # 13 Gauss points
@@ -274,14 +275,14 @@ def quadratureRule_fine(K):
         wc = 0.053347235608838
         wd = 0.077113760890257
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1, 
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1, 
-                    d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1])
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,wd,wd,wd])
+        X = numpy.array([a,a,a,
+                       b1,b2,b2,b2,b1,b2,b2,b2,b1, 
+                       c1,c2,c2,c2,c1,c2,c2,c2,c1, 
+                       d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1])
+        W = numpy.array([wa,
+                        wb,wb,wb,
+                        wc,wc,wc,
+                        wd,wd,wd,wd,wd,wd])
         
     # 17 Gauss points
     if K==17:
@@ -296,17 +297,17 @@ def quadratureRule_fine(K):
         wd = 0.032458497623198
         we = 0.027230314174435
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1, 
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1, 
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1, 
-                    e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1])
+        X = numpy.array([a,a,a,
+                        b1,b2,b2,b2,b1,b2,b2,b2,b1, 
+                        c1,c2,c2,c2,c1,c2,c2,c2,c1, 
+                        d1,d2,d2,d2,d1,d2,d2,d2,d1, 
+                        e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1])
                     
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,we,we,we])
+        W = numpy.array([wa,
+                        wb,wb,wb,
+                        wc,wc,wc,
+                        wd,wd,wd,
+                        we,we,we,we,we,we])
 
     # 19 Gauss points
     if K==19:
@@ -324,18 +325,18 @@ def quadratureRule_fine(K):
         we = 0.025577675658698
         wf = 0.043283539377289
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,wf,wf,wf])
+        X = numpy.array([a,a,a,
+                        b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                        c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                        d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                        e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                        f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
+        W = numpy.array([wa,
+                        wb,wb,wb,
+                        wc,wc,wc,
+                        wd,wd,wd,
+                        we,we,we,
+                        wf,wf,wf,wf,wf,wf])
 
     # 25 Gauss points
     if K==25:
@@ -353,18 +354,18 @@ def quadratureRule_fine(K):
         we = 0.028327242531057
         wf = 0.009421666963733
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1,
-                    e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1,
-                    f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,wd,wd,wd,
-                    we,we,we,we,we,we,
-                    wf,wf,wf,wf,wf,wf])
+        X = numpy.array([a,a,a,
+                        b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                        c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                        d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1,
+                        e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1,
+                        f1,f2,f3,f1,f3,f2,f2,f1,f3,f2,f3,f1,f3,f1,f2,f3,f2,f1])
+        W = numpy.array([wa,
+                        wb,wb,wb,
+                        wc,wc,wc,
+                        wd,wd,wd,wd,wd,wd,
+                        we,we,we,we,we,we,
+                        wf,wf,wf,wf,wf,wf])
 
     # 37 Gauss points
     if K==37:
@@ -390,27 +391,27 @@ def quadratureRule_fine(K):
         wi = 0.017401463303822
         wj = 0.015521786839045
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
-                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
-                    h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
-                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
-                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1])
+        X = numpy.array([a,a,a,
+                         b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                         c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                         d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                         e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                         f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                         g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                         h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
+                         i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                         j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1])
 
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,
-                    wg,wg,wg,
-                    wh,wh,wh,wh,wh,wh,
-                    wi,wi,wi,wi,wi,wi,
-                    wj,wj,wj,wj,wj,wj])
+        W = numpy.array([wa,
+                         wb,wb,wb,
+                         wc,wc,wc,
+                         wd,wd,wd,
+                         we,we,we,
+                         wf,wf,wf,
+                         wg,wg,wg,
+                         wh,wh,wh,wh,wh,wh,
+                         wi,wi,wi,wi,wi,wi,
+                         wj,wj,wj,wj,wj,wj])
 
     # 48 Gauss points
     if K==48:
@@ -438,29 +439,29 @@ def quadratureRule_fine(K):
         wj = 0.021505319847731
         wk = 0.007673942631049
 
-        X = array([a1,a2,a2,a2,a1,a2,a2,a2,a1,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
-                    g1,g2,g3,g1,g3,g2,g2,g1,g3,g2,g3,g1,g3,g1,g2,g3,g2,g1,
-                    h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
-                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
-                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
-                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1])
+        X = numpy.array([a1,a2,a2,a2,a1,a2,a2,a2,a1,
+                         b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                         c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                         d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                         e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                         f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                         g1,g2,g3,g1,g3,g2,g2,g1,g3,g2,g3,g1,g3,g1,g2,g3,g2,g1,
+                         h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
+                         i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                         j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                         k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1])
 
-        W = array([wa,wa,wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,
-                    wg,wg,wg,wg,wg,wg,
-                    wh,wh,wh,wh,wh,wh,
-                    wi,wi,wi,wi,wi,wi,
-                    wj,wj,wj,wj,wj,wj,
-                    wk,wk,wk,wk,wk,wk])
+        W = numpy.array([wa,wa,wa,
+                         wb,wb,wb,
+                         wc,wc,wc,
+                         wd,wd,wd,
+                         we,we,we,
+                         wf,wf,wf,
+                         wg,wg,wg,wg,wg,wg,
+                         wh,wh,wh,wh,wh,wh,
+                         wi,wi,wi,wi,wi,wi,
+                         wj,wj,wj,wj,wj,wj,
+                         wk,wk,wk,wk,wk,wk])
 
 
     # 52 Gauss points
@@ -493,33 +494,33 @@ def quadratureRule_fine(K):
         wl = 0.019084792755899 
         wm = 0.006850054546542
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
-                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
-                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
-                    i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
-                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
-                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
-                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
-                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1])
+        X = numpy.array([a,a,a,
+                         b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                         c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                         d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                         e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                         f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                         g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                         h1,h2,h2,h2,h1,h2,h2,h2,h1,
+                         i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
+                         j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                         k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
+                         l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                         m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1])
 
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,
-                    wg,wg,wg,
-                    wh,wh,wh,
-                    wi,wi,wi,wi,wi,wi,
-                    wj,wj,wj,wj,wj,wj,
-                    wk,wk,wk,wk,wk,wk,
-                    wl,wl,wl,wl,wl,wl,
-                    wm,wm,wm,wm,wm,wm])
+        W = numpy.array([wa,
+                         wb,wb,wb,
+                         wc,wc,wc,
+                         wd,wd,wd,
+                         we,we,we,
+                         wf,wf,wf,
+                         wg,wg,wg,
+                         wh,wh,wh,
+                         wi,wi,wi,wi,wi,wi,
+                         wj,wj,wj,wj,wj,wj,
+                         wk,wk,wk,wk,wk,wk,
+                         wl,wl,wl,wl,wl,wl,
+                         wm,wm,wm,wm,wm,wm])
 
     # 61 Gauss points
     if K==61:
@@ -555,37 +556,37 @@ def quadratureRule_fine(K):
         wn = 0.018292796770025
         wo = 0.006665632004165
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
-                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
-                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
-                    i1,i2,i2,i2,i1,i2,i2,i2,i1,
-                    j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
-                    k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
-                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
-                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
-                    n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
-                    o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1])
+        X = numpy.array([a,a,a,
+                         b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                         c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                         d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                         e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                         f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                         g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                         h1,h2,h2,h2,h1,h2,h2,h2,h1,
+                         i1,i2,i2,i2,i1,i2,i2,i2,i1,
+                         j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
+                         k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
+                         l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                         m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
+                         n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
+                         o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1])
 
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,
-                    wg,wg,wg,
-                    wh,wh,wh,
-                    wi,wi,wi,
-                    wj,wj,wj,wj,wj,wj,
-                    wk,wk,wk,wk,wk,wk,
-                    wl,wl,wl,wl,wl,wl,
-                    wm,wm,wm,wm,wm,wm,
-                    wn,wn,wn,wn,wn,wn,
-                    wo,wo,wo,wo,wo,wo])
+        W = numpy.array([wa,
+                         wb,wb,wb,
+                         wc,wc,wc,
+                         wd,wd,wd,
+                         we,we,we,
+                         wf,wf,wf,
+                         wg,wg,wg,
+                         wh,wh,wh,
+                         wi,wi,wi,
+                         wj,wj,wj,wj,wj,wj,
+                         wk,wk,wk,wk,wk,wk,
+                         wl,wl,wl,wl,wl,wl,
+                         wm,wm,wm,wm,wm,wm,
+                         wn,wn,wn,wn,wn,wn,
+                         wo,wo,wo,wo,wo,wo])
 
 
     # 79 Gauss points
@@ -630,45 +631,45 @@ def quadratureRule_fine(K):
         wr = 0.010112684927462
         ws = 0.003573909385950
 
-        X = array([a,a,a,
-                    b1,b2,b2,b2,b1,b2,b2,b2,b1,
-                    c1,c2,c2,c2,c1,c2,c2,c2,c1,
-                    d1,d2,d2,d2,d1,d2,d2,d2,d1,
-                    e1,e2,e2,e2,e1,e2,e2,e2,e1,
-                    f1,f2,f2,f2,f1,f2,f2,f2,f1,
-                    g1,g2,g2,g2,g1,g2,g2,g2,g1,
-                    h1,h2,h2,h2,h1,h2,h2,h2,h1,
-                    i1,i2,i2,i2,i1,i2,i2,i2,i1,
-                    j1,j2,j2,j2,j1,j2,j2,j2,j1,
-                    k1,k2,k2,k2,k1,k2,k2,k2,k1,
-                    l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
-                    m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
-                    n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
-                    o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1,
-                    p1,p2,p3,p1,p3,p2,p2,p1,p3,p2,p3,p1,p3,p1,p2,p3,p2,p1,
-                    q1,q2,q3,q1,q3,q2,q2,q1,q3,q2,q3,q1,q3,q1,q2,q3,q2,q1,
-                    r1,r2,r3,r1,r3,r2,r2,r1,r3,r2,r3,r1,r3,r1,r2,r3,r2,r1,
-                    s1,s2,s3,s1,s3,s2,s2,s1,s3,s2,s3,s1,s3,s1,s2,s3,s2,s1])
+        X = numpy.array([a,a,a,
+                         b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                         c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                         d1,d2,d2,d2,d1,d2,d2,d2,d1,
+                         e1,e2,e2,e2,e1,e2,e2,e2,e1,
+                         f1,f2,f2,f2,f1,f2,f2,f2,f1,
+                         g1,g2,g2,g2,g1,g2,g2,g2,g1,
+                         h1,h2,h2,h2,h1,h2,h2,h2,h1, 
+                         i1,i2,i2,i2,i1,i2,i2,i2,i1,
+                         j1,j2,j2,j2,j1,j2,j2,j2,j1,
+                         k1,k2,k2,k2,k1,k2,k2,k2,k1,
+                         l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
+                         m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
+                         n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
+                         o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1,
+                         p1,p2,p3,p1,p3,p2,p2,p1,p3,p2,p3,p1,p3,p1,p2,p3,p2,p1,
+                         q1,q2,q3,q1,q3,q2,q2,q1,q3,q2,q3,q1,q3,q1,q2,q3,q2,q1,
+                         r1,r2,r3,r1,r3,r2,r2,r1,r3,r2,r3,r1,r3,r1,r2,r3,r2,r1,
+                         s1,s2,s3,s1,s3,s2,s2,s1,s3,s2,s3,s1,s3,s1,s2,s3,s2,s1])
 
-        W = array([wa,
-                    wb,wb,wb,
-                    wc,wc,wc,
-                    wd,wd,wd,
-                    we,we,we,
-                    wf,wf,wf,
-                    wg,wg,wg,
-                    wh,wh,wh,
-                    wi,wi,wi,
-                    wj,wj,wj,
-                    wk,wk,wk,
-                    wl,wl,wl,wl,wl,wl,
-                    wm,wm,wm,wm,wm,wm,
-                    wn,wn,wn,wn,wn,wn,
-                    wo,wo,wo,wo,wo,wo,
-                    wp,wp,wp,wp,wp,wp,
-                    wq,wq,wq,wq,wq,wq,
-                    wr,wr,wr,wr,wr,wr,
-                    ws,ws,ws,ws,ws,ws])
+        W = numpy.array([wa,
+                         wb,wb,wb,
+                         wc,wc,wc,
+                         wd,wd,wd,
+                         we,we,we,
+                         wf,wf,wf,
+                         wg,wg,wg,
+                         wh,wh,wh,
+                         wi,wi,wi,
+                         wj,wj,wj,
+                         wk,wk,wk,
+                         wl,wl,wl,wl,wl,wl,
+                         wm,wm,wm,wm,wm,wm,
+                         wn,wn,wn,wn,wn,wn,
+                         wo,wo,wo,wo,wo,wo,
+                         wp,wp,wp,wp,wp,wp,
+                         wq,wq,wq,wq,wq,wq,
+                         wr,wr,wr,wr,wr,wr,
+                         ws,ws,ws,ws,ws,ws])
 
     return X, W
 
@@ -677,17 +678,17 @@ def fill_surface(surf,param):
     N  = len(surf.triangle)
     Nj = N*param.K
     # Calculate centers
-    surf.xi = average(surf.vertex[surf.triangle[:],0], axis=1)
-    surf.yi = average(surf.vertex[surf.triangle[:],1], axis=1)
-    surf.zi = average(surf.vertex[surf.triangle[:],2], axis=1)
+    surf.xi = numpy.average(surf.vertex[surf.triangle[:],0], axis=1)
+    surf.yi = numpy.average(surf.vertex[surf.triangle[:],1], axis=1)
+    surf.zi = numpy.average(surf.vertex[surf.triangle[:],2], axis=1)
 
-    surf.normal = zeros((N,3))
-    surf.Area = zeros(N)
+    surf.normal = numpy.zeros((N,3))
+    surf.Area = numpy.zeros(N)
 
     L0 = surf.vertex[surf.triangle[:,1]] - surf.vertex[surf.triangle[:,0]]
     L2 = surf.vertex[surf.triangle[:,0]] - surf.vertex[surf.triangle[:,2]]
-    surf.normal = cross(L0,L2)
-    surf.Area = sqrt(surf.normal[:,0]**2 + surf.normal[:,1]**2 + surf.normal[:,2]**2)/2
+    surf.normal = numpy.cross(L0,L2)
+    surf.Area = numpy.sqrt(surf.normal[:,0]**2 + surf.normal[:,1]**2 + surf.normal[:,2]**2)/2
     surf.normal[:,0] = surf.normal[:,0]/(2*surf.Area)
     surf.normal[:,1] = surf.normal[:,1]/(2*surf.Area)
     surf.normal[:,2] = surf.normal[:,2]/(2*surf.Area)
@@ -698,7 +699,7 @@ def fill_surface(surf,param):
     n2 = surf.yi + surf.normal[:,1]
     n3 = surf.zi + surf.normal[:,2]
 
-    rtest = sqrt(n1*n1+n2*n2+n3*n3)
+    rtest = numpy.sqrt(n1*n1+n2*n2+n3*n3)
     counter = 0
     for i in range(len(rtest)):
         if rtest[i]<R:
@@ -710,11 +711,11 @@ def fill_surface(surf,param):
     # Set Gauss points (sources)
     surf.xj,surf.yj,surf.zj = getGaussPoints(surf.vertex,surf.triangle,param.K)
 
-    x_center = zeros(3)
-    x_center[0] = average(surf.xi).astype(param.REAL)
-    x_center[1] = average(surf.yi).astype(param.REAL)
-    x_center[2] = average(surf.zi).astype(param.REAL)
-    dist = sqrt((surf.xi-x_center[0])**2+(surf.yi-x_center[1])**2+(surf.zi-x_center[2])**2)
+    x_center = numpy.zeros(3)
+    x_center[0] = numpy.average(surf.xi).astype(param.REAL)
+    x_center[1] = numpy.average(surf.yi).astype(param.REAL)
+    x_center[2] = numpy.average(surf.zi).astype(param.REAL)
+    dist = numpy.sqrt((surf.xi-x_center[0])**2+(surf.yi-x_center[1])**2+(surf.zi-x_center[2])**2)
     R_C0 = max(dist)
 
     # Generate tree, compute indices and precompute terms for M2M
@@ -734,18 +735,18 @@ def fill_surface(surf,param):
 
     # Generate preconditioner
     # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
-    surf.Precond = zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
+    surf.Precond = numpy.zeros((4,N))  # Stores the inverse of the block diagonal (also a tridiag matrix)
                                  # Order: Top left, top right, bott left, bott right    
-    centers = zeros((N,3))
+    centers = numpy.zeros((N,3))
     centers[:,0] = surf.xi[:]
     centers[:,1] = surf.yi[:]
     centers[:,2] = surf.zi[:]
 
 #   Compute diagonal integral for internal equation
-    VL = zeros(N) 
-    KL = zeros(N) 
-    VY = zeros(N)
-    KY = zeros(N)
+    VL = numpy.zeros(N) 
+    KL = numpy.zeros(N) 
+    VY = numpy.zeros(N)
+    KY = numpy.zeros(N)
     computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
                     surf.kappa_in, 2*pi, 0., surf.xk, surf.wk)
     if surf.LorY_in == 1:
@@ -757,13 +758,13 @@ def fill_surface(surf,param):
         dX12 = -VY
         surf.sglInt_int = VY # Array for singular integral of V through interior
     else:
-        surf.sglInt_int = zeros(N)
+        surf.sglInt_int = numpy.zeros(N)
 
 #   Compute diagonal integral for external equation
-    VL = zeros(N) 
-    KL = zeros(N) 
-    VY = zeros(N)
-    KY = zeros(N)
+    VL = numpy.zeros(N) 
+    KL = numpy.zeros(N) 
+    VY = numpy.zeros(N)
+    KY = numpy.zeros(N)
     computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
                     surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
     if surf.LorY_out == 1:
@@ -775,7 +776,7 @@ def fill_surface(surf,param):
         dX22 = surf.E_hat*VY
         surf.sglInt_ext = VY # Array for singular integral of V through exterior
     else:
-        surf.sglInt_ext = zeros(N)
+        surf.sglInt_ext = numpy.zeros(N)
 
     if surf.surf_type!='dirichlet_surface' and surf.surf_type!='neumann_surface':
         d_aux = 1/(dX22-dX21*dX12/dX11)
@@ -847,7 +848,7 @@ def zeroAreas(s, triangle_raw, Area_null):
     for i in range(len(triangle_raw)):
         L0 = s.vertex[triangle_raw[i,1]] - s.vertex[triangle_raw[i,0]]
         L2 = s.vertex[triangle_raw[i,0]] - s.vertex[triangle_raw[i,2]]
-        normal_aux = cross(L0,L2)
+        normal_aux = numpy.cross(L0,L2)
         Area_aux = linalg.norm(normal_aux)/2
         if Area_aux<1e-10:
             Area_null.append(i)
@@ -868,7 +869,7 @@ def initializeSurf(field_array, filename, param):
         s.surf_type = surf_type[i]
 
         if s.surf_type=='dirichlet_surface' or s.surf_type=='neumann_surface':
-            s.phi0 = loadtxt(phi0_file[i])
+            s.phi0 = numpy.loadtxt(phi0_file[i])
             print '\nReading phi0 file for surface %i from '%i+phi0_file[i]
 
         Area_null = []
@@ -878,7 +879,7 @@ def initializeSurf(field_array, filename, param):
         toc = time.time()
         print 'Time load mesh: %f'%(toc-tic)
         Area_null = zeroAreas(s, triangle_raw, Area_null)
-        s.triangle = delete(triangle_raw, Area_null, 0)
+        s.triangle = numpy.delete(triangle_raw, Area_null, 0)
         print 'Removed areas=0: %i'%len(Area_null)
 
         # Look for regions inside/outside
@@ -924,7 +925,7 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
 #       Avoid transferring size 1 arrays to GPU (some systems crash)
         Nbuff = 5
         if len(surf_array[s].sizeTarget)<Nbuff:
-            sizeTarget_buffer = zeros(Nbuff, dtype=int32)    
+            sizeTarget_buffer = numpy.zeros(Nbuff, dtype=int32)    
             sizeTarget_buffer[:len(surf_array[s].sizeTarget)] = surf_array[s].sizeTarget[:]    
             surf_array[s].sizeTarDev = gpuarray.to_gpu(sizeTarget_buffer)
         else:
@@ -970,7 +971,7 @@ def fill_phi(phi, surf_array):
             s_start += s_size
         elif surf_array[i].surf_type=='asc_surface':
             surf_array[i].dphi = phi[s_start:s_start+s_size]/surf_array[i].Ein
-            surf_array[i].phi  = zeros(s_size)
+            surf_array[i].phi  = numpy.zeros(s_size)
             s_start += s_size
         else:
             surf_array[i].phi  = phi[s_start:s_start+s_size]

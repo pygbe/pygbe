@@ -20,6 +20,7 @@
   THE SOFTWARE.
 '''
 
+import numpy
 import sys 
 sys.path.append('tree')
 from FMMutils import *
@@ -30,7 +31,7 @@ import time
 
 def getWeights(K):
 
-    w = zeros(K)
+    w = numpy.zeros(K)
     if K==1:
         w[0] = 1
     if K==3:
@@ -62,20 +63,20 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
     Nt = len(surfTar.triangle)
-    L = sqrt(2*surfSrc.Area) # Representative length
+    L = numpy.sqrt(2*surfSrc.Area) # Representative length
 
     tic.record()
     K = param.K
-    w    = getWeights(K)
-    X_V  = zeros(Ns*K)
-    X_Kx = zeros(Ns*K)
-    X_Ky = zeros(Ns*K)
-    X_Kz = zeros(Ns*K)
-    X_Kc = zeros(Ns*K)
-    X_Vc = zeros(Ns*K)
+    w = getWeights(K)
+    X_V  = numpy.zeros(Ns*K)
+    X_Kx = numpy.zeros(Ns*K)
+    X_Ky = numpy.zeros(Ns*K)
+    X_Kz = numpy.zeros(Ns*K)
+    X_Kc = numpy.zeros(Ns*K)
+    X_Vc = numpy.zeros(Ns*K)
 
-    NsK = arange(Ns*K)
-    X_V[:]  =  XV[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]
+    NsK = numpy.arange(Ns*K)
+    X_V[:]  = XV[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]
     X_Kx[:] = XK[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]*surfSrc.normal[NsK/K,0]
     X_Ky[:] = XK[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]*surfSrc.normal[NsK/K,1]
     X_Kz[:] = XK[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]*surfSrc.normal[NsK/K,2]
@@ -116,8 +117,8 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
     timing.time_sort += tic.time_till(toc)*1e-3
 
     param.Nround = len(surfTar.twig)*param.NCRIT
-    K_aux  = zeros(param.Nround)
-    V_aux  = zeros(param.Nround)
+    K_aux  = numpy.zeros(param.Nround)
+    V_aux  = numpy.zeros(param.Nround)
     AI_int = 0
 
     ### CPU code
@@ -165,15 +166,15 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
     Nt = len(surfTar.triangle)
-    L = sqrt(2*surfSrc.Area) # Representative length
+    L = numpy.sqrt(2*surfSrc.Area) # Representative length
 
     tic.record()
     K = param.K
     w    = getWeights(K)
-    X_Kt = zeros(Ns*K)
-    X_Ktc = zeros(Ns*K)
+    X_Kt = numpy.zeros(Ns*K)
+    X_Ktc = numpy.zeros(Ns*K)
 
-    NsK = arange(Ns*K)
+    NsK = numpy.arange(Ns*K)
     X_Kt[:]  = XKt[NsK/K]*w[NsK%K]*surfSrc.Area[NsK/K]
     X_Ktc[:] = XKt[NsK/K]
 
@@ -183,7 +184,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
 
     tic.record()
     C = 0
-    X_aux = zeros(Ns*K)
+    X_aux = numpy.zeros(Ns*K)
     getMultipole(surfSrc.tree, C, surfSrc.xj, surfSrc.yj, surfSrc.zj, 
                     X_Kt, X_aux, X_aux, X_aux, ind0, param.P, param.NCRIT)
     toc.record()
@@ -208,9 +209,9 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
     timing.time_sort += tic.time_till(toc)*1e-3
 
     param.Nround = len(surfTar.twig)*param.NCRIT
-    Ktx_aux  = zeros(param.Nround)
-    Kty_aux  = zeros(param.Nround)
-    Ktz_aux  = zeros(param.Nround)
+    Ktx_aux  = numpy.zeros(param.Nround)
+    Kty_aux  = numpy.zeros(param.Nround)
+    Ktz_aux  = numpy.zeros(param.Nround)
     AI_int = 0
 
     ### CPU code
@@ -263,20 +264,20 @@ def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
     REAL = par_reac.REAL
     N = len(XK)
-    MV = zeros(len(XK))
-    L = sqrt(2*surface.Area) # Representative length
+    MV = numpy.zeros(len(XK))
+    L = numpy.sqrt(2*surface.Area) # Representative length
     AI_int = 0
 
     # Setup vector
     K = par_reac.K
     tic = time.time()
-    w    = getWeights(K)
-    X_V = zeros(N*K)
-    X_Kx = zeros(N*K)
-    X_Ky = zeros(N*K)
-    X_Kz = zeros(N*K)
-    X_Kc = zeros(N*K)
-    X_Vc = zeros(N*K)
+    w  = getWeights(K)
+    X_V = numpy.zeros(N*K)
+    X_Kx = numpy.zeros(N*K)
+    X_Ky = numpy.zeros(N*K)
+    X_Kz = numpy.zeros(N*K)
+    X_Kc = numpy.zeros(N*K)
+    X_Vc = numpy.zeros(N*K)
 
     for i in range(N*K):
         X_V[i]   = XV[i/K]*w[i%K]*surface.Area[i/K]
@@ -310,7 +311,7 @@ def get_phir (XK, XV, surface, xq, Cells, par_reac, ind_reac):
     # Evaluation
     IorE = 0    # This evaluation is on charge points, no self-operator
     AI_int = 0
-    phi_reac = zeros(len(xq))
+    phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.
     time_M2P = 0.
     for i in range(len(xq)):
@@ -336,20 +337,20 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
     REAL = par_reac.REAL
     Nq = len(field.xq)
     N = len(XK)
-    MV = zeros(len(XK))
-    L = sqrt(2*surface.Area) # Representative length
+    MV = numpy.zeros(len(XK))
+    L = numpy.sqrt(2*surface.Area) # Representative length
     AI_int = 0
 
     # Setup vector
     K = par_reac.K
     tic = time.time()
     w    = getWeights(K)
-    X_V = zeros(N*K)
-    X_Kx = zeros(N*K)
-    X_Ky = zeros(N*K)
-    X_Kz = zeros(N*K)
-    X_Kc = zeros(N*K)
-    X_Vc = zeros(N*K)
+    X_V = numpy.zeros(N*K)
+    X_Kx = numpy.zeros(N*K)
+    X_Ky = numpy.zeros(N*K)
+    X_Kz = numpy.zeros(N*K)
+    X_Kc = numpy.zeros(N*K)
+    X_Vc = numpy.zeros(N*K)
 
     for i in range(N*K):
         X_V[i]   = XV[i/K]*w[i%K]*surface.Area[i/K]
@@ -363,32 +364,32 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
     time_set = toc - tic
     
     sort = surface.sortSource
-    phir = cuda.to_device(zeros(Nq, dtype=REAL))
+    phir = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
     m_gpu   = cuda.to_device(X_V[sort].astype(REAL))
     mx_gpu  = cuda.to_device(X_Kx[sort].astype(REAL))
     my_gpu  = cuda.to_device(X_Ky[sort].astype(REAL))
     mz_gpu  = cuda.to_device(X_Kz[sort].astype(REAL))
     mKc_gpu = cuda.to_device(X_Kc[sort].astype(REAL))
     mVc_gpu = cuda.to_device(X_Vc[sort].astype(REAL))
-    AI_int_gpu = cuda.to_device(zeros(Nq, dtype=int32))
+    AI_int_gpu = cuda.to_device(numpy.zeros(Nq, dtype=int32))
     xkDev = cuda.to_device(surface.xk.astype(REAL))
     wkDev = cuda.to_device(surface.wk.astype(REAL))
 
 
     get_phir = kernel.get_function("get_phir")
     
-    GSZ = int(ceil(float(Nq)/par_reac.BSZ))
+    GSZ = int(numpy.ceil(float(Nq)/par_reac.BSZ))
 
     get_phir(phir, field.xq_gpu, field.yq_gpu, field.zq_gpu, m_gpu, mx_gpu, my_gpu, mz_gpu, mKc_gpu, mVc_gpu, 
             surface.xjDev, surface.yjDev, surface.zjDev, surface.AreaDev, surface.kDev, surface.vertexDev, 
             int32(len(surface.xj)), int32(Nq), int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
             AI_int_gpu, int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
 
-    AI_aux = zeros(Nq, dtype=int32)
+    AI_aux = numpy.zeros(Nq, dtype=int32)
     AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=int32)
-    AI_int = sum(AI_aux)
+    AI_int = numpy.sum(AI_aux)
 
-    phir_cpu = zeros(Nq, dtype=REAL)
+    phir_cpu = numpy.zeros(Nq, dtype=REAL)
     phir_cpu = cuda.from_device(phir, Nq, dtype=REAL)
 
     return phir_cpu, AI_int
