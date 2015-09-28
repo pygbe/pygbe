@@ -20,7 +20,8 @@
   THE SOFTWARE.
 '''
 
-from numpy import *
+import numpy
+from math import pi
 import sys
 sys.path.append('tree')
 from FMMutils import *
@@ -101,20 +102,20 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type=='dirichlet_surface':
-            surf_array[i].XinK = zeros(N) 
+            surf_array[i].XinK = numpy.zeros(N) 
             surf_array[i].XinV = X[Naux:Naux+N] 
             Naux += N
         elif surf_array[i].surf_type=='neumann_surface' or surf_array[i].surf_type=='asc_surface':
             surf_array[i].XinK = X[Naux:Naux+N] 
-            surf_array[i].XinV = zeros(N)
+            surf_array[i].XinV = numpy.zeros(N)
             Naux += N
         else:
             surf_array[i].XinK     = X[Naux:Naux+N]
             surf_array[i].XinV     = X[Naux+N:Naux+2*N]
             Naux += 2*N 
 
-        surf_array[i].Xout_int = zeros(N) 
-        surf_array[i].Xout_ext = zeros(N)
+        surf_array[i].Xout_int = numpy.zeros(N) 
+        surf_array[i].Xout_ext = numpy.zeros(N)
 
 #   Loop over fields
     for F in range(Nfield):
@@ -188,7 +189,7 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
     return MV
 
 def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
-    F = zeros(param.Neq)
+    F = numpy.zeros(param.Neq)
 
 #   Point charge contribution to RHS
     for j in range(len(field_array)):
@@ -206,12 +207,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                 s_size = len(surf_array[s].xi)
 
-                aux = zeros(len(surf_array[s].xi))
+                aux = numpy.zeros(len(surf_array[s].xi))
                 for i in range(Nq):
                     dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
                     dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
                     dz_pq = surf_array[s].zi - field_array[j].xq[i,2]
-                    R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
+                    R_pq = numpy.sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':
                         aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
@@ -249,12 +250,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                 s_size = len(surf_array[s].xi)
 
-                aux = zeros(len(surf_array[s].xi))
+                aux = numpy.zeros(len(surf_array[s].xi))
                 for i in range(Nq):
                     dx_pq = surf_array[s].xi - field_array[j].xq[i,0] 
                     dy_pq = surf_array[s].yi - field_array[j].xq[i,1]
                     dz_pq = surf_array[s].zi - field_array[j].xq[i,2]
-                    R_pq = sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
+                    R_pq = numpy.sqrt(dx_pq*dx_pq + dy_pq*dy_pq + dz_pq*dz_pq)
 
                     if surf_array[s].surf_type=='asc_surface':
                         aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
@@ -300,7 +301,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = -2*pi*(sd==s)
                     V_diag = 0
                     IorE   = 2
-                    K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
+                    K_lyr, V_lyr = project(surf_array[sd].phi0, numpy.zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
                             surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -328,7 +329,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0
                     V_diag = 0
                     IorE   = 2
-                    K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
+                    K_lyr, V_lyr = project(numpy.zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
                             surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -366,7 +367,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0  
                     V_diag = 0
                     IorE   = 2
-                    K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
+                    K_lyr, V_lyr = project(surf_array[sd].phi0, numpy.zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
                             surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -389,7 +390,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0
                     V_diag = 0
                     IorE   = 2
-                    K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
+                    K_lyr, V_lyr = project(numpy.zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
                             surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -411,7 +412,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
 def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
-    F = zeros(param.Neq)
+    F = numpy.zeros(param.Neq)
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
@@ -432,7 +433,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 s_size = len(surf_array[s].xi)
                 Nround = len(surf_array[s].twig)*param.NCRIT
 
-                GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
+                GSZ = int(numpy.ceil(float(Nround)/param.NCRIT)) # CUDA grid size
 
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
@@ -440,7 +441,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
                                 REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
 
-                    aux = zeros(Nround)
+                    aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
 
                 else: 
@@ -450,9 +451,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
                                 REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
-                    aux_x = zeros(Nround)
-                    aux_y = zeros(Nround)
-                    aux_z = zeros(Nround)
+                    aux_x = numpy.zeros(Nround)
+                    aux_y = numpy.zeros(Nround)
+                    aux_z = numpy.zeros(Nround)
                     Fx_gpu.get(aux_x)
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
@@ -498,7 +499,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 s_size = len(surf_array[s].xi)
                 Nround = len(surf_array[s].twig)*param.NCRIT
 
-                GSZ = int(ceil(float(Nround)/param.NCRIT)) # CUDA grid size
+                GSZ = int(numpy.ceil(float(Nround)/param.NCRIT)) # CUDA grid size
                 
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
@@ -506,7 +507,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
                                 REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
 
-                    aux = zeros(Nround)
+                    aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
 
                 else:
@@ -516,9 +517,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
                                 surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
                                 REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
-                    aux_x = zeros(Nround)
-                    aux_y = zeros(Nround)
-                    aux_z = zeros(Nround)
+                    aux_x = numpy.zeros(Nround)
+                    aux_y = numpy.zeros(Nround)
+                    aux_z = numpy.zeros(Nround)
                     Fx_gpu.get(aux_x)
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
@@ -567,7 +568,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = -2*pi*(sd==s)
                     V_diag = 0
                     IorE   = 2 
-                    K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
+                    K_lyr, V_lyr = project(surf_array[sd].phi0, numpy.zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
                             surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -595,7 +596,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0
                     V_diag = 0
                     IorE = 2
-                    K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
+                    K_lyr, V_lyr = project(numpy.zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
                             surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -632,7 +633,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0  
                     V_diag = 0
                     IorE   = 1
-                    K_lyr, V_lyr = project(surf_array[sd].phi0, zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
+                    K_lyr, V_lyr = project(surf_array[sd].phi0, numpy.zeros(len(surf_array[sd].xi)), LorY, surf_array[sd], 
                             surf_array[s], K_diag, V_diag, IorE, sd, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -655,7 +656,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     K_diag = 0
                     V_diag = 0
                     IorE   = 1
-                    K_lyr, V_lyr = project(zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
+                    K_lyr, V_lyr = project(numpy.zeros(len(surf_array[sn].phi0)), surf_array[sn].phi0, LorY, surf_array[sn], 
                             surf_array[s], K_diag, V_diag, IorE, sn, param, ind0, timing, kernel)
 
 #                   Find location of surface s in RHS array
@@ -708,7 +709,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
             
             AI_int = 0
             Naux = 0
-            phi_reac = zeros(len(field_array[f].q))
+            phi_reac = numpy.zeros(len(field_array[f].q))
 
 #           First look at CHILD surfaces
 #           Need to account for normals pointing outwards
@@ -720,8 +721,8 @@ def calculateEsolv(surf_array, field_array, param, kernel):
                 s.xk = REAL(s.xk)
                 s.wk = REAL(s.wk)
                 for C in range(len(s.tree)):
-                    s.tree[C].M  = zeros(par_reac.Nm)
-                    s.tree[C].Md = zeros(par_reac.Nm)
+                    s.tree[C].M  = numpy.zeros(par_reac.Nm)
+                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
                 Naux += len(s.triangle)
 
@@ -745,8 +746,8 @@ def calculateEsolv(surf_array, field_array, param, kernel):
                 s.xk = REAL(s.xk)
                 s.wk = REAL(s.wk)
                 for C in range(len(s.tree)):
-                    s.tree[C].M  = zeros(par_reac.Nm)
-                    s.tree[C].Md = zeros(par_reac.Nm)
+                    s.tree[C].M  = numpy.zeros(par_reac.Nm)
+                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
                 Naux += len(s.triangle)
 
@@ -759,7 +760,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
                 phi_reac += phi_aux 
 
             
-            E_solv_aux += 0.5*C0*sum(field_array[f].q*phi_reac)
+            E_solv_aux += 0.5*C0*numpy.sum(field_array[f].q*phi_reac)
             E_solv.append(E_solv_aux)
 
             print '%i of %i analytical integrals for phi_reac calculation in region %i'%(AI_int/len(field_array[f].xq),Naux, f)
@@ -769,13 +770,13 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
 def coulombEnergy(f, param):
 
-    point_energy = zeros(len(f.q), param.REAL)
+    point_energy = numpy.zeros(len(f.q), param.REAL)
     coulomb_direct(f.xq[:,0], f.xq[:,1], f.xq[:,2], f.q, point_energy)
 
     cal2J = 4.184
     C0 = param.qe**2*param.Na*1e-3*1e10/(cal2J*param.E_0)
 
-    Ecoul = sum(point_energy) * 0.5*C0/(4*pi*f.E)
+    Ecoul = numpy.sum(point_energy) * 0.5*C0/(4*pi*f.E)
     return Ecoul
 
 
@@ -807,13 +808,13 @@ def calculateEsurf(surf_array, field_array, param, kernel):
         if parent_surf.surf_type == 'dirichlet_surface':
             ff += 1
             print 'Calculating surface energy around region %i, stored in E_surf[%i]'%(f,ff)
-            Esurf_aux = -sum(-parent_surf.Eout*parent_surf.dphi*parent_surf.phi*parent_surf.Area) 
+            Esurf_aux = -numpy.sum(-parent_surf.Eout*parent_surf.dphi*parent_surf.phi*parent_surf.Area) 
             E_surf.append(0.5*C0*Esurf_aux)
         
         elif parent_surf.surf_type == 'neumann_surface':
             ff += 1
             print 'Calculating surface energy around region %i, stored in E_surf[%i]'%(f,ff)
-            Esurf_aux = sum(-parent_surf.Eout*parent_surf.dphi*parent_surf.phi*parent_surf.Area) 
+            Esurf_aux = numpy.sum(-parent_surf.Eout*parent_surf.dphi*parent_surf.phi*parent_surf.Area) 
             E_surf.append(0.5*C0*Esurf_aux)
 
     return E_surf
