@@ -116,5 +116,117 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
     if normr != 0.0:
         tol = tol*normr
 
+    iteration = 0
+    
+    #Here start the GMRES
+    for outer in xrange(max_outer):
+
+        # Preallocate for Givens Rotations, Hessenberg matrix and Krylov Space
+        # Space required is O(dimen*max_inner).
+        # NOTE:  We are dealing with row-major matrices, so we traverse in a
+        #        row-major fashion,
+        #        i.e., H and V's transpose is what we store.
+        
+        Q = []  # Initialzing Givens Rotations
+        # Upper Hessenberg matrix, which is then
+        # converted to upper triagonal with Givens Rotations
+
+        H = numpy.zeros((max_inner+1, max_inner+1), dtype=xtype)
+        V = numpy.zeros((max_inner+1, dimen), dtype=xtype) #Krylov space
+
+        # vs store the pointers to each column of V.
+        #   This saves a considerable amount of time.
+        vs = []
+
+        # v = r/normr
+        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x  
+        vs.append(V[0, :])
+
+        #RHS vector in the Krylov space
+        g = numpy.zeros((dimen, ), dtype=xtype)
+        g[0] = normr
+
+        for inner in xrange(max_inner):
+            #New search direction
+            v= V[inner+1, :]
+            v[:] = ravel(M*(A*vs[-1]))
+            vs.append(v)
+            normv_old = norm(v)
+
+            #Modified Gram Schmidt
+            for k in xrange(inner+1):                
+                vk = vs[k]
+                alpha = dotc(vk, v)
+                H[inner, k] = alpha
+                v[:] = axpy(vk, v, dimen, -alpha)  # y := a*x + y
+                # axpy is a wrapper for daxpy, daxpy(x,y,[n,a,offx,incx,offy,incy])
+                # n: input int, that specifies the number of elements in x and y (dimen)
+                # a: Specifies the scalar (-alpha)
+    
+            normv = norm(v)
+            H[inner, inner+1] = normv
+
+#Here the pymag check for re-orthogonalize not sure if necesasary.
+
+            #Check for breakdown
+            if H[inner, inner+1] != 0.0:
+                v[:] = scal(1.0/H[inner, inner+1], v)
+
+            #Apply for Givens rotations to H
+            if inner > 0:
+                apply_givens(Q, H[inner, :], inner)
+
+            #Calculate and apply next complex-valued Givens rotations
+            
+            #If max_inner = dimen, we don't need to calculate, this
+            #is unnecessary for the last inner iteration when inner = dimen -1 
+
+            if inner != dimmen - 1:
+                if H[inner, inner+1] != 0:
+                    #rotg is a blas function that computes the parameters
+                    #for a Givens rotation
+                    [c, s] = rotg(H[inner, inner], H[inner, inner+1])
+                    Qblock = numpy.array([[c, s], [-numpy.conjugate(s),c]], dtype=xtype)
+                    Q.append(Qblock)
+
+                    #Apply Givens Rotations to RHS for the linear system in
+                    # the krylov space. 
+                    g[inner:inner+2] = scipy.dot(Qblock, g[inner:inner+2])
+
+                    #Apply Givens rotations to H
+                    H[inner, inner] = dotu(Qblock[0,:], H[inner, inner:inner+2])
+                    H[inner, inner+1] = 0.0
+
+            iteration+= 1
+
+            if inner < max_inner-1:
+                normr = abs(g[inner+1])
+                
+                if iteration%1==0:
+                    print ('Iteration: %i, residual: %s'%(iteration,normr))                
+
+                if normr < tol:
+                    break
+
+        # end inner loop, back to outer loop
+
+        # Find best update to x in Krylov Space V.  Solve inner x inner system.
+        y = scipy.linalg.solve (H[0:inner+1, 0:inner+1].T, g[0:inner+1])
+        update = numpy.ravel(scipy.mat(V[:inner+1, :]).T * y.reshape(-1,1))
+        x= x + update            
+        r = b - ravel(A*x)
+
+        # Apply preconditioner
+        r = ravel(M*r)
+        normr = norm(r)
+
+        if normr < tol:
+            return (postprocess(x), 0) #0 means everything went well!
+
+     # end outer loop
+
+    return (postprocess(x), iteration)
+
+
 
 
