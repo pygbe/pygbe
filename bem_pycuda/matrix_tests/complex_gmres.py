@@ -32,7 +32,7 @@ def apply_givens(Q, v, k):
         Qloc = Q[j]
         v[j:j+2] = scipy.dot(Qloc, v[j:j+2])
 
-def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
+def gmres_mgs(A, x0, b, R, tol, max_iter, M=None, xtype=None):
 
     '''
     Generalized Minimum Residual Method (GMRES)
@@ -68,12 +68,12 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
     else:
         Mtype = M.dtype
 
-    xtype = upcast(Atype, x.dtype, b.dtype)
+    xtype = upcast(Atype, x.dtype, b.dtype, Mtype)
 
     # Get fast access to underlying BLAS routines
     # dotc is the conjugate dot, dotu does no conjugation
 
-    if iscomplexobj(zeros((1,), dtype=xtype)):
+    if numpy.iscomplexobj(numpy.zeros((1,), dtype=xtype)):
         [axpy, dotu, dotc, scal, rotg] =\
             get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal', 'rotg'], [x])
     else:
@@ -83,7 +83,7 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
 
     # Make full use of direct access to BLAS by defining own norm
     def norm(z):
-        return sqrt(real(dotc(z, z)))
+        return numpy.sqrt(numpy.real(dotc(z, z)))
 
 
     # Set number of outer and inner iterations
@@ -97,10 +97,10 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
     max_inner = R
 
     # Prep for method
-    r = b - ravel(A*x)
+    r = b - numpy.ravel(A*x)
 
     # Apply preconditioner
-    r = ravel(M*r)
+    r = numpy.ravel(M*r)
     normr = norm(r)
     
     # Check initial guess ( scaling by b, if b != 0,
@@ -149,7 +149,7 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
         for inner in xrange(max_inner):
             #New search direction
             v= V[inner+1, :]
-            v[:] = ravel(M*(A*vs[-1]))
+            v[:] = numpy.ravel(M*(A*vs[-1]))
             vs.append(v)
             normv_old = norm(v)
 
@@ -181,7 +181,7 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
             #If max_inner = dimen, we don't need to calculate, this
             #is unnecessary for the last inner iteration when inner = dimen -1 
 
-            if inner != dimmen - 1:
+            if inner != dimen - 1:
                 if H[inner, inner+1] != 0:
                     #rotg is a blas function that computes the parameters
                     #for a Givens rotation
@@ -214,10 +214,10 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
         y = scipy.linalg.solve (H[0:inner+1, 0:inner+1].T, g[0:inner+1])
         update = numpy.ravel(scipy.mat(V[:inner+1, :]).T * y.reshape(-1,1))
         x= x + update            
-        r = b - ravel(A*x)
+        r = b - numpy.ravel(A*x)
 
         # Apply preconditioner
-        r = ravel(M*r)
+        r = numpy.ravel(M*r)
         normr = norm(r)
 
         if normr < tol:
@@ -227,6 +227,49 @@ def gmres_mgs(A, M, x0, b, R, tol, max_iter, xtype=None):
 
     return (postprocess(x), iteration)
 
+#Testing 
+
+from scipy.linalg import solve
+from scipy.sparse.linalg import gmres as scipy_gmres
+import time
+
+xmin = -1.
+xmax = 1.
+N = 5000
+h = (xmax-xmin)/(N-1)
+x = numpy.arange(xmin, xmax+h/2, h)
+
+A = numpy.zeros((N,N))
+for i in range(N):
+    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2))
+
+b = numpy.random.random(N)
+x = numpy.zeros(N)
+R = 50
+max_iter = 5000
+tol = 1e-8
+
+tic = time.time()
+(xg, flag) = gmres_mgs(A, x, b, R, tol, max_iter) #Not preconditioner
+toc = time.time()
+print 'Time for my GMRES_mgs: %fs'%(toc-tic)
+
+
+tic = time.time()
+xs = solve(A, b)
+toc = time.time()
+print 'Time for straight solve: %fs'%(toc-tic)
+
+tic = time.time()
+xsg = scipy_gmres(A, b, x, tol, R, max_iter)[0]
+toc = time.time()
+print 'Time for scipy GMRES: %fs'%(toc-tic)
+
+error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
+print 'error stright solve vs mgs_gmres: %s'%error_xs_xg
+
+error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
+print 'error stright solve vs scipy_gmres: %s'%error_xs_xsg
 
 
 
