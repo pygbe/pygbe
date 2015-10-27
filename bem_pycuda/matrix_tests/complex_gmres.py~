@@ -239,9 +239,9 @@ N = 5000
 h = (xmax-xmin)/(N-1)
 x = numpy.arange(xmin, xmax+h/2, h)
 
-A = numpy.zeros((N,N))
+A = numpy.zeros((N,N), dtype=numpy.complex128)
 for i in range(N):
-    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2))
+    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2)) + i*1j
 
 b = numpy.random.random(N)
 x = numpy.zeros(N)
@@ -250,7 +250,7 @@ max_iter = 5000
 tol = 1e-8
 
 tic = time.time()
-xg = gmres_mgs(A, x, b, R, tol, max_iter) #Not preconditioner
+(xg, flag) = gmres_mgs(A, x, b, R, tol, max_iter) #Not preconditioner
 toc = time.time()
 print 'Time for my GMRES_mgs: %fs'%(toc-tic)
 
@@ -265,10 +265,12 @@ xsg = scipy_gmres(A, b, x, tol, R, max_iter)[0]
 toc = time.time()
 print 'Time for scipy GMRES: %fs'%(toc-tic)
 
-error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
+#error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
+error_xs_xg = numpy.sqrt(sum((xs-xg)*numpy.conj(xs-xg))/sum(xs*numpy.conj(xs)))
 print 'error stright solve vs mgs_gmres: %s'%error_xs_xg
 
-error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
+#error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
+error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))
 print 'error stright solve vs scipy_gmres: %s'%error_xs_xsg
 
 
