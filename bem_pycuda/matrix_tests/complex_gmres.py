@@ -239,9 +239,9 @@ N = 5000
 h = (xmax-xmin)/(N-1)
 x = numpy.arange(xmin, xmax+h/2, h)
 
-A = numpy.zeros((N,N)) #, dtype=numpy.complex128)
+A = numpy.zeros((N,N), dtype=numpy.complex128)
 for i in range(N):
-    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2)) #+ i*1j
+    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2)) + i*1j
 
 b = numpy.random.random(N)
 x = numpy.zeros(N)
