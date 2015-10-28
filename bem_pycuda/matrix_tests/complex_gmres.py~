@@ -239,7 +239,7 @@ N = 5000
 h = (xmax-xmin)/(N-1)
 x = numpy.arange(xmin, xmax+h/2, h)
 
-A = numpy.zeros((N,N)), dtype=numpy.complex128)
+A = numpy.zeros((N,N), dtype=numpy.complex128)
 for i in range(N):
     A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2)) + i*1j
 
@@ -267,7 +267,7 @@ print 'Time for scipy GMRES: %fs'%(toc-tic)
 
 #error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
 error_xs_xg = numpy.sqrt(sum((xs-xg)*numpy.conj(xs-xg))/sum(xs*numpy.conj(xs)))
-print 'error stright solve vs mgs_gmres: %s'%error_xs_xg
+print 'error straight solve vs mgs_gmres: %s'%error_xs_xg
 
 #error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
 error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))

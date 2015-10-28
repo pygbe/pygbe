@@ -228,7 +228,7 @@ def gmres_mgs(A, x0, b, R, tol, max_iter, M=None, xtype=None):
     return (postprocess(x), iteration)
 
 #Testing 
-
+'''
 from scipy.linalg import solve
 from scipy.sparse.linalg import gmres as scipy_gmres
 import time
@@ -267,11 +267,11 @@ print 'Time for scipy GMRES: %fs'%(toc-tic)
 
 #error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
 error_xs_xg = numpy.sqrt(sum((xs-xg)*numpy.conj(xs-xg))/sum(xs*numpy.conj(xs)))
-print 'error stright solve vs mgs_gmres: %s'%error_xs_xg
+print 'error straight solve vs mgs_gmres: %s'%error_xs_xg
 
 #error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
 error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))
 print 'error stright solve vs scipy_gmres: %s'%error_xs_xsg
-
+'''
 
 
