@@ -141,7 +141,7 @@ phi = zeros(len(F))
 #    phi = gmres(MM, FF, tol=param.tol, restart=param.restart, maxiter=param.max_iter)[0]
 
 if type(M[0,0]) == numpy.complex128:
-    (phi, flag) = gmres_mgs(M, phi, F, param.restart, param.tol, param.max_iter, Ainv)
+    phi = gmres_mgs(M, phi, F, param.restart, param.tol, param.max_iter, Ainv)
 else:
     phi = gmres_solver(MM, phi, FF, param.restart, param.tol, param.max_iter) 
 
@@ -163,7 +163,7 @@ Ecoul, field_Ecoul = coulombicEnergy(field_array, param)
 
 Esurf, surf_Esurf = surfaceEnergy(surf_array, param)
 
-dipoleMoment(surf_array, electricField)
+#dipoleMoment(surf_array, electricField)
 
 if abs(electricField)>1e-12:
     Cext, surf_Cext = extCrossSection(surf_array, array([1,0,0]), array([0,0,1]), wavelength, electricField)
