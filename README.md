@@ -49,7 +49,7 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > cd src
     > wget https://pypi.python.org/packages/source/p/pycuda/pycuda-2015.1.3.tar.gz
     > tar -xvzf pycuda-2015.1.3.tar.gz
-    > cd pycuda-2013.1.1
+    > cd pycuda-2015.1.3
     > python configure.py --cuda-root=/usr/local/cuda
     > make
     > sudo make install
