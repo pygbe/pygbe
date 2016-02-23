@@ -22,15 +22,12 @@
 
 import numpy
 from math import pi
-import sys
-sys.path.append('tree')
-from FMMutils import *
+from tree.FMMutils import *
+from tree.direct import coulomb_direct
 from projection import project, project_Kt, get_phir, get_phir_gpu
 from classes import parameters, index_constant
 import time
-sys.path.append('../util')
-from semi_analytical import GQ_1D
-from direct import coulomb_direct
+from util.semi_analytical import GQ_1D
 
 # PyCUDA libraries
 import pycuda.autoinit

@@ -34,15 +34,13 @@ from classes            import surfaces, timings, parameters, index_constant, fi
 from output             import printSummary
 from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf
 
-sys.path.append('../util')
-from readData        import readVertex, readTriangle, readpqr, readParameters
-from triangulation 	 import *
-from an_solution     import an_P, two_sphere
-from semi_analytical import *
+from util.readData        import readVertex, readTriangle, readpqr, readParameters
+from util.triangulation 	 import *
+from util.an_solution     import an_P, two_sphere
+from util.semi_analytical import *
 
-sys.path.append('tree')
-from FMMutils       import *
-from cuda_kernels   import kernels
+from tree.FMMutils       import *
+from tree.cuda_kernels   import kernels
 
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D

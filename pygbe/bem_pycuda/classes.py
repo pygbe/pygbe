@@ -22,14 +22,11 @@
 
 import numpy
 from scipy import linalg
-import sys
-sys.path.append('tree')
-from FMMutils import *
-from direct   import computeDiagonal
-sys.path.append('../util')
-from semi_analytical    import *
-from triangulation      import *
-from readData           import readVertex, readTriangle, readpqr, readcrd, readFields, readSurf
+from tree.FMMutils import *
+from tree.direct   import computeDiagonal
+from util.semi_analytical    import *
+from util.triangulation      import *
+from util.readData           import readVertex, readTriangle, readpqr, readcrd, readFields, readSurf
 
 # PyCUDA libraries
 import pycuda.autoinit
