@@ -21,6 +21,7 @@
 '''
 
 from numpy import *
+import os
 
 def readVertex2(filename, REAL):
     x = []
@@ -45,7 +46,6 @@ def readVertex2(filename, REAL):
     return vertex 
 
 def readVertex(filename, REAL):
-
     X = loadtxt(filename, dtype=REAL)
     vertex = X[:,0:3]
 
@@ -230,7 +230,10 @@ def readFields(filename):
                 kappa.append(line[4])
                 charges.append(line[5])
                 coulomb.append(line[6])
-                qfile.append(line[7])
+                qfile.append(
+                    line[7] if line[7] == 'NA'
+                    else os.environ.get('PYGBE_DATA_DIR')+line[7]
+                )
                 Nparent.append(line[8])
                 parent.append(line[9])
                 Nchild.append(line[10])
@@ -248,7 +251,7 @@ def readSurf(filename):
         line = line.split()
         if len(line)>0:
             if line[0]=='FILE':
-                files.append(line[1])
+                files.append(os.environ.get('PYGBE_DATA_DIR')+line[1])
                 surf_type.append(line[2])
                 if line[2]=='dirichlet_surface' or line[2]=='neumann_surface' or line[2]=='neumann_surface_hyper':
                     phi0_file.append(line[3])
