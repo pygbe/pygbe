@@ -1,7 +1,5 @@
 import sys
 from setuptools import setup, find_packages, Extension
-
-
 def main():
     if sys.version_info[0] != 2:
         sys.exit('PyGBe only supports Python 2.7')
