@@ -25,15 +25,9 @@ corresponding commands in your flavor of Linux to install.
 * NVCC 7.0 
 * PyCUDA 2015.1.3
 
-#### Python
-Python is available by default on Ubuntu.
+#### Python, Numpy and SWIG
 
-#### Numpy and SWIG
-
-Install numpy and SWIG by running 
-the following in the command line:
-
-    > sudo apt-get install python-numpy swig
+To install the specific version of these packages we recommend using either [conda](http://conda.pydata.org/docs/get-started.html) or [pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
 
 #### NVCC
 
