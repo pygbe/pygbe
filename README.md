@@ -31,7 +31,7 @@ To install the specific version of these packages we recommend using either [con
 
 #### SWIG
 
-To install SWIG we recommend using either `conda` or your distribution package manager.  
+To install SWIG we recommend using either `conda`, your distribution package manager or [SWIG's website](http://www.swig.org/download.html).  
 
 #### NVCC
 
