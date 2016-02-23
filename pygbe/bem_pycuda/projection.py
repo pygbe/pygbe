@@ -22,8 +22,7 @@
 
 import numpy
 import sys 
-sys.path.append('tree')
-from FMMutils import *
+from tree.FMMutils import *
 import pycuda.autoinit
 import pycuda.driver as cuda
 import time
