@@ -18,22 +18,20 @@ C++ using SWIG.
 The following instructions assume that the operating system is Ubuntu. Run the 
 corresponding commands in your flavor of Linux to install.
 
-### Dependencies
-* Python
-* Numpy
-* SWIG
-* NVCC
-* PyCUDA
+### Dependencies (last tested)
+* Python 2.7.11
+* Numpy 1.10.4
+* SWIG 3.0.8
+* NVCC 7.0 
+* PyCUDA 2015.1.3
 
-#### Python
-Python is available by default on Ubuntu.
+#### Python and Numpy 
 
-#### Numpy and SWIG
+To install the specific version of these packages we recommend using either [conda](http://conda.pydata.org/docs/get-started.html) or [pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
 
-Install numpy and SWIG by running 
-the following in the command line:
+#### SWIG
 
-    > sudo apt-get install python-numpy swig
+To install SWIG we recommend using either `conda`, your distribution package manager or [SWIG's website](http://www.swig.org/download.html).  
 
 #### NVCC
 
@@ -47,9 +45,9 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > cd $HOME
     > mkdir src
     > cd src
-    > wget https://pypi.python.org/packages/source/p/pycuda/pycuda-2013.1.1.tar.gz
-    > tar -xvzf pycuda-2013.1.1.tar.gz
-    > cd pycuda-2013.1.1
+    > wget https://pypi.python.org/packages/source/p/pycuda/pycuda-2015.1.3.tar.gz
+    > tar -xvzf pycuda-2015.1.3.tar.gz
+    > cd pycuda-2015.1.3
     > python configure.py --cuda-root=/usr/local/cuda
     > make
     > sudo make install
@@ -59,7 +57,7 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04 and 13.10. The versions of the dependencies used were python 2.7, numpy 1.6 and 1.7, swig 2.0, nvcc 5.5 and pycuda 1.1.
+PyGBe has been run and tested on Ubuntu 12.04, 13.10 and 15.04. 
 
 ### Compiling PyGBe
 
