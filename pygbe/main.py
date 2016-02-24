@@ -45,7 +45,7 @@ from tree.cuda_kernels   import kernels
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
-def main(argv):
+def main(argv=sys.argv):
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
