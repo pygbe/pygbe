@@ -45,7 +45,7 @@ from tree.cuda_kernels   import kernels
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
-def main():
+def main(argv):
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
@@ -55,8 +55,8 @@ def main():
     TIC = time.time()
     ### Read parameters
     param = parameters()
-    precision = readParameters(param,sys.argv[1])
-    configFile = sys.argv[2]
+    precision = readParameters(param,argv[1])
+    configFile = argv[2]
 
     param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
@@ -241,3 +241,7 @@ def main():
     E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
     print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
     '''
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
