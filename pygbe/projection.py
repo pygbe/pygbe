@@ -21,8 +21,11 @@
 '''
 
 import numpy
-import sys 
-from tree.FMMutils import *
+import sys
+from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort,
+                           M2PKt_sort, M2P_gpu, M2PKt_gpu, P2P_sort,
+                           P2PKt_sort, P2P_gpu, P2PKt_gpu, M2P_nonvec,
+                           P2P_nonvec)
 import pycuda.autoinit
 import pycuda.driver as cuda
 import time
@@ -358,10 +361,9 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
         X_Kz[i]  = XK[i/K]*w[i%K]*surface.Area[i/K]*surface.normal[i/K,2]
         X_Kc[i]  = XK[i/K]
         X_Vc[i]  = XV[i/K]
-    
+
     toc = time.time()
     time_set = toc - tic
-    
     sort = surface.sortSource
     phir = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
     m_gpu   = cuda.to_device(X_V[sort].astype(REAL))
@@ -370,22 +372,21 @@ def get_phir_gpu (XK, XV, surface, field, par_reac, kernel):
     mz_gpu  = cuda.to_device(X_Kz[sort].astype(REAL))
     mKc_gpu = cuda.to_device(X_Kc[sort].astype(REAL))
     mVc_gpu = cuda.to_device(X_Vc[sort].astype(REAL))
-    AI_int_gpu = cuda.to_device(numpy.zeros(Nq, dtype=int32))
+    AI_int_gpu = cuda.to_device(numpy.zeros(Nq, dtype=numpy.int32))
     xkDev = cuda.to_device(surface.xk.astype(REAL))
     wkDev = cuda.to_device(surface.wk.astype(REAL))
 
 
     get_phir = kernel.get_function("get_phir")
-    
     GSZ = int(numpy.ceil(float(Nq)/par_reac.BSZ))
 
     get_phir(phir, field.xq_gpu, field.yq_gpu, field.zq_gpu, m_gpu, mx_gpu, my_gpu, mz_gpu, mKc_gpu, mVc_gpu, 
             surface.xjDev, surface.yjDev, surface.zjDev, surface.AreaDev, surface.kDev, surface.vertexDev, 
-            int32(len(surface.xj)), int32(Nq), int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
-            AI_int_gpu, int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
+            numpy.int32(len(surface.xj)), numpy.int32(Nq), numpy.int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
+             AI_int_gpu, numpy.int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
 
-    AI_aux = numpy.zeros(Nq, dtype=int32)
-    AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=int32)
+    AI_aux = numpy.zeros(Nq, dtype=numpy.int32)
+    AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=numpy.int32)
     AI_int = numpy.sum(AI_aux)
 
     phir_cpu = numpy.zeros(Nq, dtype=REAL)
