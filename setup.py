@@ -25,18 +25,20 @@ class CustomInstall(install):
         self.run_command('build_ext')
         self.do_egg_install()
         #setuptools cleanup is weak, do it manually
-        for tree in ['PyGBe.egg-info', 'build', 'dist']:
-            shutil.rmtree(tree, ignore_errors=True)
-        for swigfile in [
-                'pygbe/tree/calculateMultipoles.py',
-                'pygbe/tree/calculateMultipoles_wrap.cpp',
-                'pygbe/tree/direct.py',
-                'pygbe/tree/direct_wrap.cpp',
-                'pygbe/tree/multipole.py',
-                'pygbe/tree/multipole_wrap.cpp',
-                'pygbe/util/semi_analyticalwrap.py',
-                'pygbe/util/semi_analyticalwrap_wrap.cpp',]:
-            os.remove(swigfile)
+        cmdline = ''.join(sys.argv[1:])
+        if 'clean' in cmdline:
+            for tree in ['PyGBe.egg-info', 'build', 'dist']:
+                shutil.rmtree(tree, ignore_errors=True)
+            for swigfile in [
+                    'pygbe/tree/calculateMultipoles.py',
+                    'pygbe/tree/calculateMultipoles_wrap.cpp',
+                    'pygbe/tree/direct.py',
+                    'pygbe/tree/direct_wrap.cpp',
+                    'pygbe/tree/multipole.py',
+                    'pygbe/tree/multipole_wrap.cpp',
+                    'pygbe/util/semi_analyticalwrap.py',
+                    'pygbe/util/semi_analyticalwrap_wrap.cpp',]:
+                os.remove(swigfile)
 
 def main():
     if sys.version_info[0] != 2:
