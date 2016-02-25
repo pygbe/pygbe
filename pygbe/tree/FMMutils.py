@@ -20,14 +20,14 @@
   THE SOFTWARE.
 '''
 
-from numpy              import *
-from numpy              import sum as npsum
-from scipy.misc         import factorial
-from scipy.misc         import comb
+import numpy
+from numpy import sum as npsum
+from scipy.misc import factorial
+from scipy.misc import comb
 
 # Wrapped code
-from multipole          import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
-from direct             import direct_c, direct_sort, directKt_sort
+from multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
+from direct import direct_c, direct_sort, directKt_sort
 from calculateMultipoles import P2M, M2M
 
 # CUDA libraries
@@ -44,20 +44,20 @@ class Cell():
                               # This will be a 8bit value and if certain 
                               # child exists, that bit will be 1.
 
-        self.source = array([], dtype=int32)        # Pointer to source particles
-        self.target = array([], dtype=int32)        # Pointer to target particles
+        self.source = numpy.array([], dtype=numpy.int32)        # Pointer to source particles
+        self.target = numpy.array([], dtype=numpy.int32)        # Pointer to target particles
         self.xc = 0.                                # x position of cell
         self.yc = 0.                                # y position of cell
         self.zc = 0.                                # z position of cell
         self.r  = 0.                                # cell radius
 
         self.parent = 0                             # Pointer to parent cell
-        self.child  = zeros(8, dtype=int32)         # Pointer to child cell
+        self.child  = numpy.zeros(8, dtype=numpy.int32)         # Pointer to child cell
 
-        self.M = zeros(Nm)                          # Array with multipoles
-        self.Md = zeros(Nm)                         # Array with multipoles for grad(G).n
+        self.M = numpy.zeros(Nm)                          # Array with multipoles
+        self.Md = numpy.zeros(Nm)                         # Array with multipoles for grad(G).n
 
-        self.P2P_list = array([], dtype=int32)       # Pointer to cells that interact with P2P
+        self.P2P_list = numpy.array([], dtype=numpy.int32)       # Pointer to cells that interact with P2P
         self.M2P_list = []                           # Pointer to cells that interact with M2P
         self.M2P_size = []                           # Size of the M2P interaction list
         self.list_ready = 0                          # Flag to know if P2P list is already generated
@@ -75,7 +75,7 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
     CN.yc = Cells[i].yc + CN.r*((octant&2)-1)   # Want to make ((octant&X)*Y - Z)=1
     CN.zc = Cells[i].zc + CN.r*((octant&4)/2-1)
     CN.parent = i
-    Cells[i].child[octant] = Ncell 
+    Cells[i].child[octant] = Ncell
     Cells[i].nchild|=(1<<octant)
     Cells[Ncell] = CN
     Ncell += 1
@@ -94,7 +94,7 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
             Ncell = add_child(octant, Cells, C, NCRIT, Nm, Ncell)
 
         CC = Cells[C].child[octant] # Pointer to child cell
-        Cells[CC].target = append(Cells[CC].target, l)
+        Cells[CC].target = numpy.append(Cells[CC].target, l)
         Cells[CC].ntarget += 1
 
         if (Cells[CC].ntarget >= NCRIT):
@@ -126,7 +126,7 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
         
             C = Cells[C].child[octant]
 
-        Cells[C].target = append(Cells[C].target, i) 
+        Cells[C].target = numpy.append(Cells[C].target, i) 
         Cells[C].ntarget += 1
 
         if (Cells[C].ntarget>=NCRIT):
@@ -146,7 +146,7 @@ def findTwigs(Cells, C, twig, NCRIT):
                 twig = findTwigs(Cells, Cells[C].child[c], twig, NCRIT)
     else:
         twig.append(C)
-        Cells[C].twig_array = int32(len(twig)-1)
+        Cells[C].twig_array = numpy.int32(len(twig)-1)
 
     return twig
 
@@ -170,7 +170,7 @@ def addSources2(x,y,z,j,Cells,C,NCRIT):
                     dx = x[j]-Cells[Cells[C].child[c]].xc
                     dy = y[j]-Cells[Cells[C].child[c]].yc
                     dz = z[j]-Cells[Cells[C].child[c]].zc
-                    r.append(sqrt(dx*dx+dy*dy+dz*dz))
+                    r.append(numpy.sqrt(dx*dx+dy*dy+dz*dz))
                     child.append(c)
             close_child = r.index(min(r))   # Find index of closest child
             O = child[close_child]              
@@ -178,50 +178,48 @@ def addSources2(x,y,z,j,Cells,C,NCRIT):
         
     else:
         Cells[C].nsource += 1
-        Cells[C].source = append(Cells[C].source, j)
+        Cells[C].source = numpy.append(Cells[C].source, j)
 
 def addSources(x,y,z,Cells,twig):
     # x,y,z: location of sources
     # Cells: array with cells
     # twig : array with pointers to twigs of cells array
 
-    dx = zeros((len(twig),len(x)))
-    dy = zeros((len(twig),len(x)))
-    dz = zeros((len(twig),len(x)))
+    dx = numpy.zeros((len(twig),len(x)))
+    dy = numpy.zeros((len(twig),len(x)))
+    dz = numpy.zeros((len(twig),len(x)))
     j = 0
     for t in twig:
         dx[j] = x - Cells[t].xc
         dy[j] = y - Cells[t].yc
         dz[j] = z - Cells[t].zc
         j+=1
-    r = sqrt(dx*dx+dy*dy+dz*dz)
+    r = numpy.sqrt(dx*dx+dy*dy+dz*dz)
 
     close_twig = argmin(r,axis=0)
 
     for j in range(len(close_twig)):
         Cells[twig[close_twig[j]]].nsource += 1
-        Cells[twig[close_twig[j]]].source = append(Cells[twig[close_twig[j]]].source, j)
+        Cells[twig[close_twig[j]]].source = numpy.append(Cells[twig[close_twig[j]]].source, j)
 
 def addSources3(Cells, twig, K):
     # This version of addSources puts the sources in the same cell
     # as the collocation point of the same panel
-    
     for C in twig:
         Cells[C].nsource = K*Cells[C].ntarget
         for j in range(K):
-            Cells[C].source = append(Cells[C].source, K*Cells[C].target + j) 
-     
+            Cells[C].source = numpy.append(Cells[C].source, K*Cells[C].target + j)
 
 def sortPoints(surface, Cells, twig, param):
 
     Nround = len(twig)*param.NCRIT
 
-    surface.sortTarget   = zeros(Nround, dtype=int32)
-    surface.unsort       = zeros(len(surface.xi), dtype=int32)
-    surface.sortSource   = zeros(len(surface.xj), dtype=int32)
-    surface.offsetSource = zeros(len(twig)+1, dtype=int32)
-    surface.offsetTarget = zeros(len(twig), dtype=int32)
-    surface.sizeTarget   = zeros(len(twig), dtype=int32)
+    surface.sortTarget   = numpy.zeros(Nround, dtype=numpy.int32)
+    surface.unsort       = numpy.zeros(len(surface.xi), dtype=numpy.int32)
+    surface.sortSource   = numpy.zeros(len(surface.xj), dtype=numpy.int32)
+    surface.offsetSource = numpy.zeros(len(twig)+1, dtype=numpy.int32)
+    surface.offsetTarget = numpy.zeros(len(twig), dtype=numpy.int32)
+    surface.sizeTarget   = numpy.zeros(len(twig), dtype=numpy.int32)
     offTar = 0
     offSrc = 0
     i = 0
@@ -251,7 +249,7 @@ def computeIndices(P, ind0):
     JJ = []
     KK = []
     index = []
-    ind0.index_large = zeros((P+1)*(P+1)*(P+1), dtype=int32)
+    ind0.index_large = numpy.zeros((P+1)*(P+1)*(P+1), dtype=numpy.int32)
     for ii in range(P+1):
         for jj in range(P+1-ii):
             for kk in range(P+1-ii-jj):
@@ -261,36 +259,35 @@ def computeIndices(P, ind0):
                 KK.append(kk)
                 ind0.index_large[(P+1)*(P+1)*ii+(P+1)*jj+kk] = index[-1]
 
-    ind0.II = array(II,int32)
-    ind0.JJ = array(JJ,int32)
-    ind0.KK = array(KK,int32)
-    ind0.index = array(index,int32)
+    ind0.II = numpy.array(II,numpy.int32)
+    ind0.JJ = numpy.array(JJ,numpy.int32)
+    ind0.KK = numpy.array(KK,numpy.int32)
+    ind0.index = numpy.array(index,numpy.int32)
 #    index = getIndex_arr(P,II,JJ,KK)
-    
 
 def precomputeTerms(P, ind0):
     # Precompute terms for 
-    ind0.combII = array([],dtype=int32)
-    ind0.combJJ = array([],dtype=int32)
-    ind0.combKK = array([],dtype=int32)
-    ind0.IImii  = array([],dtype=int32)
-    ind0.JJmjj  = array([],dtype=int32)
-    ind0.KKmkk  = array([],dtype=int32)
-    ind0.index_small  = array([], dtype=int32)
-    ind0.index_ptr = zeros(len(ind0.II)+1, dtype=int32)
+    ind0.combII = numpy.array([],dtype=numpy.int32)
+    ind0.combJJ = numpy.array([],dtype=numpy.int32)
+    ind0.combKK = numpy.array([],dtype=numpy.int32)
+    ind0.IImii  = numpy.array([],dtype=numpy.int32)
+    ind0.JJmjj  = numpy.array([],dtype=numpy.int32)
+    ind0.KKmkk  = numpy.array([],dtype=numpy.int32)
+    ind0.index_small  = numpy.array([], dtype=numpy.int32)
+    ind0.index_ptr = numpy.zeros(len(ind0.II)+1, dtype=numpy.int32)
     for i in range(len(ind0.II)):
-        ii,jj,kk = mgrid[0:ind0.II[i]+1:1,0:ind0.JJ[i]+1:1,0:ind0.KK[i]+1:1].astype(int32)
+        ii,jj,kk = numpy.mgrid[0:ind0.II[i]+1:1,0:ind0.JJ[i]+1:1,0:ind0.KK[i]+1:1].astype(numpy.int32)
         ii,jj,kk = ii.ravel(), jj.ravel(), kk.ravel()
-        index_aux = zeros(len(ii), int32)
+        index_aux = numpy.zeros(len(ii), numpy.int32)
         getIndex_arr(P, len(ii), index_aux, ii, jj, kk)  
-        ind0.index_small = append(ind0.index_small, index_aux)
+        ind0.index_small = numpy.append(ind0.index_small, index_aux)
         ind0.index_ptr[i+1] = len(index_aux)+ind0.index_ptr[i]
-        ind0.combII = append(ind0.combII, comb(ind0.II[i],ii))
-        ind0.combJJ = append(ind0.combJJ, comb(ind0.JJ[i],jj))
-        ind0.combKK = append(ind0.combKK, comb(ind0.KK[i],kk))
-        ind0.IImii = append(ind0.IImii, ind0.II[i]-ii)
-        ind0.JJmjj = append(ind0.JJmjj, ind0.JJ[i]-jj)
-        ind0.KKmkk = append(ind0.KKmkk, ind0.KK[i]-kk)
+        ind0.combII = numpy.append(ind0.combII, comb(ind0.II[i],ii))
+        ind0.combJJ = numpy.append(ind0.combJJ, comb(ind0.JJ[i],jj))
+        ind0.combKK = numpy.append(ind0.combKK, comb(ind0.KK[i],kk))
+        ind0.IImii = numpy.append(ind0.IImii, ind0.II[i]-ii)
+        ind0.JJmjj = numpy.append(ind0.JJmjj, ind0.JJ[i]-jj)
+        ind0.KKmkk = numpy.append(ind0.KKmkk, ind0.KK[i]-kk)
 
 def interactionList(surfSrc,surfTar,CJ,CI,theta,NCRIT,offTwg,offMlt,s_src):
     # Cells     : array of Cells
@@ -306,7 +303,7 @@ def interactionList(surfSrc,surfTar,CJ,CI,theta,NCRIT,offTwg,offMlt,s_src):
                 dxi = surfSrc.tree[CC].xc - surfTar.tree[CI].xc
                 dyi = surfSrc.tree[CC].yc - surfTar.tree[CI].yc
                 dzi = surfSrc.tree[CC].zc - surfTar.tree[CI].zc
-                r   = sqrt(dxi*dxi+dyi*dyi+dzi*dzi)
+                r   = numpy.sqrt(dxi*dxi+dyi*dyi+dzi*dzi)
                 if surfTar.tree[CI].r+surfSrc.tree[CC].r > theta*r: # Max distance between particles
                     offTwg, offMlt = interactionList(surfSrc,surfTar,CC,CI,theta,NCRIT,offTwg,offMlt,s_src)
                 else:
@@ -321,24 +318,23 @@ def interactionList(surfSrc,surfTar,CJ,CI,theta,NCRIT,offTwg,offMlt,s_src):
     return offTwg, offMlt
 
 def generateList(surf_array, field_array, param):
-    
     Nsurf  = len(surf_array)
-    Nfield = len(field_array) 
+    Nfield = len(field_array)
 
     # Allocate data
-    maxTwigSize = 0 
+    maxTwigSize = 0
     for i in range(Nsurf):
         maxTwigSize = max(len(surf_array[i].twig),maxTwigSize)
         maxTwigSize = max(len(surf_array[i].tree),maxTwigSize)
 
     for i in range(Nsurf):
-        surf_array[i].P2P_list    = zeros((Nsurf,maxTwigSize*maxTwigSize), dtype=int32)
-        surf_array[i].offsetTwigs = zeros((Nsurf,maxTwigSize+1), dtype=int32)
-        surf_array[i].M2P_list    = zeros((Nsurf,maxTwigSize*maxTwigSize), dtype=int32)
-        surf_array[i].offsetMlt   = zeros((Nsurf,maxTwigSize+1), dtype=int32) 
+        surf_array[i].P2P_list    = numpy.zeros((Nsurf,maxTwigSize*maxTwigSize), dtype=numpy.int32)
+        surf_array[i].offsetTwigs = numpy.zeros((Nsurf,maxTwigSize+1), dtype=numpy.int32)
+        surf_array[i].M2P_list    = numpy.zeros((Nsurf,maxTwigSize*maxTwigSize), dtype=numpy.int32)
+        surf_array[i].offsetMlt   = numpy.zeros((Nsurf,maxTwigSize+1), dtype=numpy.int32)
         for CI in surf_array[i].twig:
-            surf_array[i].tree[CI].M2P_list = zeros((Nsurf,maxTwigSize), dtype=int32)
-            surf_array[i].tree[CI].M2P_size = zeros(Nsurf, dtype=int32)
+            surf_array[i].tree[CI].M2P_list = numpy.zeros((Nsurf,maxTwigSize), dtype=numpy.int32)
+            surf_array[i].tree[CI].M2P_size = numpy.zeros(Nsurf, dtype=numpy.int32)
 
     # Generate list
     # Non-self interaction
@@ -350,12 +346,12 @@ def generateList(surf_array, field_array, param):
 
         for s_tar in S:                             # Loop over surfaces
             for s_src in S:
-                offTwg = 0 
-                offMlt = 0 
-                ii = 0 
+                offTwg = 0
+                offMlt = 0
+                ii = 0
                 for CI in surf_array[s_tar].twig:
                     if s_src!=s_tar:                # Non-self interaction
-                        CJ = 0 
+                        CJ = 0
                         offTwg, offMlt = interactionList(surf_array[s_src],surf_array[s_tar],CJ,CI,param.theta,param.NCRIT,offTwg,offMlt,s_src)
                         surf_array[s_tar].offsetTwigs[s_src,ii+1] = offTwg
                         surf_array[s_tar].offsetMlt[s_src,ii+1] = offMlt
@@ -363,11 +359,11 @@ def generateList(surf_array, field_array, param):
 
     # Self interaction
     for s in range(Nsurf):
-        offTwg = 0 
-        offMlt = 0 
-        ii = 0 
+        offTwg = 0
+        offMlt = 0
+        ii = 0
         for CI in surf_array[s].twig:
-            CJ = 0 
+            CJ = 0
             offTwg, offMlt = interactionList(surf_array[s],surf_array[s],CJ,CI,param.theta,param.NCRIT,offTwg,offMlt,s)
             surf_array[s].offsetTwigs[s,ii+1] = offTwg
             surf_array[s].offsetMlt[s,ii+1]   = offMlt
@@ -375,9 +371,9 @@ def generateList(surf_array, field_array, param):
 
 
     for s_tar in range(Nsurf):
-        surf_array[s_tar].xcSort = zeros((Nsurf, maxTwigSize*maxTwigSize))
-        surf_array[s_tar].ycSort = zeros((Nsurf, maxTwigSize*maxTwigSize))
-        surf_array[s_tar].zcSort = zeros((Nsurf, maxTwigSize*maxTwigSize))
+        surf_array[s_tar].xcSort = numpy.zeros((Nsurf, maxTwigSize*maxTwigSize))
+        surf_array[s_tar].ycSort = numpy.zeros((Nsurf, maxTwigSize*maxTwigSize))
+        surf_array[s_tar].zcSort = numpy.zeros((Nsurf, maxTwigSize*maxTwigSize))
         for s_src in range(Nsurf):
             M2P_size = surf_array[s_tar].offsetMlt[s_src,len(surf_array[s_tar].twig)]
             i = -1
@@ -387,12 +383,11 @@ def generateList(surf_array, field_array, param):
                 surf_array[s_tar].ycSort[s_src,i] = surf_array[s_src].tree[C].yc
                 surf_array[s_tar].zcSort[s_src,i] = surf_array[s_src].tree[C].zc
 
-        
 
 
 def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
     # Cells     : array of cells
-    # C         : index of cell in Cells array 
+    # C         : index of cell in Cells array
     # x,y,z     : position of particles
     # m         : weight of particles
     # P         : order of Taylor expansion
@@ -416,7 +411,6 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
         l = Cells[C].source
         P2M(Cells[C].M, Cells[C].Md, x[l], y[l], z[l], mV[l], mKx[l], mKy[l], mKz[l], Cells[C].xc, Cells[C].yc, Cells[C].zc, ind0.II, ind0.JJ, ind0.KK)
 
-   
 def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr):
     # Cells     : array of cells
     # CC        : index of child cell in Cells array
@@ -436,8 +430,8 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
-    MSort  = zeros(param.Nm*M2P_size)
-    MdSort = zeros(param.Nm*M2P_size)
+    MSort  = numpy.zeros(param.Nm*M2P_size)
+    MdSort = numpy.zeros(param.Nm*M2P_size)
 
     i = -1
     for C in surfTar.M2P_list[surf,0:M2P_size]:
@@ -459,8 +453,8 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param, 
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
-    MSort  = zeros(param.Nm*M2P_size)
-    MdSort = zeros(param.Nm*M2P_size)
+    MSort  = numpy.zeros(param.Nm*M2P_size)
+    MdSort = numpy.zeros(param.Nm*M2P_size)
 
     i = -1
     for C in surfTar.M2P_list[surf,0:M2P_size]:
@@ -486,8 +480,8 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, ker
 
     tic.record()
     M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
-    MSort  = zeros(param.Nm*M2P_size)
-    MdSort = zeros(param.Nm*M2P_size)
+    MSort  = numpy.zeros(param.Nm*M2P_size)
+    MdSort = numpy.zeros(param.Nm*M2P_size)
 
     i = -1
     for C in surfTar.M2P_list[surf,0:M2P_size]:
@@ -506,14 +500,14 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, ker
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
     ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
 
-    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    GSZ = int(numpy.ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
     multipole_gpu = kernel.get_function("M2P")
 
     multipole_gpu(K_gpu, V_gpu, surfTar.offMltDev, surfTar.sizeTarDev,  
                     surfTar.xcDev, surfTar.ycDev, surfTar.zcDev,
                     MDev, MdDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, 
-                    ind0.indexDev, int32(ptr_offset), int32(ptr_list), REAL(param.kappa), 
-                    int32(param.BlocksPerTwig), int32(param.NCRIT), int32(LorY), 
+                    ind0.indexDev, numpy.int32(ptr_offset), numpy.int32(ptr_list), REAL(param.kappa), 
+                    numpy.int32(param.BlocksPerTwig), numpy.int32(param.NCRIT), numpy.int32(LorY), 
                     block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -531,7 +525,7 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param, Lo
 
     tic.record()
     M2P_size = surfTar.offsetMlt[surf,len(surfTar.twig)]
-    MSort  = zeros(param.Nm*M2P_size)
+    MSort  = numpy.zeros(param.Nm*M2P_size)
 
     i = -1
     for C in surfTar.M2P_list[surf,0:M2P_size]:
@@ -548,14 +542,14 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param, Lo
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
     ptr_list    = surf*len(surfTar.P2P_list[surf])     # Pointer to first element in lists arrays
 
-    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    GSZ = int(numpy.ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
     multipoleKt_gpu = kernel.get_function("M2PKt")
 
     multipoleKt_gpu(Ktx_gpu, Kty_gpu, Ktz_gpu, surfTar.offMltDev, surfTar.sizeTarDev,  
                     surfTar.xcDev, surfTar.ycDev, surfTar.zcDev,
                     MDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, 
-                    ind0.indexDev, int32(ptr_offset), int32(ptr_list), REAL(param.kappa), 
-                    int32(param.BlocksPerTwig), int32(param.NCRIT), int32(LorY), 
+                    ind0.indexDev, numpy.int32(ptr_offset), numpy.int32(ptr_list), REAL(param.kappa), 
+                    numpy.int32(param.BlocksPerTwig), numpy.int32(param.NCRIT), numpy.int32(LorY), 
                     block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -582,13 +576,13 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
     tri  = surfSrc.sortSource/param.K # Triangle
     k    = surfSrc.sortSource%param.K # Gauss point
 
-    aux = zeros(2)
+    aux = numpy.zeros(2)
 
     direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
-            int32(tri), int32(k), surfTar.xi, surfTar.yi, surfTar.zi, 
+            numpy.int32(tri), numpy.int32(k), surfTar.xi, surfTar.yi, surfTar.zi, 
             s_xj, s_yj, s_zj, xt, yt, zt, m, mx, my, mz, mKc, mVc, 
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
-            surfTar.offsetTwigs[surf],int32(surfTar.tree[0].target), surfSrc.AreaSort, surfSrc.sglInt_intSort, surfSrc.sglInt_extSort,
+            surfTar.offsetTwigs[surf],numpy.int32(surfTar.tree[0].target), surfSrc.AreaSort, surfSrc.sglInt_intSort, surfSrc.sglInt_extSort,
             surfSrc.xk, surfSrc.wk, surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, w[0], aux)
 
     timing.AI_int += int(aux[0])
@@ -615,10 +609,10 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
     tri  = surfSrc.sortSource/param.K # Triangle
     k    = surfSrc.sortSource%param.K # Gauss point
 
-    aux = zeros(2)
+    aux = numpy.zeros(2)
 
     directKt_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
-            int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
+            numpy.int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
             surfTar.offsetTwigs[surf], surfSrc.AreaSort,
             surfSrc.Xsk, surfSrc.Wsk, param.kappa, param.threshold, param.eps, aux)
@@ -652,9 +646,9 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
 
 
     tic.record()
-    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    GSZ = int(numpy.ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
     direct_gpu = kernel.get_function("P2P")
-    AI_int = cuda.to_device(zeros(param.Nround, dtype=int32))
+    AI_int = cuda.to_device(numpy.zeros(param.Nround, dtype=numpy.int32))
 
     # GPU arrays are flattened, need to point to first element 
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
@@ -670,9 +664,9 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
     direct_gpu(K_gpu, V_gpu, surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
                 surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mxDev, myDev, mzDev, 
                 mKcDev, mVcDev, surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, sglInt,
-                surfSrc.vertexDev, int32(ptr_offset), int32(ptr_list), 
-                int32(LorY), REAL(param.kappa), REAL(param.threshold),
-                int32(param.BlocksPerTwig), int32(param.NCRIT), REAL(K_diag), AI_int, 
+                surfSrc.vertexDev, numpy.int32(ptr_offset), numpy.int32(ptr_list), 
+                numpy.int32(LorY), REAL(param.kappa), REAL(param.threshold),
+                numpy.int32(param.BlocksPerTwig), numpy.int32(param.NCRIT), REAL(K_diag), AI_int, 
                 surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -681,8 +675,8 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
 
 
     tic.record()
-    AI_aux = zeros(param.Nround, dtype=int32)
-    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=int32)
+    AI_aux = numpy.zeros(param.Nround, dtype=numpy.int32)
+    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=numpy.int32)
     timing.AI_int += sum(AI_aux[surfTar.unsort])
     toc.record()
     toc.synchronize()
@@ -706,9 +700,9 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu,
 
 
     tic.record()
-    GSZ = int(ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
+    GSZ = int(numpy.ceil(float(param.Nround)/param.NCRIT)) # CUDA grid size
     directKt_gpu = kernel.get_function("P2PKt")
-    AI_int = cuda.to_device(zeros(param.Nround, dtype=int32))
+    AI_int = cuda.to_device(numpy.zeros(param.Nround, dtype=numpy.int32))
 
     # GPU arrays are flattened, need to point to first element 
     ptr_offset  = surf*len(surfTar.offsetTwigs[surf])  # Pointer to first element of offset arrays 
@@ -719,9 +713,9 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu,
                 surfSrc.offSrcDev, surfTar.offTwgDev, surfTar.P2P_lstDev, surfTar.sizeTarDev,
                 surfSrc.kDev, surfSrc.xjDev, surfSrc.yjDev, surfSrc.zjDev, mDev, mKtcDev, 
                 surfTar.xiDev, surfTar.yiDev, surfTar.ziDev, surfSrc.AreaDev, 
-                surfSrc.vertexDev, int32(ptr_offset), int32(ptr_list), 
-                int32(LorY), REAL(param.kappa), REAL(param.threshold),
-                int32(param.BlocksPerTwig), int32(param.NCRIT), AI_int, 
+                surfSrc.vertexDev, numpy.int32(ptr_offset), numpy.int32(ptr_list), 
+                numpy.int32(LorY), REAL(param.kappa), REAL(param.threshold),
+                numpy.int32(param.BlocksPerTwig), numpy.int32(param.NCRIT), AI_int, 
                 surfSrc.XskDev, surfSrc.WskDev, block=(param.BSZ,1,1), grid=(GSZ,1))
 
     toc.record()
@@ -730,8 +724,8 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu,
 
 
     tic.record()
-    AI_aux = zeros(param.Nround, dtype=int32)
-    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=int32)
+    AI_aux = numpy.zeros(param.Nround, dtype=numpy.int32)
+    AI_aux = cuda.from_device(AI_int, param.Nround, dtype=numpy.int32)
     timing.AI_int += sum(AI_aux[surfTar.unsort])
     toc.record()
     toc.synchronize()
@@ -755,7 +749,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
                 dxi = Cells[CC].xc - xq[0] 
                 dyi = Cells[CC].yc - xq[1] 
                 dzi = Cells[CC].zc - xq[2] 
-                r   = sqrt(dxi*dxi+dyi*dyi+dzi*dzi)
+                r   = numpy.sqrt(dxi*dxi+dyi*dyi+dzi*dzi)
                 if Cells[CC].r > par_reac.theta*r: # Max distance between particles
                     Kval, Vval, source, time_M2P = M2P_nonvec(Cells, CC, xq, Kval, Vval,
                                                             index, par_reac, source, time_M2P)
@@ -765,11 +759,11 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
                     dyi = xq[1] - Cells[CC].yc
                     dzi = xq[2] - Cells[CC].zc
 
-                    K_aux = zeros(1)
-                    V_aux = zeros(1)
-                    dxi = array([dxi])
-                    dyi = array([dyi])
-                    dzi = array([dzi])
+                    K_aux = numpy.zeros(1)
+                    V_aux = numpy.zeros(1)
+                    dxi = numpy.array([dxi])
+                    dyi = numpy.array([dyi])
+                    dzi = numpy.array([dzi])
                     LorY = 1
                     multipole_c(K_aux, V_aux, Cells[CC].M, Cells[CC].Md, dxi, dyi, dzi, index, par_reac.P, par_reac.kappa, int(par_reac.Nm), int(LorY))
 
@@ -788,7 +782,7 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
 
     tic = time.time()
     LorY = 1
-    source = int32(array(source))
+    source = numpy.int32(numpy.array(source))
     s_xj  = surface.xj[source]
     s_yj  = surface.yj[source]
     s_zj  = surface.zj[source]
@@ -802,21 +796,21 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
     tri  = source/par_reac.K # Triangle
     k    = source%par_reac.K # Gauss point
 
-    K_aux = zeros(1)
-    V_aux = zeros(1)
+    K_aux = numpy.zeros(1)
+    V_aux = numpy.zeros(1)
 
-    xq_arr = array([xq[0]])
-    yq_arr = array([xq[1]])
-    zq_arr = array([xq[2]])
-    target = array([-1], dtype=int32)
+    xq_arr = numpy.array([xq[0]])
+    yq_arr = numpy.array([xq[1]])
+    zq_arr = numpy.array([xq[2]])
+    target = numpy.array([-1], dtype=numpy.int32)
 
-    aux = zeros(2)
+    aux = numpy.zeros(2)
     K_diag = 0
     V_diag = 0
     direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surface.vertex[surface.triangle[:]]), 
-            int32(tri), int32(k), surface.xi, surface.yi, surface.zi,
+            numpy.int32(tri), numpy.int32(k), surface.xi, surface.yi, surface.zi,
             s_xj, s_yj, s_zj, xq_arr, yq_arr, zq_arr, s_m, s_mx, s_my, s_mz, s_mKc, s_mVc, 
-            array([-1], dtype=int32), surface.Area, surface.sglInt_int, surface.sglInt_ext,
+            numpy.array([-1], dtype=numpy.int32), surface.Area, surface.sglInt_int, surface.sglInt_ext,
             surface.xk, surface.wk, surface.Xsk, surface.Wsk,
             par_reac.kappa, par_reac.threshold, par_reac.eps, w[0], aux)
 
