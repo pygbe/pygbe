@@ -22,7 +22,7 @@
 
 import numpy
 from math import pi
-from tree.FMMutils import *
+from tree.FMMutils import computeIndices, precomputeTerms
 from tree.direct import coulomb_direct
 from projection import project, project_Kt, get_phir, get_phir_gpu
 from classes import parameters, index_constant
@@ -165,7 +165,7 @@ def gmres_dot (X, surf_array, field_array, ind0, param, timing, kernel):
                     surf_array[c].Xout_ext += v
      
 #   Gather results into the result vector
-    MV = zeros(len(X))
+    MV = numpy.zeros(len(X))
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
@@ -435,8 +435,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHS_gpu(F_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, numpy.int32(Nq), 
+                                REAL(field_array[j].E), numpy.int32(param.NCRIT), numpy.int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
@@ -446,8 +446,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, numpy.int32(Nq), 
+                                REAL(field_array[j].E), numpy.int32(param.NCRIT), numpy.int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
                     aux_x = numpy.zeros(Nround)
                     aux_y = numpy.zeros(Nround)
                     aux_z = numpy.zeros(Nround)
@@ -501,8 +501,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 if surf_array[s].surf_type!='asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHS_gpu(F_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, numpy.int32(Nq), 
+                                REAL(field_array[j].E), numpy.int32(param.NCRIT), numpy.int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
@@ -512,8 +512,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     Fz_gpu = gpuarray.zeros(Nround, dtype=REAL)     
                     computeRHSKt_gpu(Fx_gpu, Fy_gpu, Fz_gpu, field_array[j].xq_gpu, field_array[j].yq_gpu, field_array[j].zq_gpu, field_array[j].q_gpu,
-                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, int32(Nq), 
-                                REAL(field_array[j].E), int32(param.NCRIT), int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
+                                surf_array[s].xiDev, surf_array[s].yiDev, surf_array[s].ziDev, surf_array[s].sizeTarDev, numpy.int32(Nq), 
+                                REAL(field_array[j].E), numpy.int32(param.NCRIT), numpy.int32(param.BlocksPerTwig), block=(param.BSZ,1,1), grid=(GSZ,1)) 
                     aux_x = numpy.zeros(Nround)
                     aux_y = numpy.zeros(Nround)
                     aux_z = numpy.zeros(Nround)
