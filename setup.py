@@ -1,8 +1,11 @@
 import sys
+import os
 from distutils.command.build import build
+from distutils.command.clean import clean
 from setuptools.command.install import install
 from setuptools import setup, find_packages, Extension
 import numpy
+import shutil
 
 class CustomBuild(build):
     """
@@ -21,6 +24,19 @@ class CustomInstall(install):
     def run(self):
         self.run_command('build_ext')
         self.do_egg_install()
+        #setuptools cleanup is weak, do it manually
+        for tree in ['PyGBe.egg-info', 'build', 'dist']:
+            shutil.rmtree(tree, ignore_errors=True)
+        for swigfile in [
+                'pygbe/tree/calculateMultipoles.py',
+                'pygbe/tree/calculateMultipoles_wrap.cpp',
+                'pygbe/tree/direct.py',
+                'pygbe/tree/direct_wrap.cpp',
+                'pygbe/tree/multipole.py',
+                'pygbe/tree/multipole_wrap.cpp',
+                'pygbe/util/semi_analyticalwrap.py',
+                'pygbe/util/semi_analyticalwrap_wrap.cpp',]:
+            os.remove(swigfile)
 
 def main():
     if sys.version_info[0] != 2:
