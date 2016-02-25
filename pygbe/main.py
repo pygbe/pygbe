@@ -22,26 +22,27 @@
 '''
 
 import numpy
-from math  			import pi
-from scipy.misc     import factorial
+from math import pi
+from scipy.misc import factorial
 import time
 import os
 
 # Import self made modules
 import sys
-from gmres			    import gmres_solver
-from projection         import get_phir
-from classes            import surfaces, timings, parameters, index_constant, fill_surface, initializeSurf, initializeField, dataTransfer, fill_phi
-from output             import printSummary
-from matrixfree         import generateRHS, generateRHS_gpu, calculateEsolv, coulombEnergy, calculateEsurf
+from gmres import gmres_solver
+from projection import get_phir
+from classes import (surfaces, timings, parameters, index_constant,
+                     fill_surface, initializeSurf, initializeField,
+                     dataTransfer, fill_phi)
+from output import printSummary
+from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
+                        coulombEnergy, calculateEsurf)
 
-from util.readData        import readVertex, readTriangle, readpqr, readParameters
-from util.triangulation 	 import *
-from util.an_solution     import an_P, two_sphere
-from util.semi_analytical import *
+from util.readData import readVertex, readTriangle, readpqr, readParameters
+from util.an_solution import an_P, two_sphere
 
-from tree.FMMutils       import *
-from tree.cuda_kernels   import kernels
+from tree.FMMutils import computeIndices, precomputeTerms, generateList
+from tree.cuda_kernels import kernels
 
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D
