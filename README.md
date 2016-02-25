@@ -50,7 +50,13 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > cd pycuda-2015.1.3
     > python configure.py --cuda-root=/usr/local/cuda
     > make
-    > sudo make install
+    > sudo make install 
+    
+If you are not installing PyCUDA systemwide, do not use `sudo` to install and simply run
+
+    > make install
+    
+as the final command.
 
 Test the installation by running the following:
 
@@ -59,24 +65,28 @@ Test the installation by running the following:
 
 PyGBe has been run and tested on Ubuntu 12.04, 13.10 and 15.04. 
 
-### Compiling PyGBe
+### Installing PyGBe
 
 Create a clone of the repository on your machine:
 
     > cd $HOME/src
     > git clone https://github.com/barbagroup/pygbe.git
     > cd pygbe
+    > python setup.py install
+    
+If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), then use `sudo` on the install command
 
-To compile the C++ code, type `make all` in the `./bem_pycuda` directory:
+    > sudo python setup.py install
 
-    > cd bem_pycuda
-    > make all
+### Configuring PyGBe
+
+
 
 ## Run PyGBe
 
-To run a case, type `./main.py <file1.param> <file2.config>` in the folder `./bem_pycuda`. Replace `file1` and `file2` with the corresponding names of the input files. As an example, run the following:
+To run a case, type `pygbe <file1.param> <file2.config>`. Replace `file1` and `file2` with the corresponding names of the input files. As an example, run the following:
 
-    > ./main.py input_files/lys.param input_files/lys.config
+    > pygbe input_files/lys.param input_files/lys.config
 
 ### Mesh
 In `./geometry`, we provide the meshes and `.pqr` files for a spherical molecule 
