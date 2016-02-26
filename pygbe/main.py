@@ -48,27 +48,8 @@ from tree.cuda_kernels import kernels
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
 
-def environok():
-    if not os.environ.get('PYGBE_DATA_DIR'):
-        print('{:-^{}}'.format('No `PYGBE_DATA_DIR` ENVVAR detected', 80))
-        print('\n')
-        print('{:^{}}'.format('PyGBe needs to know your where mesh files are located', 80))
-        print('{:^{}}'.format('You can set the ENVVAR for this session by running', 80))
-        print('\n')
-        print('{:<{}}'.format('$ export PYGBE_DATA_DIR = /path/to/pygbe/pygbe', 80))
-        print('\n')
-        print('{:^{}}'.format('where the path should point to the folder containing', 80))
-        print('{:^{}}'.format('the folder "geometry"', 80))
-        print('\n')
-        print('{:-^{}}'.format('No `PYGBE_DATA_DIR` ENVVAR detected', 80))
-        return False
-    else:
-        return True
-
 def main(argv=sys.argv):
 
-    if not environok():
-        return
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
