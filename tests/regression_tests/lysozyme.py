@@ -23,8 +23,6 @@ import os
 from numpy import zeros, array
 import math
 import sys
-sys.path.append('../util')
-from an_solution import *
 
 def scanOutput(filename):
     
@@ -52,7 +50,7 @@ def scanOutput(filename):
 
 mesh = array(['1','2','4','8'])
 
-comm = './main.py regression_tests/input_files/lys.param regression_tests/input_files/lys_single_'
+comm = 'pygbe regression_tests/input_files/lys.param regression_tests/input_files/lys_single_'
 out = 'regression_tests/output_aux'
 
 N = zeros(len(mesh))
@@ -71,7 +69,7 @@ for i in range(len(mesh)):
     N[i],iterations_single[i],Esolv_single[i],Esurf_single[i],Ecoul_single[i],Time_single[i] = scanOutput(out)
 
 
-comm = './main.py regression_tests/input_files/lys.param regression_tests/input_files/lys_'
+comm = 'pygbe regression_tests/input_files/lys.param regression_tests/input_files/lys_'
 print 'Simulations for Lysozyme full surface simulation'
 iterations_full = zeros(len(mesh))
 Esolv_full = zeros(len(mesh))
@@ -85,7 +83,7 @@ for i in range(len(mesh)):
     print 'Scan output file'
     N[i],iterations_full[i],Esolv_full[i],Esurf_full[i],Ecoul_full[i],Time_full[i] = scanOutput(out)
 
-comm = './main.py regression_tests/input_files/lys.param regression_tests/input_files/lys_k0_'
+comm = 'pygbe regression_tests/input_files/lys.param regression_tests/input_files/lys_k0_'
 print 'Simulations for Lysozyme with kappa=0'
 iterations_k0 = zeros(len(mesh))
 Esolv_k0 = zeros(len(mesh))

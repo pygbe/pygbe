@@ -27,8 +27,7 @@ import os
 import numpy
 import math
 import sys
-sys.path.append('../util')
-from an_solution import *
+from pygbe.util import an_solution
 
 def scanOutput(filename):
     
@@ -56,7 +55,7 @@ def scanOutput(filename):
 
 mesh = numpy.array(['500','2K','8K','32K','130K'])
 
-comm = './main.py regression_tests/input_files/sphere_fine.param regression_tests/input_files/twosphere_'
+comm = 'pygbe regression_tests/input_files/sphere_fine.param regression_tests/input_files/twosphere_'
 out = 'regression_tests/output_aux'
 
 print 'Runs for two molecules'
@@ -75,7 +74,7 @@ for i in range(len(mesh)):
     
 print 'Runs for isolated molecule'
 
-comm = './main.py regression_tests/input_files/sphere_fine.param regression_tests/input_files/molecule_single_center_'
+comm = 'pygbe regression_tests/input_files/sphere_fine.param regression_tests/input_files/molecule_single_center_'
 out = 'regression_tests/output_aux'
 
 N_single = numpy.zeros(len(mesh))
@@ -128,7 +127,7 @@ ax.loglog(N, asymp, c='k', marker='None', ls=':', lw=0.8, label=None)
 plt.rc('font',**font)
 loc = (3*N[0]+N[1])/4
 tex_loc = array((loc,N[0]*error[0]/loc))
-tex_angle = math.atan2(log(abs(asymp[-1]-asymp[0])),log(abs(N[-1]-N[0])))*180/math.pi
+tex_angle = math.atan2(numpy.log(abs(asymp[-1]-asymp[0])),numpy.log(abs(N[-1]-N[0])))*180/math.pi
 ax.text(tex_loc[0], tex_loc[1],r'N$^{-1}$',fontsize=8,rotation=tex_angle,rotation_mode='anchor')
 ax.set_ylabel('Relative error', fontsize=10)
 ax.set_xlabel('Number of elements', fontsize=10)
@@ -137,12 +136,12 @@ fig.savefig('regression_tests/figs/error_energy_twomolecule.pdf',dpi=80,format='
 
 fig = plt.figure(figsize=(3,2), dpi=80)
 ax = fig.add_subplot(111)
-asymp = N*log(N)*total_time[0]/(N[0]*log(N[0]))
+asymp = N*numpy.log(N)*total_time[0]/(N[0]*numpy.log(N[0]))
 ax.loglog(N, total_time, c='k', marker='o',ls=' ', mfc='w', ms=5, label='')
 ax.loglog(N, asymp,c='k',marker='None',ls=':', lw=0.8, label=None)
 loc = (3*N[0]+N[1])/4
-tex_loc = array((loc, loc*log(loc)*total_time[0]/(N[0]*log(N[0]))))
-tex_angle = math.atan2(log(abs(asymp[-1]-asymp[0])),log(abs(N[-1]-N[0])))*180/math.pi
+tex_loc = array((loc, loc*numpy.log(loc)*total_time[0]/(N[0]*numpy.log(N[0]))))
+tex_angle = math.atan2(numpy.log(abs(asymp[-1]-asymp[0])),numpy.log(abs(N[-1]-N[0])))*180/math.pi
 ax.text(tex_loc[0], tex_loc[1], 'NlogN', fontsize=8,rotation=tex_angle, rotation_mode='anchor')
 plt.rc('font',**font)
 ax.set_ylabel('Total time [s]', fontsize=10)
