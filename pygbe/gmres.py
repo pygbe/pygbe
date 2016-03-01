@@ -114,7 +114,7 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
     
             if iteration<6:
                 fname = 'Vip1{}.txt'.format(iteration)
-                numpy.savetxt(os.path.join(output_path,fname), Vip1)
+#                numpy.savetxt(os.path.join(output_path,fname), Vip1)
 
             tic = time.time()
             Vk = V[0:i+1,:]
