@@ -21,12 +21,14 @@
 '''
 
 import numpy
+import time
 from scipy import linalg
-from tree.FMMutils import *
-from tree.direct   import computeDiagonal
-from util.semi_analytical    import *
-from util.triangulation      import *
-from util.readData           import readVertex, readTriangle, readpqr, readcrd, readFields, readSurf
+from tree.FMMutils import addSources3, sortPoints, generateTree, findTwigs
+from tree.direct import computeDiagonal
+from util.semi_analytical import GQ_1D
+#from util.triangulation      import *
+from util.readData import (readVertex, readTriangle, readpqr, readcrd,
+                           readFields, readSurf)
 
 # PyCUDA libraries
 import pycuda.autoinit
@@ -744,8 +746,10 @@ def fill_surface(surf,param):
     KL = numpy.zeros(N) 
     VY = numpy.zeros(N)
     KY = numpy.zeros(N)
-    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
-                    surf.kappa_in, 2*pi, 0., surf.xk, surf.wk)
+    computeDiagonal(VL, KL, VY, KY,
+                    numpy.ravel(surf.vertex[surf.triangle[:]]),
+                    numpy.ravel(centers), surf.kappa_in, 2*numpy.pi, 0.,
+                    surf.xk, surf.wk)
     if surf.LorY_in == 1:
         dX11 = KL
         dX12 = -VL
@@ -762,8 +766,10 @@ def fill_surface(surf,param):
     KL = numpy.zeros(N) 
     VY = numpy.zeros(N)
     KY = numpy.zeros(N)
-    computeDiagonal(VL, KL, VY, KY, ravel(surf.vertex[surf.triangle[:]]), ravel(centers), 
-                    surf.kappa_out, 2*pi, 0., surf.xk, surf.wk)
+    computeDiagonal(VL, KL, VY, KY,
+                    numpy.ravel(surf.vertex[surf.triangle[:]]),
+                    numpy.ravel(centers),
+                    surf.kappa_out, 2*numpy.pi, 0., surf.xk, surf.wk)
     if surf.LorY_out == 1:
         dX21 = KL
         dX22 = surf.E_hat*VL
@@ -784,7 +790,7 @@ def fill_surface(surf,param):
     elif surf.surf_type=='dirichlet_surface':
         surf.Precond[0,:] = 1/VY  # So far only for Yukawa outside
     elif surf.surf_type=='neumann_surface' or surf.surf_type=='asc_surface':
-        surf.Precond[0,:] = 1/(2*pi)
+        surf.Precond[0,:] = 1/(2*numpy.pi)
     
     tic = time.time()
     sortPoints(surf, surf.tree, surf.twig, param)
@@ -914,33 +920,33 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
         surf_array[s].AreaDev    = gpuarray.to_gpu(surf_array[s].AreaSort.astype(REAL))
         surf_array[s].sglInt_intDev = gpuarray.to_gpu(surf_array[s].sglInt_intSort.astype(REAL))
         surf_array[s].sglInt_extDev = gpuarray.to_gpu(surf_array[s].sglInt_extSort.astype(REAL))
-        surf_array[s].vertexDev  = gpuarray.to_gpu(ravel(surf_array[s].vertex[surf_array[s].triangleSort]).astype(REAL))
-        surf_array[s].xcDev      = gpuarray.to_gpu(ravel(surf_array[s].xcSort.astype(REAL)))
-        surf_array[s].ycDev      = gpuarray.to_gpu(ravel(surf_array[s].ycSort.astype(REAL)))
-        surf_array[s].zcDev      = gpuarray.to_gpu(ravel(surf_array[s].zcSort.astype(REAL)))
+        surf_array[s].vertexDev  = gpuarray.to_gpu(numpy.ravel(surf_array[s].vertex[surf_array[s].triangleSort]).astype(REAL))
+        surf_array[s].xcDev      = gpuarray.to_gpu(numpy.ravel(surf_array[s].xcSort.astype(REAL)))
+        surf_array[s].ycDev      = gpuarray.to_gpu(numpy.ravel(surf_array[s].ycSort.astype(REAL)))
+        surf_array[s].zcDev      = gpuarray.to_gpu(numpy.ravel(surf_array[s].zcSort.astype(REAL)))
         
 #       Avoid transferring size 1 arrays to GPU (some systems crash)
         Nbuff = 5
         if len(surf_array[s].sizeTarget)<Nbuff:
-            sizeTarget_buffer = numpy.zeros(Nbuff, dtype=int32)    
+            sizeTarget_buffer = numpy.zeros(Nbuff, dtype=numpy.int32)    
             sizeTarget_buffer[:len(surf_array[s].sizeTarget)] = surf_array[s].sizeTarget[:]    
             surf_array[s].sizeTarDev = gpuarray.to_gpu(sizeTarget_buffer)
         else:
-            surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
+            surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(numpy.int32))
        
-#        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(int32))
-        surf_array[s].offSrcDev  = gpuarray.to_gpu(surf_array[s].offsetSource.astype(int32))
-        surf_array[s].offTwgDev  = gpuarray.to_gpu(ravel(surf_array[s].offsetTwigs.astype(int32)))
-        surf_array[s].offMltDev  = gpuarray.to_gpu(ravel(surf_array[s].offsetMlt.astype(int32)))
-        surf_array[s].M2P_lstDev = gpuarray.to_gpu(ravel(surf_array[s].M2P_list.astype(int32)))
-        surf_array[s].P2P_lstDev = gpuarray.to_gpu(ravel(surf_array[s].P2P_list.astype(int32)))
+#        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(numpy.int32))
+        surf_array[s].offSrcDev  = gpuarray.to_gpu(surf_array[s].offsetSource.astype(numpy.int32))
+        surf_array[s].offTwgDev  = gpuarray.to_gpu(numpy.ravel(surf_array[s].offsetTwigs.astype(numpy.int32)))
+        surf_array[s].offMltDev  = gpuarray.to_gpu(numpy.ravel(surf_array[s].offsetMlt.astype(numpy.int32)))
+        surf_array[s].M2P_lstDev = gpuarray.to_gpu(numpy.ravel(surf_array[s].M2P_list.astype(numpy.int32)))
+        surf_array[s].P2P_lstDev = gpuarray.to_gpu(numpy.ravel(surf_array[s].P2P_list.astype(numpy.int32)))
         surf_array[s].xkDev      = gpuarray.to_gpu(surf_array[s].xk.astype(REAL))
         surf_array[s].wkDev      = gpuarray.to_gpu(surf_array[s].wk.astype(REAL))
         surf_array[s].XskDev     = gpuarray.to_gpu(surf_array[s].Xsk.astype(REAL))
         surf_array[s].WskDev     = gpuarray.to_gpu(surf_array[s].Wsk.astype(REAL))
-        surf_array[s].kDev       = gpuarray.to_gpu((surf_array[s].sortSource%param.K).astype(int32))
+        surf_array[s].kDev       = gpuarray.to_gpu((surf_array[s].sortSource%param.K).astype(numpy.int32))
 
-    ind.indexDev = gpuarray.to_gpu(ind.index_large.astype(int32))
+    ind.indexDev = gpuarray.to_gpu(ind.index_large.astype(numpy.int32))
 
     Nfield = len(field_array)
     for f in range(Nfield):
