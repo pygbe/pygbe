@@ -63,22 +63,20 @@ def read_inputs():
     ˫ output/
     """
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
-    parser.add_argument('problem_folder', type=str, help="Path to folder containing problem files")
+    parser.add_argument('problem_folder', type=str,
+                        help="Path to folder containing problem files")
+    parser.add_argument('-c', '--config', dest='config', type=str, default=None,
+                        help="Path to problem config file")
+    parser.add_argument('-p', '--param', dest='param', type=str, default=None,
+                        help="Path to problem param file")
 
     return parser.parse_args()
 
-def check_file_exists(filename, ftype):
+def check_file_exists(filename):
     """Try to open the file `filename` and return True if it's valid """
-    try:
-        f = open(filename+'.'+ftype, 'r')
-        f.close()
-        return True
-    except IOError:
-        print("No {} file found (tried {}.{})".format(ftype, filename, ftype))
-        return False
+    return os.path.exists(filename)
 
-
-def find_config_files(prob_path):
+def find_config_files(cliargs):
     """
     Check that .config and .param files exist and can be opened.
     If either file isn't found, PyGBe exits (and should print which
@@ -87,31 +85,40 @@ def find_config_files(prob_path):
 
     Parameters
     ----------
-    prob_path: string
-        path to folder containing config files
+    cliargs: parser
+        parser containing cli arguments passed to PyGBe
 
     Returns
     -------
-    prob.config: string
+    cliargs.config: string
         path to config file
-    prob.param: string
+    cliargs.param: string
         path to param file
     """
 
+    prob_path = cliargs.problem_folder
     #If user tries `pygbe lys` then `split` will fail
     #But if user tries `pygbe examples/lys` then the split
     #is required to grab the right name
     try:
-        prob_name = prob_path.split('/')[-1]
+        prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/'
+                     else prob_path.split('/')[-2])
+        print(prob_name)
     except AttributeError:
         prob_name = prob_path
 
-    for ftype in ['config', 'param']:
-        if not check_file_exists(os.path.join(prob_path, prob_name), ftype):
+    if cliargs.config is None:
+        cliargs.config = os.path.join(prob_path, prob_name)+'.config'
+    if cliargs.param is None:
+        cliargs.param = os.path.join(prob_path, prob_name)+'.param'
+
+    print(cliargs)
+
+    for req_file in [cliargs.config, cliargs.param]:
+        if not check_file_exists(req_file):
             sys.exit('Did not find expected config files')
 
-    base_ext = os.path.join(prob_path, prob_name)
-    return base_ext+'.config', base_ext+'.param'
+    return cliargs.config, cliargs.param
 
 #courtesy of http://stackoverflow.com/a/5916874
 class Logger(object):
@@ -131,8 +138,8 @@ class Logger(object):
 def main(argv=sys.argv):
 
     args = read_inputs()
-    print(args.problem_folder)
-    find_config_files(args.problem_folder)
+    print(args)
+    find_config_files(read_inputs())
 
     ### Time stamp
     timestamp = time.localtime()
