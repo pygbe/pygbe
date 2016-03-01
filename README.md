@@ -72,35 +72,41 @@ Create a clone of the repository on your machine:
     > cd $HOME/src
     > git clone https://github.com/barbagroup/pygbe.git
     > cd pygbe
-    > python setup.py install
+    > python setup.py install clean
     
 If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), then use `sudo` on the install command
 
-    > sudo python setup.py install
+    > sudo python setup.py install clean
 
-### Configuring PyGBe
+### Run PyGBe
 
+PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.  Additional problem folders can be downloaded from [coming soon]().
 
+Test the PyGBe installation by running the Lysozyme (`lys`) example in the folder `examples`.
+The structure of the folder is as follows:
 
-## Run PyGBe
+```
+lys 
+  ˫ lys.param
+  ˫ lys.config
+  ˫ built_parse.pqr
+  ˫ geometry/Lys1.face
+  ˫ geometry/Lys1.vert
+  ˫ output/
+```
 
-To run a case, type `pygbe <file1.param> <file2.config>`. Replace `file1` and `file2` with the corresponding names of the input files. As an example, run the following:
+To run this case, you can use
 
-    > pygbe input_files/lys.param input_files/lys.config
+    > pygbe examples/lys
+    
+To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to the problem folder. 
 
 ### Mesh
-In `./geometry`, we provide the meshes and `.pqr` files for a spherical molecule 
-and the Lysozyme protein. To plug in your own protein data, download the 
-corresponding `.pdb` file from the Protein Data Bank, then get its `.pqr` file 
-using any PDB to PQR converter (there are online tools available for this). 
+In the `examples` folder, we provide meshes and `.pqr` files for a few example problems. 
+To plug in your own protein data, download the corresponding `.pdb` file from the Protein Data Bank, 
+then get its `.pqr` file using any PDB to PQR converter (there are online tools available for this). 
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's 
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).  
-
-### Input files
-In `./bem_pycuda/input_files`, we provide example input files. For a run 
-you need two input files: a "parameters" file and a "config" file. 
-Documentation on the format of these files is provided in the file 
-`README_input_format`.
 
 Let us know if you have any questions/feedback.
 
