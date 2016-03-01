@@ -5,7 +5,11 @@
 ---
 ### Added
 * `setup.py` installer
-* `argparse` ArgumentParser to handle command line arguments
+* `argparse` ArgumentParser to handle command line arguments (all optional)
+  * `-c` to specify config file
+  * `-p` to specify param file
+  * `-o` to specify output folder
+  
 
 ### Changed
 * Repo structure altered to match Python packaging guidelines.
