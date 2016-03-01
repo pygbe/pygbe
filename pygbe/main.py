@@ -26,9 +26,10 @@ from math import pi
 from scipy.misc import factorial
 import time
 import os
+import sys
+from argparse import ArgumentParser
 
 # Import self made modules
-import sys
 from gmres import gmres_solver
 from projection import get_phir
 from classes import (surfaces, timings, parameters, index_constant,
@@ -47,16 +48,100 @@ from tree.cuda_kernels import kernels
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
+def read_inputs():
+    """
+    Parse command-line arguments to determine which config and param files to run
+    Assumes that in the absence of specific command line arguments that pygbe
+    problem folder resembles the following structure
+
+    lys
+    ˫ lys.param
+    ˫ lys.config
+    ˫ built_parse.pqr
+    ˫ geometry/Lys1.face
+    ˫ geometry/Lys1.vert
+    ˫ output/
+    """
+    parser = ArgumentParser(description='Manage PyGBe command line arguments')
+    parser.add_argument('problem_folder', type=str, help="Path to folder containing problem files")
+
+    return parser.parse_args()
+
+def check_file_exists(filename, ftype):
+    """Try to open the file `filename` and return True if it's valid """
+    try:
+        f = open(filename+'.'+ftype, 'r')
+        f.close()
+        return True
+    except IOError:
+        print("No {} file found (tried {}.{})".format(ftype, filename, ftype))
+        return False
+
+
+def find_config_files(prob_path):
+    """
+    Check that .config and .param files exist and can be opened.
+    If either file isn't found, PyGBe exits (and should print which
+    file was not found).  Otherwise return the path to the config and
+    param files
+
+    Parameters
+    ----------
+    prob_path: string
+        path to folder containing config files
+
+    Returns
+    -------
+    prob.config: string
+        path to config file
+    prob.param: string
+        path to param file
+    """
+
+    #If user tries `pygbe lys` then `split` will fail
+    #But if user tries `pygbe examples/lys` then the split
+    #is required to grab the right name
+    try:
+        prob_name = prob_path.split('/')[-1]
+    except AttributeError:
+        prob_name = prob_path
+
+    for ftype in ['config', 'param']:
+        if not check_file_exists(os.path.join(prob_path, prob_name), ftype):
+            sys.exit('Did not find expected config files')
+
+    base_ext = os.path.join(prob_path, prob_name)
+    return base_ext+'.config', base_ext+'.param'
+
+#courtesy of http://stackoverflow.com/a/5916874
+class Logger(object):
+    """
+    Allow writing both to STDOUT on screen and sending text to file
+    in conjunction with the command
+    `sys.stdout = Logger("desired_log_file.txt")`
+    """
+    def __init__(self, filename="Default.log"):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
 
 def main(argv=sys.argv):
+
+    args = read_inputs()
+    print(args.problem_folder)
+    find_config_files(args.problem_folder)
 
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
     print '\tDate: %i/%i/%i'%(timestamp.tm_year,timestamp.tm_mon,timestamp.tm_mday)
     print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
-
     TIC = time.time()
+
+    find_config_files(argv)
     ### Read parameters
     param = parameters()
     precision = readParameters(param,argv[1])
