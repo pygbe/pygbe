@@ -236,7 +236,7 @@ def main(argv=sys.argv):
     toc = time.time()
     rhs_time = toc-tic
 
-    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
+#    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
 
     setup_time = toc-TIC
     print 'List time          : %fs'%list_time
