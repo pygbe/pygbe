@@ -42,13 +42,26 @@ from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
 
 from util.readData import readVertex, readTriangle, readpqr, readParameters
 from util.an_solution import an_P, two_sphere
+from util.which import whichgen
 
 from tree.FMMutils import computeIndices, precomputeTerms, generateList
 from tree.cuda_kernels import kernels
 
-# import modules for testing
-#from mpl_toolkits.mplot3d import Axes3D
-#import matplotlib.pyplot as plt
+#courtesy of http://stackoverflow.com/a/5916874
+class Logger(object):
+    """
+    Allow writing both to STDOUT on screen and sending text to file
+    in conjunction with the command
+    `sys.stdout = Logger("desired_log_file.txt")`
+    """
+    def __init__(self, filename="Default.log"):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
 def read_inputs():
     """
     Parse command-line arguments to determine which config and param files to run
@@ -125,22 +138,17 @@ def find_config_files(cliargs):
 
     return cliargs.config, cliargs.param
 
-#courtesy of http://stackoverflow.com/a/5916874
-class Logger(object):
-    """
-    Allow writing both to STDOUT on screen and sending text to file
-    in conjunction with the command
-    `sys.stdout = Logger("desired_log_file.txt")`
-    """
-    def __init__(self, filename="Default.log"):
-        self.terminal = sys.stdout
-        self.log = open(filename, "a")
+def check_for_nvcc():
+    '''Check system PATH for nvcc, exit if not found'''
+    try:
+        whichgen('nvcc').next()
+    except StopIteration:
+        sys.exit("Could not find `nvcc` on your PATH.  Is cuda installed?")
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
 
 def main(argv=sys.argv):
+
+    check_for_nvcc()
 
     args = read_inputs()
     configFile, paramfile = find_config_files(args)

@@ -9,6 +9,7 @@
   * `-c` to specify config file
   * `-p` to specify param file
   * `-o` to specify output folder
+* Forked `which` clone to check if `nvcc` is on PATH and fail gracefully if not.
   
 
 ### Changed
