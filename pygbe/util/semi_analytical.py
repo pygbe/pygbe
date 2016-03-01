@@ -20,17 +20,16 @@
   THE SOFTWARE.
 '''
 
-from numpy import *
-#from pylab import *
+import numpy
 from math import atan2
 from semi_analyticalwrap import SA_wrap_arr
 
 def GQ_1D(K):
-    T = zeros((K,K))
-    nvec = arange(1.,K)
-    beta = 0.5/sqrt(1-1/(2*nvec)**2)
-    T = diag(beta,1)+diag(beta,-1)
-    d,v = linalg.eig(T)
+    T = numpy.zeros((K,K))
+    nvec = numpy.arange(1.,K)
+    beta = 0.5/numpy.sqrt(1-1/(2*nvec)**2)
+    T = numpy.diag(beta,1)+numpy.diag(beta,-1)
+    d,v = numpy.linalg.eig(T)
     w = 2*v[0]**2
     x = d
 
@@ -51,15 +50,15 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
     thetam = (theta2+theta1)/2.
 
     thetak = dtheta/2*xk + thetam
-    Rtheta = x/cos(thetak)
-    dy = x*tan(thetak)
-    R = sqrt(Rtheta**2+z**2)
+    Rtheta = x/numpy.cos(thetak)
+    dy = x*numpy.tan(thetak)
+    R = numpy.sqrt(Rtheta**2+z**2)
     
-    phi_Y  = sum(-wk * (exp(-kappa*R) - exp(-kappa*absZ))/kappa)
-    dphi_Y = -sum(wk *(z/R*exp(-kappa*R) - exp(-kappa*absZ)*signZ))
+    phi_Y  = numpy.sum(-wk * (exp(-kappa*R) - exp(-kappa*absZ))/kappa)
+    dphi_Y = -numpy.sum(wk *(z/R*exp(-kappa*R) - exp(-kappa*absZ)*signZ))
 
-    phi_L  = sum(wk * (R - absZ))
-    dphi_L = -sum(wk *(z/R - signZ))
+    phi_L  = numpy.sum(wk * (R - absZ))
+    dphi_L = -numpy.sum(wk *(z/R - signZ))
 
     phi_Y  *= dtheta/2
     dphi_Y *= dtheta/2
@@ -71,32 +70,32 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
 def intSide(v1, v2, p, kappa, xk, wk):
     
     v21 = v2 - v1
-    L21 = linalg.norm(v21)
+    L21 = numpy.linalg.norm(v21)
     v21u = v21/L21
-    orthog = cross(array([0,0,1]), v21u)
+    orthog = numpy.cross(numpy.array([0,0,1]), v21u)
 
-    alpha = -dot(v21,v1)/L21**2
+    alpha = -numpy.dot(v21,v1)/L21**2
 
     rOrthog = v1+alpha*v21
-    d_toEdge = linalg.norm(rOrthog)
-    side_vec = cross(v21,-v1)
+    d_toEdge = numpy.linalg.norm(rOrthog)
+    side_vec = numpy.cross(v21,-v1)
 
-    rotateToVertLine = zeros((3,3))
+    rotateToVertLine = numpy.zeros((3,3))
     rotateToVertLine[:,0] = orthog
     rotateToVertLine[:,1] = v21u
     rotateToVertLine[:,2] = [0.,0.,1.]
 
-    v1new = dot(rotateToVertLine,v1)
+    v1new = numpy.dot(rotateToVertLine,v1)
 
     if v1new[0]<0:
         v21u = -v21u
         orthog = -orthog
         rotateToVertLine[:,0] = orthog
         rotateToVertLine[:,1] = v21u
-        v1new = dot(rotateToVertLine,v1)
+        v1new = numpy.dot(rotateToVertLine,v1)
 
-    v2new = dot(rotateToVertLine, v2)
-    rOrthognew = dot(rotateToVertLine, rOrthog)
+    v2new = numpy.dot(rotateToVertLine, v2)
+    rOrthognew = numpy.dot(rotateToVertLine, rOrthog)
     x = v1new[0]
 
     if v1new[1]>0 and v2new[1]<0 or v1new[1]<0 and v2new[1]>0:
@@ -120,10 +119,10 @@ def intSide(v1, v2, p, kappa, xk, wk):
 def SA_arr(y, x, kappa, same, xk, wk):
     
     N = len(x)
-    phi_Y  = zeros(N)
-    dphi_Y = zeros(N)
-    phi_L  = zeros(N)
-    dphi_L = zeros(N)
+    phi_Y  = numpy.zeros(N)
+    dphi_Y = numpy.zeros(N)
+    phi_L  = numpy.zeros(N)
+    dphi_L = numpy.zeros(N)
 
     # Put first vertex at origin
     y_panel = y - y[0]
@@ -131,20 +130,20 @@ def SA_arr(y, x, kappa, same, xk, wk):
 
     # Find panel coordinate system X: 0->1
     X = y_panel[1]
-    X = X/linalg.norm(X)
-    Z = cross(y_panel[1],y_panel[2])
-    Z = Z/linalg.norm(Z)
-    Y = cross(Z,X)
+    X = X/numpy.linalg.norm(X)
+    Z = numpy.cross(y_panel[1],y_panel[2])
+    Z = Z/numpy.linalg.norm(Z)
+    Y = numpy.cross(Z,X)
 
     # Rotate coordinate system to match panel plane
-    rot_matrix = array([X,Y,Z])
-    panel_plane = transpose(dot(rot_matrix,transpose(y_panel)))
-    x_plane = transpose(dot(rot_matrix, transpose(x_panel)))
+    rot_matrix = numpy.array([X,Y,Z])
+    panel_plane = numpy.transpose(numpy.dot(rot_matrix,numpy.transpose(y_panel)))
+    x_plane = numpy.transpose(numpy.dot(rot_matrix, numpy.transpose(x_panel)))
 
 
     for i in range(N):
         # Shift origin so it matches collocation point
-        panel_final = panel_plane - array([x_plane[i,0],x_plane[i,1],0])
+        panel_final = panel_plane - numpy.array([x_plane[i,0],x_plane[i,1],0])
 
         # Loop over sides
         for j in range(3):
@@ -165,22 +164,22 @@ def SA_arr(y, x, kappa, same, xk, wk):
 
 def GQ(y, x, kappa, same):
     # n=7
-    L   = array([y[1]-y[0], y[2]-y[1], y[0]-y[2]])
-    Area = linalg.norm(cross(L[2],L[1]))/2
-    normal = cross(L[0],L[2])
-    normal = normal/linalg.norm(normal)
+    L = numpy.array([y[1]-y[0], y[2]-y[1], y[0]-y[2]])
+    Area = numpy.linalg.norm(cross(L[2],L[1]))/2
+    normal = numpy.cross(L[0],L[2])
+    normal = normal/numpy.linalg.norm(normal)
 
-    M = transpose(y)
-    xi = zeros((7,3))
-    m  = zeros(7)
-    xi[0] = dot(M,array([1/3.,1/3.,1/3.]))
-    xi[1] = dot(M,array([.79742699,.10128651,.10128651]))
-    xi[2] = dot(M,array([.10128651,.79742699,.10128651]))
-    xi[3] = dot(M,array([.10128651,.10128651,.79742699]))
-    xi[4] = dot(M,array([.05971587,.47014206,.47014206]))
-    xi[5] = dot(M,array([.47014206,.05971587,.47014206]))
-    xi[6] = dot(M,array([.47014206,.47014206,.05971587]))
-    r = sqrt(sum((x-xi)**2,axis=1))
+    M = numpy.transpose(y)
+    xi = numpy.zeros((7,3))
+    m  = numpy.zeros(7)
+    xi[0] = numpy.dot(M,numpy.array([1/3.,1/3.,1/3.]))
+    xi[1] =numpy.dot(M,numpy.array([.79742699,.10128651,.10128651]))
+    xi[2] =numpy.dot(M,numpy.array([.10128651,.79742699,.10128651]))
+    xi[3] =numpy.dot(M,numpy.array([.10128651,.10128651,.79742699]))
+    xi[4] =numpy.dot(M,numpy.array([.05971587,.47014206,.47014206]))
+    xi[5] =numpy.dot(M,numpy.array([.47014206,.05971587,.47014206]))
+    xi[6] =numpy.dot(M,numpy.array([.47014206,.47014206,.05971587]))
+    r = numpy.sqrt(numpy.sum((x-xi)**2,axis=1))
 
     m[0] = 0.225
     m[1] = 0.12593918
@@ -189,8 +188,8 @@ def GQ(y, x, kappa, same):
     m[4] = 0.13239415
     m[5] = 0.13239415
     m[6] = 0.13239415
-    Q17 = Area * sum(m*exp(-kappa*r)/r)
-    Q27 = Area * sum(-m*exp(-kappa*r)*(kappa+1/r)/r**2*dot(xi-x,normal))
+    Q17 = Area * numpy.sum(m*numpy.exp(-kappa*r)/r)
+    Q27 = Area * numpy.sum(-m*numpy.exp(-kappa*r)*(kappa+1/r)/r**2*numpy.dot(xi-x,normal))
 
     if same==1: Q27 = 2*pi
     return Q17, Q27
