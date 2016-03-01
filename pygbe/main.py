@@ -25,6 +25,7 @@ import numpy
 from math import pi
 from scipy.misc import factorial
 import time
+from datetime import datetime
 import os
 import sys
 from argparse import ArgumentParser
@@ -69,6 +70,8 @@ def read_inputs():
                         help="Path to problem config file")
     parser.add_argument('-p', '--param', dest='param', type=str, default=None,
                         help="Path to problem param file")
+    parser.add_argument('-o', '--output', dest='output', type=str,
+                        default='output', help="Output folder")
 
     return parser.parse_args()
 
@@ -116,8 +119,6 @@ def find_config_files(cliargs):
     if cliargs.param is None:
         cliargs.param = os.path.join(full_path, prob_name+'.param')
 
-    print(cliargs)
-
     for req_file in [cliargs.config, cliargs.param]:
         if not check_file_exists(req_file):
             sys.exit('Did not find expected config files')
@@ -141,19 +142,29 @@ class Logger(object):
 
 def main(argv=sys.argv):
 
-    configFile, paramfile = find_config_files(read_inputs())
+    args = read_inputs()
+    configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
-    output_dir = os.path.join(full_path, 'OUTPUT')
+
+    #try to expand ~ if present in output path
+    args.output = os.path.expanduser(args.output)
+    #if output path is absolute, use that, otherwise prepend
+    #problem path
+    if not os.path.isdir(args.output):
+        output_dir = os.path.join(full_path, args.output)
+    else:
+        output_dir = args.output
     #create output directory if it doesn't already exist
     try:
-        os.makedirs(os.path.join(full_path, 'OUTPUT'))
+        os.makedirs(output_dir)
     except OSError:
         pass
 
 
-    sys.stdout = Logger(os.path.join(full_path, 'OUTPUT/output.log'))
-    ### Time stamp
     timestamp = time.localtime()
+    outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
+    sys.stdout = Logger(os.path.join(output_dir, outputfname))
+    ### Time stamp
     print 'Run started on:'
     print '\tDate: %i/%i/%i'%(timestamp.tm_year,timestamp.tm_mon,timestamp.tm_mday)
     print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
@@ -257,7 +268,8 @@ def main(argv=sys.argv):
     toc = time.time()
     solve_time = toc-tic
     print 'Solve time        : %fs'%solve_time
-    numpy.savetxt(os.path.join(output_dir, 'phi.txt'),phi)
+    phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
+    numpy.savetxt(os.path.join(output_dir, phifname),phi)
     #phi = loadtxt('phi.txt')
 
     # Put result phi in corresponding surfaces
