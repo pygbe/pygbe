@@ -20,7 +20,7 @@
   THE SOFTWARE.
 '''
 
-from numpy import *
+import numpy
 import os
 
 def readVertex2(filename, REAL):
@@ -36,10 +36,10 @@ def readVertex2(filename, REAL):
         y.append(REAL(y0))
         z.append(REAL(z0))
 
-    x = array(x)
-    y = array(y)
-    z = array(z)
-    vertex = zeros((len(x),3))
+    x = numpy.array(x)
+    y = numpy.array(y)
+    z = numpy.array(z)
+    vertex = numpy.zeros((len(x),3))
     vertex[:,0] = x
     vertex[:,1] = y
     vertex[:,2] = z
@@ -47,7 +47,7 @@ def readVertex2(filename, REAL):
 
 def readVertex(filename, REAL):
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')+'/'
-    X = loadtxt(full_path + filename, dtype=REAL)
+    X = numpy.loadtxt(full_path + filename, dtype=REAL)
     vertex = X[:,0:3]
 
     return vertex
@@ -63,14 +63,14 @@ def readTriangle2(filename):
         triangle.append([int(v1)-1,int(v2)-1,int(v3)-1])
         # -1-> python starts from 0, matlab from 1
 
-    triangle = array(triangle)
+    triangle = numpy.array(triangle)
 
     return triangle
 
 def readTriangle(filename, surf_type):
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')+'/'
-    X = loadtxt(full_path + filename, dtype=int)
-    triangle = zeros((len(X),3), dtype=int)
+    X = numpy.loadtxt(full_path + filename, dtype=int)
+    triangle = numpy.zeros((len(X),3), dtype=int)
 #    if surf_type<=10:
     if surf_type=='internal_cavity':
         triangle[:,0] = X[:,0]
@@ -94,7 +94,7 @@ def readCheck(aux, REAL):
         if c=='-':
             cut.append(i)
     cut.append(len(aux))
-    X = zeros(len(cut)-1)
+    X = numpy.zeros(len(cut)-1)
     for i in range(len(cut)-1):
         X[i] = REAL(aux[cut[i]:cut[i+1]])
 
@@ -106,7 +106,7 @@ def readpqr(filename, REAL):
     pos = []
     q   = []
     for line in file(filename):
-        line = array(line.split())
+        line = numpy.array(line.split())
         line_aux = []
 
         if line[0]=='ATOM':
@@ -134,8 +134,8 @@ def readpqr(filename, REAL):
 
 #    f.close()
 #    quit()
-    pos = array(pos)
-    q   = array(q)
+    pos = numpy.array(pos)
+    q   = numpy.array(q)
     Nq  = len(q)
     return pos, q, Nq
 
@@ -147,7 +147,7 @@ def readcrd(filename, REAL):
 
     start = 0
     for line in file(filename):
-        line = array(line.split())
+        line = numpy.array(line.split())
    
         if len(line)>8 and line[0]!='*':# and start==2:
             x = line[4]
@@ -162,8 +162,8 @@ def readcrd(filename, REAL):
             if start==2:
                 Nq = int(line[0])
         '''
-    pos = array(pos)
-    q   = array(q)
+    pos = numpy.array(pos)
+    q   = numpy.array(q)
     Nq  = len(q)
     return pos, q, Nq
 
@@ -176,9 +176,9 @@ def readParameters(param, filename):
 
     dataType = val[0]      # Data type
     if dataType=='double':
-        param.REAL = float64
+        param.REAL = numpy.float64
     elif dataType=='float':
-        param.REAL = float32
+        param.REAL = numpy.float32
 
     REAL = param.REAL
     param.K         = int (val[1])      # Gauss points per element
