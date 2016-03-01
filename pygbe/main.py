@@ -26,9 +26,10 @@ from math import pi
 from scipy.misc import factorial
 import time
 import os
+import sys
+from argparse import ArgumentParser
 
 # Import self made modules
-import sys
 from gmres import gmres_solver
 from projection import get_phir
 from classes import (surfaces, timings, parameters, index_constant,
@@ -47,39 +48,117 @@ from tree.cuda_kernels import kernels
 # import modules for testing
 #from mpl_toolkits.mplot3d import Axes3D
 #import matplotlib.pyplot as plt
+def read_inputs():
+    """
+    Parse command-line arguments to determine which config and param files to run
+    Assumes that in the absence of specific command line arguments that pygbe
+    problem folder resembles the following structure
 
-def environok():
-    if not os.environ.get('PYGBE_DATA_DIR'):
-        print('{:-^{}}'.format('No `PYGBE_DATA_DIR` ENVVAR detected', 80))
-        print('\n')
-        print('{:^{}}'.format('PyGBe needs to know your where mesh files are located', 80))
-        print('{:^{}}'.format('You can set the ENVVAR for this session by running', 80))
-        print('\n')
-        print('{:<{}}'.format('$ export PYGBE_DATA_DIR = /path/to/pygbe/pygbe', 80))
-        print('\n')
-        print('{:^{}}'.format('where the path should point to the folder containing', 80))
-        print('{:^{}}'.format('the folder "geometry"', 80))
-        print('\n')
-        print('{:-^{}}'.format('No `PYGBE_DATA_DIR` ENVVAR detected', 80))
-        return False
-    else:
-        return True
+    lys
+    ˫ lys.param
+    ˫ lys.config
+    ˫ built_parse.pqr
+    ˫ geometry/Lys1.face
+    ˫ geometry/Lys1.vert
+    ˫ output/
+    """
+    parser = ArgumentParser(description='Manage PyGBe command line arguments')
+    parser.add_argument('problem_folder', type=str,
+                        help="Path to folder containing problem files")
+    parser.add_argument('-c', '--config', dest='config', type=str, default=None,
+                        help="Path to problem config file")
+    parser.add_argument('-p', '--param', dest='param', type=str, default=None,
+                        help="Path to problem param file")
+
+    return parser.parse_args()
+
+def check_file_exists(filename):
+    """Try to open the file `filename` and return True if it's valid """
+    return os.path.exists(filename)
+
+def find_config_files(cliargs):
+    """
+    Check that .config and .param files exist and can be opened.
+    If either file isn't found, PyGBe exits (and should print which
+    file was not found).  Otherwise return the path to the config and
+    param files
+
+    Parameters
+    ----------
+    cliargs: parser
+        parser containing cli arguments passed to PyGBe
+
+    Returns
+    -------
+    cliargs.config: string
+        path to config file
+    cliargs.param: string
+        path to param file
+    """
+
+    prob_path = cliargs.problem_folder
+    full_path = os.getcwd() + '/' + prob_path
+    os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
+    #If user tries `pygbe lys` then `split` will fail
+    #But if user tries `pygbe examples/lys` then the split
+    #is required to grab the right name
+    try:
+        prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/'
+                     else prob_path.split('/')[-2])
+    except AttributeError:
+        prob_name = prob_path
+
+    if cliargs.config is None:
+        cliargs.config = os.path.join(full_path, prob_name+'.config')
+    if cliargs.param is None:
+        cliargs.param = os.path.join(full_path, prob_name+'.param')
+
+    print(cliargs)
+
+    for req_file in [cliargs.config, cliargs.param]:
+        if not check_file_exists(req_file):
+            sys.exit('Did not find expected config files')
+
+    return cliargs.config, cliargs.param
+
+#courtesy of http://stackoverflow.com/a/5916874
+class Logger(object):
+    """
+    Allow writing both to STDOUT on screen and sending text to file
+    in conjunction with the command
+    `sys.stdout = Logger("desired_log_file.txt")`
+    """
+    def __init__(self, filename="Default.log"):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
 
 def main(argv=sys.argv):
 
-    if not environok():
-        return
+    configFile, paramfile = find_config_files(read_inputs())
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
+    output_dir = os.path.join(full_path, 'OUTPUT')
+    #create output directory if it doesn't already exist
+    try:
+        os.makedirs(os.path.join(full_path, 'OUTPUT'))
+    except OSError:
+        pass
+
+
+    sys.stdout = Logger(os.path.join(full_path, 'OUTPUT/output.log'))
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
     print '\tDate: %i/%i/%i'%(timestamp.tm_year,timestamp.tm_mon,timestamp.tm_mday)
     print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
-
     TIC = time.time()
+
     ### Read parameters
     param = parameters()
-    precision = readParameters(param,argv[1])
-    configFile = argv[2]
+    precision = readParameters(param,paramfile)
 
     param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
@@ -157,7 +236,7 @@ def main(argv=sys.argv):
     toc = time.time()
     rhs_time = toc-tic
 
-    numpy.savetxt('RHS.txt',F)
+    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
 
     setup_time = toc-TIC
     print 'List time          : %fs'%list_time
@@ -175,7 +254,7 @@ def main(argv=sys.argv):
     toc = time.time()
     solve_time = toc-tic
     print 'Solve time        : %fs'%solve_time
-    numpy.savetxt('phi.txt',phi)
+    numpy.savetxt(os.path.join(output_dir, 'phi.txt'),phi)
     #phi = loadtxt('phi.txt')
 
     # Put result phi in corresponding surfaces

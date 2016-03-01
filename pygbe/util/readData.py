@@ -46,7 +46,8 @@ def readVertex2(filename, REAL):
     return vertex 
 
 def readVertex(filename, REAL):
-    X = loadtxt(filename, dtype=REAL)
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')+'/'
+    X = loadtxt(full_path + filename, dtype=REAL)
     vertex = X[:,0:3]
 
     return vertex
@@ -67,8 +68,8 @@ def readTriangle2(filename):
     return triangle
 
 def readTriangle(filename, surf_type):
-
-    X = loadtxt(filename, dtype=int)
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')+'/'
+    X = loadtxt(full_path + filename, dtype=int)
     triangle = zeros((len(X),3), dtype=int)
 #    if surf_type<=10:
     if surf_type=='internal_cavity':
@@ -104,17 +105,11 @@ def readpqr(filename, REAL):
 
     pos = []
     q   = []
-    
-#    f = open("test","w")
-
     for line in file(filename):
         line = array(line.split())
         line_aux = []
 
-#        line_test = list(line[0:5])
-   
         if line[0]=='ATOM':
-
             for l in range(len(line)-6):
                 aux = line[5+len(line_aux)]
                 if len(aux)>14:
@@ -232,7 +227,7 @@ def readFields(filename):
                 coulomb.append(line[6])
                 qfile.append(
                     line[7] if line[7] == 'NA'
-                    else os.environ.get('PYGBE_DATA_DIR')+line[7]
+                    else os.environ.get('PYGBE_PROBLEM_FOLDER')+'/'+line[7]
                 )
                 Nparent.append(line[8])
                 parent.append(line[9])
@@ -251,7 +246,7 @@ def readSurf(filename):
         line = line.split()
         if len(line)>0:
             if line[0]=='FILE':
-                files.append(os.environ.get('PYGBE_DATA_DIR')+line[1])
+                files.append(line[1])
                 surf_type.append(line[2])
                 if line[2]=='dirichlet_surface' or line[2]=='neumann_surface' or line[2]=='neumann_surface_hyper':
                     phi0_file.append(line[3])
