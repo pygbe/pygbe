@@ -8,12 +8,5 @@ geometry/sphere/sphere520K*
 *.so
 *_wrap.cxx
 
-# specific files
-bem_pycuda/tree/calculateMultipoles.py
-bem_pycuda/tree/direct.py
-bem_pycuda/tree/multipole.py
-util/semi_analyticalwrap.py
-bem_pycuda/regression_tests/regression_*
-
 # regression test output
 tests/regression_tests/figs/*
