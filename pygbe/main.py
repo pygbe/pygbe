@@ -55,12 +55,12 @@ def read_inputs():
     problem folder resembles the following structure
 
     lys
-    ˫ lys.param
-    ˫ lys.config
-    ˫ built_parse.pqr
-    ˫ geometry/Lys1.face
-    ˫ geometry/Lys1.vert
-    ˫ output/
+    |- lys.param
+    |- lys.config
+    |- built_parse.pqr
+    |- geometry/Lys1.face
+    |- geometry/Lys1.vert
+    |- output/
     """
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
     parser.add_argument('problem_folder', type=str,
@@ -98,6 +98,9 @@ def find_config_files(cliargs):
 
     prob_path = cliargs.problem_folder
     full_path = os.getcwd() + '/' + prob_path
+    #if user gave us an absolute path, use that
+    if not os.path.isdir(full_path):
+        full_path = os.path.expanduser(prob_path)
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
     #If user tries `pygbe lys` then `split` will fail
     #But if user tries `pygbe examples/lys` then the split
