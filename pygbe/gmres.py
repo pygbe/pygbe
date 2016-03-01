@@ -21,6 +21,7 @@
 '''
 
 import numpy
+import os
 from scipy import linalg
 import time
 from matrixfree import gmres_dot as gmres_dot
@@ -78,6 +79,10 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     b_norm = linalg.norm(b)
 
+    output_path = os.path.join(
+        os.environ.get('PYGBE_PROBLEM_FOLDER'),
+        'OUTPUT')
+
     while (iteration < param.max_iter and rel_resid>=param.tol): # Outer iteration
         
         aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
@@ -108,7 +113,8 @@ def gmres_solver (surf_array, field_array, X, b, param, ind0, timing, kernel):
             time_Vi+=toc-tic
     
             if iteration<6:
-                numpy.savetxt('Vip1%i.txt'%iteration, Vip1)
+                fname = 'Vip1{}.txt'.format(iteration)
+                numpy.savetxt(os.path.join(output_path,fname), Vip1)
 
             tic = time.time()
             Vk = V[0:i+1,:]

@@ -138,8 +138,17 @@ class Logger(object):
 
 def main(argv=sys.argv):
 
-    args = read_inputs()
+    configFile, paramfile = find_config_files(read_inputs())
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
+    output_dir = os.path.join(full_path, 'OUTPUT')
+    #create output directory if it doesn't already exist
+    try:
+        os.makedirs(os.path.join(full_path, 'OUTPUT'))
+    except OSError:
+        pass
 
+
+    sys.stdout = Logger(os.path.join(full_path, 'OUTPUT/output.log'))
     ### Time stamp
     timestamp = time.localtime()
     print 'Run started on:'
@@ -147,7 +156,6 @@ def main(argv=sys.argv):
     print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
     TIC = time.time()
 
-    configFile, paramfile = find_config_files(read_inputs())
     ### Read parameters
     param = parameters()
     precision = readParameters(param,paramfile)
@@ -228,7 +236,7 @@ def main(argv=sys.argv):
     toc = time.time()
     rhs_time = toc-tic
 
-    numpy.savetxt('RHS.txt',F)
+    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
 
     setup_time = toc-TIC
     print 'List time          : %fs'%list_time
@@ -246,7 +254,7 @@ def main(argv=sys.argv):
     toc = time.time()
     solve_time = toc-tic
     print 'Solve time        : %fs'%solve_time
-    numpy.savetxt('phi.txt',phi)
+    numpy.savetxt(os.path.join(output_dir, 'phi.txt'),phi)
     #phi = loadtxt('phi.txt')
 
     # Put result phi in corresponding surfaces
