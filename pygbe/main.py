@@ -97,20 +97,21 @@ def find_config_files(cliargs):
     """
 
     prob_path = cliargs.problem_folder
+    full_path = os.getcwd() + '/' + prob_path
+    os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
     #If user tries `pygbe lys` then `split` will fail
     #But if user tries `pygbe examples/lys` then the split
     #is required to grab the right name
     try:
         prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/'
                      else prob_path.split('/')[-2])
-        print(prob_name)
     except AttributeError:
         prob_name = prob_path
 
     if cliargs.config is None:
-        cliargs.config = os.path.join(prob_path, prob_name)+'.config'
+        cliargs.config = os.path.join(full_path, prob_name+'.config')
     if cliargs.param is None:
-        cliargs.param = os.path.join(prob_path, prob_name)+'.param'
+        cliargs.param = os.path.join(full_path, prob_name+'.param')
 
     print(cliargs)
 
@@ -138,8 +139,6 @@ class Logger(object):
 def main(argv=sys.argv):
 
     args = read_inputs()
-    print(args)
-    find_config_files(read_inputs())
 
     ### Time stamp
     timestamp = time.localtime()
@@ -148,11 +147,10 @@ def main(argv=sys.argv):
     print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
     TIC = time.time()
 
-    find_config_files(argv)
+    configFile, paramfile = find_config_files(read_inputs())
     ### Read parameters
     param = parameters()
-    precision = readParameters(param,argv[1])
-    configFile = argv[2]
+    precision = readParameters(param,paramfile)
 
     param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
