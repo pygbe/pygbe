@@ -49,7 +49,6 @@ def main():
             description='A boundary element method code that does molecular electrostatics calculations with a continuum approach',
             platforms='Linux',
             install_requires = [
-                'pycuda >= 2013.1',
                 'numpy > 1.8',
             ],
             license='MIT',
