@@ -31,7 +31,10 @@ from direct import direct_c, direct_sort, directKt_sort
 from calculateMultipoles import P2M, M2M
 
 # CUDA libraries
-import pycuda.driver as cuda
+try:
+    import pycuda.driver as cuda
+except:
+    print ('PyCUDA not installed, performance might not be so hot')
 
 import time
 
@@ -473,8 +476,12 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param, 
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, kernel):
 
-    tic = cuda.Event()
-    toc = cuda.Event()
+    if param.GPU==1:
+        tic = cuda.Event()
+        toc = cuda.Event()
+    else:
+        tic = Event()
+        toc = Event()
 
     REAL = param.REAL
 
@@ -518,8 +525,12 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing, ker
 
 def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param, LorY, timing, kernel):
 
-    tic = cuda.Event()
-    toc = cuda.Event()
+    if param.GPU==1:
+        tic = cuda.Event()
+        toc = cuda.Event()
+    else:
+        tic = Event()
+        toc = Event()
 
     REAL = param.REAL
 
@@ -578,7 +589,7 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux,
 
     aux = numpy.zeros(2)
 
-    direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
+    direct_sort(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), numpy.ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
             numpy.int32(tri), numpy.int32(k), surfTar.xi, surfTar.yi, surfTar.zi, 
             s_xj, s_yj, s_zj, xt, yt, zt, m, mx, my, mz, mKc, mVc, 
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
@@ -611,7 +622,7 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
 
     aux = numpy.zeros(2)
 
-    directKt_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
+    directKt_sort(Ktx_aux, Kty_aux, Ktz_aux, int(LorY), numpy.ravel(surfSrc.vertex[surfSrc.triangleSort[:]]), 
             numpy.int32(k), s_xj, s_yj, s_zj, xt, yt, zt, m, mKc,
             surfTar.P2P_list[surf], surfTar.offsetTarget, surfTar.sizeTarget, surfSrc.offsetSource, 
             surfTar.offsetTwigs[surf], surfSrc.AreaSort,
@@ -629,8 +640,12 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux,
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, 
             surf, LorY, K_diag, IorE, L, w, param, timing, kernel):
 
-    tic = cuda.Event() 
-    toc = cuda.Event() 
+    if param.GPU==1:
+        tic = cuda.Event() 
+        toc = cuda.Event() 
+    else:
+        tic = Event()
+        toc = Event()
 
     tic.record()
     REAL = param.REAL
@@ -687,8 +702,12 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu,
 def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, 
             surf, LorY, w, param, timing, kernel):
 
-    tic = cuda.Event() 
-    toc = cuda.Event() 
+    if param.GPU==1:
+        tic = cuda.Event() 
+        toc = cuda.Event() 
+    else:
+        tic = Event()
+        toc = Event()
 
     tic.record()
     REAL = param.REAL
@@ -807,7 +826,7 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc,
     aux = numpy.zeros(2)
     K_diag = 0
     V_diag = 0
-    direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), ravel(surface.vertex[surface.triangle[:]]), 
+    direct_c(K_aux, V_aux, int(LorY), K_diag, V_diag, int(IorE), numpy.ravel(surface.vertex[surface.triangle[:]]), 
             numpy.int32(tri), numpy.int32(k), surface.xi, surface.yi, surface.zi,
             s_xj, s_yj, s_zj, xq_arr, yq_arr, zq_arr, s_m, s_mx, s_my, s_mz, s_mKc, s_mVc, 
             numpy.array([-1], dtype=numpy.int32), surface.Area, surface.sglInt_int, surface.sglInt_ext,

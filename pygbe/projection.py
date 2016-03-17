@@ -22,13 +22,20 @@
 
 import numpy
 import sys
+from math import pi
 from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort,
                            M2PKt_sort, M2P_gpu, M2PKt_gpu, P2P_sort,
                            P2PKt_sort, P2P_gpu, P2PKt_gpu, M2P_nonvec,
                            P2P_nonvec)
-import pycuda.autoinit
-import pycuda.driver as cuda
+from classes import Event
+try:
+    import pycuda.autoinit
+    import pycuda.driver as cuda
+except:
+    pass
+
 import time
+
 
 
 def getWeights(K):
@@ -59,8 +66,12 @@ def getWeights(K):
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
             self, param, ind0, timing, kernel):
 
-    tic = cuda.Event()
-    toc = cuda.Event()
+    if param.GPU==1:
+        tic = cuda.Event()
+        toc = cuda.Event()
+    else:
+        tic = Event()
+        toc = Event()
 
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
@@ -162,8 +173,12 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
 def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag,
                 self, param, ind0, timing, kernel):
 
-    tic = cuda.Event()
-    toc = cuda.Event()
+    if param.GPU==1:
+        tic = cuda.Event()
+        toc = cuda.Event()
+    else:
+        tic = Event()
+        toc = Event()
 
     REAL = param.REAL
     Ns = len(surfSrc.triangle)

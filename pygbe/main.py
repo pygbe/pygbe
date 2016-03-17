@@ -45,7 +45,11 @@ from util.an_solution import an_P, two_sphere
 from util.which import whichgen
 
 from tree.FMMutils import computeIndices, precomputeTerms, generateList
-from tree.cuda_kernels import kernels
+
+try:
+    from tree.cuda_kernels import kernels
+except:
+    pass
 
 #courtesy of http://stackoverflow.com/a/5916874
 class Logger(object):
@@ -230,7 +234,10 @@ def main(log_output=True):
     precomputeTerms(param.P, ind0)
 
     ### Load CUDA code
-    kernel = kernels(param.BSZ, param.Nm, param.K_fine, param.P, precision)
+    if param.GPU==1:
+        kernel = kernels(param.BSZ, param.Nm, param.K_fine, param.P, precision)
+    else:
+        kernel = 1
 
     ### Generate interaction list
     print 'Generate interaction list'
