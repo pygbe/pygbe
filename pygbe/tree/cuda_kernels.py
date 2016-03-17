@@ -20,7 +20,10 @@
   THE SOFTWARE.
 '''
 
-from pycuda.compiler import SourceModule
+try:
+    from pycuda.compiler import SourceModule
+except:
+    pass
 
 def kernels(BSZ, Nm, K_fine, P, REAL):
     

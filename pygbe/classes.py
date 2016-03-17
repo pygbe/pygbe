@@ -31,9 +31,26 @@ from util.readData import (readVertex, readTriangle, readpqr, readcrd,
                            readFields, readSurf)
 
 # PyCUDA libraries
-import pycuda.autoinit
-import pycuda.gpuarray as gpuarray
-import pycuda.driver as cuda
+try:
+    import pycuda.autoinit
+    import pycuda.gpuarray as gpuarray
+    import pycuda.driver as cuda
+except:
+    pass
+
+class Event():
+    """
+    class for logging like in pycuda's cuda.Event()
+    """
+    def __init__(self):
+        self.t = 0
+    def record(self):
+        t = time.time()*1e3
+    def time_till(self,toc):
+        return toc.t-self.t
+    def synchronize(self):
+        pass
+
 
 class surfaces():
     def __init__(self):

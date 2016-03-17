@@ -30,8 +30,11 @@ import time
 from util.semi_analytical import GQ_1D
 
 # PyCUDA libraries
-import pycuda.autoinit
-import pycuda.gpuarray as gpuarray
+try:
+    import pycuda.autoinit
+    import pycuda.gpuarray as gpuarray
+except:
+    pass
 
 ## Note: 
 ##  Remember ordering of equations:
