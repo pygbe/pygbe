@@ -1,0 +1,124 @@
+Run started on:
+	Date: 2016/4/19
+	Time: 16:42:24
+
+Reading pqr for region 1 from /home/ncclementi/Documents/pygbe_dev/pygbe/examples/sphere//offcenter_R2.pqr
+
+Reading surface 0 from file geometry/sphere500_R4
+Time load mesh: 0.035703
+Removed areas=0: 0
+
+Total elements : 512
+Total equations: 1024
+----------------------------
+1 surfaces:
+
+Surface 0:
+	512 elements
+	Surface type       : dielectric_interface
+	Cells              : 9
+	Twigs              : 8
+	Levels             : 2
+	C0 size            : 3.965859
+	C0 box center      : 0.000000, 0.000000, 0.000000
+	Twig cell size     : 1.982929
+	Rbox/theta         : 3.965859
+	Analytic distance  : 1.750006
+	Elem. per sq Ang   : 2.578943
+	Max, min, avg elem.: 0.629836657298, 0.307421324863, 0.387755743362
+	Total area         : 198.530941
+----------------------------
+
+2 regions:
+
+Region 0:
+	Laplace or Yukawa: 2
+	kappa            : 0.125
+	dielectric const : 80.0
+	Number of charges: 0
+	Parent surface   : []
+	Child surfaces   : [0]
+Region 1:
+	Laplace or Yukawa: 1
+	kappa            : 1e-12
+	dielectric const : 4.0
+	Number of charges: 1
+	Parent surface   : [0]
+	Child surfaces   : []
+----------------------------
+
+Parameters:
+	Data type               : <type 'numpy.float64'>
+	Use GPU                 : 1
+	P                       : 15
+	threshold               : 0.50
+	theta                   : 0.50
+	NCRIT                   : 500
+	CUDA block size         : 128
+	Gauss points per element: 3
+	Gauss points near singlr: 37
+	1D Gauss points per side: 9
+	GMRES tolerance         : 1e-06
+	GMRES max iterations    : 1000
+	GMRES restart iteration : 100
+----------------------------
+
+Generate interaction list
+Transfer data to GPU
+Generate RHS
+List time          : 0.000454s
+Data transfer time : 0.003575s
+RHS generation time: 0.153698s
+------------------------------
+Total setup time   : 13.497069s
+
+Solve
+Analytical integrals: 50 of 512, 9%
+iteration: 1, rel resid: 0.200308135647
+iteration: 2, rel resid: 0.0453343740128
+iteration: 3, rel resid: 0.0130667356353
+iteration: 4, rel resid: 0.00467091960357
+iteration: 5, rel resid: 0.00194000506639
+iteration: 6, rel resid: 0.00102674295184
+iteration: 7, rel resid: 0.000511650167269
+iteration: 8, rel resid: 0.000233252413152
+iteration: 9, rel resid: 0.000109468545212
+iteration: 10, rel resid: 4.87979939259e-05
+iteration: 11, rel resid: 2.05328215776e-05
+iteration: 12, rel resid: 9.47835389642e-06
+iteration: 13, rel resid: 4.15414232113e-06
+iteration: 14, rel resid: 1.78428601464e-06
+iteration: 15, rel resid: 6.74511711793e-07
+GMRES solve
+Converged after 15 iterations to a residual of 6.74511711793e-07
+Time weight vector: 0.014737
+Time sort         : 0.002439
+Time data transfer: 0.013764
+Time P2M          : 0.785826
+Time M2M          : 0.270936
+Time M2P          : 0.000000
+Time P2P          : 0.458200
+	Time analy: 0.000000
+Solve time        : 1.561800s
+
+Calculate Esolv
+Calculating solvation energy for region 1, stored in E_solv[0]
+512 of 512 analytical integrals for phi_reac calculation in region 1
+Time Esolv: 0.050345s
+Region 1: Esolv = -13.458118 kcal/mol = -56.308768 kJ/mol
+
+Calculate Esurf
+Time Esurf: 0.033520s
+
+Calculate Ecoul
+Calculate Coulomb energy for region 1
+Region 1: Ecoul = 0.000000 kcal/mol = 0.000000 kJ/mol
+Time Ecoul: 0.000075s
+
+--------------------------------
+Totals:
+Esolv = -13.458118 kcal/mol
+Esurf = 0.000000 kcal/mol
+Ecoul = 0.000000 kcal/mol
+
+Time = 15.147218 s
