@@ -248,8 +248,11 @@ def readSurf(filename):
             if line[0]=='FILE':
                 files.append(line[1])
                 surf_type.append(line[2])
-                if line[2]=='dirichlet_surface' or line[2]=='neumann_surface' or line[2]=='neumann_surface_hyper':
-                    phi0_file.append(line[3])
+                if (line[2]=='dirichlet_surface' 
+                        or line[2]=='neumann_surface' 
+                        or line[2]=='neumann_surface_hyper'):
+                    phi0_file.append(os.environ.get('PYGBE_PROBLEM_FOLDER')
+                            + line[3])
                 else:
                     phi0_file.append('no_file')
 
