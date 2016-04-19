@@ -1,0 +1,11 @@
+Run started on:
+	Date: 2016/4/19
+	Time: 17:10:18
+
+Reading pqr for region 1 from /home/ncclementi/Documents/pygbe_dev/pygbe/examples/1PGBmut_sensor//1PGB_mut.pqr
+
+Reading surface 0 from file geometry/1PGB_mut_p1.5_d02
+Time load mesh: 0.190657
+Removed areas=0: 2
+
+Reading surface 1 from file geometry/sensor_100x10x100_d02
