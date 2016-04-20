@@ -1,19 +1,34 @@
 In this file, the format for the input files is detailed.
-To run, PyGBe needs two input files: a "config" file and a "parameters" file, which are in the ./bem_pycuda/input_files directory.
+To run, PyGBe needs two input files: a "config" file and a "parameters" file, 
+which are in the ./bem_pycuda/input_files directory.
 
 Config file format:
 ------------------
 This file has two parts:
 
 FILE: indicates in that line a mesh file will be specified. 
-This code interfaces with the MSMS format, which generates a 'filename.vert' and 'filename.face' files. 
-Each 'filename' has the information for the mesh of one surface. To account for more than one surface (ie. for Stern layers, solvent filled cavities, several proteins), more than one FILE line is needed.
+This code interfaces with the MSMS format, which generates a 'filename.vert' and 
+'filename.face' files. 
+Each 'filename' has the information for the mesh of one surface. To account for 
+more than one surface (ie. for Stern layers, solvent filled cavities, several
+proteins), more than one FILE line is needed.
 After 'filename', the user must specify what kind of surface 'filename' is. It can be:
-- stern_layer:          surface interfacer stern layer with solvent
-- dielectric_interface: surface interfaces low dielectric (inside protein) and high dielectric (outside protein)
-- internal_cavity:      surface is an internal cavity (a result of '-all_components' flag in MSMS). This is important to specify because by default MSMS changes the vertex ordering for internal cavities.
-- dirichlet_surface:    surface of specified potential. The value of this potential is read from a text file which has to be specified next to 'dirichlet_surface'. (See .phi0 file in example)
-- neumann_surface:      surface of specified potential. The value of this potential is read from a text file which has to be specified next to 'neumann_surface'. (See .phi0 file in example) 
+
+- stern_layer:          surface interfacer stern layer with solvent.
+
+- dielectric_interface: surface interfaces low dielectric (inside protein) and
+                        high dielectric (outside protein).
+
+- internal_cavity:      surface is an internal cavity (a result of '-all_components'
+                        flag in MSMS). This is important to specify because by default
+                        MSMS changes the vertex ordering for internal cavities.
+- dirichlet_surface:    surface of specified potential. The value of this potential
+                        is read from a text file which has to be specified next to
+                        'dirichlet_surface'. (See .phi0 file in example).
+
+- neumann_surface:      surface of specified potential. The value of this potential
+                        is read from a text file which has to be specified next to
+                        'neumann_surface'. (See .phi0 file in example). 
 
 FIELD: specifies physical parameters of the different regions. 
 Parameters:
