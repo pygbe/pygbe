@@ -7,6 +7,7 @@ geometry/sphere/sphere520K*
 *.o
 *.so
 *_wrap.cxx
+*.log
 
 # regression test output
 tests/regression_tests/figs/*
