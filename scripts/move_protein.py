@@ -1,46 +1,45 @@
 #!/usr/bin/env python
 # Calculated according to FelderPriluskySilmanSussman2007, but using center of mass
-from numpy import *
+import numpy
 from math import atan2
 
 import os
 import sys
-sys.path.append('../util')
-from readData import readVertex, readpqr
+from pygbe.util.readData import readVertex, readpqr
 
 def findDipole(xq, q):
 
-    ctr = sum(transpose(xq)*abs(q), axis=1)/sum(abs(q))
+    ctr = numpy.sum(numpy.transpose(xq)*numpy.abs(q), axis=1)/numpy.sum(numpy.abs(q))
 #    ctr = average(xq, axis=0)
     r = xq - ctr
-    d = sum(transpose(r)*q, axis=1)
+    d = numpy.sum(numpy.transpose(r)*q, axis=1)
 
     return d
 
 def rotate_x(x, angle):
 
-    xnew = zeros(shape(x))
+    xnew = numpy.zeros(numpy.shape(x))
     xnew[:,0] = x[:,0]
-    xnew[:,1] = x[:,1]*cos(angle) - x[:,2]*sin(angle)
-    xnew[:,2] = x[:,1]*sin(angle) + x[:,2]*cos(angle)
+    xnew[:,1] = x[:,1]*numpy.cos(angle) - x[:,2]*numpy.sin(angle)
+    xnew[:,2] = x[:,1]*numpy.sin(angle) + x[:,2]*numpy.cos(angle)
 
     return xnew
 
 
 def rotate_y(x, angle):
 
-    xnew = zeros(shape(x))
-    xnew[:,0] = x[:,2]*sin(angle) + x[:,0]*cos(angle)
+    xnew = numpy.zeros(numpy.shape(x))
+    xnew[:,0] = x[:,2]*numpy.sin(angle) + x[:,0]*numpy.cos(angle)
     xnew[:,1] = x[:,1]
-    xnew[:,2] = x[:,2]*cos(angle) - x[:,0]*sin(angle)
+    xnew[:,2] = x[:,2]*numpy.cos(angle) - x[:,0]*numpy.sin(angle)
 
     return xnew    
 
 def rotate_z(x, angle):
 
-    xnew = zeros(shape(x))
-    xnew[:,0] = x[:,0]*cos(angle) - x[:,1]*sin(angle)
-    xnew[:,1] = x[:,0]*sin(angle) + x[:,1]*cos(angle)
+    xnew = numpy.zeros(numpy.shape(x))
+    xnew[:,0] = x[:,0]*numpy.cos(angle) - x[:,1]*numpy.sin(angle)
+    xnew[:,1] = x[:,0]*numpy.sin(angle) + x[:,1]*numpy.cos(angle)
     xnew[:,2] = x[:,2]
 
     return xnew    
@@ -65,8 +64,8 @@ def modifypqr(inpqr, outpqr, xq):
 
 inMesh = sys.argv[1]
 inpqr  = sys.argv[2]
-alpha_y = float(sys.argv[3])*pi/180.
-alpha_z = float(sys.argv[4])*pi/180.
+alpha_y = float(sys.argv[3])*numpy.pi/180.
+alpha_z = float(sys.argv[4])*numpy.pi/180.
 if len(sys.argv)>5:
     name = sys.argv[5]
 else:
@@ -85,17 +84,17 @@ outpqr = inpqr + name
 vert = readVertex(inMesh+'.vert', float)
 xq, q, Nq = readpqr(inpqr+'.pqr', float)
 
-#xq = array([[1.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
-#q = array([1.,-1.,1.])
+#xq = numpy.array([[1.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
+#q = numpy.array([1.,-1.,1.])
 
 #### Setup initial configuration
 # Initial configuration: dipole parallel to y and outermost atom to center parallel to x
 d = findDipole(xq,q)
-normd = sqrt(sum(d*d))
-normal  = array([0,1,0])
-normal2 = array([1,0,0])
+normd = numpy.sqrt(numpy.sum(d*d))
+normal  = numpy.array([0,1,0])
+normal2 = numpy.array([1,0,0])
 
-angle = arccos(dot(d, normal)/normd)
+angle = numpy.arccos(numpy.dot(d, normal)/normd)
 
 ## Align normal and dipole vectors
 # Rotate x axis
@@ -111,10 +110,10 @@ vert_aux2 = rotate_z(vert_aux, angle_z)
 
 ## Align vector of atom furthest to center to x axis
 # Pick atom
-ctr = average(xq_aux2, axis=0) 
+ctr = numpy.average(xq_aux2, axis=0) 
 r_atom = xq_aux2 - ctr
-r_atom_norm = sqrt(xq_aux2[:,0]**2+xq_aux2[:,2]**2) # Distance in x-z plane
-max_atom = where(r_atom_norm==max(r_atom_norm))[0][0]
+r_atom_norm = numpy.sqrt(xq_aux2[:,0]**2+xq_aux2[:,2]**2) # Distance in x-z plane
+max_atom = numpy.where(r_atom_norm==max(r_atom_norm))[0][0]
 
 # Rotate y axis
 r_atom_max = r_atom[max_atom]
@@ -126,14 +125,14 @@ vert_0 = rotate_y(vert_aux2, angle_y)
 d_0 = findDipole(xq_0, q)
 
 # Check if furthest away atom vector and x axis are parallel
-ctr = average(xq_0, axis=0) 
+ctr = numpy.average(xq_0, axis=0) 
 ctr[1] = xq_0[max_atom,1]
 r_atom = xq_0 - ctr
 max_atom_vec = r_atom[max_atom]
 
 
-check_dipole = dot(d_0,array([1,1,1]))
-check_atom   = dot(max_atom_vec,array([1,1,1]))
+check_dipole = numpy.dot(d_0,numpy.array([1,1,1]))
+check_atom   = numpy.dot(max_atom_vec,numpy.array([1,1,1]))
 if verbose:
     print 'Initial configuration:'
 if abs(check_dipole - abs(d_0[1]))<1e-10: 
@@ -157,33 +156,33 @@ vert_new = rotate_z(vert_aux, alpha_z)
 
 ## Translate
 ymin = min(vert_new[:,1])
-ctr = average(vert_new, axis=0) 
-translation = array([ctr[0], ymin-5, ctr[2]]) # 2 Angs over the x-z plane
+ctr = numpy.average(vert_new, axis=0) 
+translation = numpy.array([ctr[0], ymin-5, ctr[2]]) # 2 Angs over the x-z plane
 
 vert_new -= translation
 xq_new -= translation
 
 ## Check
-ctr = average(vert_new, axis=0) 
+ctr = numpy.average(vert_new, axis=0) 
 d = findDipole(xq_new, q)
-dx = array([0, d[1], d[2]])
-dy = array([d[0], 0, d[2]])
-dz = array([d[0], d[1], 0])
-normd = sqrt(sum(d*d))
-normdx = sqrt(sum(dx*dx))
-normdz = sqrt(sum(dz*dz))
-angle = arccos(dot(d, normal)/normd)
-anglex = arccos(dot(dx, normal)/normdx)
-anglez = arccos(dot(dz, normal)/normdz)
+dx = numpy.array([0, d[1], d[2]])
+dy = numpy.array([d[0], 0, d[2]])
+dz = numpy.array([d[0], d[1], 0])
+normd = numpy.sqrt(numpy.sum(d*d))
+normdx = numpy.sqrt(numpy.sum(dx*dx))
+normdz = numpy.sqrt(numpy.sum(dz*dz))
+angle = numpy.arccos(numpy.dot(d, normal)/normd)
+anglex = numpy.arccos(numpy.dot(dx, normal)/normdx)
+anglez = numpy.arccos(numpy.dot(dz, normal)/normdz)
 
 xq_check = rotate_z(xq_new, -alpha_z)
-ctr_check = average(xq_check, axis=0)
-atom_vec = array([xq_check[max_atom,0]-ctr_check[0], 0, xq_check[max_atom,2]-ctr_check[2]])
-atom_vec_norm = sqrt(sum(atom_vec*atom_vec))
-angley = arccos(dot(atom_vec, normal2)/atom_vec_norm)
+ctr_check = numpy.average(xq_check, axis=0)
+atom_vec = numpy.array([xq_check[max_atom,0]-ctr_check[0], 0, xq_check[max_atom,2]-ctr_check[2]])
+atom_vec_norm = numpy.sqrt(numpy.sum(atom_vec*atom_vec))
+angley = numpy.arccos(numpy.dot(atom_vec, normal2)/atom_vec_norm)
 
-if alpha_y>pi:
-    angley = 2*pi-angley    # Dot product finds the smallest angle!
+if alpha_y>numpy.pi:
+    angley = 2*numpy.pi-angley    # Dot product finds the smallest angle!
 
 if verbose:
     print 'Desired configuration:'
@@ -195,19 +194,19 @@ else:
 
 if abs(d[2])<1e-10:
     if verbose:
-        print '\tDipole is on x-y plane, %f degrees from normal'%(angle*180/pi)
+        print '\tDipole is on x-y plane, %f degrees from normal'%(angle*180/numpy.pi)
 else:
     print '\tDipole is NOT well aligned'
 
 if abs(angle-alpha_z)<1e-10:
     if verbose:
-        print '\tMolecule was tilted correctly by %f deg'%(angle*180/pi)
+        print '\tMolecule was tilted correctly by %f deg'%(angle*180/numpy.pi)
 else:
     print '\tMolecule was NOT tilted correctly!'
 
 if abs(angley-alpha_y)<1e-10:
     if verbose:
-        print '\tMolecule was rotated correctly %f deg'%(angley*180/pi)
+        print '\tMolecule was rotated correctly %f deg'%(angley*180/numpy.pi)
 else:
     print '\tMolecule was NOT rotated correctly!'
 
