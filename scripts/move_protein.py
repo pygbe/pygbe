@@ -2,10 +2,11 @@
 # Calculated according to FelderPriluskySilmanSussman2007, but using center of mass
 import numpy
 from math import atan2
-
 import os
 import sys
+import subprocess
 from argparse import ArgumentParser
+
 from pygbe.util.readData import readVertex, readpqr
 
 def findDipole(xq, q):
@@ -97,8 +98,9 @@ inpqr  = args.pqr
 alpha_y = args.alphay*numpy.pi/180.
 alpha_z = args.alphaz*numpy.pi/180.
 name = args.name
-prob_path = args.problem_folder
-full_path = os.getcwd() + '/' + prob_path
+full_path = args.problem_folder
+if not os.path.isdir(full_path):
+    full_path = os.getcwd() + '/' + full_path
 full_path = os.path.normpath(full_path)
 
 if name is None:
@@ -114,7 +116,7 @@ if args.verbose:
 outMesh = inMesh.split()[0] + name
 outpqr = inpqr.split()[0] + name
 
-vert = readVertex(inMesh, float)
+vert = readVertex(inMesh+'.vert', float)
 xq, q, Nq = readpqr(full_path+'/'+inpqr, float)
 
 #xq = numpy.array([[1.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
@@ -189,14 +191,14 @@ vert_new = rotate_z(vert_aux, alpha_z)
 
 ## Translate
 ymin = min(vert_new[:,1])
-ctr = numpy.average(vert_new, axis=0) 
+ctr = numpy.average(vert_new, axis=0)
 translation = numpy.array([ctr[0], ymin-5, ctr[2]]) # 2 Angs over the x-z plane
 
 vert_new -= translation
 xq_new -= translation
 
 ## Check
-ctr = numpy.average(vert_new, axis=0) 
+ctr = numpy.average(vert_new, axis=0)
 d = findDipole(xq_new, q)
 dx = numpy.array([0, d[1], d[2]])
 dy = numpy.array([d[0], 0, d[2]])
@@ -244,11 +246,13 @@ else:
     print '\tMolecule was NOT rotated correctly!'
 
 #### Save to file
-#import ipdb; ipdb.set_trace()
 with open(full_path+'/'+outMesh+'.vert','w') as f:
     numpy.savetxt(f, vert_new)
-cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
-os.system(cmd)
+subprocess.call(['cp',
+                 os.path.join(full_path, inMesh)+'.face',
+                 os.path.join(full_path, outMesh)+'.face',])
+#cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
+#os.system(cmd)
 
 modifypqr(full_path+'/'+inpqr, outpqr+'.pqr', xq_new)
 
