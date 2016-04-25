@@ -94,6 +94,9 @@ def read_inputs():
 args = read_inputs()
 
 inMesh = args.mesh
+#If user includes '.vert' in mesh input, strip it out
+if 'vert' in inMesh:
+    inMesh = inMesh.rsplit('.', 1)[0]
 inpqr  = args.pqr
 alpha_y = args.alphay*numpy.pi/180.
 alpha_z = args.alphaz*numpy.pi/180.
@@ -114,7 +117,7 @@ if args.verbose:
 #outMesh = inMesh+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
 #outpqr = inpqr+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
 outMesh = inMesh.split()[0] + name
-outpqr = inpqr.split()[0] + name
+outpqr = inpqr.rsplit('.',1)[0] + name
 
 vert = readVertex(inMesh+'.vert', float)
 xq, q, Nq = readpqr(full_path+'/'+inpqr, float)
@@ -251,10 +254,10 @@ with open(full_path+'/'+outMesh+'.vert','w') as f:
 subprocess.call(['cp',
                  os.path.join(full_path, inMesh)+'.face',
                  os.path.join(full_path, outMesh)+'.face',])
-#cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
-#os.system(cmd)
 
-modifypqr(full_path+'/'+inpqr, outpqr+'.pqr', xq_new)
+modifypqr(os.path.join(full_path, inpqr),
+          os.path.join(full_path, outpqr)+'.pqr',
+          xq_new)
 
 if verbose:
     print '\nWritten to '+outMesh+'.vert(.face) and '+outpqr+'.pqr'
