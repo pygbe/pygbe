@@ -148,7 +148,7 @@ vert_aux2 = rotate_z(vert_aux, angle_z)
 
 ## Align vector of atom furthest to center to x axis
 # Pick atom
-ctr = numpy.average(xq_aux2, axis=0) 
+ctr = numpy.average(xq_aux2, axis=0)
 r_atom = xq_aux2 - ctr
 r_atom_norm = numpy.sqrt(xq_aux2[:,0]**2+xq_aux2[:,2]**2) # Distance in x-z plane
 max_atom = numpy.where(r_atom_norm==max(r_atom_norm))[0][0]
@@ -163,7 +163,7 @@ vert_0 = rotate_y(vert_aux2, angle_y)
 d_0 = findDipole(xq_0, q)
 
 # Check if furthest away atom vector and x axis are parallel
-ctr = numpy.average(xq_0, axis=0) 
+ctr = numpy.average(xq_0, axis=0)
 ctr[1] = xq_0[max_atom,1]
 r_atom = xq_0 - ctr
 max_atom_vec = r_atom[max_atom]
@@ -173,10 +173,10 @@ check_dipole = numpy.dot(d_0,numpy.array([1,1,1]))
 check_atom   = numpy.dot(max_atom_vec,numpy.array([1,1,1]))
 if verbose:
     print 'Initial configuration:'
-if abs(check_dipole - abs(d_0[1]))<1e-10: 
+if abs(check_dipole - abs(d_0[1]))<1e-10:
     if verbose: print '\tDipole is aligned with normal'
 else: print '\tDipole NOT aligned!'
-if abs(check_atom - abs(max_atom_vec[0]))<1e-10: 
+if abs(check_atom - abs(max_atom_vec[0]))<1e-10:
     if verbose: print '\tMax atom is aligned with x axis'
 else: print '\tMax atom NOT aligned!'
 
