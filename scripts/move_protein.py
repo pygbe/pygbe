@@ -34,7 +34,7 @@ def rotate_y(x, angle):
     xnew[:,1] = x[:,1]
     xnew[:,2] = x[:,2]*numpy.cos(angle) - x[:,0]*numpy.sin(angle)
 
-    return xnew    
+    return xnew
 
 def rotate_z(x, angle):
 
@@ -43,7 +43,7 @@ def rotate_z(x, angle):
     xnew[:,1] = x[:,0]*numpy.sin(angle) + x[:,1]*numpy.cos(angle)
     xnew[:,2] = x[:,2]
 
-    return xnew    
+    return xnew
 
 def modifypqr(inpqr, outpqr, xq):
 
@@ -85,12 +85,12 @@ def read_inputs():
                         help="Angle change in Z in degrees")
     parser.add_argument('-n', '--name', dest='name', type=str, default=None,
                         help="Name to append to modified mesh file")
+    parser.add_argument('--verbose', action='store_true')
 
     return parser.parse_args()
 
 
 args = read_inputs()
-
 
 inMesh = args.mesh
 inpqr  = args.pqr
@@ -104,11 +104,10 @@ full_path = os.path.normpath(full_path)
 if name is None:
     name = ''
 os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
-#if len(sys.argv)>6:
-#    if sys.argv[6] == 'verbose':
-#        verbose = True
-#else:
+
 verbose = False
+if args.verbose:
+    verbose = True
 
 #outMesh = inMesh+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
 #outpqr = inpqr+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
