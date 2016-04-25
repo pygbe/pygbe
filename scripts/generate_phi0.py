@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from numpy import *
 
+import numpy 
 import sys
 import os
 sys.path.append('../util')
@@ -10,8 +10,8 @@ def zeroAreas(vertex, triangle_raw, Area_null):
     for i in range(len(triangle_raw)):
         L0 = vertex[triangle_raw[i,1]] - vertex[triangle_raw[i,0]]
         L2 = vertex[triangle_raw[i,0]] - vertex[triangle_raw[i,2]]
-        normal_aux = cross(L0,L2)
-        Area_aux = linalg.norm(normal_aux)/2
+        normal_aux = numpy.cross(L0,L2)
+        Area_aux = numpy.linalg.norm(normal_aux)/2
         if Area_aux<1e-10:
             Area_null.append(i)
     return Area_null 
@@ -30,14 +30,14 @@ triangle_raw = readTriangle(meshFile+'.face', 'neumann_surface')
 
 Area_null = []
 Area_null = zeroAreas(vertex, triangle_raw, Area_null)
-triangle = delete(triangle_raw, Area_null, 0)
+triangle = numpy.delete(triangle_raw, Area_null, 0)
 
 if len(triangle) != len(triangle_raw):
     print '%i deleted triangles'%(len(triangle_raw)-len(triangle))
 
-phi0 = zeros(len(triangle), float)
+phi0 = numpy.zeros(len(triangle), float)
 
-tri_ctr = average(vertex[triangle], axis=1)
+tri_ctr = numpy.average(vertex[triangle], axis=1)
 print len(tri_ctr)
 print len(triangle)
 
@@ -63,5 +63,5 @@ for i in range(len(triangle)):
         phi0[i] = z_back 
 
 file_out = meshFile+'_'+sys.argv[2]+sys.argv[3]+sys.argv[4]+sys.argv[5]+sys.argv[6]+sys.argv[7]+'.phi0'
-savetxt(file_out, phi0)
+numpy.savetxt(file_out, phi0)
 os.system('mv '+file_out+' input_files/')
