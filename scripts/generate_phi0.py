@@ -6,6 +6,10 @@ import os
 from pygbe.util.readData import readTriangle, readVertex
 
 def zeroAreas(vertex, triangle_raw, Area_null):
+    """
+    Looks for "zero-areas", areas that are really small, almost zero.
+
+    """
     for i in range(len(triangle_raw)):
         L0 = vertex[triangle_raw[i,1]] - vertex[triangle_raw[i,0]]
         L2 = vertex[triangle_raw[i,0]] - vertex[triangle_raw[i,2]]
