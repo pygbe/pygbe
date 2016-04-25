@@ -3,8 +3,7 @@
 import numpy 
 import sys
 import os
-sys.path.append('../util')
-from readData import readTriangle, readVertex
+from pygbe.util.readData import readTriangle, readVertex
 
 def zeroAreas(vertex, triangle_raw, Area_null):
     for i in range(len(triangle_raw)):
