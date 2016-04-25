@@ -5,6 +5,7 @@ from math import atan2
 
 import os
 import sys
+from argparse import ArgumentParser
 from pygbe.util.readData import readVertex, readpqr
 
 def findDipole(xq, q):
@@ -59,30 +60,63 @@ def modifypqr(inpqr, outpqr, xq):
             file_o.write(line)
     file_o.close()
 
+def read_inputs():
+    """
+    Parse command-line arguments to move protein.
+    User should provide:
+    - Problem folder (can be inferred from files if not provided)
+    - Mesh to be rotated
+    - PQR file
+    - Alpha Y (change in degrees in Y)
+    - Alpha Z (change in degrees in Z)
+    - Name to append to rotated mesh
+    """
+
+    parser = ArgumentParser(description='Manage move_protein command line arguments')
+    parser.add_argument('problem_folder', type=str,
+                        help="Path to folder containing problem files")
+    parser.add_argument('-m', '--mesh', dest='mesh', type=str, default=None,
+                        help="Path to problem mesh file")
+    parser.add_argument('-p', '--pqr', dest='pqr', type=str, default=None,
+                        help="Path to problem pqr file")
+    parser.add_argument('-y', '--alphay', dest='alphay', type=float, default=None,
+                        help="Angle change in Y in degrees")
+    parser.add_argument('-z', '--alphaz', dest='alphaz', type=float, default=None,
+                        help="Angle change in Z in degrees")
+    parser.add_argument('-n', '--name', dest='name', type=str, default=None,
+                        help="Name to append to modified mesh file")
+
+    return parser.parse_args()
 
 
+args = read_inputs()
 
-inMesh = sys.argv[1]
-inpqr  = sys.argv[2]
-alpha_y = float(sys.argv[3])*numpy.pi/180.
-alpha_z = float(sys.argv[4])*numpy.pi/180.
-if len(sys.argv)>5:
-    name = sys.argv[5]
-else:
+
+inMesh = args.mesh
+inpqr  = args.pqr
+alpha_y = args.alphay*numpy.pi/180.
+alpha_z = args.alphaz*numpy.pi/180.
+name = args.name
+prob_path = args.problem_folder
+full_path = os.getcwd() + '/' + prob_path
+full_path = os.path.normpath(full_path)
+
+if name is None:
     name = ''
-if len(sys.argv)>6:
-    if sys.argv[6] == 'verbose':
-        verbose = True
-else:
-    verbose = False
+os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
+#if len(sys.argv)>6:
+#    if sys.argv[6] == 'verbose':
+#        verbose = True
+#else:
+verbose = False
 
 #outMesh = inMesh+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
 #outpqr = inpqr+'_rot'+sys.argv[3]+'_til'+sys.argv[4]
-outMesh = inMesh + name
-outpqr = inpqr + name
+outMesh = inMesh.split()[0] + name
+outpqr = inpqr.split()[0] + name
 
-vert = readVertex(inMesh+'.vert', float)
-xq, q, Nq = readpqr(inpqr+'.pqr', float)
+vert = readVertex(inMesh, float)
+xq, q, Nq = readpqr(full_path+'/'+inpqr, float)
 
 #xq = numpy.array([[1.,0.,0.],[0.,0.,1.],[0.,1.,0.]])
 #q = numpy.array([1.,-1.,1.])
@@ -211,11 +245,13 @@ else:
     print '\tMolecule was NOT rotated correctly!'
 
 #### Save to file
-savetxt(outMesh+'.vert', vert_new)
+#import ipdb; ipdb.set_trace()
+with open(full_path+'/'+outMesh+'.vert','w') as f:
+    numpy.savetxt(f, vert_new)
 cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
 os.system(cmd)
 
-modifypqr(inpqr+'.pqr', outpqr+'.pqr', xq_new)
+modifypqr(full_path+'/'+inpqr, outpqr+'.pqr', xq_new)
 
 if verbose:
     print '\nWritten to '+outMesh+'.vert(.face) and '+outpqr+'.pqr'
