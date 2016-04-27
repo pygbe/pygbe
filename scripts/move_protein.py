@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-# Calculated according to FelderPriluskySilmanSussman2007, but using center of mass
+'''
+Move the protein a certain angle an it saves the mesh files (.vert and .face)
+and pqr corresponding to the new position.
+
+Calculated according to FelderPriluskySilmanSussman2007, but using center
+of mass.
+'''
+
 import numpy
 from math import atan2
 import os
@@ -11,12 +18,26 @@ from pygbe.util.readData import readVertex, readpqr
 
 def findDipole(xq, q):
 
+    '''
+    Finds the dipole moment of the protein.
+ 
+    Arguments:
+    ----------
+    xq: (array) position of the charges (x,y,z). 
+    q : (array) charges.
+
+    Returns:
+    --------
+    d: (array) dipole moment.    
+    '''
+
     ctr = numpy.sum(numpy.transpose(xq)*numpy.abs(q), axis=1)/numpy.sum(numpy.abs(q))
-#    ctr = average(xq, axis=0)
+#   ctr = average(xq, axis=0)
     r = xq - ctr
     d = numpy.sum(numpy.transpose(r)*q, axis=1)
 
     return d
+
 
 def rotate_x(x, angle):
 
