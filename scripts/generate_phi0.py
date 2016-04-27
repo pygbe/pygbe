@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-
+"""
+It generates a .phi0 for a sensor brick.
+"""
 import numpy 
 import sys
 import os
 from pygbe.util.readData import readTriangle, readVertex
+from argparse import ArgumentParser
 
 def zeroAreas(vertex, triangle_raw, Area_null):
     """
@@ -20,13 +23,69 @@ def zeroAreas(vertex, triangle_raw, Area_null):
     return Area_null 
 
 ## Designed for a cube which faces are aligned with cartesian coordinates
-meshFile = sys.argv[1]
-x_right = float(sys.argv[2])
-x_left  = float(sys.argv[3])
-y_top   = float(sys.argv[4])
-y_bott  = float(sys.argv[5])
-z_front = float(sys.argv[6])
-z_back  = float(sys.argv[7])
+
+def read_inputs():
+    """
+    Parse command-line arguments to generate_phi0.
+    User should provide:
+    - Problem folder (can be inferred from files if not provided)
+    - Mesh which phi0 is desired, without .vert or .face 
+    - x_right 
+    - x_left  
+    - y_top   
+    - y_bottom  
+    - z_front 
+    - z_back  
+    """
+
+    parser = ArgumentParser(description='Manage generate_phi0 command line arguments')
+
+    parser.add_argument('problem_folder', type=str,
+                        help="Path to folder containing problem files")
+
+    parser.add_argument('-m', '--mesh', dest='mesh', type=str, default=None,
+                        help="Path to sensor-brick mesh file")
+
+    parser.add_argument('-x_r', '--x_right', dest='x_right', type=float, default=None,
+                        help="charge assigned to x_right face")
+
+    parser.add_argument('-x_l', '--x_left', dest='x_left', type=float, default=None,
+                        help="charge assigned to x_left face")
+
+    parser.add_argument('-y_t', '--y_top', dest='y_top', type=float, default=None,
+                        help="charge assigned to y_top face")
+
+    parser.add_argument('-y_b', '--y_bottom', dest='y_bottom', type=float, default=None,
+                        help="charge assigned to y_bottom face")
+
+    parser.add_argument('-z_f', '--z_front', dest='z_front', type=float, default=None,
+                        help="charge assigned to z_front face")
+
+    parser.add_argument('-z_b', '--z_back', dest='z_back', type=float, default=None,
+                        help="charge assigned to z_back face")
+
+    return parser.parse_args()
+
+
+args = read_inputs()
+
+meshFile = args.mesh
+
+x_right = args.x_right
+x_left  = args.x_left
+y_top   = args.y_top
+y_bott  = args.y_bottom
+z_front = args.z_front
+z_back  = args.z_back
+
+full_path = args.problem_folder
+
+if not os.path.isdir(full_path):
+    full_path = os.getcwd() + '/' + full_path
+full_path = os.path.normpath(full_path)
+
+os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
+
 
 vertex = readVertex(meshFile+'.vert', float)
 triangle_raw = readTriangle(meshFile+'.face', 'neumann_surface')
@@ -65,6 +124,16 @@ for i in range(len(triangle)):
     if abs(tri_ctr[i,2]-min_z)<1e-10:
         phi0[i] = z_back 
 
-file_out = meshFile+'_'+sys.argv[2]+sys.argv[3]+sys.argv[4]+sys.argv[5]+sys.argv[6]+sys.argv[7]+'.phi0'
-numpy.savetxt(file_out, phi0)
-os.system('mv '+file_out+' input_files/')
+
+meshFile = meshFile.rsplit('/', 1)[-1]
+
+faces_values = [x_right, x_left, y_top, y_bott, z_front, z_back]
+faces_values = ''.join([str(face) for face in faces_values])
+
+file_out = meshFile+'_'+faces_values+'.phi0'
+
+with open(full_path+'/'+file_out, 'w') as f:
+    numpy.savetxt(f, phi0)
+
+
+
