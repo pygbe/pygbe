@@ -10,8 +10,8 @@ from argparse import ArgumentParser
 
 def zeroAreas(vertex, triangle_raw, Area_null):
     """
-    Looks for "zero-areas", areas that are really small, almost zero.
-
+    Looks for "zero-areas", areas that are really small, almost zero. It appends
+    them to Area_null list.
     """
     for i in range(len(triangle_raw)):
         L0 = vertex[triangle_raw[i,1]] - vertex[triangle_raw[i,0]]
@@ -29,7 +29,7 @@ def read_inputs():
     Parse command-line arguments to generate_phi0.
     User should provide:
     - Problem folder (can be inferred from files if not provided)
-    - Mesh which phi0 is desired, without .vert or .face 
+    - Mesh file (without .vert or .face) which phi0 is desired.  
     - x_right 
     - x_left  
     - y_top   
