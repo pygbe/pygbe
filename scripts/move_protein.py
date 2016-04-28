@@ -108,6 +108,12 @@ def rotate_z(x, angle):
 
 def modifypqr(inpqr, outpqr, xq):
 
+    '''
+    Modifies the .pqr file replacing the old positions by the new ones, and it
+    saves them in a file outpqr. 
+        
+    '''
+
     file_o = open(outpqr,'w')
     for line in file(inpqr):
         line_split = line.split()
