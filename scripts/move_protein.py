@@ -23,7 +23,7 @@ def findDipole(xq, q):
  
     Arguments:
     ----------
-    xq: (array) position of the charges (x,y,z). 
+    xq: (Nqx3 array) position of the charges (x,y,z). 
     q : (array) charges.
 
     Returns:
@@ -41,6 +41,19 @@ def findDipole(xq, q):
 
 def rotate_x(x, angle):
 
+    '''
+    Rotates the array x, a certain angle around x-axis.
+ 
+    Arguments:
+    ----------
+    x: (Nx3 array) positions (x,y,z) of the N particles. 
+    angle: angle to rotate.
+
+    Returns:
+    --------
+    xnew: (Nx3 array) with the rotated positions.    
+    '''
+
     xnew = numpy.zeros(numpy.shape(x))
     xnew[:,0] = x[:,0]
     xnew[:,1] = x[:,1]*numpy.cos(angle) - x[:,2]*numpy.sin(angle)
@@ -51,6 +64,19 @@ def rotate_x(x, angle):
 
 def rotate_y(x, angle):
 
+    '''
+    Rotates the array x, a certain angle around y-axis.
+ 
+    Arguments:
+    ----------
+    x: (Nx3 array) positions (x,y,z) of the N particles. 
+    angle: angle to rotate.
+
+    Returns:
+    --------
+    xnew: (Nx3 array) with the rotated positions.    
+    '''
+
     xnew = numpy.zeros(numpy.shape(x))
     xnew[:,0] = x[:,2]*numpy.sin(angle) + x[:,0]*numpy.cos(angle)
     xnew[:,1] = x[:,1]
@@ -59,6 +85,19 @@ def rotate_y(x, angle):
     return xnew
 
 def rotate_z(x, angle):
+
+    '''
+    Rotates the array x, a certain angle around z-axis.
+ 
+    Arguments:
+    ----------
+    x: (Nx3 array) positions (x,y,z) of the N particles. 
+    angle: angle to rotate.
+
+    Returns:
+    --------
+    xnew: (Nx3 array) with the rotated positions.    
+    '''
 
     xnew = numpy.zeros(numpy.shape(x))
     xnew[:,0] = x[:,0]*numpy.cos(angle) - x[:,1]*numpy.sin(angle)
