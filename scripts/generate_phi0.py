@@ -16,7 +16,7 @@ For example:
 If the user desires a surface charge sigma = 0.05 C/m^2 then in this code he/she
 will set up dphi/dn in the faces of the brick, where:
 
-dphi/dn = - (0.05 x (1x10^-10)^2)/ (80 x 1.602x10^-19) = 4x10^-5
+dphi/dn = - (0.05 x (1x10^-10)^2)/ (80 x 1.602x10^-19) = -4x10^-5
    
 """
 import numpy 
@@ -47,12 +47,12 @@ def read_inputs():
     User should provide:
     - Problem folder (can be inferred from files if not provided)
     - Mesh file (without .vert or .face) which phi0 is desired.  
-    - x_right 
-    - x_left  
-    - y_top   
-    - y_bottom  
-    - z_front 
-    - z_back  
+    - x_right : value of dphi/dn in the x_right face.
+    - x_left  : value of dphi/dn in the x_left face.
+    - y_top   : value of dphi/dn in the y_top face.
+    - y_bottom: value of dphi/dn in the y_bottom face.  
+    - z_front : value of dphi/dn in the z_front face.
+    - z_back  : value of dphi/dn in the z_back face.
     """
 
     parser = ArgumentParser(description='Manage generate_phi0 command line arguments')
@@ -151,6 +151,4 @@ file_out = meshFile+'_'+faces_values+'.phi0'
 
 with open(full_path+'/'+file_out, 'w') as f:
     numpy.savetxt(f, phi0)
-
-
 
