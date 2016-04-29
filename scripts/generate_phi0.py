@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 """
-It generates a .phi0 for a sensor brick.
+It generates a .phi0 for a sensor brick. The user has to set the values
+of dphi/dn on each face of the brick. 
+
+The surface charge \sigma is usually units of C/m^2. However, the code takes as
+input dphi/dn which has to be in units of electron charge and angstrom^2.
+
+dphi/dn = - sigma / epsilon therefore, to convert to the proper units, from sigma
+to dphi/dn, we have to multiply the value of sigma by (Å)^2, divided it by the
+charge of the electron q_e = 1.602x10^-19, and finally divided it by epsilon = 80 
+(dielectric constant of the medium outside, usually water).
+
+For example:
+
+If the user desires a surface charge sigma = 0.05 C/m^2 then in this code he/she
+will set up dphi/dn in the faces of the brick, where:
+
+dphi/dn = - (0.05 x (1x10^-10)^2)/ (80 x 1.602x10^-19) = 4x10^-5
+   
 """
 import numpy 
 import sys
