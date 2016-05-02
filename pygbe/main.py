@@ -29,6 +29,7 @@ try:
 except:
     pass
 
+
 #courtesy of http://stackoverflow.com/a/5916874
 class Logger(object):
     """
@@ -36,6 +37,7 @@ class Logger(object):
     in conjunction with the command
     `sys.stdout = Logger("desired_log_file.txt")`
     """
+
     def __init__(self, filename="Default.log"):
         self.terminal = sys.stdout
         self.log = open(filename, "a")
@@ -43,6 +45,7 @@ class Logger(object):
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
+
 
 def read_inputs(args):
     """
@@ -59,20 +62,35 @@ def read_inputs(args):
     |- output/
     """
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
-    parser.add_argument('problem_folder', type=str,
+    parser.add_argument('problem_folder',
+                        type=str,
                         help="Path to folder containing problem files")
-    parser.add_argument('-c', '--config', dest='config', type=str, default=None,
+    parser.add_argument('-c',
+                        '--config',
+                        dest='config',
+                        type=str,
+                        default=None,
                         help="Path to problem config file")
-    parser.add_argument('-p', '--param', dest='param', type=str, default=None,
+    parser.add_argument('-p',
+                        '--param',
+                        dest='param',
+                        type=str,
+                        default=None,
                         help="Path to problem param file")
-    parser.add_argument('-o', '--output', dest='output', type=str,
-                        default='output', help="Output folder")
+    parser.add_argument('-o',
+                        '--output',
+                        dest='output',
+                        type=str,
+                        default='output',
+                        help="Output folder")
 
     return parser.parse_args(args)
+
 
 def check_file_exists(filename):
     """Try to open the file `filename` and return True if it's valid """
     return os.path.exists(filename)
+
 
 def find_config_files(cliargs):
     """
@@ -104,15 +122,15 @@ def find_config_files(cliargs):
     #But if user tries `pygbe examples/lys` then the split
     #is required to grab the right name
     try:
-        prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/'
-                     else prob_path.split('/')[-2])
+        prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/' else
+                     prob_path.split('/')[-2])
     except AttributeError:
         prob_name = prob_path
 
     if cliargs.config is None:
-        cliargs.config = os.path.join(full_path, prob_name+'.config')
+        cliargs.config = os.path.join(full_path, prob_name + '.config')
     if cliargs.param is None:
-        cliargs.param = os.path.join(full_path, prob_name+'.param')
+        cliargs.param = os.path.join(full_path, prob_name + '.param')
 
     for req_file in [cliargs.config, cliargs.param]:
         if not check_file_exists(req_file):
@@ -120,13 +138,17 @@ def find_config_files(cliargs):
 
     return cliargs.config, cliargs.param
 
+
 def check_for_nvcc():
     '''Check system PATH for nvcc, exit if not found'''
     try:
-        subprocess.check_output(['which','nvcc'])
+        subprocess.check_output(['which', 'nvcc'])
         check_nvcc_version()
     except subprocess.CalledProcessError:
-        print("Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH")
+        print(
+            "Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH"
+        )
+
 
 def check_nvcc_version():
     '''Check that version of nvcc <= 7.0'''
@@ -138,6 +160,7 @@ def check_nvcc_version():
         sys.exit('PyGBe only supports CUDA <= 7.0\n'
                  'Please install an earlier version of the CUDA toolkit\n'
                  'or remove `nvcc` from your PATH to use CPU only.')
+
 
 def main(argv, log_output=True):
 
@@ -161,23 +184,26 @@ def main(argv, log_output=True):
     except OSError:
         pass
 
-
     timestamp = time.localtime()
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     ### Time stamp
     print 'Run started on:'
-    print '\tDate: %i/%i/%i'%(timestamp.tm_year,timestamp.tm_mon,timestamp.tm_mday)
-    print '\tTime: %i:%i:%i'%(timestamp.tm_hour,timestamp.tm_min,timestamp.tm_sec)
+    print '\tDate: %i/%i/%i' % (timestamp.tm_year, timestamp.tm_mon,
+                                timestamp.tm_mday)
+    print '\tTime: %i:%i:%i' % (timestamp.tm_hour, timestamp.tm_min,
+                                timestamp.tm_sec)
     TIC = time.time()
 
     ### Read parameters
     param = parameters()
-    precision = readParameters(param,paramfile)
+    precision = readParameters(param, paramfile)
 
-    param.Nm            = (param.P+1)*(param.P+2)*(param.P+3)/6     # Number of terms in Taylor expansion
-    param.BlocksPerTwig = int(numpy.ceil(param.NCRIT/float(param.BSZ)))   # CUDA blocks that fit per twig
+    param.Nm = (param.P + 1) * (param.P + 2) * (
+        param.P + 3) / 6  # Number of terms in Taylor expansion
+    param.BlocksPerTwig = int(numpy.ceil(param.NCRIT / float(param.BSZ))
+                              )  # CUDA blocks that fit per twig
 
     ### Generate array of fields
     field_array = initializeField(configFile, param)
@@ -189,7 +215,6 @@ def main(argv, log_output=True):
     time_sort = 0.
     for i in range(len(surf_array)):
         time_sort += fill_surface(surf_array[i], param)
-
     '''
     fig = plt.figure()
     ax = Axes3D(fig)
@@ -203,7 +228,7 @@ def main(argv, log_output=True):
     '''
 
     ### Output setup summary
-    param.N   = 0
+    param.N = 0
     param.Neq = 0
     for s in surf_array:
         N_aux = len(s.triangle)
@@ -211,9 +236,9 @@ def main(argv, log_output=True):
         if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface' or s.surf_type == 'asc_surface':
             param.Neq += N_aux
         else:
-            param.Neq += 2*N_aux
-    print '\nTotal elements : %i'%param.N
-    print 'Total equations: %i'%param.Neq
+            param.Neq += 2 * N_aux
+    print '\nTotal elements : %i' % param.N
+    print 'Total equations: %i' % param.Neq
 
     printSummary(surf_array, field_array, param)
 
@@ -223,7 +248,7 @@ def main(argv, log_output=True):
     precomputeTerms(param.P, ind0)
 
     ### Load CUDA code
-    if param.GPU==1:
+    if param.GPU == 1:
         kernel = kernels(param.BSZ, param.Nm, param.K_fine, param.P, precision)
     else:
         kernel = 1
@@ -233,48 +258,50 @@ def main(argv, log_output=True):
     tic = time.time()
     generateList(surf_array, field_array, param)
     toc = time.time()
-    list_time = toc-tic
+    list_time = toc - tic
 
     ### Transfer data to GPU
     print 'Transfer data to GPU'
     tic = time.time()
-    if param.GPU==1:
+    if param.GPU == 1:
         dataTransfer(surf_array, field_array, ind0, param, kernel)
     toc = time.time()
-    transfer_time = toc-tic
+    transfer_time = toc - tic
 
     timing = timings()
 
     ### Generate RHS
     print 'Generate RHS'
     tic = time.time()
-    if param.GPU==0:
+    if param.GPU == 0:
         F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
-    elif param.GPU==1:
-        F = generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0)
+    elif param.GPU == 1:
+        F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
+                            ind0)
     toc = time.time()
-    rhs_time = toc-tic
+    rhs_time = toc - tic
 
-#    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
+    #    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
 
-    setup_time = toc-TIC
-    print 'List time          : %fs'%list_time
-    print 'Data transfer time : %fs'%transfer_time
-    print 'RHS generation time: %fs'%rhs_time
+    setup_time = toc - TIC
+    print 'List time          : %fs' % list_time
+    print 'Data transfer time : %fs' % transfer_time
+    print 'RHS generation time: %fs' % rhs_time
     print '------------------------------'
-    print 'Total setup time   : %fs\n'%setup_time
+    print 'Total setup time   : %fs\n' % setup_time
 
     tic = time.time()
 
     ### Solve
     print 'Solve'
     phi = numpy.zeros(param.Neq)
-    phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing, kernel) 
+    phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing,
+                       kernel)
     toc = time.time()
-    solve_time = toc-tic
-    print 'Solve time        : %fs'%solve_time
+    solve_time = toc - tic
+    print 'Solve time        : %fs' % solve_time
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
-    numpy.savetxt(os.path.join(output_dir, phifname),phi)
+    numpy.savetxt(os.path.join(output_dir, phifname), phi)
     #phi = loadtxt('phi.txt')
 
     # Put result phi in corresponding surfaces
@@ -285,13 +312,14 @@ def main(argv, log_output=True):
     tic = time.time()
     E_solv = calculateEsolv(surf_array, field_array, param, kernel)
     toc = time.time()
-    print 'Time Esolv: %fs'%(toc-tic)
+    print 'Time Esolv: %fs' % (toc - tic)
     ii = -1
     for f in param.E_field:
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
             ii += 1
-            print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol'%(f, E_solv[ii], E_solv[ii]*4.184)
+            print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol' % (
+                f, E_solv[ii], E_solv[ii] * 4.184)
 
     ### Calculate surface energy
     print '\nCalculate Esurf'
@@ -303,8 +331,9 @@ def main(argv, log_output=True):
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
             ii += 1
-            print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol'%(f, E_surf[ii], E_surf[ii]*4.184)
-    print 'Time Esurf: %fs'%(toc-tic)
+            print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol' % (
+                f, E_surf[ii], E_surf[ii] * 4.184)
+    print 'Time Esurf: %fs' % (toc - tic)
 
     ### Calculate Coulombic interaction
     print '\nCalculate Ecoul'
@@ -314,19 +343,20 @@ def main(argv, log_output=True):
     for f in field_array:
         i += 1
         if f.coulomb == 1:
-            print 'Calculate Coulomb energy for region %i'%i
+            print 'Calculate Coulomb energy for region %i' % i
             E_coul.append(coulombEnergy(f, param))
-            print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol'%(i,E_coul[-1],E_coul[-1]*4.184)
+            print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol' % (
+                i, E_coul[-1], E_coul[-1] * 4.184)
     toc = time.time()
-    print 'Time Ecoul: %fs'%(toc-tic)
+    print 'Time Ecoul: %fs' % (toc - tic)
 
     ### Output summary
     print '\n--------------------------------'
     print 'Totals:'
-    print 'Esolv = %f kcal/mol'%sum(E_solv)
-    print 'Esurf = %f kcal/mol'%sum(E_surf)
-    print 'Ecoul = %f kcal/mol'%sum(E_coul)
-    print '\nTime = %f s'%(toc-TIC)
+    print 'Esolv = %f kcal/mol' % sum(E_solv)
+    print 'Esurf = %f kcal/mol' % sum(E_surf)
+    print 'Ecoul = %f kcal/mol' % sum(E_coul)
+    print '\nTime = %f s' % (toc - TIC)
 
     # Analytic solution
     '''
