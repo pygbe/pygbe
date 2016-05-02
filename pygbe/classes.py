@@ -4,7 +4,6 @@ from scipy import linalg
 from tree.FMMutils import addSources3, sortPoints, generateTree, findTwigs
 from tree.direct import computeDiagonal
 from util.semi_analytical import GQ_1D
-#from util.triangulation      import *
 from util.readData import (readVertex, readTriangle, readpqr, readcrd,
                            readFields, readSurf)
 
@@ -236,7 +235,7 @@ def getGaussPoints(y,triangle, n):
     return xi[:,0], xi[:,1], xi[:,2]
 
 def quadratureRule_fine(K):
-    
+    # yapf: disable
     # 1 Gauss point
     if K==1:
         X = numpy.array([1/3., 1/3., 1/3.])
@@ -256,8 +255,7 @@ def quadratureRule_fine(K):
                        b1,b2,b2,b2,b1,b2,b2,b2,b1,
                        c1,c2,c2,c2,c1,c2,c2,c2,c1])
         W = numpy.array([wa,wb,wb,wb,wc,wc,wc])
-        
-   
+
     # 13 Gauss points
     if K==13:
         a = 1/3.
@@ -270,14 +268,14 @@ def quadratureRule_fine(K):
         wd = 0.077113760890257
 
         X = numpy.array([a,a,a,
-                       b1,b2,b2,b2,b1,b2,b2,b2,b1, 
-                       c1,c2,c2,c2,c1,c2,c2,c2,c1, 
+                       b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                       c1,c2,c2,c2,c1,c2,c2,c2,c1,
                        d1,d2,d3,d1,d3,d2,d2,d1,d3,d2,d3,d1,d3,d1,d2,d3,d2,d1])
         W = numpy.array([wa,
                         wb,wb,wb,
                         wc,wc,wc,
                         wd,wd,wd,wd,wd,wd])
-        
+
     # 17 Gauss points
     if K==17:
         a = 1/3.
@@ -292,11 +290,10 @@ def quadratureRule_fine(K):
         we = 0.027230314174435
 
         X = numpy.array([a,a,a,
-                        b1,b2,b2,b2,b1,b2,b2,b2,b1, 
-                        c1,c2,c2,c2,c1,c2,c2,c2,c1, 
-                        d1,d2,d2,d2,d1,d2,d2,d2,d1, 
+                        b1,b2,b2,b2,b1,b2,b2,b2,b1,
+                        c1,c2,c2,c2,c1,c2,c2,c2,c1,
+                        d1,d2,d2,d2,d1,d2,d2,d2,d1,
                         e1,e2,e3,e1,e3,e2,e2,e1,e3,e2,e3,e1,e3,e1,e2,e3,e2,e1])
-                    
         W = numpy.array([wa,
                         wb,wb,wb,
                         wc,wc,wc,
@@ -340,7 +337,7 @@ def quadratureRule_fine(K):
         d1 = 0.141707219414880; d2 = 0.307939838764121; d3 = 0.550352941820999
         e1 = 0.025003534762686; e2 = 0.246672560639903; e3 = 0.728323904597411
         f1 = 0.009540815400299; f2 = 0.066803251012200; f3 = 0.923655933587500
-        
+
         wa = 0.090817990382754
         wb = 0.036725957756467
         wc = 0.045321059435528
@@ -375,13 +372,13 @@ def quadratureRule_fine(K):
         j1 = 0.022233076674090; j2 = 0.126357385491669; j3 = 0.851409537834241
 
         wa = 0.052520923400802
-        wb = 0.011280145209330 
+        wb = 0.011280145209330
         wc = 0.031423518362454
-        wd = 0.047072502504194 
+        wd = 0.047072502504194
         we = 0.047363586536355
-        wf = 0.031167529045794 
+        wf = 0.031167529045794
         wg = 0.007975771465074
-        wh = 0.036848402728732 
+        wh = 0.036848402728732
         wi = 0.017401463303822
         wj = 0.015521786839045
 
@@ -395,7 +392,6 @@ def quadratureRule_fine(K):
                          h1,h2,h3,h1,h3,h2,h2,h1,h3,h2,h3,h1,h3,h1,h2,h3,h2,h1,
                          i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
                          j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1])
-
         W = numpy.array([wa,
                          wb,wb,wb,
                          wc,wc,wc,
@@ -419,16 +415,16 @@ def quadratureRule_fine(K):
         h1 = 0.036366677396917; h2 = 0.388046767090269; h3 = 0.575586555512814
         i1 =-0.010174883126571; i2 = 0.285712220049916; i3 = 0.724462663076655
         j1 = 0.036843869875878; j2 = 0.215599664072284; j3 = 0.747556466051838
-        k1 = 0.012459809331199; k2 = 0.103575616576386; k3 = 0.883964574092416        
+        k1 = 0.012459809331199; k2 = 0.103575616576386; k3 = 0.883964574092416
 
         wa = 0.001916875642849
-        wb = 0.044249027271145 
+        wb = 0.044249027271145
         wc = 0.051186548718852
-        wd = 0.023687735870688 
+        wd = 0.023687735870688
         we = 0.013289775690021
-        wf = 0.004748916608192 
+        wf = 0.004748916608192
         wg = 0.038550072599593
-        wh = 0.027215814320624 
+        wh = 0.027215814320624
         wi = 0.002182077366797
         wj = 0.021505319847731
         wk = 0.007673942631049
@@ -444,7 +440,6 @@ def quadratureRule_fine(K):
                          i1,i2,i3,i1,i3,i2,i2,i1,i3,i2,i3,i1,i3,i1,i2,i3,i2,i1,
                          j1,j2,j3,j1,j3,j2,j2,j1,j3,j2,j3,j1,j3,j1,j2,j3,j2,j1,
                          k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1])
-
         W = numpy.array([wa,wa,wa,
                          wb,wb,wb,
                          wc,wc,wc,
@@ -456,7 +451,6 @@ def quadratureRule_fine(K):
                          wi,wi,wi,wi,wi,wi,
                          wj,wj,wj,wj,wj,wj,
                          wk,wk,wk,wk,wk,wk])
-
 
     # 52 Gauss points
     if K==52:
@@ -472,20 +466,20 @@ def quadratureRule_fine(K):
         j1 = 0.020083411655416; j2 = 0.337723063403079; j3 = 0.642193524941505
         k1 =-0.004341002614139; k2 = 0.204748281642812; k3 = 0.799592720971327
         l1 = 0.041941786468010; l2 = 0.189358492130623; l3 = 0.768699721401368
-        m1 = 0.014317320230681; m2 = 0.085283615682657; m3 = 0.900399064086661 
+        m1 = 0.014317320230681; m2 = 0.085283615682657; m3 = 0.900399064086661
 
-        wa = 0.046875697427642 
-        wb = 0.006405878578585 
+        wa = 0.046875697427642
+        wb = 0.006405878578585
         wc = 0.041710296739387
-        wd = 0.026891484250064 
+        wd = 0.026891484250064
         we = 0.042132522761650
-        wf = 0.030000266842773 
+        wf = 0.030000266842773
         wg = 0.014200098925024
-        wh = 0.003582462351273 
+        wh = 0.003582462351273
         wi = 0.032773147460627
-        wj = 0.015298306248441 
+        wj = 0.015298306248441
         wk = 0.002386244192839
-        wl = 0.019084792755899 
+        wl = 0.019084792755899
         wm = 0.006850054546542
 
         X = numpy.array([a,a,a,
@@ -501,7 +495,6 @@ def quadratureRule_fine(K):
                          k1,k2,k3,k1,k3,k2,k2,k1,k3,k2,k3,k1,k3,k1,k2,k3,k2,k1,
                          l1,l2,l3,l1,l3,l2,l2,l1,l3,l2,l3,l1,l3,l1,l2,l3,l2,l1,
                          m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1])
-
         W = numpy.array([wa,
                          wb,wb,wb,
                          wc,wc,wc,
@@ -535,17 +528,17 @@ def quadratureRule_fine(K):
         o1 = 0.014663182224828; o2 = 0.080711313679564; o3 = 0.904625504095608
 
         wa = 0.033437199290803
-        wb = 0.005093415440507 
+        wb = 0.005093415440507
         wc = 0.014670864527638
-        wd = 0.024350878353672 
+        wd = 0.024350878353672
         we = 0.031107550868969
-        wf = 0.031257111218620 
+        wf = 0.031257111218620
         wg = 0.024815654339665
-        wh = 0.014056073070557 
+        wh = 0.014056073070557
         wi = 0.003194676173779
-        wj = 0.008119655318993 
+        wj = 0.008119655318993
         wk = 0.026805742283163
-        wl = 0.018459993210822 
+        wl = 0.018459993210822
         wm = 0.008476868534328
         wn = 0.018292796770025
         wo = 0.006665632004165
@@ -565,7 +558,6 @@ def quadratureRule_fine(K):
                          m1,m2,m3,m1,m3,m2,m2,m1,m3,m2,m3,m1,m3,m1,m2,m3,m2,m1,
                          n1,n2,n3,n1,n3,n2,n2,n1,n3,n2,n3,n1,n3,n1,n2,n3,n2,n1,
                          o1,o2,o3,o1,o3,o2,o2,o1,o3,o2,o3,o1,o3,o1,o2,o3,o2,o1])
-
         W = numpy.array([wa,
                          wb,wb,wb,
                          wc,wc,wc,
@@ -581,7 +573,6 @@ def quadratureRule_fine(K):
                          wm,wm,wm,wm,wm,wm,
                          wn,wn,wn,wn,wn,wn,
                          wo,wo,wo,wo,wo,wo])
-
 
     # 79 Gauss points
     if K==79:
@@ -632,7 +623,7 @@ def quadratureRule_fine(K):
                          e1,e2,e2,e2,e1,e2,e2,e2,e1,
                          f1,f2,f2,f2,f1,f2,f2,f2,f1,
                          g1,g2,g2,g2,g1,g2,g2,g2,g1,
-                         h1,h2,h2,h2,h1,h2,h2,h2,h1, 
+                         h1,h2,h2,h2,h1,h2,h2,h2,h1,
                          i1,i2,i2,i2,i1,i2,i2,i2,i1,
                          j1,j2,j2,j2,j1,j2,j2,j2,j1,
                          k1,k2,k2,k2,k1,k2,k2,k2,k1,
@@ -666,6 +657,8 @@ def quadratureRule_fine(K):
                          ws,ws,ws,ws,ws,ws])
 
     return X, W
+
+# yapf: enable
 
 def fill_surface(surf,param):
 

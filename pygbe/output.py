@@ -1,15 +1,16 @@
 import numpy 
 
+# yapf: disable
 def printSummary(surf_array, field_array, param):
     Nsurf = len(surf_array)
-    print '----------------------------'
-    print '%i surfaces:\n'%Nsurf
+    print 28 * '-' + '\n'
+    print '%i surfaces:\n' % Nsurf
     for i in range(len(surf_array)):
         N_aux = len(surf_array[i].triangle)
         rr = numpy.zeros(len(surf_array[i].tree))
         for ii in range(len(surf_array[i].tree)):
             rr[ii] = surf_array[i].tree[ii].r
-        Levels = numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1 
+        Levels = numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1
 
         print 'Surface %i:'%i
         print '\t%i elements'%(N_aux)
@@ -26,7 +27,7 @@ def printSummary(surf_array, field_array, param):
         print '\tMax, min, avg elem.: %s, %s, %s'%(numpy.max(surf_array[i].Area),numpy.min(surf_array[i].Area),numpy.average(surf_array[i].Area))
         print '\tTotal area         : %f'%(numpy.sum(surf_array[i].Area))
 
-    print '----------------------------\n'
+    print 28*'-'+'\n'
 
     Nfield = len(field_array)
     print '%i regions:\n'%Nfield
@@ -39,7 +40,7 @@ def printSummary(surf_array, field_array, param):
         print '\tParent surface   : '+str(field_array[i].parent)
         print '\tChild surfaces   : '+str(field_array[i].child)
 
-    print '----------------------------\n'
+    print 28*'-'+'\n'
 
     print 'Parameters:'
     print '\tData type               : '+str(param.REAL)
@@ -56,4 +57,5 @@ def printSummary(surf_array, field_array, param):
     print '\tGMRES max iterations    : %i'%param.max_iter
     print '\tGMRES restart iteration : %i'%param.restart
 
-    print '----------------------------\n'
+    print 28*'-'+'\n'
+# yapf: enable

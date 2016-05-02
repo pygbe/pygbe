@@ -4,7 +4,6 @@ All functions output the analytical solution in kcal/mol
 import numpy
 from numpy import pi
 from scipy import special
-from scipy.special import lpmv
 from scipy.misc import factorial
 from math import gamma
 from scipy.linalg import solve
@@ -62,14 +61,14 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
         phi = 0.+0.*1j
         for n in range(N):
             for m in range(-n,n+1):
-                P1 = lpmv(numpy.abs(m),n,numpy.cos(zenit))
+                P1 = special.lpmv(numpy.abs(m),n,numpy.cos(zenit))
 
                 Enm = 0.
                 for k in range(len(q)):
                     rho_k   = numpy.sqrt(numpy.sum(xq[k]**2))
                     zenit_k = numpy.arccos(xq[k,2]/rho_k)
                     azim_k  = numpy.arctan2(xq[k,1],xq[k,0])
-                    P2 = lpmv(numpy.abs(m),n,numpy.cos(zenit_k))
+                    P2 = special.lpmv(numpy.abs(m),n,numpy.cos(zenit_k))
 
                     Enm += q[k]*rho_k**n*factorial(n-numpy.abs(m))/factorial(n+numpy.abs(m))*P2*numpy.exp(-1j*m*azim_k)
     

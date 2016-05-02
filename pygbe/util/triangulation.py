@@ -6,28 +6,28 @@ Really appreciate you putting this code out there, thanks!
 Create a unitsphere recursively by subdividing all triangles in an octahedron recursivly.
 
 A unitsphere has a radius of 1, which also means that all points in this sphere
-have an absolute value of 1. Another feature of an unitsphere is that the normals 
+have an absolute value of 1. Another feature of an unitsphere is that the normals
 of this sphere are exactly the same as the vertices.
 
-This recursive method will avoid the common problem of the polar singularity, 
+This recursive method will avoid the common problem of the polar singularity,
 produced by 2d parameterization methods.
 
 If you wish a sphere with another radius than that of 1, simply multiply every single
-value in the vertex array with this new radius 
+value in the vertex array with this new radius
 (although this will break the "vertex array equal to normal array" property)
 '''
 import numpy
-#import pylab
 
-octahedron_vertices = numpy.array( [ 
-    [ 1.0, 0.0, 0.0], # 0 
+# yapf: disable
+octahedron_vertices = numpy.array([
+    [ 1.0, 0.0, 0.0], # 0
     [-1.0, 0.0, 0.0], # 1
-    [ 0.0, 1.0, 0.0], # 2 
+    [ 0.0, 1.0, 0.0], # 2
     [ 0.0,-1.0, 0.0], # 3
-    [ 0.0, 0.0, 1.0], # 4 
-    [ 0.0, 0.0,-1.0]  # 5                                
-    ] )
-octahedron_triangles = numpy.array( [ 
+    [ 0.0, 0.0, 1.0], # 4
+    [ 0.0, 0.0,-1.0]  # 5
+    ])
+octahedron_triangles = numpy.array([
     [ 0, 4, 2 ],
     [ 2, 4, 1 ],
     [ 1, 4, 3 ],
@@ -35,8 +35,10 @@ octahedron_triangles = numpy.array( [
     [ 0, 2, 5 ],
     [ 2, 1, 5 ],
     [ 1, 3, 5 ],
-    [ 3, 0, 5 ]] )
+    [ 3, 0, 5 ]
+    ])
 
+# yapf: enable
 def normalize_v3(arr):
     ''' Normalize a numpy array of 3 component vectors shape=(n,3) '''
     lens = numpy.sqrt( arr[:,0]**2 + arr[:,1]**2 + arr[:,2]**2 )
@@ -46,26 +48,28 @@ def normalize_v3(arr):
     return arr
 
 def divide_all( vertices, triangles ):    
-    #new_triangles = []
+    '''
+    Subdivide each triangle in the old approximation and normalize
+    the new points thus generated to lie on the surface of the unit
+    sphere.
+    Each input triangle with vertices labelled [0,1,2] as shown
+    below will be turned into four new triangles:
+
+                Make new points
+                     a = (0+2)/2
+                     b = (0+1)/2
+                     c = (1+2)/2
+            1
+           /\        Normalize a, b, c
+          /  \
+        b/____\ c    Construct new triangles
+        /\    /\       t1 [0,b,a]
+       /  \  /  \      t2 [b,1,c]
+      /____\/____\     t3 [a,b,c]
+     0      a     2    t4 [a,c,2]
+    '''
+
     new_triangle_count = len( triangles ) * 4
-    # Subdivide each triangle in the old approximation and normalize
-    #  the new points thus generated to lie on the surface of the unit
-    #  sphere.
-    # Each input triangle with vertices labelled [0,1,2] as shown
-    #  below will be turned into four new triangles:
-    #
-    #            Make new points
-    #                 a = (0+2)/2
-    #                 b = (0+1)/2
-    #                 c = (1+2)/2
-    #        1
-    #       /\        Normalize a, b, c
-    #      /  \
-    #    b/____\ c    Construct new triangles
-    #    /\    /\       t1 [0,b,a]
-    #   /  \  /  \      t2 [b,1,c]
-    #  /____\/____\     t3 [a,b,c]
-    # 0      a     2    t4 [a,c,2]    
     v0 = vertices[ triangles[:,0] ]
     v1 = vertices[ triangles[:,1] ]
     v2 = vertices[ triangles[:,2] ]
