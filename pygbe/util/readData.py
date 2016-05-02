@@ -211,7 +211,7 @@ def readFields(filename):
                 charges.append(line[5])
                 coulomb.append(line[6])
                 qfile.append(line[7] if line[7] == 'NA' else
-                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7])
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
                 Nparent.append(line[8])
                 parent.append(line[9])
                 Nchild.append(line[10])
