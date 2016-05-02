@@ -210,8 +210,8 @@ def readFields(filename):
                 kappa.append(line[4])
                 charges.append(line[5])
                 coulomb.append(line[6])
-                qfile.append(line[7] if line[7] == 'NA' else os.environ.get(
-                    'PYGBE_PROBLEM_FOLDER') + '/' + line[7])
+                qfile.append(line[7] if line[7] == 'NA' else
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7])
                 Nparent.append(line[8])
                 parent.append(line[9])
                 Nchild.append(line[10])
@@ -235,8 +235,8 @@ def readSurf(filename):
                 if (line[2] == 'dirichlet_surface' or
                         line[2] == 'neumann_surface' or
                         line[2] == 'neumann_surface_hyper'):
-                    phi0_file.append(os.environ.get('PYGBE_PROBLEM_FOLDER') +
-                                     line[3])
+                    phi0_file.append(os.path.join(
+                        os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
                 else:
                     phi0_file.append('no_file')
 
