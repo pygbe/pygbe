@@ -180,7 +180,7 @@ def check_nvcc_version():
                  'or remove `nvcc` from your PATH to use CPU only.')
 
 
-def main(argv=sys.argv, log_output=True):
+def main(argv=sys.argv, log_output=True, return_output_fname=False):
 
     check_for_nvcc()
 
@@ -411,6 +411,8 @@ def main(argv=sys.argv, log_output=True):
     E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
     print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
     '''
+    if return_output_fname:
+        return outputfname
 
 
 if __name__ == "__main__":
