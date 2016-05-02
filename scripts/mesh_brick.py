@@ -1,7 +1,26 @@
+'''
+It generates the mesh files (.vert and .face) for a brick.
+'''
+
 import numpy
 
 def meshSurf(C, N, S, fix, normal):
+    '''
+    It generates a triangular mesh for a rectangular surface.
 
+    Arguments:
+    ----------
+    C     : (6, 3) list, Face centers.
+    N     : (6, 2) list, Face nodes.
+    S     : (6, 2) list, Face size.
+    fix   : (6, )  list, Face fix.
+    normal: (6, )  list, Normal direction.
+
+    Returns:
+    --------
+    nodes    : list, triangles vertices.
+    triangles: list, triangles faces.
+    '''
     # xi, yi local 2D coordinates of the surface
 
     h = numpy.zeros(2, dtype=float)
