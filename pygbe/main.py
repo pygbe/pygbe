@@ -113,19 +113,15 @@ def find_config_files(cliargs):
     """
 
     prob_path = cliargs.problem_folder
-    full_path = os.getcwd() + '/' + prob_path
+    full_path = os.path.join(os.getcwd(), prob_path)
     #if user gave us an absolute path, use that
     if not os.path.isdir(full_path):
         full_path = os.path.expanduser(prob_path)
+    full_path = os.path.normcase(full_path)
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
-    #If user tries `pygbe lys` then `split` will fail
-    #But if user tries `pygbe examples/lys` then the split
-    #is required to grab the right name
-    try:
-        prob_name = (prob_path.split('/')[-1] if prob_path[-1] != '/' else
-                     prob_path.split('/')[-2])
-    except AttributeError:
-        prob_name = prob_path
+
+    #use the name of the rightmost folder in path as problem name
+    prob_name = os.path.split(prob_path)[-1]
 
     if cliargs.config is None:
         cliargs.config = os.path.join(full_path, prob_name + '.config')
@@ -162,11 +158,13 @@ def check_nvcc_version():
                  'or remove `nvcc` from your PATH to use CPU only.')
 
 
-def main(argv, log_output=True):
+def main(argv=sys.argv, log_output=True):
 
+    print(argv)
     check_for_nvcc()
 
-    args = read_inputs(argv)
+    args = read_inputs(argv[1:])
+    print(args)
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
 
