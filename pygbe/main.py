@@ -66,7 +66,7 @@ class Logger(object):
         self.terminal.write(message)
         self.log.write(message)
 
-def read_inputs():
+def read_inputs(args):
     """
     Parse command-line arguments to determine which config and param files to run
     Assumes that in the absence of specific command line arguments that pygbe
@@ -90,7 +90,7 @@ def read_inputs():
     parser.add_argument('-o', '--output', dest='output', type=str,
                         default='output', help="Output folder")
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 def check_file_exists(filename):
     """Try to open the file `filename` and return True if it's valid """
@@ -150,11 +150,11 @@ def check_for_nvcc():
         print("Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH")
 
 
-def main(log_output=True):
+def main(argv, log_output=True):
 
     check_for_nvcc()
 
-    args = read_inputs()
+    args = read_inputs(argv)
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
 
