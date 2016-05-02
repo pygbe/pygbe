@@ -1,6 +1,5 @@
 import numpy
-import sys
-from math import pi
+from numpy import pi
 from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort,
                            M2PKt_sort, M2P_gpu, M2PKt_gpu, P2P_sort,
                            P2PKt_sort, P2P_gpu, P2PKt_gpu, M2P_nonvec,
@@ -17,7 +16,7 @@ import time
 
 
 def getWeights(K):
-
+# yapf: disable
     w = numpy.zeros(K)
     if K==1:
         w[0] = 1
@@ -40,6 +39,7 @@ def getWeights(K):
         w[6] = 0.132394152788506
 
     return w
+# yapf: enable
 
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE,
             self, param, ind0, timing, kernel):

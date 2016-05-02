@@ -1,6 +1,5 @@
-from numpy import *
-#from pylab import *
-from math import pi, atan2
+import numpy
+from numpy import pi
 
 def get_gamma(p1, p2, qet, cr1, cr2, zn, zd):
     
@@ -49,7 +48,7 @@ def calculate_gamma(p, q, rho, etha):
     #print(cr22, cr23, zn2, zd2)
     #print(cr33, cr31, zn3, zd3)
 
-    gamma = zeros(3)
+    gamma = numpy.zeros(3)
     gamma[0] = get_gamma(p[0,0],p[1,0],2*q[0]*etha,cr11,cr12,zn1,zd1)
     gamma[1] = get_gamma(p[1,1],p[2,1],2*q[1]*etha,cr22,cr23,zn2,zd2)
     gamma[2] = get_gamma(p[2,2],p[0,2],2*q[2]*etha,cr33,cr31,zn3,zd3)
@@ -61,7 +60,7 @@ def test_pos(aQ, bQ, cQ, q, p, same):
     if same: return 2*pi
     
     kQ3 = cQ/aQ
-    shc = zeros(3)
+    shc = numpy.zeros(3)
     shc[2] = -q[0]/aQ
     shc[1] = (kQ3*q[0] - p[0,0])/bQ
     shc[0] = 1. - (shc[2] + shc[1])

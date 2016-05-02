@@ -1,5 +1,5 @@
 import numpy
-from math import pi
+from numpy import pi
 from tree.FMMutils import computeIndices, precomputeTerms
 from tree.direct import coulomb_direct
 from projection import project, project_Kt, get_phir, get_phir_gpu
