@@ -1,11 +1,10 @@
-import numpy as np
-import matplotlib as mpl
+import numpy
 
 def meshSurf(C, N, S, fix, normal):
 
     # xi, yi local 2D coordinates of the surface
 
-    h = np.zeros(2, dtype=float)
+    h = numpy.zeros(2, dtype=float)
     h[0] = S[0]/(N[0]-1) # Mesh size xi direction
     h[1] = S[1]/(N[1]-1) # Mesh size yi direction 
 
@@ -22,11 +21,11 @@ def meshSurf(C, N, S, fix, normal):
         y0 = C[1] - S[1]/2   # Starting point yi direction
 
     # Generate nodes
-    xi,yi = np.mgrid[x0:x0+S[0]+h[0]/2.:h[0],y0:y0+S[1]+h[1]/2.:h[1]]
+    xi,yi = numpy.mgrid[x0:x0+S[0]+h[0]/2.:h[0],y0:y0+S[1]+h[1]/2.:h[1]]
     xi = xi.flatten()
     yi = yi.flatten()
     
-    nodes = np.zeros((N[0]*N[1], 3), dtype=np.float64)
+    nodes = numpy.zeros((N[0]*N[1], 3), dtype=numpy.float64)
     for ii in range(N[0]*N[1]):
         if fix=='x':
             nodes[ii,0] = C[0]
@@ -43,7 +42,7 @@ def meshSurf(C, N, S, fix, normal):
 
     # Generate triangles (RHS rule normal into page)
     Nt = 2*(N[0]-1)*(N[1]-1) # Number of triangles
-    triangles = np.zeros((Nt,3), dtype=int)
+    triangles = numpy.zeros((Nt,3), dtype=int)
 
     # Triangles pointing up
     counter = -1
@@ -89,7 +88,7 @@ def meshSurf(C, N, S, fix, normal):
 sz  = [250., 10., 250.] # Cube size
 ctr = [0.,-sz[1]/2,0.]        # Cube center
 d = 8 
-sqr_per_side = int(np.ceil(np.sqrt(sz[0]*sz[2]*d/2.)))
+sqr_per_side = int(numpy.ceil(numpy.sqrt(sz[0]*sz[2]*d/2.)))
 avg_size = sz[0]/sqr_per_side
 sqr_per_side_y = int(sz[1]/avg_size)
 nod = [sqr_per_side+1, sqr_per_side_y+1, sqr_per_side+1]    # Number of nodes
@@ -136,19 +135,19 @@ for i in range(6):
     nodes.extend(node_face)
     triangles.extend(triangle_face)
 
-triangles = np.array(triangles) + 1 # Add 1 to conform to msms format
-nodes = np.array(nodes)
+triangles = numpy.array(triangles) + 1 # Add 1 to conform to msms format
+nodes = numpy.array(nodes)
 
 print 'Cube center: %f, %f, %f'%(ctr[0],ctr[1],ctr[2])
 print 'Cube size  : %f, %f, %f'%(sz[0],sz[1],sz[2])
-print np.shape(nodes)
-print np.shape(triangles)
+print numpy.shape(nodes)
+print numpy.shape(triangles)
 
 if d>=10:
     mesh_out = 'sensor_%ix%ix%i_d%i'%(int(sz[0]), int(sz[1]), int(sz[2]), int(d))
 else:
     mesh_out = 'sensor_%ix%ix%i_d0%i'%(int(sz[0]), int(sz[1]), int(sz[2]), int(d))
 print 'Written to '+mesh_out
-np.savetxt(mesh_out+'.face', triangles, fmt='%i')
-np.savetxt(mesh_out+'.vert', nodes)
+numpy.savetxt(mesh_out+'.face', triangles, fmt='%i')
+numpy.savetxt(mesh_out+'.vert', nodes)
 
