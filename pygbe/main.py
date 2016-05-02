@@ -122,25 +122,39 @@ def find_config_files(cliargs):
 
     #use the name of the rightmost folder in path as problem name
     prob_rel_path = os.path.split(prob_path)
-    prob_name = prob_rel_path[-1]
+    prob_name = prob_rel_path[1]
     if not prob_name:
-        prob_name = prob_rel_path[-2]
+        prob_name = os.path.split(prob_rel_path[0])[1]
 
     if cliargs.config is None:
         cliargs.config = os.path.join(full_path, prob_name + '.config')
+    else:
+        cliargs.config = resolve_relative_config_file(cliargs.config, full_path)
     if cliargs.param is None:
         cliargs.param = os.path.join(full_path, prob_name + '.param')
-
-    req_files = [cliargs.config, cliargs.param]
-    print(req_files)
-    for i, req_file in enumerate(req_files):
-        if not check_file_exists(req_file):
-            req_files[i] = os.path.join(full_path, req_file)
-            if not check_file_exists(req_files[i]):
-                sys.exit('Did not find expected config files\n'
-                         'Could not find {} or {}'.format(req_file, req_files[i]))
+    else:
+        cliargs.param = resolve_relative_config_file(cliargs.param, full_path)
 
     return cliargs.config, cliargs.param
+
+
+def resolve_relative_config_file(config_file, full_path):
+    """
+    Keyword Arguments:
+    config_file -- the given path to a .param or .config file from the
+                    command line
+    full_path   -- the full path to the problem folder
+    """
+
+    if check_file_exists(config_file):
+        return config_file
+    elif check_file_exists(os.path.join(os.getcwd(), config_file)):
+        return os.path.join(os.getcwd(), config_file)
+    elif check_file_exists(os.path.join(full_path, config_file)):
+        return os.path.join(full_path, config_file)
+    else:
+        sys.exit('Did not find expected config files\n'
+                    'Could not find {}'.format(config_file))
 
 
 def check_for_nvcc():
@@ -166,7 +180,7 @@ def check_nvcc_version():
                  'or remove `nvcc` from your PATH to use CPU only.')
 
 
-def main(argv=sys.argv, log_output=True):
+def main(argv=sys.argv, log_output=True, return_output_fname=False):
 
     check_for_nvcc()
 
@@ -397,6 +411,8 @@ def main(argv=sys.argv, log_output=True):
     E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
     print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
     '''
+    if return_output_fname:
+        return outputfname
 
 
 if __name__ == "__main__":
