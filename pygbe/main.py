@@ -121,16 +121,24 @@ def find_config_files(cliargs):
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
     #use the name of the rightmost folder in path as problem name
-    prob_name = os.path.split(prob_path)[-1]
+    prob_rel_path = os.path.split(prob_path)
+    prob_name = prob_rel_path[-1]
+    if not prob_name:
+        prob_name = prob_rel_path[-2]
 
     if cliargs.config is None:
         cliargs.config = os.path.join(full_path, prob_name + '.config')
     if cliargs.param is None:
         cliargs.param = os.path.join(full_path, prob_name + '.param')
 
-    for req_file in [cliargs.config, cliargs.param]:
+    req_files = [cliargs.config, cliargs.param]
+    print(req_files)
+    for i, req_file in enumerate(req_files):
         if not check_file_exists(req_file):
-            sys.exit('Did not find expected config files')
+            req_files[i] = os.path.join(full_path, req_file)
+            if not check_file_exists(req_files[i]):
+                sys.exit('Did not find expected config files\n'
+                         'Could not find {} or {}'.format(req_file, req_files[i]))
 
     return cliargs.config, cliargs.param
 
@@ -160,13 +168,11 @@ def check_nvcc_version():
 
 def main(argv=sys.argv, log_output=True):
 
-    print(argv)
     check_for_nvcc()
 
     args = read_inputs(argv[1:])
-    print(args)
     configFile, paramfile = find_config_files(args)
-    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
 
     #try to expand ~ if present in output path
     args.output = os.path.expanduser(args.output)

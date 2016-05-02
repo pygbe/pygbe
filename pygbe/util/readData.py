@@ -26,8 +26,8 @@ def readVertex2(filename, REAL):
 
 
 def readVertex(filename, REAL):
-    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
-    X = numpy.loadtxt(full_path + filename, dtype=REAL)
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    X = numpy.loadtxt(os.path.join(full_path, filename), dtype=REAL)
     vertex = X[:, 0:3]
 
     return vertex
@@ -50,8 +50,8 @@ def readTriangle2(filename):
 
 
 def readTriangle(filename, surf_type):
-    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER') + '/'
-    X = numpy.loadtxt(full_path + filename, dtype=int)
+    full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    X = numpy.loadtxt(os.path.join(full_path, filename), dtype=int)
     triangle = numpy.zeros((len(X), 3), dtype=int)
     #    if surf_type<=10:
     if surf_type == 'internal_cavity':
