@@ -1,5 +1,4 @@
 import numpy
-from math import atan2
 from semi_analyticalwrap import SA_wrap_arr
 
 def GQ_1D(K):
@@ -15,8 +14,8 @@ def GQ_1D(K):
 
 def lineInt(z, x, v1, v2, kappa, xk, wk):
 
-    theta1 = atan2(v1,x)
-    theta2 = atan2(v2,x)
+    theta1 = numpy.arctan2(v1,x)
+    theta2 = numpy.arctan2(v2,x)
 
     dtheta = theta2 - theta1
 

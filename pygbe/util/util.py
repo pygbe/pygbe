@@ -8,22 +8,22 @@ def get_gamma(p1, p2, qet, cr1, cr2, zn, zd):
         if qet<0.:
             cond = (cr1>0. and cr2<0. and zn>0. and zd<0.) or (cr1<0. and cr2>0. and zn>0. and zd<0.) or (cr1<0. and cr2<0. and zn>0.)
             if cond:
-                return atan2(zn,zd) - 2*pi
+                return numpy.arctan2(zn,zd) - 2*pi
             else:
-                return atan2(zn,zd)
+                return numpy.arctan2(zn,zd)
 
         elif qet>0.:
             cond = (cr1>0. and cr2<0. and zn<0. and zd<0.) or (cr1<0. and cr2>0. and zn<0. and zd<0.) or (cr1<0. and cr2<0. and zn<0.)
             if cond:
-                return atan2(zn,zd)+2*pi
+                return numpy.arctan2(zn,zd)+2*pi
             else:
-                return atan2(zn,zd)
+                return numpy.arctan2(zn,zd)
 
         else:
             return 0.0
 
     else:
-        return atan2(zn,zd)
+        return numpy.arctan2(zn,zd)
 
                  
 
