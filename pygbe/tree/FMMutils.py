@@ -1,7 +1,5 @@
 import numpy
-from numpy import sum as npsum
-from scipy.misc import factorial
-from scipy.misc import comb
+from scipy.misc import factorial, comb
 
 # Wrapped code
 from multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
