@@ -22,12 +22,14 @@
 '''
 
 import numpy
-from math import pi
+from numpy import pi
 from scipy.misc import factorial
 import time
 from datetime import datetime
 import os
 import sys
+import re
+import subprocess
 from argparse import ArgumentParser
 
 # Import self made modules
@@ -42,7 +44,6 @@ from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
 
 from util.readData import readVertex, readTriangle, readpqr, readParameters
 from util.an_solution import an_P, two_sphere
-from util.which import whichgen
 
 from tree.FMMutils import computeIndices, precomputeTerms, generateList
 
@@ -145,10 +146,21 @@ def find_config_files(cliargs):
 def check_for_nvcc():
     '''Check system PATH for nvcc, exit if not found'''
     try:
-        whichgen('nvcc').next()
-    except StopIteration:
+        subprocess.check_output(['which','nvcc'])
+        check_nvcc_version()
+    except subprocess.CalledProcessError:
         print("Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH")
 
+def check_nvcc_version():
+    '''Check that version of nvcc <= 7.0'''
+    verstr = subprocess.check_output(['nvcc', '--version'])
+    cuda_ver = re.compile('release (\d\.\d)')
+    match = re.search(cuda_ver, verstr)
+    version = float(match.group(1))
+    if version > 7.0:
+        sys.exit('PyGBe only supports CUDA <= 7.0\n'
+                 'Please install an earlier version of the CUDA toolkit\n'
+                 'or remove `nvcc` from your PATH to use CPU only.')
 
 def main(argv, log_output=True):
 
