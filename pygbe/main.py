@@ -83,6 +83,11 @@ def read_inputs(args):
                         type=str,
                         default='output',
                         help="Output folder")
+    parser.add_argument('-g',
+                        '--geometry',
+                        dest='geometry',
+                        type=str,
+                        help="Custom geometry folder prefix")
 
     return parser.parse_args(args)
 
@@ -187,6 +192,16 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    #check if a custom geometry location has been specified
+    #if it has, add an ENV_VAR to handle it
+    if args.geometry:
+        if os.path.isdir(args.geometry):
+            os.environ['PYGBE_GEOMETRY'] = args.geometry
+        elif os.path.isdir(os.path.join(os.getcwd(), args.geometry)):
+            os.environ['PYGBE_GEOMETRY'] = os.path.normpath(
+                os.path.join(os.getcwd(), args.geometry))
+        else:
+            sys.exit('Invalid geometry prefix provided (Folder not found)')
 
     #try to expand ~ if present in output path
     args.output = os.path.expanduser(args.output)
@@ -411,6 +426,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
     print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
     '''
+
+    #reset sys.stdout
+    sys.stdout = sys.__stdout__
+
     if return_output_fname:
         return outputfname
 
