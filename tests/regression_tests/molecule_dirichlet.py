@@ -92,39 +92,37 @@ def run_regression(mesh, problem_folder, param):
 
 def main():
     #molecule_dirichlet
-    mesh = ['500','2K',]#'8K','32K','130K']
+    mesh = ['500','2K','8K','32K','130K']
     param = 'sphere_fine.param'
     problem_folder = 'molecule_dirichlet'
     N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, problem_folder, param)
 
-    print(N, iterations, Esolv, Esurf, Ecoul, Time)
-    ##molecule_single_center
-    #mesh = ['500','2K',]#'8K','32K','130K']
-    #param = 'sphere_fine.param'
-    #problem_folder = 'molecule_single_center'
-    #N_mol, iterations_mol, Esolv_mol, Esurf_mol, Ecoul_mol, Time_mol = run_regression(mesh, problem_folder, param)
-    #
-    #
-    ##dirichlet_surface
-    #mesh = ['500','2K',]#'8K','32K','130K']
-    #param = 'sphere_fine.param'
-    #problem_folder = 'dirichlet_surface'
-    #N_surf, iterations_surf, Esolv_surf, Esurf_surf, Ecoul_surf, Time_surf = run_regression(mesh, problem_folder, param)
+    #molecule_single_center
+    mesh = ['500','2K','8K','32K','130K']
+    param = 'sphere_fine.param'
+    problem_folder = 'molecule_single_center'
+    N_mol, iterations_mol, Esolv_mol, Esurf_mol, Ecoul_mol, Time_mol = run_regression(mesh, problem_folder, param)
+
+    #dirichlet_surface
+    mesh = ['500','2K','8K','32K','130K']
+    param = 'sphere_fine.param'
+    problem_folder = 'dirichlet_surface'
+    N_surf, iterations_surf, Esolv_surf, Esurf_surf, Ecoul_surf, Time_surf = run_regression(mesh, problem_folder, param)
 
 
-#Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
-#total_time = Time+Time_mol+Time_surf
-#
-#analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)  
-#
-#error = abs(Einter-analytical)/abs(analytical)
-#
-#print '\nNumber of elements : '+str(N)
-#print 'Number of iteration: '+str(iterations)
-#print 'Interaction energy : '+str(Einter)
-#print 'Analytical solution: %f kcal/mol'%analytical
-#print 'Error              : '+str(error)
-#print 'Total time         : '+str(total_time)
+    Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
+    total_time = Time+Time_mol+Time_surf
+
+    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)  
+
+    error = abs(Einter-analytical)/abs(analytical)
+
+    print '\nNumber of elements : '+str(N)
+    print 'Number of iteration: '+str(iterations)
+    print 'Interaction energy : '+str(Einter)
+    print 'Analytical solution: %f kcal/mol'%analytical
+    print 'Error              : '+str(error)
+    print 'Total time         : '+str(total_time)
 #
 #
 #flag = 0
