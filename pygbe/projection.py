@@ -14,6 +14,18 @@ import time
 
 
 def getWeights(K):
+
+    '''
+    It gets the weights of 
+
+    Arguments:
+    ----------
+    K: int, number of Gauss points per element. (1, 3, 4, and 7 are supported)
+
+    Returns:
+    --------
+    w: K-size array, weights 
+    '''
     # yapf: disable
     w = numpy.zeros(K)
     if K==1:
@@ -41,6 +53,30 @@ def getWeights(K):
 
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
             ind0, timing, kernel):
+    '''
+    It 
+
+    Arguments:
+    ----------
+    XK     :
+    XV     :
+    LorY   :
+    surfSrc:
+    surfTar:
+    K_diag :
+    V_diag :
+    IorE   :
+    self   :
+    param  :
+    ind0   :
+    timing :
+    kernel : 
+
+    Returns:
+    --------
+    K_lyr  :
+    V_lyr  :  
+    '''
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -155,6 +191,28 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
 
 def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
                kernel):
+
+    '''
+    It 
+
+    Arguments:
+    ----------
+    XKt    :
+    LorY   :
+    surfSrc:
+    surfTar:
+    Kt_diag:
+    self   :
+    param  :
+    ind0   :
+    timing :
+    kernel : 
+
+    Returns:
+    --------
+    phi_reac:
+    AI_int: 
+    '''
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -345,6 +403,24 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
 
 def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
+
+    '''
+    It gets the 
+
+    Arguments:
+    ----------
+    XK      :
+    XV      :
+    surface :
+    field   :
+    par_reac:
+    kernel  :
+
+    Returns:
+    --------
+    phir_cpu:
+    AI_int  :
+    '''
 
     REAL = par_reac.REAL
     Nq = len(field.xq)
