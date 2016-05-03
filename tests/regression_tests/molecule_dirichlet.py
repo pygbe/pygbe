@@ -26,7 +26,7 @@ def scanOutput(filename):
             N = int(N.group(1))
         iterations = re.search(ITER_REGEX, txt)
         if iterations:
-            iterations = float(iterations.group(1))
+            iterations = int(iterations.group(1))
         Esolv = re.search(ESOLV_REGEX, txt)
         if Esolv:
             Esolv = float(Esolv.group(1))
@@ -39,6 +39,7 @@ def scanOutput(filename):
         Time = re.search(TIME_REGEX, txt)
         if Time:
             Time = float(Time.group(1))
+
 
     return N, iterations, Esolv, Esurf, Ecoul, Time
 
@@ -75,7 +76,8 @@ def run_regression(mesh, problem_folder, param):
         outfile = pygbe(['',
                          '-p', '{}'.format(param),
                          '-c', '{}_{}.config'.format(problem_folder, mesh[i]),
-                        '-o', 'output_{}'.format(mesh[i]),
+                         '-o', 'output_{}'.format(mesh[i]),
+                         '-g', '../../pygbe/',
                          '{}'.format(problem_folder),], return_output_fname=True)
 
         print 'Scan output file'
@@ -87,49 +89,42 @@ def run_regression(mesh, problem_folder, param):
 
     return(N, iterations, Esolv, Esurf, Ecoul, Time)
 
-#molecule_dirichlet
-mesh = ['500','2K',]#'8K','32K','130K']
-param = 'sphere_fine.param'
-problem_folder = 'molecule_dirichlet'
-N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, problem_folder, param)
 
-#molecule_single_center
-mesh = ['500','2K',]#'8K','32K','130K']
-param = 'sphere_fine.param'
-problem_folder = 'molecule_single_center'
-(N_mol,
- iterations_mol,
- Esolv_mol,
- Esurf_mol,
- Ecoul_mol,
- Time_mol) = run_regression(mesh, problem_folder, param)
+def main():
+    #molecule_dirichlet
+    mesh = ['500','2K',]#'8K','32K','130K']
+    param = 'sphere_fine.param'
+    problem_folder = 'molecule_dirichlet'
+    N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, problem_folder, param)
 
-
-#dirichlet_surface
-mesh = ['500','2K',]#'8K','32K','130K']
-param = 'sphere_fine.param'
-problem_folder = 'dirichlet_surface'
-(N_surf,
- iterations_surf,
- Esolv_surf,
- Esurf_surf,
- Ecoul_surf,
- Time_surf) = run_regression(mesh, problem_folder, param)
+    print(N, iterations, Esolv, Esurf, Ecoul, Time)
+    ##molecule_single_center
+    #mesh = ['500','2K',]#'8K','32K','130K']
+    #param = 'sphere_fine.param'
+    #problem_folder = 'molecule_single_center'
+    #N_mol, iterations_mol, Esolv_mol, Esurf_mol, Ecoul_mol, Time_mol = run_regression(mesh, problem_folder, param)
+    #
+    #
+    ##dirichlet_surface
+    #mesh = ['500','2K',]#'8K','32K','130K']
+    #param = 'sphere_fine.param'
+    #problem_folder = 'dirichlet_surface'
+    #N_surf, iterations_surf, Esolv_surf, Esurf_surf, Ecoul_surf, Time_surf = run_regression(mesh, problem_folder, param)
 
 
-Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
-total_time = Time+Time_mol+Time_surf
-
-analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)  
-
-error = abs(Einter-analytical)/abs(analytical)
-
-print '\nNumber of elements : '+str(N)
-print 'Number of iteration: '+str(iterations)
-print 'Interaction energy : '+str(Einter)
-print 'Analytical solution: %f kcal/mol'%analytical
-print 'Error              : '+str(error)
-print 'Total time         : '+str(total_time)
+#Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
+#total_time = Time+Time_mol+Time_surf
+#
+#analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)  
+#
+#error = abs(Einter-analytical)/abs(analytical)
+#
+#print '\nNumber of elements : '+str(N)
+#print 'Number of iteration: '+str(iterations)
+#print 'Interaction energy : '+str(Einter)
+#print 'Analytical solution: %f kcal/mol'%analytical
+#print 'Error              : '+str(error)
+#print 'Total time         : '+str(total_time)
 #
 #
 #flag = 0
@@ -182,3 +177,6 @@ print 'Total time         : '+str(total_time)
 #ax.set_xlabel('Number of elements', fontsize=10)
 #fig.subplots_adjust(left=0.185, bottom=0.21, right=0.965, top=0.95)
 #fig.savefig('regression_tests/figs/iterations_molecule_dirichlet.pdf',dpi=80,format='pdf')
+
+if __name__ == "__main__":
+    main()
