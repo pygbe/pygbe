@@ -30,6 +30,9 @@ class Event():
 
 
 class surfaces():
+    """
+    Class for 
+    """
     def __init__(self):
         self.triangle = []  # indices to triangle vertices
         self.vertex   = []  # position of vertices
@@ -116,6 +119,9 @@ class surfaces():
         self.kDev       = []
 
 class fields():
+    """
+    Class for 
+    """
     def __init__(self):
         self.parent = []    # Pointer to "parent" surface
         self.child  = []    # Pointer to "children" surfaces
@@ -134,6 +140,9 @@ class fields():
         self.q_gpu  = []    # value of charges on gpu
 
 class timings():
+    """
+    Class for 
+    """
     def __init__(self):
         self.time_an    = 0.
         self.time_P2P   = 0.
@@ -147,6 +156,9 @@ class timings():
 
 
 class parameters():
+    """
+    Class for 
+    """
     def __init__(self):
         self.kappa         = 0.              # inverse of Debye length
         self.restart       = 0               # Restart of GMRES
@@ -195,9 +207,24 @@ class index_constant():
 
 
 def getGaussPoints(y,triangle, n):
-    # y         : vertices
-    # triangle  : array with indices for corresponding triangles
-    # n         : Gauss points per element
+
+    '''
+    It get the Gauss points  for
+
+    Arguments:
+    ----------
+    y       : list, vertices of .
+    triangle: list, with indices for the corresponding triangles.
+    n       : int (1,3,4,7), desired Gauss points per element.
+
+    Returns:
+    --------
+    xi[:,0] :
+    xi[:,1] :
+    xi[:,2] :
+
+    '''
+   
 
     N  = len(triangle) # Number of triangles
     xi = numpy.zeros((N*n,3))
@@ -235,6 +262,20 @@ def getGaussPoints(y,triangle, n):
     return xi[:,0], xi[:,1], xi[:,2]
 
 def quadratureRule_fine(K):
+
+    '''
+    Fine quadrature rule
+
+    Arguments:
+    ----------
+    K: int (1, 7, 13, 17, 19, 25, 37, 48, 52, 61, 79), number of Gauss points.
+
+    Returns:
+    --------
+    X: array,
+    W: array,
+
+    '''
     # yapf: disable
     # 1 Gauss point
     if K==1:
@@ -662,6 +703,20 @@ def quadratureRule_fine(K):
 
 def fill_surface(surf,param):
 
+    '''
+    Fill the surface 
+
+    Arguments:
+    ----------
+    surf     : 
+    param    : 
+
+    Returns:
+    --------
+    time_sort: 
+
+    '''
+
     N  = len(surf.triangle)
     Nj = N*param.K
     # Calculate centers
@@ -789,6 +844,20 @@ def fill_surface(surf,param):
 
 
 def initializeField(filename, param):
+
+    '''
+    Initialize the Field 
+
+    Arguments:
+    ----------
+    filename   : 
+    param      : 
+
+    Returns:
+    --------
+    field_array: 
+
+    '''
     
     LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(filename)
 
@@ -836,6 +905,21 @@ def initializeField(filename, param):
 
     
 def zeroAreas(s, triangle_raw, Area_null):
+
+    """
+    Looks for "zero-areas", areas that are really small, almost zero. It appends
+    them to Area_null list.
+
+    Arguments:
+    ----------
+    s           : surface 
+    triangle_raw: triangle list
+    Area_null   : list
+
+    Returns:
+    --------
+    Area_null   : list with the indices of the triangles with zero-areas.
+    """
     for i in range(len(triangle_raw)):
         L0 = s.vertex[triangle_raw[i,1]] - s.vertex[triangle_raw[i,0]]
         L2 = s.vertex[triangle_raw[i,0]] - s.vertex[triangle_raw[i,2]]
@@ -847,6 +931,19 @@ def zeroAreas(s, triangle_raw, Area_null):
 
 def initializeSurf(field_array, filename, param):
 
+    '''
+    Initialize the surface 
+
+    Arguments:
+    ----------
+    field_array: 
+    filename   : 
+    param      : 
+
+    Returns:
+    --------
+    surf_array : 
+    '''
     surf_array = []
 
     files, surf_type, phi0_file = readSurf(filename)      # Read filenames for surfaces
@@ -895,6 +992,18 @@ def initializeSurf(field_array, filename, param):
     return surf_array
 
 def dataTransfer(surf_array, field_array, ind, param, kernel):
+    '''
+    It manages the data transfer to the GPU.
+
+    Arguments:
+    ----------
+    surf_array :
+    field_array: 
+    ind        : 
+    param      : 
+    kernel     :
+
+    '''
 
     REAL = param.REAL
     Nsurf = len(surf_array)
@@ -947,6 +1056,17 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
 
 
 def fill_phi(phi, surf_array):
+
+    '''
+    It .
+
+    Arguments:
+    ----------
+    phi        : 
+    surf_array :
+
+    '''
+
 # Places the result vector on surf structure 
 
     s_start = 0
