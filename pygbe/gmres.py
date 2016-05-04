@@ -1,3 +1,8 @@
+'''
+Generalized Minimum Residual Method (GMRES), it uses the Housholder relfections
+for ortogonalization. 
+'''
+
 import numpy
 import os
 from scipy import linalg
@@ -6,6 +11,23 @@ from matrixfree import gmres_dot as gmres_dot
 
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
+    '''
+    Given a vector (dx, dy), it provides the cosine (cs) and sine (sn). 
+  
+
+    Arguments:
+    ----------
+    dx: float, x coordinate of the vector (dx, dy). 
+    dy: float, y coordinate of the vector (dx, dy).
+    cs:
+    sn:
+        
+    Returns:
+    --------
+    cs: float, cosine.
+    sn: float, sine. 
+
+    '''
 
     if dy == 0:
         cs = 1.
@@ -23,6 +45,23 @@ def GeneratePlaneRotation(dx, dy, cs, sn):
 
 
 def ApplyPlaneRotation(dx, dy, cs, sn):
+    '''
+    Given a vector (dx, dy) 
+  
+
+    Arguments:
+    ----------
+    dx: float, x coordinate of the vector (dx, dy). 
+    dy: float, y coordinate of the vector (dx, dy).
+    cs:
+    sn:
+        
+    Returns:
+    --------
+    dx: float, .
+    dy: float, . 
+
+    '''
     temp = cs * dx + sn * dy
     dy = -sn * dx + cs * dy
     dx = temp
@@ -31,6 +70,28 @@ def ApplyPlaneRotation(dx, dy, cs, sn):
 
 
 def PlaneRotation(H, cs, sn, s, i, R):
+
+    '''
+    
+  
+
+    Arguments:
+    ----------
+    H: 
+    cs:
+    sn:
+    s:
+    i:
+    R:
+    
+    Returns:
+    --------
+    H: 
+    cs:
+    sn:
+    s:
+
+    '''
     for k in range(i):
         H[k, i], H[k + 1, i] = ApplyPlaneRotation(H[k, i], H[k + 1, i], cs[k],
                                                   sn[k])
@@ -44,6 +105,26 @@ def PlaneRotation(H, cs, sn, s, i, R):
 
 
 def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
+
+    '''
+    GMRES solver 
+
+    Arguments:
+    ----------
+    surf_array :
+    field_array:
+    X          : array, initial guess 
+    b          : array, right hand side.
+    param      :  
+    ind0       :
+    timing     :
+    kernel     :
+
+    Returns:
+    --------
+    X          :  array, an update guess to the solution Ax=b where A is 
+
+    '''
 
     N = len(b)
     V = numpy.zeros((param.restart + 1, N))
