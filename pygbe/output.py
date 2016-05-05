@@ -1,7 +1,23 @@
+'''
+Prints output with main information.
+'''
 import numpy 
 
 # yapf: disable
 def printSummary(surf_array, field_array, param):
+
+    '''
+    Prints a summary with the main information of the run.
+
+    Arguments:
+    ----------
+    
+    surf_array :
+    field_array:
+    param:
+
+    '''
+    
     Nsurf = len(surf_array)
     print 28 * '-' + '\n'
     print '%i surfaces:\n' % Nsurf
