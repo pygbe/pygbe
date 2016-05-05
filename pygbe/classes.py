@@ -31,7 +31,96 @@ class Event():
 
 class surfaces():
     """
-    Class for 
+    Surface class.
+
+    Attributes:
+    -----------
+    
+    triangle      : indices to triangle vertices
+    vertex        : position of vertices
+    XinV          : weights input for single layer potential
+    XinK          : weights input for double layer potential
+    Xout_int      : output vector of interior operators
+    Xout_ext      : output vector of exterior operators
+    xi            : x component of center
+    yi            : y component of center
+    zi            : z component of center
+    xj            : x component of gauss nodes
+    yj            : y component of gauss nodes
+    zj            : z component of gauss nodes
+    Area          : Area of triangles
+    normal        : normal of triangles
+    sglInt_int    : singular integrals for V for internal equation
+    sglInt_ext    : singular integrals for V for external equation
+    xk            : position of gauss points on edges
+    wk            : weight of gauss points on edges
+    Xsk           : position of gauss points for near singular integrals
+    Wsk           : weight of gauss points for near singular integrals
+    tree          : tree structure
+    twig          : tree twigs
+    xiSort        : sorted x component of center
+    yiSort        : sorted y component of center
+    ziSort        : sorted z component of center
+    xjSort        : sorted x component of gauss nodes
+    yjSort        : sorted y component of gauss nodes
+    zjSort        : sorted z component of gauss nodes
+    xcSort        : sorted x component box centers according to M2P_list array
+    ycSort        : sorted y component box centers according to M2P_list array
+    zcSort        : sorted z component box centers according to M2P_list array
+    AreaSort      : sorted array of areas
+    sglInt_intSort: sorted array of singular integrals for V for internal equation
+    sglInt_extSort: sorted array of singular integrals for V for external equation
+    unsort        : array of indices to unsort targets
+    triangleSort  : sorted array of triangles
+    sortTarget    : array of indices to sort targets
+    sortSource    : array of indices to sort sources
+    offsetSource  : array with offsets to sorted source array
+    offsetTarget  : array with offsets to sorted target array
+    sizeTarget    : array with number of targets pero twig
+    offsetTwigs   : offset to twig in P2P list array
+    P2P_list      : pointers to twigs for P2P interaction list
+    offsetMlt     : offset to multipoles in M2P list array
+    M2P_list      : pointers to boxes for M2P interaction list
+    Precond       : Sparse representation of preconditioner for self interaction block
+    Ein           : Permitivitty inside surface
+    Eout          : Permitivitty outside surface
+    E_hat         : ratio of Ein/Eout
+    kappa_in      : kappa inside surface
+    kappa_out     : kappa inside surface
+    LorY_in       : Laplace or Yukawa in inner region
+    LorY_out      : Laplace or Yukawa in outer region
+    surf_type     : Surface type: internal_cavity (=0), stern or dielecric_interface (=1)  
+    phi0          : Known surface potential (dirichlet) or derivative of potential (neumann)
+    phi           : Potential on surface
+    dphi          : Derivative of potential on surface
+
+    # Device data
+        
+    xiDev        :
+    yiDev        :
+    ziDev        :
+    xjDev        :
+    yjDev        :
+    zjDev        :
+    xcDev        :
+    ycDev        :
+    zcDev        :
+    AreaDev      :
+    sglInt_intDev:
+    sglInt_extDev: 
+    vertexDev    :
+    sizeTarDev   :
+    offSrcDev    :
+    offMltDev    :
+    offTwgDev    :
+    M2P_lstDev   :
+    P2P_lstDev   :
+    xkDev        :
+    wkDev        :
+    XskDev       :
+    WskDev       :
+    kDev         :
+
     """
     def __init__(self):
         self.triangle = []  # indices to triangle vertices
@@ -121,6 +210,26 @@ class surfaces():
 class fields():
     """
     Class for 
+
+    Attributes:
+    -----------
+
+    parent: Pointer to "parent" surface
+    child : Pointer to "children" surfaces
+    LorY  : 1: Laplace, 2: Yukawa
+    kappa : inverse of Debye length
+    E     : dielectric constant
+    xq    : position of charges
+    q     : value of charges
+    coul  : 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
+
+    # Device data
+
+    xq_gpu: x position of charges on gpu
+    yq_gpu: y position of charges on gpu
+    zq_gpu: z position of charges on gpu
+    q_gpu : value of charges on gpu
+
     """
     def __init__(self):
         self.parent = []    # Pointer to "parent" surface
@@ -142,6 +251,19 @@ class fields():
 class timings():
     """
     Class for 
+
+    Attributes:
+    -----------
+    time_an   : 
+    time_P2P  : 
+    time_P2M  : 
+    time_M2M  : 
+    time_M2P  : 
+    time_trans: 
+    time_sort : 
+    time_mass : 
+    AI_int    : 
+
     """
     def __init__(self):
         self.time_an    = 0.
