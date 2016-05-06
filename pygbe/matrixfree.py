@@ -7,7 +7,7 @@ from numpy import pi
 from tree.FMMutils import computeIndices, precomputeTerms
 from tree.direct import coulomb_direct
 from projection import project, project_Kt, get_phir, get_phir_gpu
-from classes import parameters, index_constant
+from classes import Parameters, IndexConstant
 import time
 from util.semi_analytical import GQ_1D
 
@@ -1047,14 +1047,14 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
     REAL = param.REAL
 
-    par_reac = parameters()
+    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6
 
-    ind_reac = index_constant()
+    ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)
     precomputeTerms(par_reac.P, ind_reac)
 
@@ -1188,14 +1188,14 @@ def calculateEsurf(surf_array, field_array, param, kernel):
     '''
     REAL = param.REAL
 
-    par_reac = parameters()
+    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6
 
-    ind_reac = index_constant()
+    ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)
     precomputeTerms(par_reac.P, ind_reac)
 
