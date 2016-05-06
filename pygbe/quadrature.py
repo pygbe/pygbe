@@ -12,8 +12,8 @@ def quadratureRule_fine(K):
 
     Returns:
     --------
-    X: array,
-    W: array,
+    X: array, position of the gauss quadrature points.
+    W: array, gauss quadrature weights.
 
     '''
     # yapf: disable
@@ -440,25 +440,23 @@ def quadratureRule_fine(K):
     return X, W
 
 
-def getGaussPoints(y,triangle, n):
+def getGaussPoints(y, triangle, n):
 
     '''
-    It get the Gauss points  for
+    It gets the Gauss points for far away integrals.
 
     Arguments:
     ----------
-    y       : list, vertices of .
-    triangle: list, with indices for the corresponding triangles.
+    y       : list, vertices of the triangles.
+    triangle: list, indices for the corresponding triangles.
     n       : int (1,3,4,7), desired Gauss points per element.
 
     Returns:
     --------
-    xi[:,0] :
-    xi[:,1] :
-    xi[:,2] :
-
+    xi[:,0] : position of the gauss point in the x axis.
+    xi[:,1] : position of the gauss point in the y axis.
+    xi[:,2] : position of the gauss point in the z axis.
     '''
-
 
     N  = len(triangle) # Number of triangles
     xi = numpy.zeros((N*n,3))
