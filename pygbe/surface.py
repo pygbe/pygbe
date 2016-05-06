@@ -5,10 +5,9 @@ from tree.FMMutils import addSources3, sortPoints, generateTree, findTwigs
 from tree.direct import computeDiagonal
 from util.semi_analytical import GQ_1D
 from util.readData import (readVertex, readTriangle, readpqr, readcrd,
-                           readFields, readSurf)
+                           readFields, read_surface)
 
 from quadrature import quadratureRule_fine, getGaussPoints
-from util.readData import readSurf
 from classes import Surface, Field
 
 
@@ -29,7 +28,7 @@ def initializeSurf(field_array, filename, param):
     surf_array = []
 
     # Read filenames for surfaces
-    files, surf_type, phi0_file = readSurf(filename)
+    files, surf_type, phi0_file = read_surface(filename)
     Nsurf = len(files)
 
     for i in range(Nsurf):
