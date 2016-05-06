@@ -17,94 +17,107 @@ class Event():
 
 class Surface():
     """
-    Surface class. 
+    Surface class.
+    It contains information about the solvent excluded surface.
 
     Attributes:
     -----------
 
-    triangle      : indices to triangle vertices.
-    vertex        : position of vertices.
-    XinV          : weights input for single layer potential.
-    XinK          : weights input for double layer potential.
-    Xout_int      : output vector of interior operators.
-    Xout_ext      : output vector of exterior operators.
-    xi            : x component of center.
-    yi            : y component of center.
-    zi            : z component of center.
-    xj            : x component of gauss nodes.
-    yj            : y component of gauss nodes.
-    zj            : z component of gauss nodes.
-    Area          : Area of triangles.
-    normal        : normal of triangles.
-    sglInt_int    : singular integrals for V for internal equation.
-    sglInt_ext    : singular integrals for V for external equation.
-    xk            : position of gauss points on edges.
-    wk            : weight of gauss points on edges.
-    Xsk           : position of gauss points for near singular integrals.
-    Wsk           : weight of gauss points for near singular integrals.
-    tree          : tree structure.
-    twig          : tree twigs.
-    xiSort        : sorted x component of center.
-    yiSort        : sorted y component of center.
-    ziSort        : sorted z component of center.
-    xjSort        : sorted x component of gauss nodes.
-    yjSort        : sorted y component of gauss nodes.
-    zjSort        : sorted z component of gauss nodes.
-    xcSort        : sorted x component box centers according to M2P_list array.
-    ycSort        : sorted y component box centers according to M2P_list array.
-    zcSort        : sorted z component box centers according to M2P_list array.
-    AreaSort      : sorted array of areas.
-    sglInt_intSort: sorted array of singular integrals for V for internal equation.
-    sglInt_extSort: sorted array of singular integrals for V for external equation.
-    unsort        : array of indices to unsort targets.
-    triangleSort  : sorted array of triangles.
-    sortTarget    : array of indices to sort targets.
-    sortSource    : array of indices to sort sources.
-    offsetSource  : array with offsets to sorted source array.
-    offsetTarget  : array with offsets to sorted target array.
-    sizeTarget    : array with number of targets pero twig.
-    offsetTwigs   : offset to twig in P2P list array.
-    P2P_list      : pointers to twigs for P2P interaction list.
-    offsetMlt     : offset to multipoles in M2P list array.
-    M2P_list      : pointers to boxes for M2P interaction list.
-    Precond       : Sparse representation of preconditioner for self interaction block.
-    Ein           : Permitivitty inside surface.
-    Eout          : Permitivitty outside surface.
-    E_hat         : ratio of Ein/Eout.
-    kappa_in      : kappa inside surface.
-    kappa_out     : kappa inside surface.
-    LorY_in       : Laplace or Yukawa in inner region.
-    LorY_out      : Laplace or Yukawa in outer region.
-    surf_type     : Surface type: internal_cavity (=0), stern or dielecric_interface (=1).
-    phi0          : Known surface potential (dirichlet) or derivative of potential (neumann).
-    phi           : Potential on surface.
-    dphi          : Derivative of potential on surface.
+    triangle      : list, indices to triangle vertices.
+    vertex        : list, position of vertices.
+    XinV          : list, weights input for single layer potential.
+    XinK          : list, weights input for double layer potential.
+    Xout_int      : list, output vector of interior operators.
+    Xout_ext      : list, output vector of exterior operators.
+    xi            : list, x component of center.
+    yi            : list, y component of center.
+    zi            : list, z component of center.
+    xj            : list, x component of gauss nodes.
+    yj            : list, y component of gauss nodes.
+    zj            : list, z component of gauss nodes.
+    Area          : list, areas of triangles.
+    normal        : list, normal of triangles.
+    sglInt_int    : list, singular integrals for V for internal equation.
+    sglInt_ext    : list, singular integrals for V for external equation.
+    xk            : list, position of gauss points on edges.
+    wk            : list, weight of gauss points on edges.
+    Xsk           : list, position of gauss points for near singular integrals.
+    Wsk           : list, weight of gauss points for near singular integrals.
+    tree          : list, tree structure.
+    twig          : list, tree twigs.
+    xiSort        : list, sorted x component of center.
+    yiSort        : list, sorted y component of center.
+    ziSort        : list, sorted z component of center.
+    xjSort        : list, sorted x component of gauss nodes.
+    yjSort        : list, sorted y component of gauss nodes.
+    zjSort        : list, sorted z component of gauss nodes.
+    xcSort        : list, sorted x component of the box centers according to
+                          M2P_list array.
+    ycSort        : list, sorted y component of the box centers according to
+                          M2P_list array.
+    zcSort        : list, sorted z component of the box centers according to
+                          M2P_list array.
+    AreaSort      : list, sorted array of areas.
+    sglInt_intSort: list, sorted array of singular integrals for V for internal
+                          equation.
+    sglInt_extSort: list, sorted array of singular integrals for V for external
+                          equation.
+    unsort        : list, array of indices to unsort targets.
+    triangleSort  : list, sorted array of triangles.
+    sortTarget    : list, indices to sort targets.
+    sortSource    : list, indices to sort sources.
+    offsetSource  : list, offsets to sorted source array.
+    offsetTarget  : list, offsets to sorted target array.
+    sizeTarget    : list, number of targets per twig.
+    offsetTwigs   : list, offset to twig in P2P list array.
+    P2P_list      : list, pointers to twigs for P2P interaction list.
+    offsetMlt     : list, offset to multipoles in M2P list array.
+    M2P_list      : list, pointers to boxes for M2P interaction list.
+    Precond       : list, sparse representation of preconditioner for self
+                          interaction block.
+    Ein           : float, permitivitty inside surface.
+    Eout          : float, permitivitty outside surface.
+    E_hat         : float, ratio of Ein/Eout.
+    kappa_in      : float, kappa inside surface.
+    kappa_out     : float, kappa inside surface.
+    LorY_in       : int, Laplace (0) or Yukawa (1) in inner region.
+    LorY_out      : int, Laplace (0) or Yukawa (1) in outer region.
+    surf_type     : int, Surface type: internal_cavity (=0), stern or
+                         dielecric_interface (=1).
+    phi0          : list, known surface potential (dirichlet) or derivative of
+                          potential (neumann).
+    phi           : list, potential on surface.
+    dphi          : list, derivative of potential on surface.
 
-    # Device data
+    # Device data:
 
-    xiDev        :
-    yiDev        :
-    ziDev        :
-    xjDev        :
-    yjDev        :
-    zjDev        :
+    xiDev        : list, x component of center (on the GPU).
+    yiDev        : list, y component of center (on the GPU).
+    ziDev        : list, z component of center (on the GPU).
+    xjDev        : list, x component of gauss nodes (on the GPU).
+    yjDev        : list, y component of gauss nodes (on the GPU).
+    zjDev        : list, z component of gauss nodes (on the GPU).
     xcDev        :
     ycDev        :
     zcDev        :
-    AreaDev      :
-    sglInt_intDev:
-    sglInt_extDev:
+    AreaDev      : list, areas of triangles (on the GPU).
+    sglInt_intDev: list, singular integrals for V for internal equation (on the 
+                         GPU).
+    sglInt_extDev: list, singular integrals for V for external equation (on the
+                         GPU).
     vertexDev    :
-    sizeTarDev   :
-    offSrcDev    :
-    offMltDev    :
-    offTwgDev    :
-    M2P_lstDev   :
-    P2P_lstDev   :
-    xkDev        :
-    wkDev        :
-    XskDev       :
-    WskDev       :
+    sizeTarDev   : list, number of targets per twig (on the GPU). 
+    offSrcDev    : list, offsets to sorted source array (on the GPU).
+    offMltDev    : list, offset to multipoles in M2P list array (on the GPU).
+    offTwgDev    : list, offset to twig in P2P list array (on the GPU).
+    M2P_lstDev   : list, pointers to boxes for M2P interaction list (on the GPU).
+    P2P_lstDev   : list, pointers to twigs for P2P interaction list (on the GPU).
+    xkDev        : list, position of gauss points on edges (on the GPU).
+    wkDev        : list, weight of gauss points on edges (on the GPU).
+    XskDev       : list, position of gauss points for near singular integrals 
+                         (on the GPU).
+    WskDev       : list, weight of gauss points for near singular integrals (on
+                         the GPU).
     kDev         :
 
     """
@@ -149,7 +162,7 @@ class Surface():
         self.sortSource   = []  # array of indices to sort sources
         self.offsetSource = []  # array with offsets to sorted source array
         self.offsetTarget = []  # array with offsets to sorted target array
-        self.sizeTarget   = []  # array with number of targets pero twig
+        self.sizeTarget   = []  # array with number of targets per twig
         self.offsetTwigs  = []  # offset to twig in P2P list array
         self.P2P_list     = []  # pointers to twigs for P2P interaction list
         self.offsetMlt    = []  # offset to multipoles in M2P list array
@@ -196,7 +209,8 @@ class Surface():
 
 class Field():
     """
-    Field class
+    Field class.
+    It contains the information about each region in the molecule.
 
     Attributes:
     -----------
@@ -212,10 +226,10 @@ class Field():
 
     # Device data
 
-    xq_gpu: x position of charges on gpu.
-    yq_gpu: y position of charges on gpu.
-    zq_gpu: z position of charges on gpu.
-    q_gpu : value of charges on gpu.
+    xq_gpu: x position of charges on GPU.
+    yq_gpu: y position of charges on GPU.
+    zq_gpu: z position of charges on GPU.
+    q_gpu : value of charges on GPU.
 
     """
     def __init__(self):
@@ -238,19 +252,20 @@ class Field():
 
 class Timing():
     """
-    Timing class 
+    Timing class.
+    It contains timing information for different parts of the code. 
 
     Attributes:
     -----------
-    time_an   : float, time spent in solving the analytical.  
+    time_an   : float, time spent in compute the near singular integrals.  
     time_P2P  : float, time spent in compute the P2P part of the treecode.
     time_P2M  : float, time spent in compute the P2M part of the treecode.
     time_M2M  : float, time spent in compute the M2M part of the treecode.
     time_M2P  : float, time spent in compute the M2P part of the treecode.
-    time_trans: float, 
-    time_sort : float,
-    time_mass : float, 
-    AI_int    : int, 
+    time_trans: float, time spent in transfer data to and from the GPU.
+    time_sort : float, time spent in sorting data to send to the GPU.
+    time_mass : float, time spent in compute the mass of the sources in treecode.
+    AI_int    : int, counter of the amount of near singular integrals solved.
 
     """
     def __init__(self):
@@ -268,6 +283,7 @@ class Timing():
 class Parameters():
     """
     Parameters class.
+    It contains the information of the parameters needed to run the code. 
     
     Attributes:
     -----------
@@ -333,10 +349,11 @@ class IndexConstant():
     Attributes:
     -----------
 
-    II         : 
-    JJ         :  
-    KK         :  
-    index      : 
+    II         : list, multipole order in the x-direction for the treecode.
+    JJ         : list, multipole order in the y-direction for the treecode. 
+    KK         : list, multipole order in the z-direction for the treecode. 
+    index      : list, pointers to the location of the mulipole of order i,j,k 
+                       in the multipole array. 
     index_small:
     index_large:
     index_ptr  :
