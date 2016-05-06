@@ -17,7 +17,7 @@ class Event():
 
 class Surface():
     """
-    Surface class.
+    Surface class. 
 
     Attributes:
     -----------
@@ -328,7 +328,7 @@ class Parameters():
 class IndexConstant():
 
     """
-    Parameters class.
+    It contains the precompute indices required for the treecode computation.
     
     Attributes:
     -----------
