@@ -3,11 +3,12 @@ import numpy
 def quadratureRule_fine(K):
 
     '''
-    Fine quadrature rule
+    Fine quadrature rule, to solve the near singular integrals.
 
     Arguments:
     ----------
-    K: int (1, 7, 13, 17, 19, 25, 37, 48, 52, 61, 79), number of Gauss points.
+    K: int (1, 7, 13, 17, 19, 25, 37, 48, 52, 61, 79), number of Gauss points
+       per element.
 
     Returns:
     --------
