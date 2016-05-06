@@ -3,7 +3,7 @@ import time
 
 class Event():
     """
-    class for logging like in pycuda's cuda.Event()
+    Class for logging like in pycuda's cuda.Event()
     """
     def __init__(self):
         self.t = 0
@@ -22,63 +22,63 @@ class Surface():
     Attributes:
     -----------
 
-    triangle      : indices to triangle vertices
-    vertex        : position of vertices
-    XinV          : weights input for single layer potential
-    XinK          : weights input for double layer potential
-    Xout_int      : output vector of interior operators
-    Xout_ext      : output vector of exterior operators
-    xi            : x component of center
-    yi            : y component of center
-    zi            : z component of center
-    xj            : x component of gauss nodes
-    yj            : y component of gauss nodes
-    zj            : z component of gauss nodes
-    Area          : Area of triangles
-    normal        : normal of triangles
-    sglInt_int    : singular integrals for V for internal equation
-    sglInt_ext    : singular integrals for V for external equation
-    xk            : position of gauss points on edges
-    wk            : weight of gauss points on edges
-    Xsk           : position of gauss points for near singular integrals
-    Wsk           : weight of gauss points for near singular integrals
-    tree          : tree structure
-    twig          : tree twigs
-    xiSort        : sorted x component of center
-    yiSort        : sorted y component of center
-    ziSort        : sorted z component of center
-    xjSort        : sorted x component of gauss nodes
-    yjSort        : sorted y component of gauss nodes
-    zjSort        : sorted z component of gauss nodes
-    xcSort        : sorted x component box centers according to M2P_list array
-    ycSort        : sorted y component box centers according to M2P_list array
-    zcSort        : sorted z component box centers according to M2P_list array
-    AreaSort      : sorted array of areas
-    sglInt_intSort: sorted array of singular integrals for V for internal equation
-    sglInt_extSort: sorted array of singular integrals for V for external equation
-    unsort        : array of indices to unsort targets
-    triangleSort  : sorted array of triangles
-    sortTarget    : array of indices to sort targets
-    sortSource    : array of indices to sort sources
-    offsetSource  : array with offsets to sorted source array
-    offsetTarget  : array with offsets to sorted target array
-    sizeTarget    : array with number of targets pero twig
-    offsetTwigs   : offset to twig in P2P list array
-    P2P_list      : pointers to twigs for P2P interaction list
-    offsetMlt     : offset to multipoles in M2P list array
-    M2P_list      : pointers to boxes for M2P interaction list
-    Precond       : Sparse representation of preconditioner for self interaction block
-    Ein           : Permitivitty inside surface
-    Eout          : Permitivitty outside surface
-    E_hat         : ratio of Ein/Eout
-    kappa_in      : kappa inside surface
-    kappa_out     : kappa inside surface
-    LorY_in       : Laplace or Yukawa in inner region
-    LorY_out      : Laplace or Yukawa in outer region
-    surf_type     : Surface type: internal_cavity (=0), stern or dielecric_interface (=1)
-    phi0          : Known surface potential (dirichlet) or derivative of potential (neumann)
-    phi           : Potential on surface
-    dphi          : Derivative of potential on surface
+    triangle      : indices to triangle vertices.
+    vertex        : position of vertices.
+    XinV          : weights input for single layer potential.
+    XinK          : weights input for double layer potential.
+    Xout_int      : output vector of interior operators.
+    Xout_ext      : output vector of exterior operators.
+    xi            : x component of center.
+    yi            : y component of center.
+    zi            : z component of center.
+    xj            : x component of gauss nodes.
+    yj            : y component of gauss nodes.
+    zj            : z component of gauss nodes.
+    Area          : Area of triangles.
+    normal        : normal of triangles.
+    sglInt_int    : singular integrals for V for internal equation.
+    sglInt_ext    : singular integrals for V for external equation.
+    xk            : position of gauss points on edges.
+    wk            : weight of gauss points on edges.
+    Xsk           : position of gauss points for near singular integrals.
+    Wsk           : weight of gauss points for near singular integrals.
+    tree          : tree structure.
+    twig          : tree twigs.
+    xiSort        : sorted x component of center.
+    yiSort        : sorted y component of center.
+    ziSort        : sorted z component of center.
+    xjSort        : sorted x component of gauss nodes.
+    yjSort        : sorted y component of gauss nodes.
+    zjSort        : sorted z component of gauss nodes.
+    xcSort        : sorted x component box centers according to M2P_list array.
+    ycSort        : sorted y component box centers according to M2P_list array.
+    zcSort        : sorted z component box centers according to M2P_list array.
+    AreaSort      : sorted array of areas.
+    sglInt_intSort: sorted array of singular integrals for V for internal equation.
+    sglInt_extSort: sorted array of singular integrals for V for external equation.
+    unsort        : array of indices to unsort targets.
+    triangleSort  : sorted array of triangles.
+    sortTarget    : array of indices to sort targets.
+    sortSource    : array of indices to sort sources.
+    offsetSource  : array with offsets to sorted source array.
+    offsetTarget  : array with offsets to sorted target array.
+    sizeTarget    : array with number of targets pero twig.
+    offsetTwigs   : offset to twig in P2P list array.
+    P2P_list      : pointers to twigs for P2P interaction list.
+    offsetMlt     : offset to multipoles in M2P list array.
+    M2P_list      : pointers to boxes for M2P interaction list.
+    Precond       : Sparse representation of preconditioner for self interaction block.
+    Ein           : Permitivitty inside surface.
+    Eout          : Permitivitty outside surface.
+    E_hat         : ratio of Ein/Eout.
+    kappa_in      : kappa inside surface.
+    kappa_out     : kappa inside surface.
+    LorY_in       : Laplace or Yukawa in inner region.
+    LorY_out      : Laplace or Yukawa in outer region.
+    surf_type     : Surface type: internal_cavity (=0), stern or dielecric_interface (=1).
+    phi0          : Known surface potential (dirichlet) or derivative of potential (neumann).
+    phi           : Potential on surface.
+    dphi          : Derivative of potential on surface.
 
     # Device data
 
@@ -196,26 +196,26 @@ class Surface():
 
 class Field():
     """
-    Class for 
+    Field class
 
     Attributes:
     -----------
 
-    parent: Pointer to "parent" surface
-    child : Pointer to "children" surfaces
-    LorY  : 1: Laplace, 2: Yukawa
-    kappa : inverse of Debye length
-    E     : dielectric constant
-    xq    : position of charges
-    q     : value of charges
+    parent: Pointer to "parent" surface.
+    child : Pointer to "children" surfaces.
+    LorY  : 1: Laplace, 2: Yukawa.
+    kappa : inverse of Debye length.
+    E     : dielectric constant.
+    xq    : position of charges.
+    q     : value of charges.
     coul  : 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
 
     # Device data
 
-    xq_gpu: x position of charges on gpu
-    yq_gpu: y position of charges on gpu
-    zq_gpu: z position of charges on gpu
-    q_gpu : value of charges on gpu
+    xq_gpu: x position of charges on gpu.
+    yq_gpu: y position of charges on gpu.
+    zq_gpu: z position of charges on gpu.
+    q_gpu : value of charges on gpu.
 
     """
     def __init__(self):
@@ -238,19 +238,19 @@ class Field():
 
 class Timing():
     """
-    Class for 
+    Timing class 
 
     Attributes:
     -----------
-    time_an   : 
-    time_P2P  : 
-    time_P2M  : 
-    time_M2M  : 
-    time_M2P  : 
-    time_trans: 
-    time_sort : 
-    time_mass : 
-    AI_int    : 
+    time_an   : float, time spent in solving the analytical.  
+    time_P2P  : float, time spent in compute the P2P part of the treecode.
+    time_P2M  : float, time spent in compute the P2M part of the treecode.
+    time_M2M  : float, time spent in compute the M2M part of the treecode.
+    time_M2P  : float, time spent in compute the M2P part of the treecode.
+    time_trans: float, 
+    time_sort : float,
+    time_mass : float, 
+    AI_int    : int, 
 
     """
     def __init__(self):
@@ -267,7 +267,36 @@ class Timing():
 
 class Parameters():
     """
-    Class for 
+    Parameters class.
+    
+    Attributes:
+    -----------
+
+    kappa        :  float, inverse of Debye length.
+    restart      :  int, Restart of GMRES.
+    tol          :  float, Tolerance of GMRES.
+    max_iter     :  int, Max number of GMRES iterations.
+    P            :  int, Order of Taylor expansion.
+    eps          :  int, Epsilon machine.
+    Nm           :  int, Number of terms in Taylor expansion.
+    NCRIT        :  int, Max number of targets per twig box.
+    theta        :  float, MAC criterion for treecode.
+    K            :  int, Number of Gauss points per element.
+    K_fine       :  int, Number of Gauss points per element for near singular integrals.
+    threshold    :  float, L/d criterion for semi-analytic intergrals.
+    Nk           :  int, Gauss points per side for semi-analytical integrals.
+    BSZ          :  int, CUDA block size.
+    Nround       :  int, Max size of sorted target array.
+    BlocksPerTwig:  int, Number of CUDA blocks that fit per tree twig.
+    N            :  int, Total number of elements.
+    Neq          :  int, Total number of equations.
+    qe           :  float, Charge of an electron (1.60217646e-19).
+    Na           :  float, Avogadro's number (6.0221415e23).
+    E_0          :  float, Vacuum dielectric constant (8.854187818e-12).
+    REAL         :  Data type.
+    E_field      :  list, Regions where energy will be calculated.
+    GPU          :  int, =1: with GPU, =0: no GPU.
+ 
     """
     def __init__(self):
         self.kappa         = 0.              # inverse of Debye length
@@ -297,6 +326,31 @@ class Parameters():
 
 
 class IndexConstant():
+
+    """
+    Parameters class.
+    
+    Attributes:
+    -----------
+
+    II         : 
+    JJ         :  
+    KK         :  
+    index      : 
+    index_small:
+    index_large:
+    index_ptr  :
+    combII     :
+    combJJ     : 
+    combKK     : 
+    IImii      :   
+    JJmjj      : 
+    KKmkk      : 
+
+    # Device data
+
+    indexDev   :
+    """
     def __init__(self):
         self.II = []
         self.JJ = []
