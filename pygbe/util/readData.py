@@ -221,7 +221,7 @@ def readFields(filename):
     return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
 
 
-def readSurf(filename):
+def read_surface(filename):
 
     files = []
     surf_type = []
