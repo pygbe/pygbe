@@ -661,7 +661,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     kernel     : pycuda source module.
     timing     : class, it contains timing information for different parts of 
                         the code.
-    ind0       : array, it contains the indices related to the treecode computation. 
+    ind0       : array, it contains the indices related to the treecode 
+                        computation. 
 
     Returns:
     --------
