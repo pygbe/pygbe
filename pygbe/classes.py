@@ -80,8 +80,8 @@ class Surface():
     E_hat         : float, ratio of Ein/Eout.
     kappa_in      : float, kappa inside surface.
     kappa_out     : float, kappa inside surface.
-    LorY_in       : int, Laplace (0) or Yukawa (1) in inner region.
-    LorY_out      : int, Laplace (0) or Yukawa (1) in outer region.
+    LorY_in       : int, Laplace (1) or Yukawa (2) in inner region.
+    LorY_out      : int, Laplace (1) or Yukawa (2) in outer region.
     surf_type     : int, Surface type: internal_cavity (=0), stern or
                          dielecric_interface (=1).
     phi0          : list, known surface potential (dirichlet) or derivative of
