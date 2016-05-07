@@ -40,7 +40,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     s     : int, position of the surface in the surface array.
     LorY  : int, Laplace (1) or Yukawa (2).
     param : class, parameters related to the surface. 
-    ind0  : array, it contains the indices related to the treecode computation. 
+    ind0  : class, it contains the indices related to the treecode computation. 
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -79,7 +79,7 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     s     : int, position of the surface in the surface array.
     LorY  : int, Laplace (1) or Yukawa (2).
     param : class, parameters related to the surface. 
-    ind0  : array, it contains the indices related to the treecode computation. 
+    ind0  : class, it contains the indices related to the treecode computation. 
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -122,7 +122,7 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
     param : class, parameters related to the surface. 
-    ind0  : array, it contains the indices related to the treecode computation. 
+    ind0  : class, it contains the indices related to the treecode computation. 
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -161,7 +161,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
     param : class, parameters related to the surface. 
-    ind0  : array, it contains the indices related to the treecode computation. 
+    ind0  : class, it contains the indices related to the treecode computation. 
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -197,7 +197,7 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
     param : class, parameters related to the surface. 
-    ind0  : array, it contains the indices related to the treecode computation. 
+    ind0  : class, it contains the indices related to the treecode computation. 
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -229,7 +229,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     surf_array : array, contains the surface classes of each region on the
                         surface.
     field_array: array, contains the Field classes of each region on the surface.
-    ind0       : array, it contains the indices related to the treecode computation. 
+    ind0       : class, it contains the indices related to the treecode computation. 
     param      : class, parameters related to the surface.     
     timing     : class, it contains timing information for different parts of 
                         the code.
@@ -362,7 +362,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     kernel     : pycuda source module.
     timing     : class, it contains timing information for different parts of 
                         the code.
-    ind0       : array, it contains the indices related to the treecode computation. 
+    ind0       : class, it contains the indices related to the treecode computation. 
 
     Returns:
     --------
@@ -661,7 +661,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     kernel     : pycuda source module.
     timing     : class, it contains timing information for different parts of 
                         the code.
-    ind0       : array, it contains the indices related to the treecode 
+    ind0       : class, it contains the indices related to the treecode 
                         computation. 
 
     Returns:
