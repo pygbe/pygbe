@@ -91,21 +91,24 @@ class Surface():
 
     # Device data:
 
-    xiDev        : list, x component of center (on the GPU).
-    yiDev        : list, y component of center (on the GPU).
-    ziDev        : list, z component of center (on the GPU).
-    xjDev        : list, x component of gauss nodes (on the GPU).
-    yjDev        : list, y component of gauss nodes (on the GPU).
-    zjDev        : list, z component of gauss nodes (on the GPU).
-    xcDev        :
-    ycDev        :
-    zcDev        :
+    xiDev        : list, sorted x component of center (on the GPU).
+    yiDev        : list, sorted y component of center (on the GPU).
+    ziDev        : list, sorted z component of center (on the GPU).
+    xjDev        : list, sorted x component of gauss nodes (on the GPU).
+    yjDev        : list, sorted y component of gauss nodes (on the GPU).
+    zjDev        : list, sorted z component of gauss nodes (on the GPU).
+    xcDev        : list, sorted x component of the box centers according to
+                         M2P_list array (on the GPU).
+    ycDev        : list, sorted y component of the box centers according to
+                         M2P_list array (on the GPU).
+    zcDev        : list, sorted z component of the box centers according to
+                         M2P_list array (on the GPU).
     AreaDev      : list, areas of triangles (on the GPU).
     sglInt_intDev: list, singular integrals for V for internal equation (on the 
                          GPU).
     sglInt_extDev: list, singular integrals for V for external equation (on the
                          GPU).
-    vertexDev    :
+    vertexDev    : list, sorted vertex of the triangles.
     sizeTarDev   : list, number of targets per twig (on the GPU). 
     offSrcDev    : list, offsets to sorted source array (on the GPU).
     offMltDev    : list, offset to multipoles in M2P list array (on the GPU).
@@ -118,8 +121,8 @@ class Surface():
                          (on the GPU).
     WskDev       : list, weight of gauss points for near singular integrals (on
                          the GPU).
-    kDev         :
-
+    kDev         : list, quadrature number of each quadrature point, in order. 
+                         (on the GPU)  
     """
     def __init__(self):
         self.triangle = []  # indices to triangle vertices
@@ -230,7 +233,6 @@ class Field():
     yq_gpu: y position of charges on GPU.
     zq_gpu: z position of charges on GPU.
     q_gpu : value of charges on GPU.
-
     """
     def __init__(self):
         self.parent = []    # Pointer to "parent" surface
@@ -266,7 +268,6 @@ class Timing():
     time_sort : float, time spent in sorting data to send to the GPU.
     time_mass : float, time spent in compute the mass of the sources in treecode.
     AI_int    : int, counter of the amount of near singular integrals solved.
-
     """
     def __init__(self):
         self.time_an    = 0.
@@ -312,7 +313,6 @@ class Parameters():
     REAL         :  Data type.
     E_field      :  list, Regions where energy will be calculated.
     GPU          :  int, =1: with GPU, =0: no GPU.
- 
     """
     def __init__(self):
         self.kappa         = 0.              # inverse of Debye length
@@ -342,7 +342,6 @@ class Parameters():
 
 
 class IndexConstant():
-
     """
     It contains the precompute indices required for the treecode computation.
     
