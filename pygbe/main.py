@@ -1,6 +1,9 @@
-'''
-
-'''
+"""
+This is the main function of the program.
+We use a boundary element method (BEM) to perform molecular electrostatics
+calculations with a continuum approach. It calculates solvation energies for
+proteins modeled with any number of dielectric regions.
+"""
 import numpy
 from numpy import pi
 from scipy.misc import factorial
