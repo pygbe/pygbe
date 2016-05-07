@@ -1,3 +1,6 @@
+"""
+It contains the function in charge of the data transfer to the GPU.
+"""
 import numpy
 
 # PyCUDA libraries
@@ -17,11 +20,13 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
 
     Arguments:
     ----------
-    surf_array :
-    field_array: 
-    ind        : 
-    param      : 
-    kernel     :
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.
+    ind        : class, it contains the indices related to the treecode
+                        computation. 
+    param      : class, parameters related to the surface. 
+    kernel: pycuda source module.
 
     '''
 
