@@ -218,21 +218,21 @@ class Field():
     Attributes:
     -----------
 
-    parent: Pointer to "parent" surface.
-    child : Pointer to "children" surfaces.
-    LorY  : 1: Laplace, 2: Yukawa.
-    kappa : inverse of Debye length.
-    E     : dielectric constant.
-    xq    : position of charges.
-    q     : value of charges.
-    coul  : 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
+    parent: list, Pointer to "parent" surface.
+    child : list, Pointer to "children" surfaces.
+    LorY  : int, 1: Laplace, 2: Yukawa.
+    kappa : float, inverse of Debye length.
+    E     : float, dielectric constant.
+    xq    : list, position of charges.
+    q     : list, value of charges.
+    coul  : int, 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
 
     # Device data
 
-    xq_gpu: x position of charges on GPU.
-    yq_gpu: y position of charges on GPU.
-    zq_gpu: z position of charges on GPU.
-    q_gpu : value of charges on GPU.
+    xq_gpu: list, x position of charges on GPU.
+    yq_gpu: list, y position of charges on GPU.
+    zq_gpu: list, z position of charges on GPU.
+    q_gpu : list, value of charges on GPU.
     """
     def __init__(self):
         self.parent = []    # Pointer to "parent" surface
