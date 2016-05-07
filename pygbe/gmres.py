@@ -73,7 +73,6 @@ def PlaneRotation(H, cs, sn, s, i, R):
 
     '''
     
-  
 
     Arguments:
     ----------
@@ -106,25 +105,28 @@ def PlaneRotation(H, cs, sn, s, i, R):
 
 def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
-    '''
+    """
     GMRES solver 
 
     Arguments:
     ----------
-    surf_array :
-    field_array:
-    X          : array, initial guess 
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.
+    X          : array, initial guess. 
     b          : array, right hand side.
-    param      :  
-    ind0       :
-    timing     :
-    kernel     :
+    param      : class, parameters related to the surface.     
+    ind0       : class, it contains the indices related to the treecode 
+                        computation.     
+    timing     : class, it contains timing information for different parts of 
+                        the code.
+    kernel     : pycuda source module.
 
     Returns:
     --------
-    X          :  array, an update guess to the solution Ax=b where A is 
+    X          : array, an update guess to the solution Ax=b where A is 
 
-    '''
+    """
 
     N = len(b)
     V = numpy.zeros((param.restart + 1, N))
