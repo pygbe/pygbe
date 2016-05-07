@@ -1,22 +1,20 @@
-'''
-Prints output with main information.
-'''
+"""
+Prints output with the main information.
+"""
 import numpy 
 
 # yapf: disable
 def printSummary(surf_array, field_array, param):
-
-    '''
+    """
     Prints a summary with the main information of the run.
 
     Arguments:
     ----------
-    
-    surf_array :
-    field_array:
-    param:
-
-    '''
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.
+    param      : class, parameters related to the surface. 
+    """
     
     Nsurf = len(surf_array)
     print 28 * '-' + '\n'
