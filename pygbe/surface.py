@@ -1,3 +1,7 @@
+"""
+It contains the necessary functions to set up the surface to be solved. 
+"""
+
 import time
 import numpy
 from scipy import linalg
@@ -12,19 +16,20 @@ from classes import Surface, Field
 
 
 def initializeSurf(field_array, filename, param):
-    '''
-    Initialize the surface 
+    """
+    Initialize the surface of the molecule.  
 
     Arguments:
     ----------
-    field_array: 
-    filename   : 
-    param      : 
+    field_array: array, contains the Field classes of each region on the surface.
+    filename   : name of the file that contains the surface information.
+    param      : class, parameters related to the surface. 
 
     Returns:
     --------
-    surf_array : 
-    '''
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    """
     surf_array = []
 
     # Read filenames for surfaces
@@ -81,13 +86,13 @@ def zeroAreas(s, triangle_raw, Area_null):
 
     Arguments:
     ----------
-    s           : surface 
-    triangle_raw: triangle list
-    Area_null   : list
+    s           : class, surface where we whan to look for zero areas. 
+    triangle_raw: list, triangles of the surface.
+    Area_null   : list, contains the zero areas.
 
     Returns:
     --------
-    Area_null   : list with the indices of the triangles with zero-areas.
+    Area_null   : list, indices of the triangles with zero-areas.
     """
     for i in range(len(triangle_raw)):
         L0 = s.vertex[triangle_raw[i, 1]] - s.vertex[triangle_raw[i, 0]]
@@ -100,19 +105,24 @@ def zeroAreas(s, triangle_raw, Area_null):
 
 
 def fill_surface(surf, param):
-    '''
-    Fill the surface 
-
+    """
+    It fills the surface with all the necessary information to solve it.
+    
+    -It sets the Gauss points.
+    -It generates tree, computes the indices and precompute terms for M2M.
+    -It generates preconditioner.
+    -It computes the diagonal integral for internal and external equations.
+    
     Arguments:
     ----------
-    surf     : 
-    param    : 
+    surf     : class, surface that we are studying.
+    param    : class, parameters related to the surface we are studying.
 
     Returns:
     --------
-    time_sort: 
+    time_sort: float, time spent in sorting the data needed for the treecode.
 
-    '''
+    """
 
     N = len(surf.triangle)
     Nj = N * param.K
@@ -241,19 +251,18 @@ def fill_surface(surf, param):
 
 
 def initializeField(filename, param):
-    '''
-    Initialize the Field 
+    """
+    Initialize all the regions in the surface to be solved.
 
     Arguments:
     ----------
-    filename   : 
-    param      : 
+    filename   : name of the file that contains the surface information.
+    param      : class, parameters related to the surface.
 
     Returns:
     --------
-    field_array: 
-
-    '''
+    field_array: array, contains the Field classes of each region on the surface.
+    """
 
     LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(
         filename)
@@ -306,17 +315,15 @@ def initializeField(filename, param):
 
 
 def fill_phi(phi, surf_array):
-    '''
-    It .
+    """
+    It places the result vector on surface structure.
 
     Arguments:
     ----------
-    phi        : 
-    surf_array :
-
-    '''
-
-    # Places the result vector on surf structure
+    phi        : array, result vector.
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    """
 
     s_start = 0
     for i in range(len(surf_array)):
