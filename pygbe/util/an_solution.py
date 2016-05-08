@@ -1,4 +1,6 @@
 """
+It contains the functions to compute the cases that presents an analytical
+solutions.
 All functions output the analytical solution in kcal/mol
 """
 import numpy
