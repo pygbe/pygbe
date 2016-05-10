@@ -1,4 +1,6 @@
 """
+It contains the functions to compute the cases that presents an analytical
+solutions.
 All functions output the analytical solution in kcal/mol
 """
 import numpy
@@ -10,7 +12,24 @@ from scipy.linalg import solve
 
 
 def an_spherical(q, xq, E_1, E_2, E_0, R, N):
+    """
+    It computes the analytical solution of .
 
+    Arguments:
+    ----------
+    q  : 
+    xq :
+    E_1: float, 
+    E_2: float,
+    E_0: float,
+    R  : float,
+    N  : int, 
+
+    Returns:
+    -------- 
+    PHI: array, 
+
+    """
     PHI = numpy.zeros(len(q))
     for K in range(len(q)):
         rho = numpy.sqrt(numpy.sum(xq[K]**2))
@@ -38,6 +57,19 @@ def an_spherical(q, xq, E_1, E_2, E_0, R, N):
 
 
 def get_K(x, n):
+    """
+    It computes the  .
+
+    Arguments:
+    ----------
+    x: float, 
+    n: int, 
+    
+    Returns:
+    -------- 
+    K: float, 
+
+    """
 
     K = 0.
     n_fact = factorial(n)
@@ -50,6 +82,26 @@ def get_K(x, n):
 
 
 def an_P(q, xq, E_1, E_2, R, kappa, a, N):
+
+    """
+    It computes the analytical solution of .
+
+    Arguments:
+    ----------
+    q    :  
+    xq   :
+    E_1  : float, 
+    E_2  : float,  
+    R    : float,  
+    kappa: float, 
+    a    : float, 
+    N    : int, 
+
+    Returns:
+    -------- 
+    E_P:  
+
+    """
 
     qe = 1.60217646e-19
     Na = 6.0221415e23
@@ -107,6 +159,25 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
 
 def two_sphere_KimSong(a, R, kappa, E_1, E_2, q):
 
+    """
+    It computes the analytical solution of .
+
+    Arguments:
+    ----------
+    a    :  
+    R    :
+    kappa: float, 
+    E_1  : float, 
+    E_2  : float,  
+    q    :   
+
+    Returns:
+    -------- 
+    Einter  : float, 
+    E1sphere: float,
+    E2sphere: float, 
+    """
+
     E_hat = E_2 / E_1
     qe = 1.60217646e-19
     Na = 6.0221415e23
@@ -132,6 +203,24 @@ def two_sphere_KimSong(a, R, kappa, E_1, E_2, q):
 
 
 def two_sphere(a, R, kappa, E_1, E_2, q):
+    """
+    It computes the analytical solution of .
+
+    Arguments:
+    ----------
+    a    :  
+    R    :
+    kappa: float, 
+    E_1  : float, 
+    E_2  : float,  
+    q    :   
+
+    Returns:
+    -------- 
+    Einter  : float, 
+    E1sphere: float,
+    E2sphere: float, 
+    """
 
     N = 20  # Number of terms in expansion
 
@@ -208,30 +297,110 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
 
 
 def constant_potential_single_point(phi0, a, r, kappa):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi0 :  
+    a    :
+    r    :
+    kappa: float, 
+
+    Returns:
+    -------- 
+    phi  :
+    """
+
     phi = a / r * phi0 * numpy.exp(kappa * (a - r))
+    
     return phi
 
 
 def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    sigma0 :  
+    a      :
+    r      :
+    kappa  : float,
+    epsilon: 
+
+    Returns:
+    -------- 
+    phi  :
+    """
+
     dphi0 = -sigma0 / epsilon
     phi = -dphi0 * a * a / (1 + kappa * a) * numpy.exp(kappa * (a - r)) / r
+  
     return phi
 
 
 def constant_potential_single_charge(phi0, radius, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi0   :  
+    radius :
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    sigma  :
+    """
     dphi = -phi0 * ((1. + kappa * radius) / radius)
     sigma = -epsilon * dphi  # Surface charge
+    
     return sigma
 
 
 def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    sigma0 :  
+    radius :
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    phi    :
+    """
     dphi = -sigma0 / epsilon
     phi = -dphi * radius / (1. + kappa * radius)  # Surface potential
+
     return phi
 
 
 def constant_charge_twosphere_HsuLiu(sigma01, sigma02, r1, r2, R, kappa,
                                      epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    sigma01:  
+    sigma02:  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     gamma1 = -0.5 * (1 / (kappa * r1) -
                      (1 + 1 / (kappa * r1)) * numpy.exp(-2 * kappa * r1))
@@ -270,6 +439,24 @@ def constant_charge_twosphere_HsuLiu(sigma01, sigma02, r1, r2, R, kappa,
 
 def constant_charge_twosphere_bell(sigma01, sigma02, r1, r2, R, kappa,
                                    epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    sigma01    :  
+    sigma02    :  
+    r1         :
+    r2         :
+    R          :    
+    kappa      : float, 
+    epsilon    :
+
+    Returns:
+    -------- 
+    CC0*E_inter:
+    """
+
 
     E_inter = 4 * pi / epsilon * (sigma01 * r1 * r1 / (1 + kappa * r1)) * (
         sigma02 * r2 * r2 / (1 + kappa * r2)) * numpy.exp(-kappa *
@@ -285,6 +472,24 @@ def constant_charge_twosphere_bell(sigma01, sigma02, r1, r2, R, kappa,
 
 
 def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi01  :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
+    
 
     kT = 4.1419464e-21  # at 300K
     qe = 1.60217646e-19
@@ -331,6 +536,23 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
 
 def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi01  :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     kT = 4.1419464e-21  # at 300K
     qe = 1.60217646e-19
@@ -351,6 +573,20 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
 
 def constant_potential_single_energy(phi0, r1, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi0   :  
+    r1     :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E:
+    """
 
     N = 1  # Number of terms in expansion
 
@@ -379,7 +615,20 @@ def constant_potential_single_energy(phi0, r1, kappa, epsilon):
 
 
 def constant_charge_single_energy(phi0, r1, kappa, epsilon):
+    """
+    It computes  .
 
+    Arguments:
+    ----------
+    phi0   :  
+    r1     :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
     N = 20  # Number of terms in expansion
 
     qe = 1.60217646e-19
@@ -409,6 +658,23 @@ def constant_charge_single_energy(phi0, r1, kappa, epsilon):
 
 def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
                                             epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi01  :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     N = 20  # Number of terms in expansion
 
@@ -503,6 +769,23 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
 
 def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
                                          epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi01  :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     N = 20  # Number of terms in expansion
 
@@ -596,6 +879,24 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
 
 
 def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    q      :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    E_1    :
+    E_2    :
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     N = 20  # Number of terms in expansion
 
@@ -695,6 +996,24 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
 
 def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    q      :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    E_1    :
+    E_2    :
+
+    Returns:
+    -------- 
+    E_inter:
+    """
 
     N = 20  # Number of terms in expansion
 
@@ -795,6 +1114,23 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
 def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
                                            epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    phi01  :  
+    phi02  :  
+    r1     :
+    r2     :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
     #   From Carnie+Chan 1993
 
     N = 20  # Number of terms in expansion
@@ -858,6 +1194,22 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
 
 
 def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
+    """
+    It computes  .
+
+    Arguments:
+    ----------
+    sigma  :  
+    a      :
+    R      :    
+    kappa  : float, 
+    epsilon:
+
+    Returns:
+    -------- 
+    E_inter:
+    """
+
     #   From Carnie+Chan 1993
 
     N = 10  # Number of terms in expansion
