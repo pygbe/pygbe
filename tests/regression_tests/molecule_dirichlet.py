@@ -3,6 +3,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import numpy
+import shutil
 import re
 import sys
 import math
@@ -45,7 +46,7 @@ def scanOutput(filename):
 
 
 
-def run_regression(mesh, problem_folder, param):
+def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
     """
     Runs regression tests over a series of mesh sizes
 
@@ -75,45 +76,59 @@ def run_regression(mesh, problem_folder, param):
         print 'Start run for mesh '+mesh[i]
         outfile = pygbe(['',
                          '-p', '{}'.format(param),
-                         '-c', '{}_{}.config'.format(problem_folder, mesh[i]),
-                         '-o', 'output_{}'.format(mesh[i]),
+                         '-c', '{}_{}.config'.format(test_name, mesh[i]),
+                         '-o', 'output_{}_{}'.format(test_name, mesh[i]),
                          '-g', '../../pygbe/',
                          '{}'.format(problem_folder),], return_output_fname=True)
 
         print 'Scan output file'
-        outfile = os.path.join('{}'.format(problem_folder),
-                            'output_{}'.format(mesh[i]),
-                            outfile)
+        outfolder = os.path.join('{}'.format(problem_folder),
+                                 'output_{}_{}'.format(test_name, mesh[i]))
+        outfile = os.path.join(outfolder, outfile)
         N[i],iterations[i],Esolv[i],Esurf[i],Ecoul[i],Time[i] = scanOutput(outfile)
+        if delete_output:
+            shutil.rmtree(outfolder)
 
 
     return(N, iterations, Esolv, Esurf, Ecoul, Time)
 
 
 def main():
+    test_outputs = {}
+    problem_folder = 'input_files'
+
     #molecule_dirichlet
-    mesh = ['500','2K','8K','32K','130K']
+    mesh = ['500','2K']#,'8K','32K','130K']
     param = 'sphere_fine.param'
-    problem_folder = 'molecule_dirichlet'
-    N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, problem_folder, param)
+    test_name = 'molecule_dirichlet'
+    N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+    test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     #molecule_single_center
-    mesh = ['500','2K','8K','32K','130K']
+    mesh = ['500','2K']#,'8K','32K','130K']
     param = 'sphere_fine.param'
-    problem_folder = 'molecule_single_center'
-    N_mol, iterations_mol, Esolv_mol, Esurf_mol, Ecoul_mol, Time_mol = run_regression(mesh, problem_folder, param)
+    test_name = 'molecule_single_center'
+    N, iterations, Esolv, Esurf, Ecoul, Time= run_regression(mesh, test_name, problem_folder, param)
+    test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     #dirichlet_surface
-    mesh = ['500','2K','8K','32K','130K']
+    mesh = ['500','2K']#,'8K','32K','130K']
     param = 'sphere_fine.param'
-    problem_folder = 'dirichlet_surface'
-    N_surf, iterations_surf, Esolv_surf, Esurf_surf, Ecoul_surf, Time_surf = run_regression(mesh, problem_folder, param)
+    test_name = 'dirichlet_surface'
+    N, iterations, Esolv, Esurf, Ecoul, Time= run_regression(mesh, test_name, problem_folder, param)
+    test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
+    Esolv, Esurf, Ecoul = test_outputs['molecule_dirichlet'][2:5]
+    Esolv_mol, Esurf_mol, Ecoul_mol = test_outputs['molecule_single_center'][2:5]
+    Esolv_surf, Esurf_surf, Ecoul_surf = test_outputs['dirichlet_surface'][2:5]
+    Time = test_outputs['molecule_dirichlet'][-1]
+    Time_mol = test_outputs['molecule_single_center'][-1]
+    Time_surf = test_outputs['dirichlet_surface'][-1]
 
     Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
     total_time = Time+Time_mol+Time_surf
 
-    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)  
+    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)
 
     error = abs(Einter-analytical)/abs(analytical)
 
