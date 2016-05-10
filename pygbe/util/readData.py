@@ -288,20 +288,29 @@ def readFields(filename):
         
     Returns:
     -------
-    LorY    :
-    pot     :
-    E       :
-    kappa   :
-    charges :
-    coulomb :
-    qfile   :
-    Nparent :
-    parent  : file of the parent surface mesh, according to their position in
-              the FILE list, starting from 0 (eg. if the mesh file for the
-              parent is the third one specified in the FILE section, parent=2)
-    Nchild  : int, number of child surfaces (surfaces completely contained in this
-              region).
-    child   :
+    LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
+                    corresponding to each region.
+    pot     : list, it contains integers indicating to calculate (1) or not (2)
+                    the energy in this region.
+    E       : list, it contains floats with the dielectric constant of each
+                    region.
+    kappa   : list, it contains floats with the reciprocal of Debye length value
+                    of each region.
+    charges : list, it contains integers indicating if there are (1) or not (0)
+                    charges in this region.
+    coulomb : list, it contains integers indicating to calculate (1) or not (2)
+                    the coulomb energy in this region.
+    qfile   : list, location of the '.pqr' file with the location of the charges.    
+    Nparent : list, it contains integers indicating the number of 'parent'
+                    surfaces (surface containing this region)
+    parent  : list, it contains the file of the parent surface mesh, according 
+                    to their position in the FILE list, starting from 0 (eg. if
+                    the mesh file for the parent is the third one specified in 
+                    the FILE section, parent=2)
+    Nchild  : list, it contains integers indicating number of child surfaces
+                    (surfaces completely contained in this region).
+    child   :  list, it contains position of the mesh files for the children 
+                     surface in the FILE section.
     """
 
     LorY = []
@@ -339,7 +348,8 @@ def readFields(filename):
 
 def read_surface(filename):
     """
-    It reads the type of surface from the configuration file.
+    It reads the type of surface of each region on the surface from the 
+    configuration file.
 
     Arguments:
     ----------
@@ -347,9 +357,11 @@ def read_surface(filename):
               (filename.config)  
     Returns:
     -------
-    files    :
-    surf_type:
-    phi0_file:
+    files    : list, it contains the files corresponding to each region in the
+                     surface.
+    surf_type: list, it contains the type of surface of each region.
+    phi0_file: list, it contains the constant potential/surface charge for the
+                     cases where it applies. (dirichlet or neumann surfaces)
     """
 
     files = []
