@@ -1,3 +1,8 @@
+"""
+It contains the functions to read the all the data from the meshes files, its
+parameters and charges files. 
+"""
+
 import numpy
 import os
 
@@ -26,6 +31,20 @@ def readVertex2(filename, REAL):
 
 
 def readVertex(filename, REAL):
+    """
+    It reads the vertex of the triangles from the mesh file and it stores
+    them on an array.
+
+    Arguments:
+    ----------
+    filename: name of the file that contains the surface information.
+              (filename.vert)
+    REAL    : data type.
+    
+    Returns:
+    -------
+    vertex: array, vertices of the triangles.
+    """
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=REAL)
     vertex = X[:, 0:3]
@@ -50,6 +69,21 @@ def readTriangle2(filename):
 
 
 def readTriangle(filename, surf_type):
+    """
+    It reads the triangles from the mesh file and it stores them on an
+    array.
+
+    Arguments:
+    ----------
+    filename : name of the file that contains the surface information.
+               (filename.faces)
+    surf_type: str, type of surface.
+    
+    Returns:
+    -------
+    triangle: array, triangles indices.
+    """
+
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=int)
     triangle = numpy.zeros((len(X), 3), dtype=int)
@@ -71,6 +105,20 @@ def readTriangle(filename, surf_type):
 
 
 def readCheck(aux, REAL):
+    """
+    It checks if it is not reading more than one term.
+
+    Arguments:
+    ----------
+    aux : .
+    REAL: data type.
+    
+    
+    Returns:
+    -------
+    X: array, .
+    """
+
     # check if it is not reading more than one term
     cut = [0]
     i = 0
@@ -87,6 +135,21 @@ def readCheck(aux, REAL):
 
 
 def readpqr(filename, REAL):
+    """
+    It reads the pqr file, file that contains the charges information.
+
+    Arguments:
+    ----------
+    filename : name of the file that contains the surface information.
+               (filename.pqr)
+    REAL: data type.
+    
+    Returns:
+    -------
+    pos: (Nqx3) array, positions of the charges. 
+    q  : (Nqx1) array, value of the charges. 
+    Nq : int, number of charges.
+    """
 
     pos = []
     q = []
@@ -126,6 +189,20 @@ def readpqr(filename, REAL):
 
 
 def readcrd(filename, REAL):
+    """
+    It reads the crd file, file that contains the charges information.
+
+    Arguments:
+    ----------
+    filename : name of the file that contains the surface information.
+    REAL: data type.
+    
+    Returns:
+    -------
+    pos: (Nqx3) array, positions of the charges. 
+    q  : (Nqx1) array, value of the charges. 
+    Nq : int, number of charges.
+    """
 
     pos = []
     q = []
@@ -153,6 +230,19 @@ def readcrd(filename, REAL):
 
 
 def readParameters(param, filename):
+    """
+    It reads the parameters    .
+
+    Arguments:
+    ----------
+    param   : class, parameters related to the surface.     
+    filename: name of the file that contains the parameters information. 
+              (filename.param)
+        
+    Returns:
+    -------
+    dataType:
+    """
 
     val = []
     for line in file(filename):
@@ -186,7 +276,33 @@ def readParameters(param, filename):
     return dataType
 
 
-def readFields(filename):
+def readFields(filename):  
+    """
+    It reads the physical parameters from the configuration file for each region
+    in the surface and it appends them on the corresponding list.
+
+    Arguments:
+    ----------
+    filename: name of the file that contains the physical parameters of each
+              region. (filename.config)
+        
+    Returns:
+    -------
+    LorY    :
+    pot     :
+    E       :
+    kappa   :
+    charges :
+    coulomb :
+    qfile   :
+    Nparent :
+    parent  : file of the parent surface mesh, according to their position in
+              the FILE list, starting from 0 (eg. if the mesh file for the
+              parent is the third one specified in the FILE section, parent=2)
+    Nchild  : int, number of child surfaces (surfaces completely contained in this
+              region).
+    child   :
+    """
 
     LorY = []
     pot = []
@@ -222,6 +338,19 @@ def readFields(filename):
 
 
 def read_surface(filename):
+    """
+    It reads the type of surface from the configuration file.
+
+    Arguments:
+    ----------
+    filename: name of the file that contains the surface type of each region.
+              (filename.config)  
+    Returns:
+    -------
+    files    :
+    surf_type:
+    phi0_file:
+    """
 
     files = []
     surf_type = []
