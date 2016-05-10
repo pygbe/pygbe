@@ -10,7 +10,7 @@ from pygbe.main import main as pygbe
 ITER_REGEX = re.compile('Converged after (\d*) iterations')
 N_REGEX = re.compile('Total elements : (\d*)')
 ESOLV_REGEX = re.compile('Esolv = (\-*\d*\.\d*)\ kcal\/mol')
-ESURF_REGEX = re.compile('Esurf = (\-*\d*\.\d*)\ kcal\/mol')
+ESURF_REGEX = re.compile('[^: ]Esurf = (\-*\d*\.\d*)\ kcal\/mol')
 ECOUL_REGEX = re.compile('Ecoul = (\-*\d*\.\d*)\ kcal\/mol')
 TIME_REGEX = re.compile('Time = (\-*\d*\.\d*)\ s')
 
