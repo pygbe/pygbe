@@ -201,11 +201,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     #check if a custom geometry location has been specified
     #if it has, add an ENV_VAR to handle it
     if args.geometry:
-        if os.path.isdir(args.geometry):
-            os.environ['PYGBE_GEOMETRY'] = args.geometry
-        elif os.path.isdir(os.path.join(os.getcwd(), args.geometry)):
-            os.environ['PYGBE_GEOMETRY'] = os.path.normpath(
-                os.path.join(os.getcwd(), args.geometry))
+        geo_path = os.path.abspath(args.geometry)
+        if os.path.isdir(geo_path):
+            os.environ['PYGBE_GEOMETRY'] = geo_path
         else:
             sys.exit('Invalid geometry prefix provided (Folder not found)')
 
