@@ -49,8 +49,7 @@ def main():
     Time = test_outputs['molecule_dirichlet'][-1]
     Time_mol = test_outputs['molecule_single_center'][-1]
     Time_surf = test_outputs['dirichlet_surface'][-1]
-    N = test_outputs['molecule_dirichlet'][0]
-    iterations = test_outputs['molecule_dirichlet'][1]
+    N, iterations = test_outputs['molecule_dirichlet'][:2]
 
     Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
     total_time = Time+Time_mol+Time_surf

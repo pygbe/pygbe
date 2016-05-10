@@ -28,8 +28,7 @@ def main():
     #load data for analysis
     Esolv, Esurf, Ecoul= test_outputs['dirichlet_surface'][2:5]
     Time= test_outputs['dirichlet_surface'][-1]
-    N = test_outputs['dirichlet_surface'][0]
-    iterations = test_outputs['dirichlet_surface'][1]
+    N, iterations = test_outputs['dirichlet_surface'][:2]
 
     Etotal = Esolv + Esurf + Ecoul
     total_time = Time
