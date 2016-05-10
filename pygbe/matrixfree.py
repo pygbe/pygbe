@@ -1,9 +1,13 @@
+"""
+Matrix free formulation of the matrix vector product in the GMRES. 
+"""
+
 import numpy
 from numpy import pi
 from tree.FMMutils import computeIndices, precomputeTerms
 from tree.direct import coulomb_direct
 from projection import project, project_Kt, get_phir, get_phir_gpu
-from classes import parameters, index_constant
+from classes import Parameters, IndexConstant
 import time
 from util.semi_analytical import GQ_1D
 
@@ -17,10 +21,36 @@ except:
 ## Note: 
 ##  Remember ordering of equations:
 ##      Same order as defined in config file,
-##      with internal equation first and the external equation.
+##      with internal equation first and then the external equation.
 
 
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
+
+    """
+    Self surface interior operator:
+
+    The evaluation point and strengths of the single and double layer potential
+    are on the same surface. When we take the limit, the evaluation point
+    approaches the surface from the inside, then the result is added to the
+    interior equation.
+
+    Arguments:
+    ----------
+    surf  : array, contains all the classes of the surface. 
+    s     : int, position of the surface in the surface array.
+    LorY  : int, Laplace (1) or Yukawa (2).
+    param : class, parameters related to the surface. 
+    ind0  : class, it contains the indices related to the treecode computation. 
+    timing: class, it contains timing information for different parts of the
+                   code.
+    kernel: pycuda source module.
+
+    Returns:
+    --------
+    v     : array, result of the matrix-vector product corresponding to the self
+            interior interaction.
+
+    """
     #    print 'SELF INTERIOR, surface: %i'%s
     K_diag = 2 * pi
     V_diag = 0
@@ -28,10 +58,39 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
     v = K_lyr - V_lyr
+
     return v
 
 
 def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
+    
+    """
+    Self surface exterior operator:
+
+    The evaluation point and the strengths of both the single and double layer
+    potential are on the same surface. When we take the limit, the evaluation 
+    point approaches the surface from the outside, then the result is added to
+    the exterior equation.
+    
+
+    Arguments:
+    ----------
+    surf  : array, contains all the classes of the surface. 
+    s     : int, position of the surface in the surface array.
+    LorY  : int, Laplace (1) or Yukawa (2).
+    param : class, parameters related to the surface. 
+    ind0  : class, it contains the indices related to the treecode computation. 
+    timing: class, it contains timing information for different parts of the
+                   code.
+    kernel: pycuda source module.
+
+    Returns:
+    --------
+    v     : array, result of the matrix-vector product corresponding to the self
+            exterior interaction.
+    K_lyr : array, self exterior double layer potential.
+    V_lyr : array, self exterior single layer potential.
+    """
     #    print 'SELF EXTERIOR, surface: %i, E_hat: %f'%(s, surf.E_hat)
     K_diag = -2 * pi
     V_diag = 0.
@@ -39,10 +98,41 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
     v = -K_lyr + surf.E_hat * V_lyr
+
     return v, K_lyr, V_lyr
 
 
 def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
+    """
+    Non-self exterior operator:
+
+    The evaluation point resides in a surface that is outside the region
+    enclosed by the surface with the strength of the single and double layer
+    potentials. If both surfaces share a common external region, we add the
+    result to the external equation. If they don't share a common external region
+    we add the result to internal equation.
+    
+
+    Arguments:
+    ----------
+    surf  : array, contains all the classes of the surface. 
+    src   : int, position in the array of the source surface (surface that
+                 contains the gauss points).
+    tar   : int, position in the array of the target surface (surface that
+                 contains the collocation points).
+    LorY  : int, Laplace (1) or Yukawa (2).
+    param : class, parameters related to the surface. 
+    ind0  : class, it contains the indices related to the treecode computation. 
+    timing: class, it contains timing information for different parts of the
+                   code.
+    kernel: pycuda source module.
+
+    Returns:
+    --------
+    v     : array, result of the matrix-vector product corresponding to the 
+                   non-self exterior interaction.
+
+    """
     #    print 'NONSELF EXTERIOR, source: %i, target: %i, E_hat: %f'%(src,tar, surf[src].E_hat)
     K_diag = 0
     V_diag = 0
@@ -55,6 +145,32 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 
 
 def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
+    """
+    Non-self interior operator:
+
+    The evaluation point resides in a surface that is inside the region
+    enclosed by the surface with the strength of the single and double layer
+    potentials, and the result has to be added to the exterior equation. 
+
+    Arguments:
+    ----------
+    surf  : array, contains all the classes of the surface. 
+    src   : int, position in the array of the source surface (surface that
+                 contains the gauss points).
+    tar   : int, position in the array of the target surface (surface that
+                 contains the collocation points).
+    LorY  : int, Laplace (1) or Yukawa (2).
+    param : class, parameters related to the surface. 
+    ind0  : class, it contains the indices related to the treecode computation. 
+    timing: class, it contains timing information for different parts of the
+                   code.
+    kernel: pycuda source module.
+
+    Returns:
+    --------
+    v     : array, result of the matrix-vector product corresponding to the 
+                   non-self interior interaction.
+    """
     #    print 'NONSELF INTERIOR, source: %i, target: %i'%(src,tar)
     K_diag = 0
     V_diag = 0
@@ -63,10 +179,34 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
     v = K_lyr - V_lyr
+    
     return v
 
 
 def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
+    """
+    Self interaction for the aparent surface charge (ASC) formulation.  
+    
+
+    Arguments:
+    ----------
+    surf  : array, contains all the classes of the surface. 
+    src   : int, position in the array of the source surface (surface that
+                 contains the gauss points).
+    tar   : int, position in the array of the target surface (surface that
+                 contains the collocation points).
+    LorY  : int, Laplace (1) or Yukawa (2).
+    param : class, parameters related to the surface. 
+    ind0  : class, it contains the indices related to the treecode computation. 
+    timing: class, it contains timing information for different parts of the
+                   code.
+    kernel: pycuda source module.
+
+    Returns:
+    --------
+    v     : array, result of the matrix-vector product corresponding to the 
+                  self interaction in the ASC formulation.
+    """
 
     Kt_diag = -2 * pi * (surf.Eout + surf.Ein) / (surf.Eout - surf.Ein)
     V_diag = 0
@@ -75,10 +215,31 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
                         timing, kernel)
 
     v = -Kt_lyr
+    
     return v
 
 
 def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
+    """
+    It computes the matrix-vector product in the GMRES.  
+
+    Arguments:
+    ----------
+    X          : array, initial vector guess.
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.
+    ind0       : class, it contains the indices related to the treecode computation. 
+    param      : class, parameters related to the surface.     
+    timing     : class, it contains timing information for different parts of 
+                        the code.
+    kernel     : pycuda source module.
+
+    Returns:
+    --------
+    MV         : array, resulting matrix-vector multiplication.
+    """
+    
 
     Nfield = len(field_array)
     Nsurf = len(surf_array)
@@ -189,6 +350,25 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
 
 
 def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
+    """
+    It generate the right hand side (RHS) for the GMRES.
+
+    Arguments:
+    ----------
+    field_array: array, contains the Field classes of each region on the surface.    
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    param      : class, parameters related to the surface.     
+    kernel     : pycuda source module.
+    timing     : class, it contains timing information for different parts of 
+                        the code.
+    ind0       : class, it contains the indices related to the treecode computation. 
+
+    Returns:
+    --------
+    F          : array, RHS.
+    """
+    
     F = numpy.zeros(param.Neq)
 
     #   Point charge contribution to RHS
@@ -468,6 +648,26 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
 
 def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
+
+    """
+    It generate the right hand side (RHS) for the GMRES suitable for the GPU.
+
+    Arguments:
+    ----------
+    field_array: array, contains the Field classes of each region on the surface.    
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    param      : class, parameters related to the surface.     
+    kernel     : pycuda source module.
+    timing     : class, it contains timing information for different parts of 
+                        the code.
+    ind0       : class, it contains the indices related to the treecode 
+                        computation. 
+
+    Returns:
+    --------
+    F          : array, RHS suitable for the GPU.
+    """
 
     F = numpy.zeros(param.Neq)
     REAL = param.REAL
@@ -842,17 +1042,32 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
 
 def calculateEsolv(surf_array, field_array, param, kernel):
+    """
+    It calculates the solvation energy. 
+
+    Arguments:
+    ----------
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.    
+    param      : class, parameters related to the surface.     
+    kernel     : pycuda source module.
+
+    Returns:
+    --------
+    E_solv     : float, solvation energy.
+    """
 
     REAL = param.REAL
 
-    par_reac = parameters()
+    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6
 
-    ind_reac = index_constant()
+    ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)
     precomputeTerms(par_reac.P, ind_reac)
 
@@ -940,6 +1155,19 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
 
 def coulombEnergy(f, param):
+    """
+    It calculates the Coulomb energy .
+
+    Arguments:
+    ----------
+    f    : class, region in the field array where we desire to calculate the
+                  coloumb energy.  
+    param: class, parameters related to the surface.     
+
+    Returns:
+    --------
+    Ecoul: float, coloumb energy.
+    """
 
     point_energy = numpy.zeros(len(f.q), param.REAL)
     coulomb_direct(f.xq[:, 0], f.xq[:, 1], f.xq[:, 2], f.q, point_energy)
@@ -952,17 +1180,32 @@ def coulombEnergy(f, param):
 
 
 def calculateEsurf(surf_array, field_array, param, kernel):
+    """
+    It calculates the surface energy 
+
+    Arguments:
+    ----------
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the surface.    
+    param      : class, parameters related to the surface.     
+    kernel     : pycuda source module.
+
+    Returns:
+    --------
+    E_surf: float, surface energy.
+    """
 
     REAL = param.REAL
 
-    par_reac = parameters()
+    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
     par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6
 
-    ind_reac = index_constant()
+    ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)
     precomputeTerms(par_reac.P, ind_reac)
 

@@ -1,3 +1,9 @@
+"""
+This is the main function of the program.
+We use a boundary element method (BEM) to perform molecular electrostatics
+calculations with a continuum approach. It calculates solvation energies for
+proteins modeled with any number of dielectric regions.
+"""
 import numpy
 from numpy import pi
 from scipy.misc import factorial
@@ -12,9 +18,9 @@ from argparse import ArgumentParser
 # Import self made modules
 from gmres import gmres_solver
 from projection import get_phir
-from classes import (surfaces, timings, parameters, index_constant,
-                     fill_surface, initializeSurf, initializeField,
-                     dataTransfer, fill_phi)
+from classes import Timing, Parameters, IndexConstant
+from gpuio import dataTransfer
+from surface import initializeSurf, fill_surface, initializeField, fill_phi
 from output import printSummary
 from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
@@ -230,7 +236,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     TIC = time.time()
 
     ### Read parameters
-    param = parameters()
+    param = Parameters()
     precision = readParameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
@@ -276,7 +282,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     printSummary(surf_array, field_array, param)
 
     ### Precomputation
-    ind0 = index_constant()
+    ind0 = IndexConstant()
     computeIndices(param.P, ind0)
     precomputeTerms(param.P, ind0)
 
@@ -301,7 +307,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     toc = time.time()
     transfer_time = toc - tic
 
-    timing = timings()
+    timing = Timing()
 
     ### Generate RHS
     print 'Generate RHS'

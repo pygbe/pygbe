@@ -1,3 +1,9 @@
+"""
+It contains the functions to calculate the different potentials:
+-The single and double layer potential.
+-The adjoint double layer potential.
+-The reaction potential. 
+"""
 import numpy
 from numpy import pi
 from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
@@ -14,6 +20,18 @@ import time
 
 
 def getWeights(K):
+    """
+    It gets the weights of the Gauss points. 
+
+    Arguments:
+    ----------
+    K: int, number of Gauss points per element. (1, 3, 4, and 7 are supported)
+
+    Returns:
+    --------
+    w: K-size array, weights of the Gauss points.
+    """
+
     # yapf: disable
     w = numpy.zeros(K)
     if K==1:
@@ -41,6 +59,31 @@ def getWeights(K):
 
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
             ind0, timing, kernel):
+    """
+    It computes the single and double layer potentials.
+
+    Arguments:
+    ----------
+    XK     : array, input for the double layer potential. 
+    XV     : array, input for the single layer potential.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    surfSrc: class, source surface, the one that contains the gauss points. 
+    surfTar: class, target surface, the one that contains the collocation points.
+    K_diag : array, diagonal elements of the double layer integral operator.
+    V_diag : array, diagonal elements of the single layer integral operator.
+    IorE   : int, internal (1) or external (2).
+    self   : int, position in the surface array of the source surface. 
+    param  : class, parameters related to the surface.
+    ind0   : array, it contains the indices related to the treecode computation.
+    timing : class, it contains timing information for different parts of the
+                    code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    K_lyr  : array, double layer potential.
+    V_lyr  : array, single layer potential. 
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -155,6 +198,28 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
 
 def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
                kernel):
+    """
+    It computes the adjoint double layer potential.
+
+    Arguments:
+    ----------
+    XKt    : array, input for the adjoint double layer potential.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    surfSrc: class, source surface, the one that contains the gauss points. 
+    surfTar: class, target surface, the one that contains the collocation points.
+    Kt_diag: array, diagonal elements of the adjoint double layer integral
+                    operator.
+    self   : int, position in the surface array of the source surface. 
+    param  : class, parameters related to the surface.
+    ind0   : array, it contains the indices related to the treecode computation.
+    timing : class, it contains timing information for different parts of the
+                    code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    Kt_lyr: array, adjoint double layer potential.
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -265,6 +330,29 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
 
 
 def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
+    
+    """
+    It computes the reaction potential.
+    To compute this potential we need more terms in the Taylor expansion, that
+    is the reason why we need fine parameters (par_reac class) and a different
+    array of indices (ind_reac) than ind0.
+
+    Arguments:
+    ----------
+    XK      : array, input for the double layer potential. 
+    XV      : array, input for the single layer potential.
+    surface : class, surface where we are computing the reaction potential.
+    xq      : array, it contains the position of the charges.
+    Cells   : array, it contains the tree cells.    
+    par_reac: class, fine parameters related to the surface.
+    ind_reac: array, it contains the indices related to the treecode
+                     computation.
+
+    Returns:
+    --------
+    phi_reac: array, reaction potential.
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    """
 
     REAL = par_reac.REAL
     N = len(XK)
@@ -345,6 +433,24 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
 
 def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
+
+    '''
+    It computes the reaction potential on the GPU  and it brings the data 
+    to the cpu.
+
+    Arguments:
+    ----------
+    XK      : array, input for the double layer potential. 
+    XV      : array, input for the single layer potential.
+    surface : class, surface where we are computing the reaction potential.
+    field   : class, information about the different regions in the molecule. 
+    par_reac: class, fine parameters related to the surface.
+    
+    Returns:
+    --------
+    phir_cpu: array, reaction potential brought from the GPU to the cpu. 
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    '''
 
     REAL = par_reac.REAL
     Nq = len(field.xq)
