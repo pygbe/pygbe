@@ -55,8 +55,7 @@ def main():
     Time = test_outputs['molecule_neumann'][-1]
     Time_mol = test_outputs['molecule_single_center'][-1]
     Time_surf = test_outputs['neumann_surface'][-1]
-    N = test_outputs['molecule_neumann'][0]
-    iterations = test_outputs['molecule_neumann'][1]
+    N, iterations = test_outputs['molecule_neumann'][:2]
 
     Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
     total_time = Time+Time_mol+Time_surf
