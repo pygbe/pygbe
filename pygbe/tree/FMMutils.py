@@ -134,7 +134,6 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     Returns:
     --------
     Ncell:
-
     """
     
     # split_cell splits cell with more than NCRIT particles
@@ -160,6 +159,24 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
 
 
 def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
+    """
+    It generates a target-based tree.
+
+    Arguments:
+    ----------
+    xi      :
+    yi      :
+    zi      : 
+    NCRIT   : int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm      : int, number of multipole coefficients.
+    radius  :
+    x_center: array, 
+
+    Returns:
+    --------
+    Cells: array, cells of the tree.
+    """
     # Target-based tree
 
     C0 = Cell(NCRIT, Nm)
