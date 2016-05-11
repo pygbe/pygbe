@@ -55,7 +55,7 @@ def scanOutput(filename):
     return N, iterations, Esolv, Esurf, Ecoul, Time
 
 
-def report_results(error, N, iterations, Einter, analytical, total_time):
+def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction'):
     """
     Prints out information for the regression tests.
 
@@ -67,12 +67,14 @@ def report_results(error, N, iterations, Einter, analytical, total_time):
             Number of elements in test
         iterations: list of int
             Number of iterations to converge
-        Einter: list of float
-            Interaction energy
+        E: list of float
+            Energy: either Total energy or Interaction energy
         analytical: list of float
             Interaction energy (analytical solution)
         total_time: list of float
             Total wall time of run i
+        energy_type: str
+            Label for energy (default 'Interaction')
     """
 
     flag = 0
@@ -88,7 +90,7 @@ def report_results(error, N, iterations, Einter, analytical, total_time):
 
     print('\nNumber of elements : {}'.format(N))
     print('Number of iteration: {}'.format(iterations))
-    print('Interaction energy : {}'.format(Einter))
+    print('{} energy : {}'.format(energy_type, E))
     print('Analytical solution: {} kcal/mol'.format(analytical))
     print('Error              : {}'.format(error))
     print('Total time         : {}'.format(total_time))
