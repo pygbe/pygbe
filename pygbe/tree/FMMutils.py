@@ -212,9 +212,21 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
 
 
 def findTwigs(Cells, C, twig, NCRIT):
-    # Cells     : array of cells
-    # C         : index of cell in Cells array 
-    # twig      : array with indices of twigs in Cells array
+    """
+    It finds the twig cells, the ones that have <= NCRIT.
+
+    Arguments:
+    ----------
+    Cells: array, cells of the tree.
+    C    : int, index of cell in Cells array.
+    twig : array, indices of twigs in Cells array.
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                structure.
+
+    Returns:
+    --------
+    twig : array, indices of twigs in Cells array.
+    """
 
     if (Cells[C].ntarget >= NCRIT):
         for c in range(8):
