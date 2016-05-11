@@ -9,9 +9,9 @@ from pygbe.main import main as pygbe
 
 ITER_REGEX = re.compile('Converged after (\d*) iterations')
 N_REGEX = re.compile('Total elements : (\d*)')
-ESOLV_REGEX = re.compile('Esolv = (\-*\d*\.\d*)\ kcal\/mol')
+ESOLV_REGEX = re.compile('[^: ]Esolv = (\-*\d*\.\d*)\ kcal\/mol')
 ESURF_REGEX = re.compile('[^: ]Esurf = (\-*\d*\.\d*)\ kcal\/mol')
-ECOUL_REGEX = re.compile('Ecoul = (\-*\d*\.\d*)\ kcal\/mol')
+ECOUL_REGEX = re.compile('[^: ]Ecoul = (\-*\d*\.\d*)\ kcal\/mol')
 TIME_REGEX = re.compile('Time = (\-*\d*\.\d*)\ s')
 
 def picklesave(test_outputs):
@@ -50,6 +50,45 @@ def scanOutput(filename):
 
 
     return N, iterations, Esolv, Esurf, Ecoul, Time
+
+
+def report_results(error, N, iterations, Einter, analytical, total_time):
+    """
+    Prints out information for the regression tests.
+
+    Inputs:
+    -------
+        error: list of float
+            L2 Norm of error against analytical solution
+        N: list of int
+            Number of elements in test
+        iterations: list of int
+            Number of iterations to converge
+        Einter: list of float
+            Interaction energy
+        analytical: list of float
+            Interaction energy (analytical solution)
+        total_time: list of float
+            Total wall time of run i
+    """
+
+    flag = 0
+    for i in range(len(error)-1):
+        rate = error[i]/error[i+1]
+        if abs(rate-4)>0.6:
+            flag = 1
+            print('Bad convergence for mesh {} to {}, with rate {}'.
+                  format(i, i+1, rate))
+
+    if flag==0:
+        print('Passed convergence test!')
+
+    print('\nNumber of elements : {}'.format(N))
+    print('Number of iteration: {}'.format(iterations))
+    print('Interaction energy : {}'.format(Einter))
+    print('Analytical solution: {} kcal/mol'.format(analytical))
+    print('Error              : {}'.format(error))
+    print('Total time         : {}'.format(total_time))
 
 
 
