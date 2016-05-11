@@ -8,13 +8,14 @@ from pygbe.util import an_solution
 from regression import scanOutput, run_regression, picklesave, pickleload
 
 def main():
+    print('{:-^60}'.format('Running sphere_molecule_single test'))
     try:
         test_outputs = pickleload()
     except IOError:
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K']#,'8K','32K','130K']
+    mesh = ['500','2K','8K','32K','130K']
 
     #molecule_single
     param = 'sphere_fine.param'
