@@ -7,7 +7,7 @@ tests = ['lysozyme.py', 'molecule_dirichlet.py', 'molecule_neumann.py',
          'sphere_molecule_stern.py', 'sphere_neumann.py',
          'twosphere_dirichlet.py', 'twosphere_neumann.py', 'two_molecules.py']
 
-specify CUDA device to use
+#specify CUDA device to use
 CUDA_DEVICE = '0'
 
 ENV = os.environ.copy()
