@@ -81,11 +81,24 @@ class Cell():
 
 
 def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
-    # add_child adds child cell to Cells array
-    # octant: octant of the child cell
-    # Cells : arrays with cells
-    # i     : index of parent cell in Cells array
+    """
+    It adds a child cell to the Cells.
 
+    Arguments:
+    ----------
+    octant: int, octant of the child cell. 
+    Cells : array, it contains the cells information.
+    i     : int, index of parent cell in Cells array.
+    NCRIT : int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm    : int, number of multipole coefficients.
+    Ncell :
+
+    Returns:
+    --------
+    Ncell :
+    """
+   
     CN = Cell(NCRIT, Nm)  # CN: child cell
     CN.r = Cells[i].r / 2
     CN.xc = Cells[i].xc + CN.r * (
@@ -103,6 +116,27 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
 
 
 def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
+    """
+    It splits a cell with more than NCRIT particles.
+
+    Arguments:
+    ----------
+    x    :
+    y    :
+    z    : 
+    Cells: array, it contains the cells information.
+    C    : int, index in the Cells array of the cell to be splited .
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm   : int, number of multipole coefficients.
+    Ncell:
+
+    Returns:
+    --------
+    Ncell:
+
+    """
+    
     # split_cell splits cell with more than NCRIT particles
     # x,y,z: positions of particles
     # Cells: array of cells
