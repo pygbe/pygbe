@@ -8,13 +8,16 @@ from pygbe.util import an_solution
 from regression import scanOutput, run_regression, picklesave, pickleload
 
 def main():
+
+    print('{:-^60}'.format('Running molecule_dirichlet test'))
+
     try:
         test_outputs = pickleload()
     except IOError:
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K']#,'8K','32K','130K']
+    mesh = ['500','2K','8K','32K','130K']
 
     #molecule_dirichlet
     param = 'sphere_fine.param'
@@ -57,6 +60,16 @@ def main():
     analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)
 
     error = abs(Einter-analytical)/abs(analytical)
+
+    flag = 0
+    for i in range(len(error)-1):
+        rate = error[i]/error[i+1]
+        if abs(rate-4)>0.6:
+            flag = 1
+            print 'Bad convergence for mesh %i to %i, with rate %f'%(i,i+1,rate)
+
+    if flag==0:
+        print 'Passed convergence test!'
 
     print '\nNumber of elements : '+str(N)
     print 'Number of iteration: '+str(iterations)

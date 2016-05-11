@@ -8,13 +8,14 @@ from pygbe.util import an_solution
 from regression import scanOutput, run_regression, picklesave, pickleload
 
 def main():
+    print('{:-^60}'.format('Running twosphere_dirichlet test'))
     try:
         test_outputs = pickleload()
     except IOError:
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K']#,'8K','32K','130K']
+    mesh = ['500','2K','8K','32K','130K']
 
     #twosphere_dirichlet
     param = 'sphere_fine.param'
@@ -51,14 +52,6 @@ def main():
 
     error = abs(Einter-analytical)/abs(analytical)
 
-    print '\nNumber of elements : '+str(N)
-    print 'Number of iteration: '+str(iterations)
-    print 'Interaction energy : '+str(Einter)
-    print 'Analytical solution: %f kcal/mol'%analytical
-    print 'Error              : '+str(error)
-    print 'Total time         : '+str(total_time)
-
-
     flag = 0
     for i in range(len(error)-1):
         rate = error[i]/error[i+1]
@@ -68,6 +61,15 @@ def main():
 
     if flag==0:
         print '\nPassed convergence test!'
+
+    print '\nNumber of elements : '+str(N)
+    print 'Number of iteration: '+str(iterations)
+    print 'Interaction energy : '+str(Einter)
+    print 'Analytical solution: %f kcal/mol'%analytical
+    print 'Error              : '+str(error)
+    print 'Total time         : '+str(total_time)
+
+
 
 #
 #    font = {'family':'serif','size':10}

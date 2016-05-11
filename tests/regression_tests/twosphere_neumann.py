@@ -8,6 +8,8 @@ from pygbe.util import an_solution
 from regression import scanOutput, run_regression, picklesave, pickleload
 
 def main():
+
+    print('{:-^60}'.format('Running twosphere_neumann test'))
     try:
         test_outputs = pickleload()
     except IOError:
@@ -49,14 +51,6 @@ def main():
 
     error = abs(Einter-analytical)/abs(analytical)
 
-    print '\nNumber of elements : '+str(N)
-    print 'Number of iteration: '+str(iterations)
-    print 'Interaction energy : '+str(Einter)
-    print 'Analytical solution: %f kcal/mol'%analytical
-    print 'Error              : '+str(error)
-    print 'Total time         : '+str(total_time)
-
-
     flag = 0
     for i in range(len(error)-1):
         rate = error[i]/error[i+1]
@@ -66,6 +60,15 @@ def main():
 
     if flag==0:
         print '\nPassed convergence test!'
+
+    print '\nNumber of elements : '+str(N)
+    print 'Number of iteration: '+str(iterations)
+    print 'Interaction energy : '+str(Einter)
+    print 'Analytical solution: %f kcal/mol'%analytical
+    print 'Error              : '+str(error)
+    print 'Total time         : '+str(total_time)
+
+
 #
 #
 #    font = {'family':'serif','size':10}
