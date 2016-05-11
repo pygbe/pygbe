@@ -46,6 +46,11 @@ class Cell():
      
     """
     def __init__(self, NCRIT, Nm):
+        """
+        NCRIT: int, maximum number of boundary elements per twig box of tree
+                    structure.
+        Nm   : int, number of multipole coefficients.
+        """
         self.nsource = 0  # Number of source particles
         self.ntarget = 0  # Number of target particles
         self.nchild = 0  # Number of child boxes in binary
