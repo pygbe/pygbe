@@ -5,7 +5,9 @@ import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import scanOutput, run_regression, picklesave, pickleload
+from regression import (scanOutput, run_regression, picklesave, pickleload,
+                        report_results, mesh)
+
 
 def main():
     print('{:-^60}'.format('Running sphere_molecule_single test'))
@@ -15,13 +17,13 @@ def main():
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K','8K','32K','130K']
 
     #molecule_single
     param = 'sphere_fine.param'
     test_name = 'molecule_single'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -33,26 +35,13 @@ def main():
 
     total_time = Time
 
-    analytical = an_solution.an_P(numpy.array([1.]), numpy.array([[1.,1.,1.41421356]]), 4., 80., 5., 0.125, 5., 20)
+    analytical = an_solution.an_P(
+        numpy.array([1.]), numpy.array([[1., 1., 1.41421356]]), 4., 80., 5.,
+        0.125, 5., 20)
 
-    error = abs(Esolv-analytical)/abs(analytical)
+    error = abs(Esolv - analytical) / abs(analytical)
 
-    flag = 0
-    for i in range(len(error)-1):
-        rate = error[i]/error[i+1]
-        if abs(rate-4)>0.6:
-            flag = 1
-            print 'Bad convergence for mesh %i to %i, with rate %f'%(i,i+1,rate)
-
-    if flag==0:
-        print '\nPassed convergence test!'
-
-    print '\nNumber of elements  : '+str(N)
-    print 'Number of iterations: '+str(iterations)
-    print 'Total energy        : '+str(Esolv)
-    print 'Analytical solution : %f kcal/mol'%analytical
-    print 'Error               : '+str(error)
-    print 'Total time          : '+str(total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time)
 
 #    font = {'family':'serif','size':10}
 #    fig = plt.figure(figsize=(3,2), dpi=80)
