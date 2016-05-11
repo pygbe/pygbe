@@ -6,6 +6,7 @@ import pickle
 
 from pygbe.util import an_solution
 from regression import scanOutput, run_regression, picklesave, pickleload
+from regression import lysozome_mesh as mesh
 
 def main():
     print('{:-^60}'.format('Running lysozyme test'))
@@ -15,7 +16,6 @@ def main():
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['1','2','4','8']
 
     #lys_single
     param = 'lys.param'

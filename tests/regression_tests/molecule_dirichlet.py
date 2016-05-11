@@ -5,7 +5,9 @@ import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import scanOutput, run_regression, picklesave, pickleload
+from regression import (scanOutput, run_regression, picklesave, pickleload,
+                        report_results, mesh)
+
 
 def main():
 
@@ -17,13 +19,13 @@ def main():
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K','8K','32K','130K']
 
     #molecule_dirichlet
     param = 'sphere_fine.param'
     test_name = 'molecule_dirichlet'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -32,7 +34,8 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time= run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -41,13 +44,15 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'dirichlet_surface'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time= run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
 
     Esolv, Esurf, Ecoul = test_outputs['molecule_dirichlet'][2:5]
-    Esolv_mol, Esurf_mol, Ecoul_mol = test_outputs['molecule_single_center'][2:5]
+    Esolv_mol, Esurf_mol, Ecoul_mol = test_outputs['molecule_single_center'][2:
+                                                                             5]
     Esolv_surf, Esurf_surf, Ecoul_surf = test_outputs['dirichlet_surface'][2:5]
     Time = test_outputs['molecule_dirichlet'][-1]
     Time_mol = test_outputs['molecule_single_center'][-1]
@@ -55,28 +60,14 @@ def main():
     N, iterations = test_outputs['molecule_dirichlet'][:2]
 
     Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
-    total_time = Time+Time_mol+Time_surf
+    total_time = Time + Time_mol + Time_surf
 
-    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12., 0.125, 4., 80.)
+    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12.,
+                                                         0.125, 4., 80.)
 
-    error = abs(Einter-analytical)/abs(analytical)
+    error = abs(Einter - analytical) / abs(analytical)
 
-    flag = 0
-    for i in range(len(error)-1):
-        rate = error[i]/error[i+1]
-        if abs(rate-4)>0.6:
-            flag = 1
-            print 'Bad convergence for mesh %i to %i, with rate %f'%(i,i+1,rate)
-
-    if flag==0:
-        print 'Passed convergence test!'
-
-    print '\nNumber of elements : '+str(N)
-    print 'Number of iteration: '+str(iterations)
-    print 'Interaction energy : '+str(Einter)
-    print 'Analytical solution: %f kcal/mol'%analytical
-    print 'Error              : '+str(error)
-    print 'Total time         : '+str(total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time)
 #
 #
 #flag = 0

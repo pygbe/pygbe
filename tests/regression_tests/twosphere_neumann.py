@@ -5,7 +5,9 @@ import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import scanOutput, run_regression, picklesave, pickleload
+from regression import (scanOutput, run_regression, picklesave, pickleload,
+                        report_results, mesh)
+
 
 def main():
 
@@ -16,14 +18,14 @@ def main():
         test_outputs = {}
 
     problem_folder = 'input_files'
-    mesh = ['500','2K','8K','32K','130K']
 
     #twosphere_neumann
     print('Runs for two spherical surfaces with set dphidn')
     param = 'sphere_fine.param'
     test_name = 'twosphere_neumann'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -33,7 +35,8 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'neumann_surface'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+            mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -44,30 +47,15 @@ def main():
     Time_surf = test_outputs['neumann_surface'][-1]
     N, iterations = test_outputs['twosphere_neumann'][:2]
 
-    Einter = Esurf - 2*Esurf_surf # Isolated sphere has to be done twice
-    total_time = Time+Time_surf
+    Einter = Esurf - 2 * Esurf_surf  # Isolated sphere has to be done twice
+    total_time = Time + Time_surf
 
-    analytical = an_solution.constant_charge_twosphere_dissimilar(80*1., 80*1., 4., 4., 12., 0.125, 80.)
+    analytical = an_solution.constant_charge_twosphere_dissimilar(
+        80 * 1., 80 * 1., 4., 4., 12., 0.125, 80.)
 
-    error = abs(Einter-analytical)/abs(analytical)
+    error = abs(Einter - analytical) / abs(analytical)
 
-    flag = 0
-    for i in range(len(error)-1):
-        rate = error[i]/error[i+1]
-        if abs(rate-4)>0.6:
-            flag = 1
-            print 'Bad convergence for mesh %i to %i, with rate %f'%(i,i+1,rate)
-
-    if flag==0:
-        print '\nPassed convergence test!'
-
-    print '\nNumber of elements : '+str(N)
-    print 'Number of iteration: '+str(iterations)
-    print 'Interaction energy : '+str(Einter)
-    print 'Analytical solution: %f kcal/mol'%analytical
-    print 'Error              : '+str(error)
-    print 'Total time         : '+str(total_time)
-
+    report_results(error, N, iterations, Einter, analytical, total_time)
 
 #
 #
