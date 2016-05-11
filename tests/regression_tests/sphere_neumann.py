@@ -41,7 +41,13 @@ def main():
 
     error = abs(Etotal - analytical) / abs(analytical)
 
-    report_results(error, N, iterations, Einter, analytical, total_time)
+    report_results(error,
+                   N,
+                   iterations,
+                   Etotal,
+                   analytical,
+                   total_time,
+                   energy_type='Total')
 
 #
 #    font = {'family':'serif','size':10}
