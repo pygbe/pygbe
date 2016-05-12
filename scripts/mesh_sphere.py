@@ -1,16 +1,16 @@
 """
 Creates a sphere of radius r, centered at x0, y0, z0
 
-Parameters (command line arguments)
+Arguments (command line arguments)
 ----------
-rec : (int) number of recursions for unit sphere
-r   : (float) radius
-x0  : (float) x center of sphere
-y0  : (float) y center of sphere
-z0  : (float) z center of sphere
-name: (str) output file name
+rec : int, number of recursions for unit sphere.
+r   : float, radius.
+x0  : float, x center of sphere.
+y0  : float, y center of sphere.
+z0  : float, z center of sphere.
+name: str, output file name.
  
-Output
+Returns
 -----
 File with vertices ".vert"
 File with triangle indices ".face"
