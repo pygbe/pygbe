@@ -408,6 +408,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
     # Evaluation
     IorE = 0  # This evaluation is on charge points, no self-operator
+              # 0 means it doesn't matter if it is internal or external.  
     AI_int = 0
     phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.
