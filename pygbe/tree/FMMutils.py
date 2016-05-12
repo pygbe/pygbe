@@ -125,7 +125,7 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     y    :
     z    : 
     Cells: array, it contains the cells information.
-    C    : int, index in the Cells array of the cell to be splited .
+    C    : int, index in the Cells array of the cell to be splitted .
     NCRIT: int, maximum number of boundary elements per twig box of tree
                     structure.
     Nm   : int, number of multipole coefficients.
@@ -218,7 +218,7 @@ def findTwigs(Cells, C, twig, NCRIT):
     Arguments:
     ----------
     Cells: array, cells of the tree.
-    C    : int, index of cell in Cells array.
+    C    : int, index of cell in the Cells array.
     twig : array, indices of twigs in Cells array.
     NCRIT: int, maximum number of boundary elements per twig box of tree
                 structure.
@@ -295,9 +295,19 @@ def addSources(x, y, z, Cells, twig):
 
 
 def addSources3(Cells, twig, K):
-    # This version of addSources puts the sources in the same cell
-    # as the collocation point of the same panel
-    for C in twig:
+    """
+    It adds the source points to the cells.     
+    This version of addSources puts the sources in the same cell as the
+    collocation point of the same panel.
+
+    Arguments:
+    ----------
+    Cells: array, cells of the tree.
+    twig : array, indices of twigs in Cells array.
+    K    :
+
+    """
+        for C in twig:
         Cells[C].nsource = K * Cells[C].ntarget
         for j in range(K):
             Cells[C].source = numpy.append(Cells[C].source,
@@ -305,6 +315,17 @@ def addSources3(Cells, twig, K):
 
 
 def sortPoints(surface, Cells, twig, param):
+    """
+    It sort the points .
+
+    Arguments:
+    ----------
+    surface: 
+    Cells  : array, cells of the tree.
+    twig   : array, indices of twigs in Cells array.
+    param  : class, parameters related to the surface. 
+
+    """
 
     Nround = len(twig) * param.NCRIT
 
@@ -342,6 +363,16 @@ def sortPoints(surface, Cells, twig, param):
 
 
 def computeIndices(P, ind0):
+    """
+    It computes the indices 
+
+    Arguments:
+    ----------
+    P   : int, order of the Taylor expansion.
+    ind0: class, it contains the indices related to the treecode computation. 
+
+        
+    """
     II = []
     JJ = []
     KK = []
@@ -367,6 +398,15 @@ def computeIndices(P, ind0):
 
 
 def precomputeTerms(P, ind0):
+    """
+    Precompute terms for
+
+    Arguments:
+    ----------
+    P   : int, order of the Taylor expansion.
+    ind0: class, it contains the indices related to the treecode computation. 
+        
+    """
     # Precompute terms for
     ind0.combII = numpy.array([], dtype=numpy.int32)
     ind0.combJJ = numpy.array([], dtype=numpy.int32)
@@ -394,11 +434,28 @@ def precomputeTerms(P, ind0):
 
 def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
                     s_src):
-    # Cells     : array of Cells
-    # CJ        : index of source cell
-    # CI        : index of target cell
-    # theta     : MAC criteron 
-    # NCRIT     : max number of particles per cell
+    """
+    It  the interaction list for 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    CJ     : int, index of source cell.
+    CI     : int, index of target cell.
+    theta  : float, Multipole-acceptance criterion (MAC).
+    NCRIT  : int, maximum number of boundary elements per twig box of tree
+                  structure.
+    offTwg :
+    offMlt : 
+    s_src  :
+    
+    Returns:
+    -------- 
+    offTwg :
+    offMlt : 
+    """
 
     if (surfSrc.tree[CJ].ntarget >= NCRIT):
         for c in range(8):
@@ -426,6 +483,19 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
 
 
 def generateList(surf_array, field_array, param):
+    """
+    It generates the list for 
+
+    Arguments:
+    ----------
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the
+                 surface.
+    param      : class, parameters related to the surface.  
+    
+
+    """
     Nsurf = len(surf_array)
     Nfield = len(field_array)
 
@@ -513,6 +583,26 @@ def generateList(surf_array, field_array, param):
 
 
 def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
+    """
+    It gets the multipole .
+
+    Arguments:
+    ----------
+    Cells: array, it contains the cells information.
+    C    : int, index of the cell in the Cells array.    
+    x    :
+    y    :
+    z    : 
+    mV   :
+    mKx  :
+    mKy  :
+    mKz  :
+    ind0 : class, it contains the indices related to the treecode computation. 
+    P    : int, order of the Taylor expansion.
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                structure.
+    """
+
     # Cells     : array of cells
     # C         : index of cell in Cells array
     # x,y,z     : position of particles
@@ -544,6 +634,30 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
 
 def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
                 IImii, JJmjj, KKmkk, index_small, index_ptr):
+    """
+    It  .
+
+    Arguments:
+    ----------
+    Cells      : array, it contains the cells information.
+    CC         : int, index of the child cell in the Cells array .    
+    PC         : int, index of the parent cell in the Cells array
+    P          : int, order of the Taylor expansion.
+    II         : list, multipole order in the x-direction for the treecode.
+    JJ         : list, multipole order in the y-direction for the treecode. 
+    KK         : list, multipole order in the z-direction for the treecode. 
+    index      : list, pointers to the location of the mulipole of order i,j,k 
+                       in the multipole array. 
+    combII     :
+    combJJ     :
+    combKK     :
+    IImii      :
+    JJmjj      :
+    KKmkk      :
+    index_small:
+    index_ptr  :
+    
+    """
     # Cells     : array of cells
     # CC        : index of child cell in Cells array
     # PC        : index of parent cell in Cells array
@@ -562,6 +676,30 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
 
 
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    K_aux  :
+    V_aux  :
+    surf   :
+    index  : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    K_aux  :
+    V_aux  :
+
+    """
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
@@ -588,6 +726,32 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 
 def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
                LorY, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+    surf   :
+    index  : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+
+    """
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
@@ -614,7 +778,31 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
             kernel):
+    """
+    It 
 
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    K_gpu  :
+    V_gpu  :
+    surf   :
+    ind0   : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY    int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    K_gpu  :
+    V_gpu  :
+
+    """
     if param.GPU == 1:
         tic = cuda.Event()
         toc = cuda.Event()
@@ -682,6 +870,33 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
 
 def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
               LorY, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+    surf   :
+    ind0   : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
