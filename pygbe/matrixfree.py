@@ -228,8 +228,10 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     X          : array, initial vector guess.
     surf_array : array, contains the surface classes of each region on the
                         surface.
-    field_array: array, contains the Field classes of each region on the surface.
-    ind0       : class, it contains the indices related to the treecode computation. 
+    field_array: array, contains the Field classes of each region on the
+                        surface.
+    ind0       : class, it contains the indices related to the treecode
+                        computation. 
     param      : class, parameters related to the surface.     
     timing     : class, it contains timing information for different parts of 
                         the code.
