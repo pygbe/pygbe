@@ -1319,6 +1319,29 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
 
 
 def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
+    """
+    It
+    
+    Arguments:
+    ----------
+    Cells   : array, cells of the tree.
+    CJ      : int, index of the source cell.
+    xq      :
+    Kval    :
+    Vval    :
+    index   : list, pointers to the location of the mulipole of order i,j,k 
+                    in the multipole array. 
+    par_reac: class, fine parameters related to the surface.
+    source  :
+    time_M2P:
+
+    Returns:
+    --------
+    Kval    :    
+    Vval    :
+    source  :
+    time_M2P:
+    """
     # Cells     : array of Cells
     # CJ        : index of source cell
     # p         : accumulator 
@@ -1369,6 +1392,36 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
 
 def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
                par_reac, w, source, AI_int, time_P2P):
+ """
+    It
+    
+    Arguments:
+    ----------
+    Cells   : array, cells of the tree.
+    surface :
+    m       :
+    mx      :
+    my      :
+    mz      :
+    mKc     :
+    mVc     :   
+    xq      :
+    Kval    :
+    Vval    :
+    IorE    : int, internal (1) or external (2).
+    par_reac: class, fine parameters related to the surface.
+    w       :
+    source  :
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    time_P2P:
+
+    Returns:
+    --------
+    Kval    :    
+    Vval    :
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    time_P2P:
+    """
 
     tic = time.time()
     LorY = 1
