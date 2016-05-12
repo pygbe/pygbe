@@ -1,26 +1,27 @@
-'''
+"""
 It generates the mesh files (.vert and .face) for a brick.
-'''
+"""
 
 import numpy
 
 def meshSurf(C, N, S, fix, normal):
-    '''
+    """
     It generates a triangular mesh for a rectangular surface.
 
     Arguments:
     ----------
     C     : (6, 3) list, Face centers.
     N     : (6, 2) list, Face nodes.
-    S     : (6, 2) list, Face size.
-    fix   : (6, )  list, Face fix.
-    normal: (6, )  list, Normal direction.
+    S     : (6, 2) list, Face size, length of the face.
+    fix   : (6, 1) list, contains the direction where the normal of the faces
+                         lies on. Elements can be 'x', 'y' or 'z'.
+    normal: (6, 1) list, normal direction. Elements can be 'pos' or 'neg'.
 
     Returns:
     --------
     nodes    : list, triangles vertices.
-    triangles: list, triangles faces.
-    '''
+    triangles: list, indices of the triangles.
+    """
     # xi, yi local 2D coordinates of the surface
 
     h = numpy.zeros(2, dtype=float)
@@ -105,8 +106,8 @@ def meshSurf(C, N, S, fix, normal):
 #   z / 
 # Cube info
 sz  = [250., 10., 250.] # Cube size
-ctr = [0.,-sz[1]/2,0.]        # Cube center
-d = 8 
+ctr = [0.,-sz[1]/2,0.]  # Cube center
+d = 8                   # Density :triangles per angstrom square. 
 sqr_per_side = int(numpy.ceil(numpy.sqrt(sz[0]*sz[2]*d/2.)))
 avg_size = sz[0]/sqr_per_side
 sqr_per_side_y = int(sz[1]/avg_size)
