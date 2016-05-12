@@ -962,6 +962,38 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
 
 def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
              LorY, K_diag, V_diag, IorE, L, w, param, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mx     :
+    my     :
+    mz     :
+    mKc    :
+    mVc    :
+    K_aux  :
+    V_aux  :
+    surf   :
+    K_diag : array, diagonal elements of the double layer integral operator.
+    V_diag : array, diagonal elements of the single layer integral operator.
+    IorE   : int, internal (1) or external (2).
+    L      :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    K_aux  :
+    V_aux  :
+
+    """
 
     tic = time.time()
 
@@ -1000,6 +1032,32 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
 
 def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
                w, param, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mKc    :
+    Ktx_aux:
+    Kty_aux:  
+    Ktz_aux:  
+    surf   :
+    LorY   : int, Laplace (1) or Yukawa (2).
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+    """
 
     tic = time.time()
 
@@ -1035,6 +1093,39 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
             LorY, K_diag, IorE, L, w, param, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mx     :
+    my     :
+    mz     :
+    mKc    :
+    mVc    :
+    K_gpu  :
+    V_gpu  :
+    surf   :
+    LorY   :
+    K_diag : array, diagonal elements of the double layer integral operator.
+    IorE   : int, internal (1) or external (2).
+    L      :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    K_gpu  :
+    V_gpu  :
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -1125,6 +1216,35 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
 
 def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
               w, param, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mKtc   :
+    mVc    :
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+    surf   :
+    LorY   :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
