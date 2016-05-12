@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Creates a sphere of radius r, centered at x0, y0, z0
 
@@ -18,13 +19,52 @@ File with triangle indices ".face"
 import sys
 import numpy
 from triangulation import create_unit_sphere
+from argparse import ArgumentParser
 
-rec = int(sys.argv[1])
-r = float(sys.argv[2])
-x0 = float(sys.argv[3])
-y0 = float(sys.argv[4])
-z0 = float(sys.argv[5])
-filename = sys.argv[6]
+def read_inputs():
+    """
+    Parse command-line arguments to run mesh_sphere.
+
+    User should provide:
+    -rec : int, number of recursions for unit sphere.
+    -r   : float, radius of the sphere.
+    -x0  : float, x coordinate of the center of sphere.
+    -y0  : float, y coordinate of the center of sphere.
+    -z0  : float, z coordinate of the center of sphere.
+    -name: str, output file name.    
+    """
+
+    parser = ArgumentParser(description='Manage mesh_sphere command line arguments')
+
+
+    parser.add_argument('-rec', '--recursions', dest='rec', type=int, default=None,
+                        help="number of recursions for unit sphere")
+
+    parser.add_argument('-r', '--radius', dest='r', type=float, default=None,
+                        help="radius of the sphere")
+
+    parser.add_argument('-x0', '--x_center', dest='x0', type=float, default=None,
+                        help="x coordinate of the center of sphere")
+
+    parser.add_argument('-y0', '--y_center', dest='y0', type=float, default=None,
+                        help="y coordinate of the center of sphere")
+
+    parser.add_argument('-z0', '--z_center', dest='z0', type=float, default=None,
+                        help="z coordinate of the center of sphere")
+
+    parser.add_argument('-n', '--name', dest='name', type=str, default=None,
+                        help="output file name")
+
+    return parser.parse_args()
+
+args = read_inputs()
+
+rec      = args.rec
+r        = args.r
+x0       = args.x0
+y0       = args.y0
+z0       = args.z0
+filename = args.name
 
 xc = numpy.array([x0,y0,z0])
 vertex, index, center = create_unit_sphere(rec)
