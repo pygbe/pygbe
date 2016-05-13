@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-
+"""
+It reads the .pqr file to generate the input for MSMS in order to
+generate the mesh for the Stern layer.
+"""
 import sys
 from numpy import *
 
