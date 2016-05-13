@@ -185,12 +185,4 @@ def surfaceVariables(vertex, triangle):
     
     return normal, Area
 
-"""
-vertex_array, index_array = create_unit_sphere(3)
-for i in range(len(index_array)):
-    v0 = vertex_array[index_array[i,0]]
-    v1 = vertex_array[index_array[i,1]]
-    v2 = vertex_array[index_array[i,2]]
-    A = pylab.norm(numpy.cross(v1-v0,v2-v1))/2
-    print(A)
-"""
+
