@@ -261,7 +261,7 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
 def constant_potential_single_point(phi0, a, r, kappa):
     """
     It computes the potential in a point 'r' due to a spherical surface
-    with constant potential phi0 inmersed in water. Solution to the 
+    with constant potential phi0, immersed in water. Solution to the 
     Poisson-Boltzmann problem. 
 
     Arguments:
@@ -274,7 +274,7 @@ def constant_potential_single_point(phi0, a, r, kappa):
 
     Returns:
     -------- 
-    phi  : float, potential. Solution to the Poisson-Boltzmann equation.
+    phi  : float, potential.
     """
 
     phi = a / r * phi0 * numpy.exp(kappa * (a - r))
@@ -284,19 +284,22 @@ def constant_potential_single_point(phi0, a, r, kappa):
 
 def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
     """
-    It computes  .
+    It computes the potential in a point 'r' due to a spherical surface
+    with constant charge sigma0 immersed in water. Solution to the 
+    Poisson-Boltzmann problem. .
 
     Arguments:
     ----------
-    sigma0 :  
-    a      :
-    r      :
-    kappa  : float,
-    epsilon: 
+    sigma0 : float, constant charge on the surface of the sphere.  
+    a      : float, radius of the sphere.
+    r      : float, distance from the center of the sphere to the evaluation
+                  point.
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant .
 
     Returns:
     -------- 
-    phi  :
+    phi  : float, potential. 
     """
 
     dphi0 = -sigma0 / epsilon
@@ -307,18 +310,19 @@ def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
 
 def constant_potential_single_charge(phi0, radius, kappa, epsilon):
     """
-    It computes  .
+    It computes the surface charge of a sphere at constant potential, immersed
+    in water.
 
     Arguments:
     ----------
-    phi0   :  
-    radius :
-    kappa  : float, 
-    epsilon:
+    phi0   : float, constant potential on the surface of the sphere. 
+    radius : float, radius of the sphere.
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant .
 
     Returns:
     -------- 
-    sigma  :
+    sigma  : float, surface charge.
     """
     dphi = -phi0 * ((1. + kappa * radius) / radius)
     sigma = -epsilon * dphi  # Surface charge
@@ -328,18 +332,19 @@ def constant_potential_single_charge(phi0, radius, kappa, epsilon):
 
 def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
     """
-    It computes  .
+    It computes the surface potential on a sphere at constant charged, immersed
+    in water.
 
     Arguments:
     ----------
-    sigma0 :  
-    radius :
-    kappa  : float, 
-    epsilon:
+    sigma0 : float, constant charge on the surface of the sphere.   
+    radius : float, radius of the sphere.
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
-    phi    :
+    phi  : float, potential.
     """
     dphi = -sigma0 / epsilon
     phi = -dphi * radius / (1. + kappa * radius)  # Surface potential
