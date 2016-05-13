@@ -13,7 +13,8 @@ from math import gamma
 
 def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     """
-    It computes the analytical solution of a sphere with Nq charges inside.
+    It computes the analytical solution of the potential of a sphere with
+    Nq charges inside.
     Took from Kirkwood (1934).
 
     Arguments:
@@ -84,25 +85,23 @@ def get_K(x, n):
 
 
 def an_P(q, xq, E_1, E_2, R, kappa, a, N):
-
     """
-    It computes the analytical solution of .
+    It computes the solvation energy according to Kirkwood-1934.
 
     Arguments:
     ----------
-    q    :  
-    xq   :
-    E_1  : float, 
-    E_2  : float,  
-    R    : float,  
-    kappa: float, 
-    a    : float, 
-    N    : int, 
+    q    : array, charges.
+    xq   : array, positions of the charges.
+    E_1  : float, dielectric constant inside the sphere.
+    E_2  : float, dielectric constant outside the sphere.
+    R    : float, radius of the sphere.
+    kappa: float, reciprocal of Debye length.
+    a    : float, radius of the Stern Layer. 
+    N    : int, number of terms desired in the polinomial expansion.
 
     Returns:
     -------- 
-    E_P:  
-
+    E_P  : float, solvation energry.
     """
 
     qe = 1.60217646e-19
