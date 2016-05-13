@@ -68,7 +68,8 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     XV     : array, input for the single layer potential.
     LorY   : int, Laplace (1) or Yukawa (2).
     surfSrc: class, source surface, the one that contains the gauss points. 
-    surfTar: class, target surface, the one that contains the collocation points.
+    surfTar: class, target surface, the one that contains the collocation 
+                    points.
     K_diag : array, diagonal elements of the double layer integral operator.
     V_diag : array, diagonal elements of the single layer integral operator.
     IorE   : int, internal (1) or external (2).
@@ -407,6 +408,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
     # Evaluation
     IorE = 0  # This evaluation is on charge points, no self-operator
+              # 0 means it doesn't matter if it is internal or external.  
     AI_int = 0
     phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.

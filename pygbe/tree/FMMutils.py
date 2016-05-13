@@ -1,3 +1,6 @@
+"""
+It contains the functions to build the tree and 
+"""
 import numpy
 from scipy.misc import factorial, comb
 
@@ -16,7 +19,38 @@ import time
 
 
 class Cell():
+    """
+    Cell class. It contains the information about the cells in the tree.
+
+    Attributes:
+    -----------
+    nsource   : int, Number of source particles.
+    ntarget   : int, Number of target particles.
+    nchild    : int, Number of child boxes in binary, 8bit value, if certain
+                     child exists, that bit will be 1.
+    source    : array, Pointer to source particles.
+    target    : array, Pointer to target particles.
+    xc        : float, x position of cell.
+    yc        : float, y position of cell.
+    zc        : float, z position of cell.
+    r         : float, cell radius.
+    parent    : int, Pointer to parent cell.
+    child     : array, Pointer to child cell.
+    M         : array, Array with multipoles.
+    Md        : array, Array with multipoles for grad(G).n.
+    P2P_list  : list, Pointer to cells that interact with P2P.
+    M2P_list  : list, Pointer to cells that interact with M2P.
+    M2P_size  : list, Size of the M2P interaction list.
+    list_ready: int, Flag to know if P2P list is already generated.
+    twig_array: list, Position in the twig array.
+     
+    """
     def __init__(self, NCRIT, Nm):
+        """
+        NCRIT: int, maximum number of boundary elements per twig box of tree
+                    structure.
+        Nm   : int, number of multipole coefficients.
+        """
         self.nsource = 0  # Number of source particles
         self.ntarget = 0  # Number of target particles
         self.nchild = 0  # Number of child boxes in binary
@@ -47,11 +81,24 @@ class Cell():
 
 
 def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
-    # add_child adds child cell to Cells array
-    # octant: octant of the child cell
-    # Cells : arrays with cells
-    # i     : index of parent cell in Cells array
+    """
+    It adds a child cell to the Cells.
 
+    Arguments:
+    ----------
+    octant: int, octant of the child cell. 
+    Cells : array, it contains the cells information.
+    i     : int, index of parent cell in Cells array.
+    NCRIT : int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm    : int, number of multipole coefficients.
+    Ncell :
+
+    Returns:
+    --------
+    Ncell :
+    """
+   
     CN = Cell(NCRIT, Nm)  # CN: child cell
     CN.r = Cells[i].r / 2
     CN.xc = Cells[i].xc + CN.r * (
@@ -69,6 +116,26 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
 
 
 def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
+    """
+    It splits a cell with more than NCRIT particles.
+
+    Arguments:
+    ----------
+    x    :
+    y    :
+    z    : 
+    Cells: array, it contains the cells information.
+    C    : int, index in the Cells array of the cell to be splitted .
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm   : int, number of multipole coefficients.
+    Ncell:
+
+    Returns:
+    --------
+    Ncell:
+    """
+    
     # split_cell splits cell with more than NCRIT particles
     # x,y,z: positions of particles
     # Cells: array of cells
@@ -92,6 +159,24 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
 
 
 def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
+    """
+    It generates a target-based tree.
+
+    Arguments:
+    ----------
+    xi      :
+    yi      :
+    zi      : 
+    NCRIT   : int, maximum number of boundary elements per twig box of tree
+                    structure.
+    Nm      : int, number of multipole coefficients.
+    radius  :
+    x_center: array, 
+
+    Returns:
+    --------
+    Cells: array, cells of the tree.
+    """
     # Target-based tree
 
     C0 = Cell(NCRIT, Nm)
@@ -127,9 +212,21 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
 
 
 def findTwigs(Cells, C, twig, NCRIT):
-    # Cells     : array of cells
-    # C         : index of cell in Cells array 
-    # twig      : array with indices of twigs in Cells array
+    """
+    It finds the twig cells, the ones that have <= NCRIT.
+
+    Arguments:
+    ----------
+    Cells: array, cells of the tree.
+    C    : int, index of cell in the Cells array.
+    twig : array, indices of twigs in Cells array.
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                structure.
+
+    Returns:
+    --------
+    twig : array, indices of twigs in Cells array.
+    """
 
     if (Cells[C].ntarget >= NCRIT):
         for c in range(8):
@@ -198,16 +295,37 @@ def addSources(x, y, z, Cells, twig):
 
 
 def addSources3(Cells, twig, K):
-    # This version of addSources puts the sources in the same cell
-    # as the collocation point of the same panel
+    """
+    It adds the source points to the cells.     
+    This version of addSources puts the sources in the same cell as the
+    collocation point of the same panel.
+
+    Arguments:
+    ----------
+    Cells: array, cells of the tree.
+    twig : array, indices of twigs in Cells array.
+    K    :
+
+    """
     for C in twig:
         Cells[C].nsource = K * Cells[C].ntarget
         for j in range(K):
             Cells[C].source = numpy.append(Cells[C].source,
-                                           K * Cells[C].target + j)
+                                       K * Cells[C].target + j)
 
 
 def sortPoints(surface, Cells, twig, param):
+    """
+    It sort the points .
+
+    Arguments:
+    ----------
+    surface: 
+    Cells  : array, cells of the tree.
+    twig   : array, indices of twigs in Cells array.
+    param  : class, parameters related to the surface. 
+
+    """
 
     Nround = len(twig) * param.NCRIT
 
@@ -245,6 +363,16 @@ def sortPoints(surface, Cells, twig, param):
 
 
 def computeIndices(P, ind0):
+    """
+    It computes the indices 
+
+    Arguments:
+    ----------
+    P   : int, order of the Taylor expansion.
+    ind0: class, it contains the indices related to the treecode computation. 
+
+        
+    """
     II = []
     JJ = []
     KK = []
@@ -270,6 +398,15 @@ def computeIndices(P, ind0):
 
 
 def precomputeTerms(P, ind0):
+    """
+    Precompute terms for
+
+    Arguments:
+    ----------
+    P   : int, order of the Taylor expansion.
+    ind0: class, it contains the indices related to the treecode computation. 
+        
+    """
     # Precompute terms for
     ind0.combII = numpy.array([], dtype=numpy.int32)
     ind0.combJJ = numpy.array([], dtype=numpy.int32)
@@ -297,11 +434,28 @@ def precomputeTerms(P, ind0):
 
 def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
                     s_src):
-    # Cells     : array of Cells
-    # CJ        : index of source cell
-    # CI        : index of target cell
-    # theta     : MAC criteron 
-    # NCRIT     : max number of particles per cell
+    """
+    It  the interaction list for 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    CJ     : int, index of source cell.
+    CI     : int, index of target cell.
+    theta  : float, Multipole-acceptance criterion (MAC).
+    NCRIT  : int, maximum number of boundary elements per twig box of tree
+                  structure.
+    offTwg :
+    offMlt : 
+    s_src  :
+    
+    Returns:
+    -------- 
+    offTwg :
+    offMlt : 
+    """
 
     if (surfSrc.tree[CJ].ntarget >= NCRIT):
         for c in range(8):
@@ -329,6 +483,19 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
 
 
 def generateList(surf_array, field_array, param):
+    """
+    It generates the list for 
+
+    Arguments:
+    ----------
+    surf_array : array, contains the surface classes of each region on the
+                        surface.
+    field_array: array, contains the Field classes of each region on the
+                 surface.
+    param      : class, parameters related to the surface.  
+    
+
+    """
     Nsurf = len(surf_array)
     Nfield = len(field_array)
 
@@ -416,6 +583,26 @@ def generateList(surf_array, field_array, param):
 
 
 def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
+    """
+    It gets the multipole .
+
+    Arguments:
+    ----------
+    Cells: array, it contains the cells information.
+    C    : int, index of the cell in the Cells array.    
+    x    :
+    y    :
+    z    : 
+    mV   :
+    mKx  :
+    mKy  :
+    mKz  :
+    ind0 : class, it contains the indices related to the treecode computation. 
+    P    : int, order of the Taylor expansion.
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                structure.
+    """
+
     # Cells     : array of cells
     # C         : index of cell in Cells array
     # x,y,z     : position of particles
@@ -447,6 +634,30 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
 
 def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
                 IImii, JJmjj, KKmkk, index_small, index_ptr):
+    """
+    It  .
+
+    Arguments:
+    ----------
+    Cells      : array, it contains the cells information.
+    CC         : int, index of the child cell in the Cells array .    
+    PC         : int, index of the parent cell in the Cells array
+    P          : int, order of the Taylor expansion.
+    II         : list, multipole order in the x-direction for the treecode.
+    JJ         : list, multipole order in the y-direction for the treecode. 
+    KK         : list, multipole order in the z-direction for the treecode. 
+    index      : list, pointers to the location of the mulipole of order i,j,k 
+                       in the multipole array. 
+    combII     :
+    combJJ     :
+    combKK     :
+    IImii      :
+    JJmjj      :
+    KKmkk      :
+    index_small:
+    index_ptr  :
+    
+    """
     # Cells     : array of cells
     # CC        : index of child cell in Cells array
     # PC        : index of parent cell in Cells array
@@ -465,6 +676,30 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
 
 
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    K_aux  :
+    V_aux  :
+    surf   :
+    index  : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    K_aux  :
+    V_aux  :
+
+    """
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
@@ -491,6 +726,32 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 
 def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
                LorY, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+    surf   :
+    index  : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+
+    """
 
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
@@ -517,7 +778,31 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
             kernel):
+    """
+    It 
 
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    K_gpu  :
+    V_gpu  :
+    surf   :
+    ind0   : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY    int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    K_gpu  :
+    V_gpu  :
+
+    """
     if param.GPU == 1:
         tic = cuda.Event()
         toc = cuda.Event()
@@ -585,6 +870,33 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
 
 def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
               LorY, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+    surf   :
+    ind0   : list, pointers to the location of the mulipole of order i,j,k 
+                   in the multipole array.   
+    param  : class, parameters related to the surface.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -650,6 +962,38 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
 
 def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
              LorY, K_diag, V_diag, IorE, L, w, param, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mx     :
+    my     :
+    mz     :
+    mKc    :
+    mVc    :
+    K_aux  :
+    V_aux  :
+    surf   :
+    K_diag : array, diagonal elements of the double layer integral operator.
+    V_diag : array, diagonal elements of the single layer integral operator.
+    IorE   : int, internal (1) or external (2).
+    L      :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    K_aux  :
+    V_aux  :
+
+    """
 
     tic = time.time()
 
@@ -688,6 +1032,32 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
 
 def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
                w, param, timing):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mKc    :
+    Ktx_aux:
+    Kty_aux:  
+    Ktz_aux:  
+    surf   :
+    LorY   : int, Laplace (1) or Yukawa (2).
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    
+    Returns:
+    --------
+    Ktx_aux:
+    Kty_aux:
+    Kty_aux:
+    """
 
     tic = time.time()
 
@@ -723,6 +1093,39 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
 
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
             LorY, K_diag, IorE, L, w, param, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mx     :
+    my     :
+    mz     :
+    mKc    :
+    mVc    :
+    K_gpu  :
+    V_gpu  :
+    surf   :
+    LorY   :
+    K_diag : array, diagonal elements of the double layer integral operator.
+    IorE   : int, internal (1) or external (2).
+    L      :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    K_gpu  :
+    V_gpu  :
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -813,6 +1216,35 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
 
 def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
               w, param, timing, kernel):
+    """
+    It 
+
+    Arguments:
+    ----------
+    surfSrc: class, source surface, the one that contains the gauss points.
+    surfTar: class, target surface, the one that contains the collocation
+                    points.
+    m      :
+    mKtc   :
+    mVc    :
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+    surf   :
+    LorY   :
+    w      :
+    param  : class, parameters related to the surface.
+    timing : class, it contains timing information for different parts of 
+                    the code.
+    kernel : pycuda source module.
+
+    Returns:
+    --------
+    Ktx_gpu:
+    Kty_gpu:
+    Kty_gpu:
+
+    """
 
     if param.GPU == 1:
         tic = cuda.Event()
@@ -887,6 +1319,29 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
 
 
 def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
+    """
+    It
+    
+    Arguments:
+    ----------
+    Cells   : array, cells of the tree.
+    CJ      : int, index of the source cell.
+    xq      :
+    Kval    :
+    Vval    :
+    index   : list, pointers to the location of the mulipole of order i,j,k 
+                    in the multipole array. 
+    par_reac: class, fine parameters related to the surface.
+    source  :
+    time_M2P:
+
+    Returns:
+    --------
+    Kval    :    
+    Vval    :
+    source  :
+    time_M2P:
+    """
     # Cells     : array of Cells
     # CJ        : index of source cell
     # p         : accumulator 
@@ -937,6 +1392,36 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
 
 def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
                par_reac, w, source, AI_int, time_P2P):
+    """
+    It
+    
+    Arguments:
+    ----------
+    Cells   : array, cells of the tree.
+    surface :
+    m       :
+    mx      :
+    my      :
+    mz      :
+    mKc     :
+    mVc     :   
+    xq      :
+    Kval    :
+    Vval    :
+    IorE    : int, internal (1) or external (2).
+    par_reac: class, fine parameters related to the surface.
+    w       :
+    source  :
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    time_P2P:
+
+    Returns:
+    --------
+    Kval    :    
+    Vval    :
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    time_P2P:
+    """
 
     tic = time.time()
     LorY = 1

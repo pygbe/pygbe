@@ -106,7 +106,7 @@ def PlaneRotation(H, cs, sn, s, i, R):
 def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     """
-    GMRES solver 
+    GMRES solver. 
 
     Arguments:
     ----------
@@ -124,7 +124,7 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     Returns:
     --------
-    X          : array, an update guess to the solution Ax=b where A is 
+    X          : array, an updated guess to the solution. 
 
     """
 
@@ -255,43 +255,4 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
     #    print 'Tolerance: %f, maximum iterations: %f'%(tol, max_iter)
 
     return X
-"""
-## Testing
-from scipy.sparse.linalg  import gmres 
 
-xmin = -1.
-xmax = 1.
-N = 5000
-h = (xmax-xmin)/(N-1)
-x = numpy.arange(xmin, xmax+h/2, h)
-
-A = numpy.zeros((N,N))
-for i in range(N):
-    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2))
-
-b = numpy.random.random(N)
-x = numpy.zeros(N)
-R = 50
-max_iter = 5000
-tol = 1e-8
-
-tic = time.time()
-x = gmres_solver(A, x, b, R, tol, max_iter)
-toc = time.time()
-print 'Time for my GMRES: %fs'%(toc-tic)
-
-tic = time.time()
-xs = linalg.solve(A, b)
-toc = time.time()
-print 'Time for stright solve: %fs'%(toc-tic)
-
-
-tic = time.time()
-xg = gmres(A, b, x, tol, R, max_iter)[0]
-toc = time.time()
-print 'Time for scipy GMRES: %fs'%(toc-tic)
-
-
-error = numpy.sqrt(numpy.sum((xs-x)**2)/numpy.sum(xs**2))
-print 'error: %s'%error
-"""
