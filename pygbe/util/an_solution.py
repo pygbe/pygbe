@@ -5,10 +5,10 @@ All functions output the analytical solution in kcal/mol
 """
 import numpy
 from numpy import pi
-from scipy import special
+from scipy import special, linalg
 from scipy.misc import factorial
 from math import gamma
-from scipy.linalg import solve
+
 
 
 def an_spherical(q, xq, E_1, E_2, E_0, R, N):
@@ -277,7 +277,7 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
     RHS = numpy.zeros(N)
     RHS[0] = -E_hat * q / (4 * pi * E_1 * a * a)
 
-    a_coeff = solve(M, RHS)
+    a_coeff = linalg.solve(M, RHS)
 
     a0 = a_coeff[0]
     a0_inf = -E_hat * q / (4 * pi * E_1 * a * a) * 1 / (kappa * k1p[0])
@@ -743,7 +743,7 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     RHS[0] = phi01
     RHS[N] = phi02
 
-    coeff = solve(M, RHS)
+    coeff = linalg.solve(M, RHS)
 
     a = coeff[0:N] / k1
     b = coeff[N:2 * N] / k2
@@ -854,7 +854,7 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     RHS[0] = phi01 * r1 / epsilon
     RHS[N] = phi02 * r2 / epsilon
 
-    coeff = solve(M, RHS)
+    coeff = linalg.solve(M, RHS)
 
     a = coeff[0:N] / (-r1 * kappa * k1p)
     b = coeff[N:2 * N] / (-r2 * kappa * k2p)
@@ -968,7 +968,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     RHS[0] = -E_hat * q / (4 * pi * E_1 * r1 * r1)
     RHS[N] = phi02
 
-    coeff = solve(M, RHS)
+    coeff = linalg.solve(M, RHS)
 
     a = coeff[0:N] / (kappa * k1p - E_hat * numpy.arange(N) / r1 * k1)
     b = coeff[N:2 * N] / k2
@@ -1085,7 +1085,7 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
     RHS[0] = -E_hat * q / (4 * pi * E_1 * r1 * r1)
     RHS[N] = -phi02 / E_2
 
-    coeff = solve(M, RHS)
+    coeff = linalg.solve(M, RHS)
 
     a = coeff[0:N] / (kappa * k1p - E_hat * numpy.arange(N) / r1 * k1)
     b = coeff[N:2 * N] / (kappa * k2p)
@@ -1178,7 +1178,7 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
     RHS = numpy.zeros(N)
     RHS[0] = phi01
 
-    a = solve(M, RHS)
+    a = linalg.solve(M, RHS)
 
     a0 = a[0]
 
@@ -1267,7 +1267,7 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     RHS = numpy.zeros(N)
     RHS[0] = a * sigma / epsilon
 
-    a_coeff = solve(M, RHS)
+    a_coeff = linalg.solve(M, RHS)
 
     a0 = a_coeff[0]
 
