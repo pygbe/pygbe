@@ -13,21 +13,22 @@ from math import gamma
 
 def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     """
-    It computes the analytical solution of .
+    It computes the analytical solution of a sphere with Nq charges inside.
+    Took from Kirkwood (1934).
 
     Arguments:
     ----------
-    q  : 
-    xq :
-    E_1: float, 
-    E_2: float,
-    E_0: float,
-    R  : float,
-    N  : int, 
+    q  : array, charges.
+    xq : array, positions of the charges.
+    E_1: float, dielectric constant inside the sphere.
+    E_2: float, dielectric constant outside the sphere.
+    E_0: float, dielectric constant of vacuum.
+    R  : float, radius of the sphere.
+    N  : int, number of terms desired in the spherical harmonic expansion. 
 
     Returns:
     -------- 
-    PHI: array, 
+    PHI: array, reaction potential. 
 
     """
     PHI = numpy.zeros(len(q))
