@@ -29,8 +29,8 @@ def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     Returns:
     -------- 
     PHI: array, reaction potential. 
-
     """
+
     PHI = numpy.zeros(len(q))
     for K in range(len(q)):
         rho = numpy.sqrt(numpy.sum(xq[K]**2))
@@ -59,16 +59,17 @@ def an_spherical(q, xq, E_1, E_2, E_0, R, N):
 
 def get_K(x, n):
     """
-    It computes the  .
+    It computes the polinomials K needed for Kirkwood-1934 solutions.
+    K_n(x) in Equation 4 in Kirkwood 1934.
 
     Arguments:
     ----------
-    x: float, 
-    n: int, 
+    x: float, evaluation point of K.
+    n: int, number of terms desired in the expansion. 
     
     Returns:
     -------- 
-    K: float, 
+    K: float, polinomials K. 
 
     """
 
