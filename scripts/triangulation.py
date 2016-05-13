@@ -19,7 +19,7 @@ sphere-recursively
 Thanks!
 """
 import numpy
-#import pylab
+
 
 octahedron_vertices = numpy.array( [ 
     [ 1.0, 0.0, 0.0], # 0 
@@ -80,12 +80,13 @@ def divide_all( vertices, triangles ):
 
     Arguments:
     ----------
-    vertices : array, vertices of the triangles.
-    triangles: array, indices corresponding to the triangles. 
+    vertices  : array, vertices of the triangles.
+    triangles : array, indices corresponding to the triangles. 
 
     Returns:
     --------
-    vertices:
+    vert_new  : array, vertices of the new triangles.
+    triang_new: array, indices corresponding to the new triangles. 
     
 
     """ 
@@ -102,11 +103,11 @@ def divide_all( vertices, triangles ):
     normalize_v3( c )
     
     #Stack the triangles together.
-    vertices = numpy.hstack( (v0,b,a,  b,v1,c,  a,b,c, a,c,v2) ).reshape((-1,3))
-    
+    vert_new  = numpy.hstack( (v0,b,a,  b,v1,c,  a,b,c, a,c,v2) ).reshape((-1,3))
+    triang_new = numpy.arange( len(vertices) ).reshape( (-1,3) )
     #Now our vertices are duplicated, and thus our triangle structure
     # are unnecesarry.    
-    return vertices, numpy.arange( len(vertices) ).reshape( (-1,3) )
+    return vert_new, triang_new
 
 def create_unit_sphere( recursion_level=2 ):
     """
