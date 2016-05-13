@@ -103,8 +103,8 @@ def find_config_files(cliargs):
     file was not found).  Otherwise return the path to the config and
     param files
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     cliargs: parser
         parser containing cli arguments passed to PyGBe
 
@@ -117,11 +117,7 @@ def find_config_files(cliargs):
     """
 
     prob_path = cliargs.problem_folder
-    full_path = os.path.join(os.getcwd(), prob_path)
-    #if user gave us an absolute path, use that
-    if not os.path.isdir(full_path):
-        full_path = os.path.expanduser(prob_path)
-    full_path = os.path.normcase(full_path)
+    full_path = os.path.abspath(prob_path)
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
     #use the name of the rightmost folder in path as problem name
@@ -144,15 +140,19 @@ def find_config_files(cliargs):
 
 def resolve_relative_config_file(config_file, full_path):
     """
-    Keyword Arguments:
-    config_file -- the given path to a .param or .config file from the
-                    command line
-    full_path   -- the full path to the problem folder
+    Does its level-headed best to find the config files specified by the user
+
+    Arguments:
+    ---------
+    config_file: str
+        the given path to a .param or .config file from the command line
+    full_path: str
+        the full path to the problem folder
     """
 
     if check_file_exists(config_file):
         return config_file
-    elif check_file_exists(os.path.join(os.getcwd(), config_file)):
+    elif check_file_exists(os.path.abspath(config_file)):
         return os.path.join(os.getcwd(), config_file)
     elif check_file_exists(os.path.join(full_path, config_file)):
         return os.path.join(full_path, config_file)
@@ -185,6 +185,24 @@ def check_nvcc_version():
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False):
+    '''
+    Run a PyGBe problem, write outputs to STDOUT and to log file in
+    problem directory
+
+    Arguments:
+    ----------
+    log_output: Bool, default True
+                If False, output is written only to STDOUT and not
+                to a log file
+    return_output_fname: Bool, default False
+                If True, function main() returns the name of the
+                output log file.  This is used for the regression tests
+
+    Returns:
+    --------
+    output_fname: str, if kwarg is True
+                  The name of the log file containing problem output
+    '''
 
     check_for_nvcc()
 
@@ -381,7 +399,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print '\nTime = %f s' % (toc - TIC)
 
 
-    if return_output_fname:
+    if return_output_fname and log_output:
         return outputfname
 
 
