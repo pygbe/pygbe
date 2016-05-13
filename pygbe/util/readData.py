@@ -46,6 +46,9 @@ def readVertex(filename, REAL):
     vertex: array, vertices of the triangles.
     """
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    geo_path = os.environ.get('PYGBE_GEOMETRY')
+    if geo_path:
+        full_path = geo_path
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=REAL)
     vertex = X[:, 0:3]
 
@@ -85,6 +88,9 @@ def readTriangle(filename, surf_type):
     """
 
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    geo_path = os.environ.get('PYGBE_GEOMETRY')
+    if geo_path:
+        full_path = geo_path
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=int)
     triangle = numpy.zeros((len(X), 3), dtype=int)
     #    if surf_type<=10:

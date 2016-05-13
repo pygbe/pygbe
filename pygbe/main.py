@@ -87,6 +87,11 @@ def read_inputs(args):
                         type=str,
                         default='output',
                         help="Output folder")
+    parser.add_argument('-g',
+                        '--geometry',
+                        dest='geometry',
+                        type=str,
+                        help="Custom geometry folder prefix")
 
     return parser.parse_args(args)
 
@@ -209,6 +214,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
+    #check if a custom geometry location has been specified
+    #if it has, add an ENV_VAR to handle it
+    if args.geometry:
+        geo_path = os.path.abspath(args.geometry)
+        if os.path.isdir(geo_path):
+            os.environ['PYGBE_GEOMETRY'] = geo_path
+        else:
+            sys.exit('Invalid geometry prefix provided (Folder not found)')
 
     #try to expand ~ if present in output path
     args.output = os.path.expanduser(args.output)
@@ -397,7 +410,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print 'Esurf = %f kcal/mol' % sum(E_surf)
     print 'Ecoul = %f kcal/mol' % sum(E_coul)
     print '\nTime = %f s' % (toc - TIC)
-
 
     if return_output_fname and log_output:
         return outputfname
