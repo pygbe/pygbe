@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 It reads a .xyzr file that contains the positions of the atoms (x,y,z) and the
-van der Waals radius (r), to generate the input for MSMS in order to
-generate the mesh for the Stern layer.
+van der Waals radius (r), to generate the input for MSMS in order to generate
+the mesh for the Stern layer.
 
 file_in : filename.xyzr. Given as an argv when running the script.
 file_out: filename.stern
