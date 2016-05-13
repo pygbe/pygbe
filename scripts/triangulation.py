@@ -111,17 +111,17 @@ def divide_all( vertices, triangles ):
 
 def create_unit_sphere( recursion_level=2 ):
     """
-    It creates a unit sphere 
+    It creates a unit sphere based on a recursive division of a octahedron.
 
     Arguments:
     ----------
-    recursion_level: int, 
+    recursion_level: int, times we want to divide the octahedron.
 
     Returns:
     --------
-    vertex_array   : array,
-    index_array    : array,
-    center         : array,
+    vertex_array   : array, vertices of the sphere triangles.
+    index_array    : array, indices of the triangles.
+    center         : array, contains centers of each triangle.
 
     """
     vertex_array, index_array = octahedron_vertices, octahedron_triangles
