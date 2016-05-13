@@ -1,7 +1,6 @@
-'''
-Generalized Minimum Residual Method (GMRES), it uses the Housholder relfections
-for ortogonalization. 
-'''
+"""
+Generalized Minimum Residual Method (GMRES), it uses 
+"""
 
 import numpy
 import os
@@ -11,23 +10,21 @@ from matrixfree import gmres_dot as gmres_dot
 
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
-    '''
+    """
     Given a vector (dx, dy), it provides the cosine (cs) and sine (sn). 
   
-
     Arguments:
     ----------
     dx: float, x coordinate of the vector (dx, dy). 
     dy: float, y coordinate of the vector (dx, dy).
-    cs:
-    sn:
+    cs: float, cosine.
+    sn: float, sine.
         
     Returns:
     --------
     cs: float, cosine.
     sn: float, sine. 
-
-    '''
+    """
 
     if dy == 0:
         cs = 1.
@@ -45,23 +42,23 @@ def GeneratePlaneRotation(dx, dy, cs, sn):
 
 
 def ApplyPlaneRotation(dx, dy, cs, sn):
-    '''
-    Given a vector (dx, dy) 
-  
+    """
+    Given a vector (dx, dy), the cosine (cs) and sine (sn), it rotates the
+    vector.  
 
     Arguments:
     ----------
     dx: float, x coordinate of the vector (dx, dy). 
     dy: float, y coordinate of the vector (dx, dy).
-    cs:
-    sn:
+    cs: float, cosine.
+    sn: float, sine. 
         
     Returns:
     --------
-    dx: float, .
-    dy: float, . 
-
-    '''
+    dx: float, x component of the rotated vector.
+    dy: float, y component of the rotated vector. 
+    """
+    
     temp = cs * dx + sn * dy
     dy = -sn * dx + cs * dy
     dx = temp
@@ -73,22 +70,21 @@ def PlaneRotation(H, cs, sn, s, i, R):
 
     '''
     
-
     Arguments:
     ----------
-    H: 
-    cs:
-    sn:
-    s:
-    i:
-    R:
+    H : 
+    cs: float, cosine.
+    sn: float, sine.
+    s : array, residual.
+    i : int, iteration number of the GMRES.
+    R : int, restart parameter, number of iterations for GMRES to do restart.
     
     Returns:
     --------
-    H: 
-    cs:
-    sn:
-    s:
+    H : 
+    cs: float, cosine.
+    sn: float, sine.
+    s : array, residual.
 
     '''
     for k in range(i):
@@ -104,7 +100,6 @@ def PlaneRotation(H, cs, sn, s, i, R):
 
 
 def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
-
     """
     GMRES solver. 
 
@@ -125,7 +120,6 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
     Returns:
     --------
     X          : array, an updated guess to the solution. 
-
     """
 
     N = len(b)
