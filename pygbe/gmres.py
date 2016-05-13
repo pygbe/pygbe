@@ -106,7 +106,7 @@ def PlaneRotation(H, cs, sn, s, i, R):
 def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     """
-    GMRES solver 
+    GMRES solver. 
 
     Arguments:
     ----------
@@ -124,7 +124,7 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     Returns:
     --------
-    X          : array, an update guess to the solution Ax=b where A is 
+    X          : array, an updated guess to the solution. 
 
     """
 
