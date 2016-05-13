@@ -161,25 +161,30 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
 
 def two_sphere(a, R, kappa, E_1, E_2, q):
     """
-    It computes the analytical solution of .
+    It computes the analytical solution of a spherical surface and a spherical
+    molecule with a center charge, both of radius R.
+    Follows Cooper&Barba 2016  
 
     Arguments:
     ----------
-    a    :  
-    R    :
-    kappa: float, 
-    E_1  : float, 
-    E_2  : float,  
-    q    :   
+    a    : float, center to center distance.
+    R    : float, radius of surface and molecule.
+    kappa: float, reciprocal of Debye length.
+    E_1  : float, dielectric constant inside the sphere.
+    E_2  : float, dielectric constant outside the sphere. 
+    q    : float, number of qe to be asigned to the charge. 
 
     Returns:
     -------- 
-    Einter  : float, 
-    E1sphere: float,
-    E2sphere: float, 
+    Einter  : float, interaction energy.
+    E1sphere: float, solvation energy of one sphere.
+    E2sphere: float, solvation energy of two spheres together.
+
+    Note: 
+    Einter should match (E2sphere - 2xE1sphere)     
     """
 
-    N = 20  # Number of terms in expansion
+    N = 20  # Number of terms in expansion.
 
     qe = 1.60217646e-19
     Na = 6.0221415e23
