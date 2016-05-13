@@ -260,18 +260,21 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
 
 def constant_potential_single_point(phi0, a, r, kappa):
     """
-    It computes  .
+    It computes the potential in a point 'r' due to a spherical surface
+    with constant potential phi0 inmersed in water. Solution to the 
+    Poisson-Boltzmann problem. 
 
     Arguments:
     ----------
-    phi0 :  
-    a    :
-    r    :
-    kappa: float, 
+    phi0 : float, constant potential on the surface of the sphere. 
+    a    : float, radius of the sphere.
+    r    : float, distance from the center of the sphere to the evaluation
+                  point.
+    kappa: float, reciprocal of Debye length.
 
     Returns:
     -------- 
-    phi  :
+    phi  : float, potential. Solution to the Poisson-Boltzmann equation.
     """
 
     phi = a / r * phi0 * numpy.exp(kappa * (a - r))
