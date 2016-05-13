@@ -158,50 +158,6 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
     return E_P
 
 
-def two_sphere_KimSong(a, R, kappa, E_1, E_2, q):
-
-    """
-    It computes the analytical solution of .
-
-    Arguments:
-    ----------
-    a    :  
-    R    :
-    kappa: float, 
-    E_1  : float, 
-    E_2  : float,  
-    q    :   
-
-    Returns:
-    -------- 
-    Einter  : float, 
-    E1sphere: float,
-    E2sphere: float, 
-    """
-
-    E_hat = E_2 / E_1
-    qe = 1.60217646e-19
-    Na = 6.0221415e23
-    E_0 = 8.854187818e-12
-    cal2J = 4.184
-
-    C0 = -q / (a * a * E_hat * kappa * E_1)
-    k0a = numpy.exp(-kappa * a) / (kappa * a)
-    k0R = numpy.exp(-kappa * R) / (kappa * R)
-    k1a = -k0a - k0a / (kappa * a)
-    i0 = numpy.sinh(kappa * a) / (kappa * a)
-    i1 = numpy.cosh(kappa * a) / (kappa * a) - i0 / (kappa * a)
-
-    CC0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0 * 4 * pi)
-
-    Einter = 0.5 * q * C0 * CC0 * ((k0a + k0R * i0) /
-                                   (k1a + k0R * i1) - k0a / k1a)
-    E1sphere = 0.5 * q * C0 * CC0 * (k0a / k1a) - 0.5 * CC0 * q**2 / (a * E_1)
-    E2sphere = 0.5 * q * C0 * CC0 * (k0a + k0R * i0) / (
-        k1a + k0R * i1) - 0.5 * CC0 * q**2 / (a * E_1)
-
-    return Einter, E1sphere, E2sphere
-
 
 def two_sphere(a, R, kappa, E_1, E_2, q):
     """
