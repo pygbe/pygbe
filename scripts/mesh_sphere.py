@@ -16,7 +16,7 @@ Returns
 File with vertices ".vert"
 File with triangle indices ".face"
 """
-import sys
+
 import numpy
 from triangulation import create_unit_sphere
 from argparse import ArgumentParser
