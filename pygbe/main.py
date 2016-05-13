@@ -382,41 +382,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print 'Ecoul = %f kcal/mol' % sum(E_coul)
     print '\nTime = %f s' % (toc - TIC)
 
-    # Analytic solution
-    '''
-    # two spheres
-    R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
-    dist = norm(field_array[2].xq[0]-field_array[1].xq[0])
-    E_1 = field_array[1].E
-    E_2 = field_array[0].E
-    E_an,E1an,E2an = two_sphere(R1, dist, field_array[0].kappa, E_1, E_2, field_array[1].q[0])
-    JtoCal = 4.184
-    C0 = param.qe**2*param.Na*1e-3*1e10/(JtoCal*param.E_0)
-    E_an *= C0/(4*pi)
-    E1an *= C0/(4*pi)
-    E2an *= C0/(4*pi)
-    print '\n E_solv = %s kcal/mol, Analytical solution = %f kcal/mol, Error: %s'%(E_solv, E2an, abs(E_solv-E2an)/abs(E2an))
-    print '\n E_solv = %s kJ/mol, Analytical solution = %f kJ/mol, Error: %s'%(E_solv*JtoCal, E2an*JtoCal, abs(E_solv-E2an)/abs(E2an))
 
-    # sphere with stern layer
-    K_sph = 20 # Number of terms in spherical harmonic expansion
-    #E_1 = field_array[2].E # stern
-    E_1 = field_array[1].E # no stern
-    E_2 = field_array[0].E
-    R1 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0])
-    #R2 = norm(surf_array[1].vertex[surf_array[0].triangle[0]][0]) # stern
-    R2 = norm(surf_array[0].vertex[surf_array[0].triangle[0]][0]) # no stern
-    #q = field_array[2].q # stern
-    q = field_array[1].q # no stern
-    #xq = field_array[2].xq # stern
-    xq = field_array[1].xq # no stern
-    xq += 1e-12
-    print q, xq, E_1, E_2, R1, field_array[0].kappa, R2, K_sph
-    phi_P = an_P(q, xq, E_1, E_2, R1, field_array[0].kappa, R2, K_sph)
-    JtoCal = 4.184
-    E_P = 0.5*param.qe**2*sum(q*phi_P)*param.Na*1e7/JtoCal
-    print '\n E_solv = %s, Legendre polynomial sol = %f, Error: %s'%(E_solv, E_P, abs(E_solv-E_P)/abs(E_P))
-    '''
     if return_output_fname:
         return outputfname
 
