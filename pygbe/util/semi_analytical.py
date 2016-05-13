@@ -1,8 +1,24 @@
+"""
+It contains the functions needed to compute the near singular integrals.
+"""
+
 import numpy
 from semi_analyticalwrap import SA_wrap_arr
 
 
 def GQ_1D(K):
+    """
+    Gauss quadrature in 1D.
+
+    Arguments:
+    ----------
+    K: int, desired number of gauss points. 
+    
+    Returns:
+    --------
+    x: float, location of the gauss points.    
+    w: float, weights of the gauss points.   
+    """
     T = numpy.zeros((K, K))
     nvec = numpy.arange(1., K)
     beta = 0.5 / numpy.sqrt(1 - 1 / (2 * nvec)**2)
@@ -15,6 +31,27 @@ def GQ_1D(K):
 
 
 def lineInt(z, x, v1, v2, kappa, xk, wk):
+    """
+    Line integral    .
+
+    Arguments:
+    ----------
+    z     :
+    x     : 
+    v1    :
+    v2    :
+    kappa :
+    xk    :   
+    wk    :
+    
+    Returns:
+    --------
+    phi_Y :
+    dphi_Y:
+    phi_L :
+    dphi_L:     
+    """
+
 
     theta1 = numpy.arctan2(v1, x)
     theta2 = numpy.arctan2(v2, x)
@@ -49,6 +86,25 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
 
 
 def intSide(v1, v2, p, kappa, xk, wk):
+    """
+    Integral     .
+
+    Arguments:
+    ----------
+    v1    :
+    v2    :
+    p     :  
+    kappa :
+    xk    :   
+    wk    :
+    
+    Returns:
+    --------
+    phi_Y :
+    dphi_Y:
+    phi_L :
+    dphi_L:     
+    """
 
     v21 = v2 - v1
     L21 = numpy.linalg.norm(v21)
@@ -103,6 +159,26 @@ def intSide(v1, v2, p, kappa, xk, wk):
 
 def SA_arr(y, x, kappa, same, xk, wk):
 
+    """
+         .
+
+    Arguments:
+    ----------
+    y     :
+    x     :
+    kappa :
+    same  :
+    xk    :   
+    wk    :
+    
+    Returns:
+    --------
+    phi_Y :
+    dphi_Y:
+    phi_L :
+    dphi_L:     
+    """
+
     N = len(x)
     phi_Y = numpy.zeros(N)
     dphi_Y = numpy.zeros(N)
@@ -152,6 +228,22 @@ def SA_arr(y, x, kappa, same, xk, wk):
 
 
 def GQ(y, x, kappa, same):
+    """
+     .
+
+    Arguments:
+    ----------
+    y     :
+    x     :
+    kappa :
+    same  :
+    
+    Returns:
+    --------
+    Q17:
+    Q27:   
+    """
+
     # n=7
     L = numpy.array([y[1] - y[0], y[2] - y[1], y[0] - y[2]])
     Area = numpy.linalg.norm(cross(L[2], L[1])) / 2
