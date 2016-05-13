@@ -139,15 +139,15 @@ def create_unit_sphere( recursion_level=2 ):
 
 def vertex_array_only_unit_sphere( recursion_level=2 ):
     """
-    It creates 
+    It computes only the vertex array of a unit sphere.
 
     Arguments:
     ----------
-    recursion_level: int, 
+    recursion_level: int, times we want to divide the octahedron.
 
     Returns:
     --------
-    vertex_array   : array,    
+    vertex_array   : array, vertices of the sphere triangles.
     """
 
     vertex_array, index_array = create_unit_sphere(recursion_level)
@@ -158,7 +158,7 @@ def vertex_array_only_unit_sphere( recursion_level=2 ):
 
 def surfaceVariables(vertex, triangle):
     """
-    It creates 
+    It computes the variables 'normal' and 'Area' of a surface.
 
     Arguments:
     ----------
