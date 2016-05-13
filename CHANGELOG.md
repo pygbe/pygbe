@@ -9,7 +9,9 @@
   * `-c` to specify config file
   * `-p` to specify param file
   * `-o` to specify output folder
-* Forked `which` clone to check if `nvcc` is on PATH and fail gracefully if not.
+  * `-g` to specify geometry folder
+* Docstrings to all functions
+* Checks for NVCC version and to warn if user doesn't have NVCC on PATH
   
 
 ### Changed
@@ -26,5 +28,9 @@ lys
   ˫ geometry/Lys1.vert
   ˫ output/
 ```
+* Refactored regression tests, added simple caching to avoid test repeats
+* Move many, many functions around so that individual `.py` filenames are more descriptive and accurate
+
+
 ### Removed
 * Makefiles (functionality replaced by `setup.py`)
