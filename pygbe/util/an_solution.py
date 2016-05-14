@@ -293,7 +293,7 @@ def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
     sigma0 : float, constant charge on the surface of the sphere.  
     a      : float, radius of the sphere.
     r      : float, distance from the center of the sphere to the evaluation
-                  point.
+                    point.
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant .
 
@@ -359,13 +359,13 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     Arguments:
     ----------
-    phi01  :  
-    phi02  :  
-    r1     :
-    r2     :
-    R      :    
-    kappa  : float, 
-    epsilon:
+    phi01  : float, constant potential on the surface of the sphere 1.
+    phi02  : float, constant potential on the surface of the sphere 2. 
+    r1     : float, radius of sphere 1.
+    r2     : float, radius of sphere 2.
+    R      : float, distance center to center.   
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
@@ -423,13 +423,13 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     Arguments:
     ----------
-    phi01  :  
-    phi02  :  
-    r1     :
-    r2     :
-    R      :    
-    kappa  : float, 
-    epsilon:
+    phi01  : float, constant potential on the surface of the sphere 1.
+    phi02  : float, constant potential on the surface of the sphere 2. 
+    r1     : float, radius of sphere 1.
+    r2     : float, radius of sphere 2.
+    R      : float, distance center to center.   
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
@@ -456,18 +456,19 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
 def constant_potential_single_energy(phi0, r1, kappa, epsilon):
     """
-    It computes  .
+    It computes the total energy of a single sphere at constant potential,
+    inmmersed in water.
 
     Arguments:
     ----------
-    phi0   :  
-    r1     :    
-    kappa  : float, 
-    epsilon:
+    phi0   : float, constant potential on the surface of the sphere.
+    r1     : float, radius of sphere.
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
-    E:
+    E      : float, total energy.
     """
 
     N = 1  # Number of terms in expansion
