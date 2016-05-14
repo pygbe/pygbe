@@ -307,11 +307,11 @@ def addSources3(Cells, twig, K):
     K    :
 
     """
-        for C in twig:
+    for C in twig:
         Cells[C].nsource = K * Cells[C].ntarget
         for j in range(K):
             Cells[C].source = numpy.append(Cells[C].source,
-                                           K * Cells[C].target + j)
+                                       K * Cells[C].target + j)
 
 
 def sortPoints(surface, Cells, twig, param):
@@ -1392,7 +1392,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
 
 def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
                par_reac, w, source, AI_int, time_P2P):
- """
+    """
     It
     
     Arguments:
