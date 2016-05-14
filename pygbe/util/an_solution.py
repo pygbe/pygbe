@@ -546,13 +546,13 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
 
     Arguments:
     ----------
-    phi01  :  
-    phi02  :  
-    r1     :
-    r2     :
-    R      :    
-    kappa  : float, 
-    epsilon:
+    phi01  : float, constant potential on the surface of the sphere 1.
+    phi02  : float, constant potential on the surface of the sphere 2. 
+    r1     : float, radius of sphere 1.
+    r2     : float, radius of sphere 2.
+    R      : float, distance center to center.   
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
