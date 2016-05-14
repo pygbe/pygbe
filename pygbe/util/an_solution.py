@@ -353,40 +353,6 @@ def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
 
 
 
-def constant_charge_twosphere_bell(sigma01, sigma02, r1, r2, R, kappa,
-                                   epsilon):
-    """
-    It computes  .
-
-    Arguments:
-    ----------
-    sigma01    :  
-    sigma02    :  
-    r1         :
-    r2         :
-    R          :    
-    kappa      : float, 
-    epsilon    :
-
-    Returns:
-    -------- 
-    CC0*E_inter:
-    """
-
-
-    E_inter = 4 * pi / epsilon * (sigma01 * r1 * r1 / (1 + kappa * r1)) * (
-        sigma02 * r2 * r2 / (1 + kappa * r2)) * numpy.exp(-kappa *
-                                                          (R - r1 - r2)) / R
-
-    qe = 1.60217646e-19
-    Na = 6.0221415e23
-    E_0 = 8.854187818e-12
-    cal2J = 4.184
-    CC0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
-
-    return CC0 * E_inter
-
-
 def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
     """
     It computes  .
