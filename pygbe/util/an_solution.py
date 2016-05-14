@@ -497,20 +497,20 @@ def constant_potential_single_energy(phi0, r1, kappa, epsilon):
     return E
 
 
-def constant_charge_single_energy(phi0, r1, kappa, epsilon):
+def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
     """
     It computes  .
 
     Arguments:
     ----------
-    phi0   :  
-    r1     :    
-    kappa  : float, 
-    epsilon:
+    sigma0 : float, constant charge on the surface of the sphere.   
+    r1     : float, radius of sphere.
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
-    E_inter:
+    E      : float, total energy.
     """
     N = 20  # Number of terms in expansion
 
@@ -528,13 +528,13 @@ def constant_charge_single_energy(phi0, r1, kappa, epsilon):
     k1p = -numpy.sqrt(pi / 2) * 1 / (2 * (kappa * r1)**(3 / 2.)) * special.kv(
         index, kappa * r1) + numpy.sqrt(pi / (2 * kappa * r1)) * K1p
 
-    a0_inf = -phi0 / (epsilon * kappa * k1p[0])
+    a0_inf = -sigma0 / (epsilon * kappa * k1p[0])
 
     U1_inf = a0_inf * k1[0]
 
-    C1 = 2 * pi * phi0 * r1 * r1
+    C1 = 2 * pi * sigma0 * r1 * r1
     C0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
-    E_inter = C0 * C1 * U1_inf
+    E = C0 * C1 * U1_inf
 
     return E_inter
 
