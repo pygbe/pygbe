@@ -352,60 +352,6 @@ def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
     return phi
 
 
-def constant_charge_twosphere_HsuLiu(sigma01, sigma02, r1, r2, R, kappa,
-                                     epsilon):
-    """
-    It computes  .
-
-    Arguments:
-    ----------
-    sigma01:  
-    sigma02:  
-    r1     :
-    r2     :
-    R      :    
-    kappa  : float, 
-    epsilon:
-
-    Returns:
-    -------- 
-    E_inter:
-    """
-
-    gamma1 = -0.5 * (1 / (kappa * r1) -
-                     (1 + 1 / (kappa * r1)) * numpy.exp(-2 * kappa * r1))
-    gamma2 = -0.5 * (1 / (kappa * r2) -
-                     (1 + 1 / (kappa * r2)) * numpy.exp(-2 * kappa * r2))
-
-    qe = 1.60217646e-19
-    Na = 6.0221415e23
-    E_0 = 8.854187818e-12
-    cal2J = 4.184
-
-    f1 = (0.5 + gamma1) / (0.5 - gamma1)
-    f2 = (0.5 + gamma2) / (0.5 - gamma2)
-
-    if f1 * f2 < 0:
-        A = numpy.arctan(numpy.sqrt(numpy.abs(f1 * f2)) * numpy.exp(-kappa * (
-            R - r1 - r2)))
-    else:
-        A = numpy.arctanh(numpy.sqrt(f1 * f2) * numpy.exp(-kappa *
-                                                          (R - r1 - r2)))
-
-    phi01 = constant_charge_single_potential(sigma01, r1, kappa, epsilon)
-    phi02 = constant_charge_single_potential(sigma02, r2, kappa, epsilon)
-
-    C0 = pi * epsilon * r1 * r2 / R
-    C1 = (f2 * phi01 * phi01 + f1 * phi02 * phi02) / (
-        f1 * f2) * log(1 - f1 * f2 * numpy.exp(-2 * kappa * (R - r1 - r2)))
-    C2 = 4 * phi01 * phi02 / numpy.sqrt(numpy.abs(f1 * f2)) * A
-
-    CC0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
-
-    E_inter = CC0 * C0 * (C1 + C2)
-
-    return E_inter
-
 
 def constant_charge_twosphere_bell(sigma01, sigma02, r1, r2, R, kappa,
                                    epsilon):
