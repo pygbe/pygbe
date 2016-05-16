@@ -73,22 +73,6 @@ def readVertex2(filename, REAL):
     return vertex
 
 
-def readTriangle2(filename):
-    triangle = []
-
-    for line in file(filename):
-        line = line.split()
-        v1 = line[0]
-        v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
-        v3 = line[1]
-        triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
-        # -1-> python starts from 0, matlab from 1
-
-    triangle = numpy.array(triangle)
-
-    return triangle
-
-
 def readTriangle(filename, surf_type):
     """
     It reads the triangles from the mesh file and it stores them on an
@@ -126,6 +110,39 @@ def readTriangle(filename, surf_type):
     triangle -= 1
 
     return triangle
+
+
+def readTriangle2(filename):
+    """
+    It reads the triangles from the mesh file and it stores them on an
+    array.
+    It reads the file line by line.
+
+    Arguments:
+    ----------
+    filename : name of the file that contains the surface information.
+               (filename.faces)
+    
+    Returns:
+    -------
+    triangle: array, triangles indices.
+    """
+
+    triangle = []
+
+    for line in file(filename):
+        line = line.split()
+        v1 = line[0]
+        v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
+        v3 = line[1]
+        triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
+        # -1-> python starts from 0, matlab from 1
+
+    triangle = numpy.array(triangle)
+
+    return triangle
+
+
 
 
 def readCheck(aux, REAL):
