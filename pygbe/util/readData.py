@@ -144,20 +144,21 @@ def readTriangle2(filename):
 
 
 
-
 def readCheck(aux, REAL):
     """
     It checks if it is not reading more than one term.
+    We use this function to check we are not missing '-' signs in the .pqr
+    files, when we read the lines.
 
     Arguments:
     ----------
-    aux : .
+    aux : str, string to be checked.
     REAL: data type.
     
     
     Returns:
     -------
-    X: array, .
+    X: array, array with the correct '-' signs assigned.
     """
 
     # check if it is not reading more than one term
