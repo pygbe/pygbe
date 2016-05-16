@@ -295,7 +295,7 @@ def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
     r      : float, distance from the center of the sphere to the evaluation
                     point.
     kappa  : float, reciprocal of Debye length.
-    epsilon: float, water dielectric constant .
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
@@ -355,7 +355,8 @@ def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
 
 def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
     """
-    It computes  .
+    It computes the solvation energy of two spheres at constant potential,
+    immersed in water.
 
     Arguments:
     ----------
@@ -369,7 +370,7 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     Returns:
     -------- 
-    E_inter:
+    E_solv  : float, solvation energy.
     """
     
 
@@ -412,9 +413,9 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     CC0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
 
-    E_inter = CC0 * (u1 + u2)
+    E_solv = CC0 * (u1 + u2)
 
-    return E_inter
+    return E_solv
 
 
 def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
@@ -433,7 +434,7 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     Returns:
     -------- 
-    E_inter:
+    E_solv:
     """
 
     kT = 4.1419464e-21  # at 300K
@@ -444,14 +445,14 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
     h = R - r1 - r2
     #    E_inter = r1*r2*epsilon/(4*R) * ( (phi01+phi02)**2 * log(1+numpy.exp(-kappa*h)) + (phi01-phi02)**2*log(1-numpy.exp(-kappa*h)) )
     #    E_inter = epsilon*r1*phi01**2/2 * log(1+numpy.exp(-kappa*h))
-    E_inter = epsilon * r1 * r2 * (phi01**2 + phi02**2) / (4 * (r1 + r2)) * (
+    E_solv = epsilon * r1 * r2 * (phi01**2 + phi02**2) / (4 * (r1 + r2)) * (
         (2 * phi01 * phi02) / (phi01**2 + phi02**2) * log(
             (1 + numpy.exp(-kappa * h)) /
             (1 - numpy.exp(-kappa * h))) + log(1 - numpy.exp(-2 * kappa * h)))
 
     CC0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
-    E_inter *= CC0
-    return E_inter
+    E_solv *= CC0
+    return E_solv
 
 
 def constant_potential_single_energy(phi0, r1, kappa, epsilon):
@@ -499,7 +500,8 @@ def constant_potential_single_energy(phi0, r1, kappa, epsilon):
 
 def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
     """
-    It computes  .
+    It computes the total energy of a single sphere at constant charge,
+    inmmersed in water.
 
     Arguments:
     ----------
@@ -536,7 +538,7 @@ def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
     C0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
     E = C0 * C1 * U1_inf
 
-    return E_inter
+    return E
 
 
 def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
@@ -650,20 +652,20 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     return E_inter
 
 
-def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
+def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
                                          epsilon):
     """
     It computes  .
 
     Arguments:
     ----------
-    phi01  :  
-    phi02  :  
-    r1     :
-    r2     :
-    R      :    
-    kappa  : float, 
-    epsilon:
+    sigma01  : float, constant charge on the surface of the sphere 1.
+    sigma02  : float, constant charge on the surface of the sphere 2. 
+    r1     : float, radius of sphere 1.
+    r2     : float, radius of sphere 2.
+    R      : float, distance center to center.   
+    kappa  : float, reciprocal of Debye length.
+    epsilon: float, water dielectric constant.
 
     Returns:
     -------- 
@@ -734,8 +736,8 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
                 M[j + N, n + N] = 1
 
     RHS = numpy.zeros(2 * N)
-    RHS[0] = phi01 * r1 / epsilon
-    RHS[N] = phi02 * r2 / epsilon
+    RHS[0] = sigma01 * r1 / epsilon
+    RHS[N] = sigma02 * r2 / epsilon
 
     coeff = linalg.solve(M, RHS)
 
@@ -743,9 +745,9 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     b = coeff[N:2 * N] / (-r2 * kappa * k2p)
 
     a0 = a[0]
-    a0_inf = -phi01 / (epsilon * kappa * k1p[0])
+    a0_inf = -sigma01 / (epsilon * kappa * k1p[0])
     b0 = b[0]
-    b0_inf = -phi02 / (epsilon * kappa * k2p[0])
+    b0_inf = -sigma02 / (epsilon * kappa * k2p[0])
 
     U1_inf = a0_inf * k1[0]
     U1_h = a0 * k1[0] + i1[0] * numpy.sum(b * B[:, 0])
@@ -753,8 +755,8 @@ def constant_charge_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     U2_inf = b0_inf * k2[0]
     U2_h = b0 * k2[0] + i2[0] * numpy.sum(a * B[:, 0])
 
-    C1 = 2 * pi * phi01 * r1 * r1
-    C2 = 2 * pi * phi02 * r2 * r2
+    C1 = 2 * pi * sigma01 * r1 * r1
+    C2 = 2 * pi * sigma02 * r2 * r2
     C0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
     E_inter = C0 * (C1 * (U1_h - U1_inf) + C2 * (U2_h - U2_inf))
 
@@ -878,14 +880,14 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     return E_inter
 
 
-def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
+def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     """
     It computes  .
 
     Arguments:
     ----------
     q      :  
-    phi02  :  
+    sigma02  :  
     r1     :
     r2     :
     R      :    
@@ -966,7 +968,7 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
     RHS = numpy.zeros(2 * N)
     RHS[0] = -E_hat * q / (4 * pi * E_1 * r1 * r1)
-    RHS[N] = -phi02 / E_2
+    RHS[N] = -sigma02 / E_2
 
     coeff = linalg.solve(M, RHS)
 
@@ -976,7 +978,7 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
     a0 = a[0]
     a0_inf = -E_hat * q / (4 * pi * E_1 * r1 * r1) * 1 / (kappa * k1p[0])
     b0 = b[0]
-    b0_inf = -phi02 / (E_2 * kappa * k2p[0])
+    b0_inf = -sigma02 / (E_2 * kappa * k2p[0])
 
     phi_inf = a0_inf * k1[0] - q / (4 * pi * E_1 * r1)
     phi_h = a0 * k1[0] + i1[0] * numpy.sum(b * B[:, 0]) - q / (4 * pi * E_1 *
@@ -989,7 +991,7 @@ def molecule_constant_charge(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
     C0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
     C1 = q * 0.5
-    C2 = 2 * pi * phi02 * r2 * r2
+    C2 = 2 * pi * sigma02 * r2 * r2
     E_inter = C0 * (C1 * phi_inter + C2 * U_inter)
 
     return E_inter
