@@ -771,7 +771,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     ----------    
     q      : float, number of qe to be asigned to the charge. 
     phi02  : float, constant potential on the surface of the sphere 2. 
-    r1     : float, radius of sphere 1.
+    r1     : float, radius of sphere 1, i.e the molecule.
     r2     : float, radius of sphere 2.
     R      : float, distance center to center.   
     kappa  : float, reciprocal of Debye length.
@@ -889,7 +889,7 @@ def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     ----------    
     q      : float, number of qe to be asigned to the charge. 
     sigma02: float, constant charge on the surface of the sphere 2. 
-    r1     : float, radius of sphere 1.
+    r1     : float, radius of sphere 1, i.e the molecule.
     r2     : float, radius of sphere 2.
     R      : float, distance center to center.   
     kappa  : float, reciprocal of Debye length.
@@ -1087,7 +1087,6 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
 
 def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     """
-  
     It computes the interaction energy for two spheres at constants surface
     charge, according to Carnie&Chan-1993.
 
