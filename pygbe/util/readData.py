@@ -161,7 +161,6 @@ def readCheck(aux, REAL):
     X: array, array with the correct '-' signs assigned.
     """
 
-    # check if it is not reading more than one term
     cut = [0]
     i = 0
     for c in aux[1:]:
@@ -182,15 +181,15 @@ def readpqr(filename, REAL):
 
     Arguments:
     ----------
-    filename : name of the file that contains the surface information.
+    filename: name of the file that contains the surface information.
                (filename.pqr)
-    REAL: data type.
+    REAL    : data type.
     
     Returns:
     -------
-    pos: (Nqx3) array, positions of the charges. 
-    q  : (Nqx1) array, value of the charges. 
-    Nq : int, number of charges.
+    pos     : (Nqx3) array, positions of the charges. 
+    q       : (Nqx1) array, value of the charges. 
+    Nq      : int, number of charges.
     """
 
     pos = []
