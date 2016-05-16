@@ -7,28 +7,6 @@ import numpy
 import os
 
 
-def readVertex2(filename, REAL):
-    x = []
-    y = []
-    z = []
-    for line in file(filename):
-        line = line.split()
-        x0 = line[0]
-        y0 = line[1]
-        z0 = line[2]
-        x.append(REAL(x0))
-        y.append(REAL(y0))
-        z.append(REAL(z0))
-
-    x = numpy.array(x)
-    y = numpy.array(y)
-    z = numpy.array(z)
-    vertex = numpy.zeros((len(x), 3))
-    vertex[:, 0] = x
-    vertex[:, 1] = y
-    vertex[:, 2] = z
-    return vertex
-
 
 def readVertex(filename, REAL):
     """
@@ -51,6 +29,46 @@ def readVertex(filename, REAL):
         full_path = geo_path
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=REAL)
     vertex = X[:, 0:3]
+
+    return vertex
+
+
+def readVertex2(filename, REAL):
+    """
+    It reads the vertex of the triangles from the mesh file and it stores
+    them on an array. 
+    It reads the file line by line.
+
+    Arguments:
+    ----------
+    filename: name of the file that contains the surface information.
+              (filename.vert)
+    REAL    : data type.
+    
+    Returns:
+    -------
+    vertex: array, vertices of the triangles.
+    """
+
+    x = []
+    y = []
+    z = []
+    for line in file(filename):
+        line = line.split()
+        x0 = line[0]
+        y0 = line[1]
+        z0 = line[2]
+        x.append(REAL(x0))
+        y.append(REAL(y0))
+        z.append(REAL(z0))
+
+    x = numpy.array(x)
+    y = numpy.array(y)
+    z = numpy.array(z)
+    vertex = numpy.zeros((len(x), 3))
+    vertex[:, 0] = x
+    vertex[:, 1] = y
+    vertex[:, 2] = z
 
     return vertex
 
