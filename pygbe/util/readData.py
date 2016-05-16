@@ -236,13 +236,13 @@ def readcrd(filename, REAL):
     Arguments:
     ----------
     filename : name of the file that contains the surface information.
-    REAL: data type.
+    REAL     : data type.
     
     Returns:
     -------
-    pos: (Nqx3) array, positions of the charges. 
-    q  : (Nqx1) array, value of the charges. 
-    Nq : int, number of charges.
+    pos      : (Nqx3) array, positions of the charges. 
+    q        : (Nqx1) array, value of the charges. 
+    Nq       : int, number of charges.
     """
 
     pos = []
@@ -272,7 +272,8 @@ def readcrd(filename, REAL):
 
 def readParameters(param, filename):
     """
-    It reads the parameters    .
+    It populates the attributes from the Parameters class with the information
+    read from the .param file.
 
     Arguments:
     ----------
@@ -282,7 +283,8 @@ def readParameters(param, filename):
         
     Returns:
     -------
-    dataType:
+    dataType: we return the dataType of each attributes because we need it for
+              other fucntions.  
     """
 
     val = []
@@ -395,7 +397,8 @@ def read_surface(filename):
     Arguments:
     ----------
     filename: name of the file that contains the surface type of each region.
-              (filename.config)  
+              (filename.config).
+  
     Returns:
     -------
     files    : list, it contains the files corresponding to each region in the
