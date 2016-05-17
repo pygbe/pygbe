@@ -235,7 +235,7 @@ def findTwigs(Cells, C, twig, NCRIT):
     return twig
 
 
-def addSources3(Cells, twig, K):
+def addSources(Cells, twig, K):
     """
     It adds the source points to the cells.     
     This version of addSources puts the sources in the same cell as the
@@ -286,7 +286,7 @@ def addSources2(x, y, z, j, Cells, C, NCRIT):
         Cells[C].source = numpy.append(Cells[C].source, j)
 
 
-def addSources(x, y, z, Cells, twig):
+def addSources3(x, y, z, Cells, twig):
     # x,y,z: location of sources
     # Cells: array with cells
     # twig : array with pointers to twigs of cells array
