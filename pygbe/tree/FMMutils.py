@@ -516,7 +516,7 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
 
 def generateList(surf_array, field_array, param):
     """
-    It generates the list for 
+    Loops over the surfaces to then compute the interactionList(). 
 
     Arguments:
     ----------
@@ -524,10 +524,9 @@ def generateList(surf_array, field_array, param):
                         surface.
     field_array: array, contains the Field classes of each region on the
                  surface.
-    param      : class, parameters related to the surface.  
-    
-
+    param      : class, parameters related to the surface.      
     """
+
     Nsurf = len(surf_array)
     Nfield = len(field_array)
 
