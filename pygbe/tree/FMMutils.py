@@ -417,7 +417,7 @@ def computeIndices(P, ind0):
 
 def precomputeTerms(P, ind0):
     """
-    Precompute terms for
+    It precomputes the terms for P2M and M2M computation.
 
     Arguments:
     ----------
