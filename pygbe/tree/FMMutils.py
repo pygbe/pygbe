@@ -209,7 +209,7 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
 
 def findTwigs(Cells, C, twig, NCRIT):
     """
-    It finds the twig cells, the ones that have <= NCRIT.
+    It finds the twig cells, the ones that have < NCRIT.
 
     Arguments:
     ----------
@@ -233,6 +233,26 @@ def findTwigs(Cells, C, twig, NCRIT):
         Cells[C].twig_array = numpy.int32(len(twig) - 1)
 
     return twig
+
+
+def addSources3(Cells, twig, K):
+    """
+    It adds the source points to the cells.     
+    This version of addSources puts the sources in the same cell as the
+    collocation point of the same panel.
+
+    Arguments:
+    ----------
+    Cells: array, cells of the tree.
+    twig : array, indices of twigs in Cells array.
+    K    : int, number of Gauss points per element.
+    """
+
+    for C in twig:
+        Cells[C].nsource = K * Cells[C].ntarget
+        for j in range(K):
+            Cells[C].source = numpy.append(Cells[C].source,
+                                       K * Cells[C].target + j)
 
 
 def addSources2(x, y, z, j, Cells, C, NCRIT):
@@ -290,24 +310,6 @@ def addSources(x, y, z, Cells, twig):
             Cells[twig[close_twig[j]]].source, j)
 
 
-def addSources3(Cells, twig, K):
-    """
-    It adds the source points to the cells.     
-    This version of addSources puts the sources in the same cell as the
-    collocation point of the same panel.
-
-    Arguments:
-    ----------
-    Cells: array, cells of the tree.
-    twig : array, indices of twigs in Cells array.
-    K    :
-
-    """
-    for C in twig:
-        Cells[C].nsource = K * Cells[C].ntarget
-        for j in range(K):
-            Cells[C].source = numpy.append(Cells[C].source,
-                                       K * Cells[C].target + j)
 
 
 def sortPoints(surface, Cells, twig, param):
