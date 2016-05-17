@@ -462,7 +462,7 @@ def precomputeTerms(P, ind0):
 def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
                     s_src):
     """
-    It  the interaction list for 
+    It finds the list of cells which each twig cell interacts.
 
     Arguments:
     ----------
@@ -474,14 +474,19 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
     theta  : float, Multipole-acceptance criterion (MAC).
     NCRIT  : int, maximum number of boundary elements per twig box of tree
                   structure.
-    offTwg :
-    offMlt : 
-    s_src  :
+    offTwg : array, pointer to the first element in the P2P interaction list 
+                    for each twig cell.
+    offMlt : array, pointer to the first element in the M2P interaction list 
+                    for each twig cell.
+    s_src  : int, position (index) in the surface-array of the surface that
+                  contains the sources.
     
     Returns:
     -------- 
-    offTwg :
-    offMlt : 
+    offTwg : array, pointer to the first element in the P2P interaction list 
+                    for each twig cell.
+    offMlt : array, pointer to the first element in the M2P interaction list 
+                    for each twig cell.
     """
 
     if (surfSrc.tree[CJ].ntarget >= NCRIT):
