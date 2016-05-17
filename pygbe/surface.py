@@ -5,7 +5,7 @@ It contains the necessary functions to set up the surface to be solved.
 import time
 import numpy
 from scipy import linalg
-from tree.FMMutils import addSources3, sortPoints, generateTree, findTwigs
+from tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
 from tree.direct import computeDiagonal
 from util.semi_analytical import GQ_1D
 from util.readData import (readVertex, readTriangle, readpqr, readcrd,
@@ -173,8 +173,8 @@ def fill_surface(surf, param):
     C = 0
     surf.twig = findTwigs(surf.tree, C, surf.twig, param.NCRIT)
 
-    addSources3(surf.tree, surf.twig, param.K)
-    #    addSources(surf.xj,surf.yj,surf.zj,surf.tree,surf.twig)
+    addSources(surf.tree, surf.twig, param.K)
+    #    addSources3(surf.xj,surf.yj,surf.zj,surf.tree,surf.twig)
     #    for j in range(Nj):
     #        C = 0
     #        addSources2(surf.xj,surf.yj,surf.zj,j,surf.tree,C,param.NCRIT)
