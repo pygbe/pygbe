@@ -1,5 +1,8 @@
 """
-It contains the functions needed to compute the near singular integrals.
+It contains the functions needed to compute the near singular integrals in
+python. For big problems these functions were written in C++ and we call them
+through the pycuda interface. At the end you have a commented test to compare
+both types.
 """
 
 import numpy
@@ -16,8 +19,8 @@ def GQ_1D(K):
     
     Returns:
     --------
-    x: float, location of the gauss points.    
-    w: float, weights of the gauss points.   
+    x: float, location of the gauss point.    
+    w: float, weights of the gauss point.   
     """
     T = numpy.zeros((K, K))
     nvec = numpy.arange(1., K)
@@ -32,24 +35,27 @@ def GQ_1D(K):
 
 def lineInt(z, x, v1, v2, kappa, xk, wk):
     """
-    Line integral    .
+    Line integral to solve the non-analytical part (integral in the angle) in
+    the semi_analytical integrals needed to calculate the potentials.
+
 
     Arguments:
     ----------
-    z     :
-    x     : 
-    v1    :
-    v2    :
-    kappa :
-    xk    :   
-    wk    :
+    z     : float, distance (height) between the plane of the triangle and the
+                   collocation point. 
+    x     : float, position of the collocation point. 
+    v1    : float, low extreme integral value.
+    v2    : float, high extreme integral value.
+    kappa : float, reciprocal of Debye length.
+    xk    : float, position of the gauss point.   
+    wk    : float, weight of the gauss point.
     
     Returns:
     --------
-    phi_Y :
-    dphi_Y:
-    phi_L :
-    dphi_L:     
+    phi_Y : float, potential due to a Yukawa kernel.
+    dphi_Y: float, normal derivative of potential due to a Yukawa kernel.
+    phi_L : float, potential due to a Laplace kernel.
+    dphi_L: float, normal derivative of potential due to a Laplace kernel.   
     """
 
 
@@ -87,23 +93,24 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
 
 def intSide(v1, v2, p, kappa, xk, wk):
     """
-    Integral     .
+    It solves the integral line over one side of the triangle .
 
     Arguments:
     ----------
-    v1    :
-    v2    :
-    p     :  
-    kappa :
-    xk    :   
-    wk    :
+    v1    : float, low extreme integral value.
+    v2    : float, high extreme integral value.
+    p     : float, distance (height) between the plane of the triangle and the
+                   collocation point. 
+    kappa : float, reciprocal of Debye length.
+    xk    : float, position of the gauss point.   
+    wk    : float, weight of the gauss point.
     
     Returns:
     --------
-    phi_Y :
-    dphi_Y:
-    phi_L :
-    dphi_L:     
+    phi_Y : float, potential due to a Yukawa kernel.
+    dphi_Y: float, normal derivative of potential due to a Yukawa kernel.
+    phi_L : float, potential due to a Laplace kernel.
+    dphi_L: float, normal derivative of potential due to a Laplace kernel.   
     """
 
     v21 = v2 - v1
@@ -160,16 +167,17 @@ def intSide(v1, v2, p, kappa, xk, wk):
 def SA_arr(y, x, kappa, same, xk, wk):
 
     """
-         .
+    It computes the integral line for all the sides of a triangle. 
 
     Arguments:
     ----------
-    y     :
-    x     :
-    kappa :
-    same  :
-    xk    :   
-    wk    :
+    y     : array, 
+    x     : array, 
+    kappa : float, reciprocal of Debye length.
+    same  : int, 1 if the collocation point is in the panel of integration, 
+                 0 otherwise.   
+    xk    : float, position of the gauss point.   
+    wk    : float, weight of the gauss point.
     
     Returns:
     --------
