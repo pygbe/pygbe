@@ -644,15 +644,6 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
                 structure.
     """
 
-    # Cells     : array of cells
-    # C         : index of cell in Cells array
-    # x,y,z     : position of particles
-    # m         : weight of particles
-    # P         : order of Taylor expansion
-    # NCRIT     : max number of target particles per cell
-    # II,JJ,KK  : x,y,z powers of multipole expansion
-    # index     : 1D mapping of II,JJ,KK (index of multipoles)
-
     if (Cells[C].ntarget >= NCRIT):
 
         Cells[C].M[:] = 0.0  # Initialize multipoles
