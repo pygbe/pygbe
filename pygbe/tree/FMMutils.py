@@ -256,11 +256,20 @@ def addSources(Cells, twig, K):
 
 
 def addSources2(x, y, z, j, Cells, C, NCRIT):
-    # x,y,z: location of sources
-    # j    : index of source
-    # Cells: array with cells
-    # C    : index of cell in Cells array
-    # NCRIT: max number of target particles per cell
+    """
+    It adds the source points to the cells.     
+    
+    Arguments:
+    ----------
+    x    : array, x coordinate of the sources. 
+    y    : array, y coordinate of the sources.
+    z    : array, z coordinate of the sources.
+    j    : int, index of the source in the source array.   
+    Cells: array, cells of the tree.
+    C    : int, index of cell in the Cells array.
+    NCRIT: int, maximum number of boundary elements per twig box of tree
+                structure.
+    """
 
     if (Cells[C].ntarget >= NCRIT):
         octant = (x[j] > Cells[C].xc) + ((y[j] > Cells[C].yc) << 1) + (
@@ -287,14 +296,24 @@ def addSources2(x, y, z, j, Cells, C, NCRIT):
 
 
 def addSources3(x, y, z, Cells, twig):
-    # x,y,z: location of sources
-    # Cells: array with cells
-    # twig : array with pointers to twigs of cells array
+    """
+    It adds the source points to the cells.     
+    
+    Arguments:
+    ----------
+    x    : array, x coordinate of the sources. 
+    y    : array, y coordinate of the sources.
+    z    : array, z coordinate of the sources.
+    j    : int, index of the source in the source array.   
+    Cells: array, cells of the tree.
+    twig : array, indices of twigs in Cells array.
+    """
 
     dx = numpy.zeros((len(twig), len(x)))
     dy = numpy.zeros((len(twig), len(x)))
     dz = numpy.zeros((len(twig), len(x)))
     j = 0
+
     for t in twig:
         dx[j] = x - Cells[t].xc
         dy[j] = y - Cells[t].yc
@@ -308,7 +327,6 @@ def addSources3(x, y, z, Cells, twig):
         Cells[twig[close_twig[j]]].nsource += 1
         Cells[twig[close_twig[j]]].source = numpy.append(
             Cells[twig[close_twig[j]]].source, j)
-
 
 
 
