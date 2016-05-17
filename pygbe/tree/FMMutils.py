@@ -161,20 +161,19 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
 
     Arguments:
     ----------
-    xi      :
-    yi      :
-    zi      : 
+    xi      : array, x position of the targets, i.e collocation points.
+    yi      : array, y position of the targets, i.e collocation points.
+    zi      : array, z position of the targets, i.e collocation points.
     NCRIT   : int, maximum number of boundary elements per twig box of tree
-                    structure.
+                   structure.
     Nm      : int, number of multipole coefficients.
-    radius  :
-    x_center: array, 
+    r       : float, cell radius, i.e half length.
+    x_center: array, center of the root cell.
 
     Returns:
     --------
-    Cells: array, cells of the tree.
+    Cells   : array, cells of the tree.
     """
-    # Target-based tree
 
     C0 = Cell(NCRIT, Nm)
     C0.xc = x_center[0]
