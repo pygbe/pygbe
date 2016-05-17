@@ -238,8 +238,9 @@ def findTwigs(Cells, C, twig, NCRIT):
 def addSources(Cells, twig, K):
     """
     It adds the source points to the cells.     
-    This version of addSources puts the sources in the same cell as the
-    collocation point of the same panel.
+    Puts the sources in the same cell as the collocation point of the same
+    panel.    
+    This version works fast when used with sorted arrays. 
 
     Arguments:
     ----------
@@ -258,6 +259,10 @@ def addSources(Cells, twig, K):
 def addSources2(x, y, z, j, Cells, C, NCRIT):
     """
     It adds the source points to the cells.     
+    Puts the sources in the same cell as the collocation point of the same
+    panel.    
+    This version is a generic version that loop over the cells looking for
+    twigs and sets the sources one it finds a twig.     
     
     Arguments:
     ----------
@@ -298,7 +303,11 @@ def addSources2(x, y, z, j, Cells, C, NCRIT):
 def addSources3(x, y, z, Cells, twig):
     """
     It adds the source points to the cells.     
-    
+    Puts the sources in the same cell as the collocation point of the same
+    panel.    
+    This version works fast when we uses the twig_array, array that contains
+    the location in the cells array of the twig cells. 
+
     Arguments:
     ----------
     x    : array, x coordinate of the sources. 
