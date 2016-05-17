@@ -90,13 +90,13 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
     Cells : array, it contains the cells information.
     i     : int, index of parent cell in Cells array.
     NCRIT : int, maximum number of boundary elements per twig box of tree
-                    structure.
+                 structure.
     Nm    : int, number of multipole coefficients.
-    Ncell :
+    Ncell : int, number of cells in the tree.
 
     Returns:
     --------
-    Ncell :
+    Ncell : int, number of cells in the tree.
     """
    
     CN = Cell(NCRIT, Nm)  # CN: child cell
