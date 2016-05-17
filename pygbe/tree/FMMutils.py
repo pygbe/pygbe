@@ -615,19 +615,29 @@ def generateList(surf_array, field_array, param):
 
 def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
     """
-    It gets the multipole .
+    It gets the multipole of the twig cells.
+    (P2M)
+
+    Note: In this context when we refer to mass we mean
+                 mass  = (vector x gauss weights)   
+          where vector is the vector in the matrix-vector multiplication in 
+          the GMRES.
 
     Arguments:
     ----------
     Cells: array, it contains the cells information.
     C    : int, index of the cell in the Cells array.    
-    x    :
-    y    :
-    z    : 
-    mV   :
-    mKx  :
-    mKy  :
-    mKz  :
+    x    : array, x coordinate of the sources. 
+    y    : array, y coordinate of the sources.
+    z    : array, z coordinate of the sources.
+    mV   : array, mass of the source particle for the single layer potential
+                  calculation. 
+    mKx  : array, mass of the source particle times  the 'x' component of the 
+                  normal vector, for the double layer potential calculation.
+    mKy  :array, mass of the source particle times  the 'y' component of the 
+                  normal vector, for the double layer potential calculation.
+    mKz  :array, mass of the source particle times  the 'z' component of the 
+                  normal vector, for the double layer potential calculation.
     ind0 : class, it contains the indices related to the treecode computation. 
     P    : int, order of the Taylor expansion.
     NCRIT: int, maximum number of boundary elements per twig box of tree
