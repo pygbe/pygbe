@@ -667,7 +667,7 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
 def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
                 IImii, JJmjj, KKmkk, index_small, index_ptr):
     """
-    It  .
+    It calculates the M2M. Calculation of the multipole for non-twig cells .
 
     Arguments:
     ----------
@@ -690,12 +690,7 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
     index_ptr  :
     
     """
-    # Cells     : array of cells
-    # CC        : index of child cell in Cells array
-    # PC        : index of parent cell in Cells array
-    # P         : order of Taylor expansion
-    # II,JJ,KK  : x,y,z powers of multipole expansion
-    # index     : 1D mapping of II,JJ,KK (index of multipoles)
+    
 
     dx = Cells[PC].xc - Cells[CC].xc
     dy = Cells[PC].yc - Cells[CC].yc
