@@ -117,29 +117,26 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
 
 def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     """
-    It splits a cell with more than NCRIT particles.
+    It splits a cell with more than (>=) NCRIT particles.
+    Particles in this context means boundary elements.
 
     Arguments:
     ----------
-    x    :
-    y    :
-    z    : 
+    x    : array, x position of the particles.
+    y    : array, y position of the particles.
+    z    : array, z position of the particles.
     Cells: array, it contains the cells information.
     C    : int, index in the Cells array of the cell to be splitted .
     NCRIT: int, maximum number of boundary elements per twig box of tree
-                    structure.
+                structure.
     Nm   : int, number of multipole coefficients.
-    Ncell:
+    Ncell: int, number of cells in the tree.
 
     Returns:
     --------
-    Ncell:
+    Ncell: int, number of cells in the tree.
     """
     
-    # split_cell splits cell with more than NCRIT particles
-    # x,y,z: positions of particles
-    # Cells: array of cells
-    # C    : index of cell to be split in Cells array
 
     for l in Cells[C].target:
         octant = int(x[l] > Cells[C].xc) + int(y[l] > Cells[C].yc) * 2 + int(z[
