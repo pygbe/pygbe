@@ -383,13 +383,12 @@ def sortPoints(surface, Cells, twig, param):
 
 def computeIndices(P, ind0):
     """
-    It computes the indices 
+    It computes the indices (exponents) needed to compute the Taylor expansion. 
 
     Arguments:
     ----------
     P   : int, order of the Taylor expansion.
     ind0: class, it contains the indices related to the treecode computation. 
-
         
     """
     II = []
