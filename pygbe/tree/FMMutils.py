@@ -332,15 +332,18 @@ def addSources3(x, y, z, Cells, twig):
 
 def sortPoints(surface, Cells, twig, param):
     """
-    It sort the points .
+    It sort the target and source points.
+
+    We sort them to makes the computation easy and faster in the GPU.
+    We unsort them when we need the information to be analized after it was
+    computed.
 
     Arguments:
     ----------
-    surface: 
+    surface: class, surface that we are analysing.
     Cells  : array, cells of the tree.
     twig   : array, indices of twigs in Cells array.
     param  : class, parameters related to the surface. 
-
     """
 
     Nround = len(twig) * param.NCRIT
