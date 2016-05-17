@@ -1,5 +1,5 @@
 """
-It contains the functions to build the tree and 
+It contains the functions to build the tree and compute all the interactions.  
 """
 import numpy
 from scipy.misc import factorial, comb
@@ -24,25 +24,25 @@ class Cell():
 
     Attributes:
     -----------
-    nsource   : int, Number of source particles.
-    ntarget   : int, Number of target particles.
-    nchild    : int, Number of child boxes in binary, 8bit value, if certain
+    nsource   : int, number of source particles.
+    ntarget   : int, number of target particles.
+    nchild    : int, number of child boxes in binary, 8bit value, if certain
                      child exists, that bit will be 1.
-    source    : array, Pointer to source particles.
-    target    : array, Pointer to target particles.
-    xc        : float, x position of cell.
-    yc        : float, y position of cell.
-    zc        : float, z position of cell.
-    r         : float, cell radius.
-    parent    : int, Pointer to parent cell.
-    child     : array, Pointer to child cell.
-    M         : array, Array with multipoles.
-    Md        : array, Array with multipoles for grad(G).n.
-    P2P_list  : list, Pointer to cells that interact with P2P.
-    M2P_list  : list, Pointer to cells that interact with M2P.
-    M2P_size  : list, Size of the M2P interaction list.
-    list_ready: int, Flag to know if P2P list is already generated.
-    twig_array: list, Position in the twig array.
+    source    : array, pointer to source particles.
+    target    : array, pointer to target particles.
+    xc        : float, x position of the center of cell.
+    yc        : float, y position of the center of cell.
+    zc        : float, z position of the center of cell.
+    r         : float, cell radius, i.e half length.
+    parent    : int, pointer to parent cell.
+    child     : array, pointer to child cell.
+    M         : array, array with multipoles.
+    Md        : array, array with multipoles for grad(G).n.
+    P2P_list  : list, pointer to cells that interact with P2P.
+    M2P_list  : list, pointer to cells that interact with M2P.
+    M2P_size  : list, size of the M2P interaction list.
+    list_ready: int, flag to know if P2P list is already generated.
+    twig_array: list, position in the twig array.
      
     """
     def __init__(self, NCRIT, Nm):
