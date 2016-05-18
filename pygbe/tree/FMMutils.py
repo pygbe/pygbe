@@ -620,7 +620,7 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
 
     Note: In this context when we refer to mass we mean
                  mass  = (vector x gauss weights)   
-          where vector is the vector in the matrix-vector multiplication in 
+          where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES.
 
     Arguments:
@@ -906,17 +906,21 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
 def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
               LorY, timing, kernel):
     """
-    It 
+    It computes the far field contribution of the adjoint double potential
+    using the sorted data, on the GPU.
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    Ktx_gpu:
-    Kty_gpu:
-    Kty_gpu:
-    surf   :
+    Ktx_gpu: array, x component of the far field contribution to the adjoint 
+                    double layer potential.
+    Kty_gpu: array, y component of the far field contribution to the adjoint 
+                    double layer potential.
+    Ktz_gpu: array, z component of the far field contribution to the adjoint 
+                    double layer potential.
+    surf   : int, position of the source surface in the surface array.
     ind0   : list, pointers to the location of the mulipole of order i,j,k 
                    in the multipole array.   
     param  : class, parameters related to the surface.
@@ -927,10 +931,12 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
 
     Returns:
     --------
-    Ktx_gpu:
-    Kty_gpu:
-    Kty_gpu:
-
+    Ktx_gpu: array, x component of the far field contribution to the adjoint 
+                    double layer potential.
+    Kty_gpu: array, y component of the far field contribution to the adjoint 
+                    double layer potential.
+    Ktz_gpu: array, z component of the far field contribution to the adjoint 
+                    double layer potential.
     """
 
     if param.GPU == 1:
@@ -998,35 +1004,49 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
 def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
              LorY, K_diag, V_diag, IorE, L, w, param, timing):
     """
-    It 
+    It computes the near field contribution of the double and single layer 
+    potential using the sorted data and adds it to the far field contribution
+    given as an input.
+
+    Note: In this context when we refer to mass we mean
+                 mass       = (vector x gauss weights)
+                 mass-clean = (vector)      
+          where 'vector' is the vector in the matrix-vector multiplication in 
+          the GMRES.
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    m      :
-    mx     :
-    my     :
-    mz     :
-    mKc    :
-    mVc    :
-    K_aux  :
-    V_aux  :
-    surf   :
+    m      : array, mass of the source particle for the single layer potential
+                    calculation. 
+    mx     : array, mass of the source particle times  the 'x' component of the 
+                    normal vector, for the double layer potential calculation.
+    my     : array, mass of the source particle times  the 'y' component of the 
+                    normal vector, for the double layer potential calculation.
+    mz     : array, mass of the source particle times  the 'z' component of the 
+                    normal vector, for the double layer potential calculation.
+    mKc    : array, mass-clean of the source particle for the double layer
+                    potential calculation.
+    mVc    : array, mass-clean of the source particle for the double layer
+                    potential calculation.
+    K_aux  : array, far field contribution to the double layer potential.
+    V_aux  : array, far field contribution to the single layer potential.
+    surf   : int, position of the source surface in the surface array.
     K_diag : array, diagonal elements of the double layer integral operator.
     V_diag : array, diagonal elements of the single layer integral operator.
     IorE   : int, internal (1) or external (2).
-    L      :
-    w      :
+    L      : float, representative distance of the triangles. (sqrt{2*Area})
+    w      : array, gauss points.
     param  : class, parameters related to the surface.
     timing : class, it contains timing information for different parts of 
                     the code.
     
     Returns:
     --------
-    K_aux  :
-    V_aux  :
+    K_aux  : array, far plus near field contribution to the double layer potential.
+    V_aux  : array, far plus near field contribution to the single layer potential.
 
     """
 
