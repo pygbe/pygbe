@@ -474,10 +474,10 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
     theta  : float, Multipole-acceptance criterion (MAC).
     NCRIT  : int, maximum number of boundary elements per twig box of tree
                   structure.
-    offTwg : array, pointer to the first element in the P2P interaction list 
-                    for each twig cell.
-    offMlt : array, pointer to the first element in the M2P interaction list 
-                    for each twig cell.
+    offTwg : array, pointer to the first element in the array P2P_list which
+                    contains the P2P interaction list for each twig cell.
+    offMlt : array, pointer to the first element in the array M2P_list which
+                    contains the M2P interaction list for each twig cell.
     s_src  : int, position (index) in the surface-array of the surface that
                   contains the sources.
     
