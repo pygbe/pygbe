@@ -680,15 +680,19 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
     KK         : list, multipole order in the z-direction for the treecode. 
     index      : list, pointers to the location of the mulipole of order i,j,k 
                        in the multipole array. 
-    combII     :
-    combJJ     :
-    combKK     :
-    IImii      :
-    JJmjj      :
-    KKmkk      :
-    index_small:
-    index_ptr  :
-    
+    combII     : array, combinatory of (I, i) where I is the maximum i multipole.
+    combJJ     : array, combinatory of (J, j) where J is the maximum j multipole.
+    combKK     : array, combinatory of (K, k) where K is the maximum k multipole.
+    IImii      : array, I-i where I is the maximum i multipole.
+    JJmjj      : array, J-j where J is the maximum j multipole.
+    KKmkk      : array, K-k where K is the maximum k multipole.
+    index_small: list, pointers to the position of multipole order i, j, k 
+                       in the multipole array, organized in a 1D array which is 
+                       compressed with respect to index_large (does not consider 
+                       combinations of i,j,k which do not have a multipole).
+    index_ptr  : list, pointer to index_small. Data in index_small is organized
+                      in a i-major fashion (i,j,k), and index_ptr points at the
+                      position in index_small where the order i changes.    
     """
     
 
