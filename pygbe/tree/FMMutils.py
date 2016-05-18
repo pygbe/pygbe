@@ -1047,7 +1047,6 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
                     potential.
     V_aux  : array, far plus near field contribution to the single layer
                     potential.
-
     """
 
     tic = time.time()
@@ -1165,36 +1164,52 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
 def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
             LorY, K_diag, IorE, L, w, param, timing, kernel):
     """
-    It 
+    It computes the near field contribution of the double and single layer 
+    potential using the sorted data and adds it to the far field contribution
+    given as an input, on the GPU.
+
+    Note: In this context when we refer to mass we mean
+                 mass       = (vector x gauss weights)
+                 mass-clean = (vector)      
+          where 'vector' is the vector in the matrix-vector multiplication in 
+          the GMRES.
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    m      :
-    mx     :
-    my     :
-    mz     :
-    mKc    :
-    mVc    :
-    K_gpu  :
-    V_gpu  :
-    surf   :
-    LorY   :
+    m      : array, mass of the source particle for the single layer potential
+                    calculation. 
+    mx     : array, mass of the source particle times  the 'x' component of the 
+                    normal vector, for the double layer potential calculation.
+    my     : array, mass of the source particle times  the 'y' component of the 
+                    normal vector, for the double layer potential calculation.
+    mz     : array, mass of the source particle times  the 'z' component of the 
+                    normal vector, for the double layer potential calculation.
+    mKc    : array, mass-clean of the source particle for the double layer
+                    potential calculation.
+    mVc    : array, mass-clean of the source particle for the double layer
+                    potential calculation.
+    K_gpu  : array, far field contribution to the double layer potential.
+    V_gpu  : array, far field contribution to the single layer potential.
+    surf   : int, position of the source surface in the surface array.
     K_diag : array, diagonal elements of the double layer integral operator.
+    V_diag : array, diagonal elements of the single layer integral operator.
     IorE   : int, internal (1) or external (2).
-    L      :
-    w      :
+    L      : float, representative distance of the triangles. (sqrt{2*Area})
+    w      : array, gauss points.
     param  : class, parameters related to the surface.
     timing : class, it contains timing information for different parts of 
                     the code.
     kernel : pycuda source module.
-
+    
     Returns:
     --------
-    K_gpu  :
-    V_gpu  :
+    K_gpu  : array, far plus near field contribution to the double layer 
+                    potential.
+    V_gpu  : array, far plus near field contribution to the single layer
+                    potential.
 
     """
 
@@ -1287,23 +1302,35 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
 
 def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
               w, param, timing, kernel):
-    """
-    It 
+   """
+    It computes the near field contribution of the double and single layer 
+    potential using the sorted data and adds it to the far field contribution
+    given as an input, on the GPU.
+
+    Note: In this context when we refer to mass we mean
+                 mass       = (vector x gauss weights)
+                 mass-clean = (vector)      
+          where 'vector' is the vector in the matrix-vector multiplication in 
+          the GMRES. 
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    m      :
-    mKtc   :
-    mVc    :
-    Ktx_gpu:
-    Kty_gpu:
-    Kty_gpu:
-    surf   :
-    LorY   :
-    w      :
+    m      : array, mass of the source particle for the adjoint double layer
+                    potential calculation. 
+    mKc    : array, mass-clean of the source particle for the adjoint double 
+                    layer potential calculation.
+    Ktx_gpu: array, x component of the far field contribution to the adjoint 
+                    double layer potential.
+    Kty_gpu: array, y component of the far field contribution to the adjoint 
+                    double layer potential.
+    Ktz_gpu: array, z component of the far field contribution to the adjoint 
+                    double layer potential.
+    surf   : int, position of the source surface in the surface array.
+    LorY   : int, Laplace (1) or Yukawa (2).
+    w      : array, gauss points.
     param  : class, parameters related to the surface.
     timing : class, it contains timing information for different parts of 
                     the code.
@@ -1311,10 +1338,12 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
 
     Returns:
     --------
-    Ktx_gpu:
-    Kty_gpu:
-    Kty_gpu:
-
+    Ktx_gpu: array, x component of the far plus near field contribution to the 
+                    adjoint double layer potential.
+    Kty_gpu: array, y component of the far plus near field contribution to the
+                    adjoint double layer potential.
+    Ktz_gpu: array, z component of the far plus near field contribution to the 
+                    adjoint double layer potential.
     """
 
     if param.GPU == 1:
