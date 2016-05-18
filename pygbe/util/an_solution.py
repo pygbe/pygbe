@@ -324,6 +324,7 @@ def constant_potential_single_charge(phi0, radius, kappa, epsilon):
     -------- 
     sigma  : float, surface charge.
     """
+ 
     dphi = -phi0 * ((1. + kappa * radius) / radius)
     sigma = -epsilon * dphi  # Surface charge
     
@@ -420,7 +421,8 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
 
 def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
     """
-    It computes  .
+    It computes the solvation energy of two spheres at constant potential,
+    immersed in water.
 
     Arguments:
     ----------
@@ -434,7 +436,7 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
 
     Returns:
     -------- 
-    E_solv:
+    E_solv  : float, solvation energy.
     """
 
     kT = 4.1419464e-21  # at 300K
@@ -544,7 +546,8 @@ def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
 def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
                                             epsilon):
     """
-    It computes  .
+    It computes the interaction energy for dissimilar spheres at constant
+    potential, immersed in water.
 
     Arguments:
     ----------
@@ -558,7 +561,7 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
 
     Returns:
     -------- 
-    E_inter:
+    E_inter: float, interaction energy.
     """
 
     N = 20  # Number of terms in expansion
@@ -655,12 +658,13 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
 def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
                                          epsilon):
     """
-    It computes  .
+    It computes the interaction energy between two dissimilar spheres at
+    constant charge, immersed in water.
 
     Arguments:
     ----------
-    sigma01  : float, constant charge on the surface of the sphere 1.
-    sigma02  : float, constant charge on the surface of the sphere 2. 
+    sigma01: float, constant charge on the surface of the sphere 1.
+    sigma02: float, constant charge on the surface of the sphere 2. 
     r1     : float, radius of sphere 1.
     r2     : float, radius of sphere 2.
     R      : float, distance center to center.   
@@ -669,7 +673,7 @@ def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
 
     Returns:
     -------- 
-    E_inter:
+    E_inter: float, interaction energy.
     """
 
     N = 20  # Number of terms in expansion
@@ -765,7 +769,9 @@ def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
 
 def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     """
-    It computes  .
+    It computes the interaction energy between a molecule (sphere with
+    point-charge in the center) and a sphere at constant potential, immersed
+    in water.
 
     Arguments:
     ----------    
@@ -781,7 +787,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     
     Returns:
     -------- 
-    E_inter:
+    E_inter: float, interaction energy.
     """
 
     N = 20  # Number of terms in expansion
@@ -883,7 +889,9 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
 
 def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     """
-    It computes  .
+    It computes the interaction energy between a molecule (sphere with
+    point-charge in the center) and a sphere at constant charge, immersed
+    in water.
 
     Arguments:
     ----------    
@@ -899,7 +907,7 @@ def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
 
     Returns:
     -------- 
-    E_inter:
+    E_inter: float, interaction energy.
     """
 
     N = 20  # Number of terms in expansion
@@ -1176,39 +1184,3 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     return E_inter
 
 
-'''
-r1 = 1.
-phi01 = 1.
-r2 = 2.
-phi02 = 2.
-
-R = 5
-
-kappa = 0.1
-epsilon = 80.
-
-E_inter = constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon)
-print E_inter
-'''
-'''
-q   = array([1.60217646e-19])
-xq  = array([[1e-10,1e-10,0.]])
-E_1 = 4.
-E_2 = 80.
-E_0 = 8.854187818e-12
-R   = 1.
-N   = 10
-Q   = 1
-Na  = 6.0221415e23
-a   = R
-kappa = 0.125
-
-#PHI_sph = an_spherical(q, xq, E_1, E_2, E_0, R, N)
-PHI_P = an_P(q, xq, E_1, E_2, E_0, R, kappa, a, N)
-
-JtoCal = 4.184    
-#E_solv_sph = 0.5*numpy.sum(q*PHI_sph)*Na*1e7/JtoCal
-E_solv_P = 0.5*numpy.sum(q*PHI_P)*Na*1e7/JtoCal
-#print 'With spherical harmonics: %f'%E_solv_sph
-print 'With Legendre functions : %f'%E_solv_P
-'''
