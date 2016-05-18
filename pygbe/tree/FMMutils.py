@@ -726,7 +726,6 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     --------
     K_aux  : array, far field contribution to the double layer potential.
     V_aux  : array, far field contribution to the single layer potential.
-
     """
 
     tic = time.time()
@@ -814,17 +813,17 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
 
 def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
             kernel):
-    """
-    It 
+    """  
+    It computes the far field contribution of the double and single layer 
+    potential using the sorted data, on the GPU.
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    K_gpu  :
-    V_gpu  :
-    surf   :
+    K_gpu  : array, far field contribution to the double layer potential.
+    V_gpu  : array, far field contribution to the single layer potential.
     ind0   : list, pointers to the location of the mulipole of order i,j,k 
                    in the multipole array.   
     param  : class, parameters related to the surface.
@@ -835,8 +834,8 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
 
     Returns:
     --------
-    K_gpu  :
-    V_gpu  :
+    K_gpu  : array, far field contribution to the double layer potential.
+    V_gpu  : array, far field contribution to the single layer potential.
 
     """
     if param.GPU == 1:
