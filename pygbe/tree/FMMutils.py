@@ -704,16 +704,17 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
 
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     """
-    It 
+    It computes the far field contribution to the potential using the sorted
+    data.
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    K_aux  :
-    V_aux  :
-    surf   :
+    K_aux  : array, far field contribution to the double layer potential.
+    V_aux  : array, far field contribution to the single layer potential.
+    surf   : int, position of the source surface in the surface array.
     index  : list, pointers to the location of the mulipole of order i,j,k 
                    in the multipole array.   
     param  : class, parameters related to the surface.
@@ -723,8 +724,8 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     
     Returns:
     --------
-    K_aux  :
-    V_aux  :
+    K_aux  : array, far field contribution to the double layer potential.
+    V_aux  : array, far field contribution to the single layer potential.
 
     """
 
