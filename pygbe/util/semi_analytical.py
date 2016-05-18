@@ -167,12 +167,13 @@ def intSide(v1, v2, p, kappa, xk, wk):
 def SA_arr(y, x, kappa, same, xk, wk):
 
     """
-    It computes the integral line for all the sides of a triangle. 
+    It computes the integral line for all the sides of a triangle and for all
+    the collocation points. 
 
     Arguments:
     ----------
-    y     : array, 
-    x     : array, 
+    y     : array, vertices coordinates of the triangles.
+    x     : array, collocation points.
     kappa : float, reciprocal of Debye length.
     same  : int, 1 if the collocation point is in the panel of integration, 
                  0 otherwise.   
@@ -181,10 +182,10 @@ def SA_arr(y, x, kappa, same, xk, wk):
     
     Returns:
     --------
-    phi_Y :
-    dphi_Y:
-    phi_L :
-    dphi_L:     
+    phi_Y : float, potential due to a Yukawa kernel.
+    dphi_Y: float, normal derivative of potential due to a Yukawa kernel.
+    phi_L : float, potential due to a Laplace kernel.
+    dphi_L: float, normal derivative of potential due to a Laplace kernel. 
     """
 
     N = len(x)
@@ -236,21 +237,7 @@ def SA_arr(y, x, kappa, same, xk, wk):
 
 
 def GQ(y, x, kappa, same):
-    """
-     .
-
-    Arguments:
-    ----------
-    y     :
-    x     :
-    kappa :
-    same  :
-    
-    Returns:
-    --------
-    Q17:
-    Q27:   
-    """
+   
 
     # n=7
     L = numpy.array([y[1] - y[0], y[2] - y[1], y[0] - y[2]])
