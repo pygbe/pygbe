@@ -1,8 +1,7 @@
 import numpy
 
 def quadratureRule_fine(K):
-
-    '''
+    """
     Fine quadrature rule, to solve the near singular integrals.
 
     Arguments:
@@ -14,8 +13,7 @@ def quadratureRule_fine(K):
     --------
     X: array, position of the gauss quadrature points.
     W: array, gauss quadrature weights.
-
-    '''
+    """
     # yapf: disable
     # 1 Gauss point
     if K==1:
@@ -440,9 +438,46 @@ def quadratureRule_fine(K):
     return X, W
 
 
-def getGaussPoints(y, triangle, n):
+def getWeights(K):
+    """
+    It gets the weights of the Gauss points. 
 
-    '''
+    Arguments:
+    ----------
+    K: int, number of Gauss points per element. (1, 3, 4, and 7 are supported)
+
+    Returns:
+    --------
+    w: K-size array, weights of the Gauss points.
+    """
+
+    # yapf: disable
+    w = numpy.zeros(K)
+    if K==1:
+        w[0] = 1
+    if K==3:
+        w[0] = 1/3.
+        w[1] = 1/3.
+        w[2] = 1/3.
+    if K==4:
+        w[0] = -27./48
+        w[1] =  25./48
+        w[2] =  25./48
+        w[3] =  25./48
+    if K==7:
+        w[0] = 0.225
+        w[1] = 0.125939180544827
+        w[2] = 0.125939180544827
+        w[3] = 0.125939180544827
+        w[4] = 0.132394152788506
+        w[5] = 0.132394152788506
+        w[6] = 0.132394152788506
+
+    return w
+    # yapf: enable
+
+def getGaussPoints(y, triangle, n):
+    """
     It gets the Gauss points for far away integrals.
 
     Arguments:
@@ -456,7 +491,7 @@ def getGaussPoints(y, triangle, n):
     xi[:,0] : position of the gauss point in the x axis.
     xi[:,1] : position of the gauss point in the y axis.
     xi[:,2] : position of the gauss point in the z axis.
-    '''
+    """
 
     N  = len(triangle) # Number of triangles
     xi = numpy.zeros((N*n,3))
