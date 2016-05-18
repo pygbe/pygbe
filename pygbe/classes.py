@@ -352,28 +352,28 @@ class IndexConstant():
     JJ         : list, multipole order in the y-direction for the treecode. 
     KK         : list, multipole order in the z-direction for the treecode. 
     index_large: list, pointers to the position of multipole order i, j, k 
-                    in the multipole array, organized in a 1D array of size 
-                    P*P*P. Index is given by index[i*P*P+j*P+k]
+                       in the multipole array, organized in a 1D array of size 
+                       P*P*P. Index is given by index[i*P*P+j*P+k]
     index_small: list, pointers to the position of multipole order i, j, k 
-                    in the multipole array, organized in a 1D array which is 
-                    compressed with respect to index_large (does not consider 
-                    combinations of i,j,k which do not have a multipole).
+                       in the multipole array, organized in a 1D array which is 
+                       compressed with respect to index_large (does not consider 
+                       combinations of i,j,k which do not have a multipole).
     index      : list, copy of index_small 
     index_ptr  : list, pointer to index_small. Data in index_small is organized
-                    in a i-major fashion (i,j,k), and index_ptr points at the
-                    position in index_small where the order i changes.
+                      in a i-major fashion (i,j,k), and index_ptr points at the
+                      position in index_small where the order i changes.
     combII     : array, combinatory of (I, i) where I is the maximum i multipole.
-                    Used in coefficients of M2M.
+                       Used in coefficients of M2M.
     combJJ     : array, combinatory of (J, j) where J is the maximum j multipole.
-                    Used in coefficients of M2M.
+                       Used in coefficients of M2M.
     combKK     : array, combinatory of (K, k) where K is the maximum k multipole.
-                    Used in coefficients of M2M.
+                       Used in coefficients of M2M.
     IImii      : array, I-i where I is the maximum i multipole.
-                    Used in exponents of M2M.
+                       Used in exponents of M2M.
     JJmjj      : array, J-j where J is the maximum j multipole.
-                    Used in exponents of M2M.
+                       Used in exponents of M2M.
     KKmkk      : array, K-k where K is the maximum k multipole.
-                    Used in exponents of M2M.
+                       Used in exponents of M2M.
 
     # Device data
 
