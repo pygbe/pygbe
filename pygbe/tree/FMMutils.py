@@ -1306,7 +1306,7 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
 
 def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
               w, param, timing, kernel):
-   """
+    """
     It computes the near field contribution of the double and single layer 
     potential using the sorted data and adds it to the far field contribution
     given as an input, on the GPU.
