@@ -1420,35 +1420,36 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
 
 def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     """
-    It
+    It computes the far field contribution of the double and single layer 
+    potential without doing the assumption that all the particles in the same
+    twig cell have the same interaction list.
     
+    This is used for the calculation for the reaction potential where the
+    targets are the point-charges location.
+  
     Arguments:
     ----------
     Cells   : array, cells of the tree.
     CJ      : int, index of the source cell.
-    xq      :
-    Kval    :
-    Vval    :
+    xq      : array, postion of the point charges.
+    Kval  : array, far field contribution to the double layer potential.
+    Vval  : array, far field contribution to the single layer potential.
     index   : list, pointers to the location of the mulipole of order i,j,k 
                     in the multipole array. 
     par_reac: class, fine parameters related to the surface.
-    source  :
-    time_M2P:
+    source  : list, P2P interaction list, which is a list of the cells that
+                    each charge-point interacts by P2P. 
+    time_M2P: real, timed consumed in compute M2P_nonvec function.
 
     Returns:
     --------
-    Kval    :    
-    Vval    :
-    source  :
-    time_M2P:
+    Kval  : array, far field contribution to the double layer potential.
+    Vval  : array, far field contribution to the single layer potential.
+    source  : list, P2P interaction list, which is a list of the cells that
+                    each charge-point interacts. 
+    time_M2P: real, time consumed in compute M2P_nonvec function.
     """
-    # Cells     : array of Cells
-    # CJ        : index of source cell
-    # p         : accumulator 
-    # theta     : MAC criteron 
-    # Nm        : Number of multipole coefficients
-    # P         : order of Taylor expansion
-    # NCRIT     : max number of particles per cell
+ 
 
     if (Cells[CJ].ntarget >= par_reac.NCRIT):  # if not a twig
         for c in range(8):
@@ -1493,34 +1494,49 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
 def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
                par_reac, w, source, AI_int, time_P2P):
     """
-    It
+    It computes the near field contribution of the double and single layer 
+    potential and adds it to the far field contribution given as an input.
+    In this case we don't do the assumption that all the particles in the same
+    twig cell have the same interaction list.
+    
+    This is used for the calculation for the reaction potential where the
+    targets are the point-charges location.
     
     Arguments:
     ----------
     Cells   : array, cells of the tree.
-    surface :
-    m       :
-    mx      :
-    my      :
-    mz      :
-    mKc     :
-    mVc     :   
-    xq      :
-    Kval    :
-    Vval    :
+    surface : class, surface where we are computing the P2P_nonvec.
+    m       : array, mass of the source particle for the single layer potential
+                    calculation. 
+    mx      : array, mass of the source particle times  the 'x' component of the 
+                    normal vector, for the double layer potential calculation.
+    my      : array, mass of the source particle times  the 'y' component of the 
+                    normal vector, for the double layer potential calculation.
+    mz      : array, mass of the source particle times  the 'z' component of the 
+                    normal vector, for the double layer potential calculation.
+    mKc     : array, mass-clean of the source particle for the double layer
+                    potential calculation.
+    mVc     : array, mass-clean of the source particle for the double layer
+                    potential calculation. 
+    xq      : array, postion of the point charges.
+    Kval  : array, far field contribution to the double layer potential.
+    Vval  : array, far field contribution to the single layer potential.
     IorE    : int, internal (1) or external (2).
     par_reac: class, fine parameters related to the surface.
-    w       :
-    source  :
+    w       : array, gauss points.
+    source  : list, P2P interaction list, which is a list of the cells that
+                    each charge-point interacts. 
     AI_int  : int, counter of the amount of near singular integrals solved.
-    time_P2P:
+    time_P2P: real, timed consumed in compute P2P_nonvec function.
 
     Returns:
     --------
-    Kval    :    
-    Vval    :
+    Kval   : array, far plus near field contribution to the double layer 
+                    potential.
+    Vval  : array, far plus near field contribution to the single layer
+                    potential.
     AI_int  : int, counter of the amount of near singular integrals solved.
-    time_P2P:
+    time_P2P: real, timed consumed in compute P2P_nonvec function.
     """
 
     tic = time.time()
