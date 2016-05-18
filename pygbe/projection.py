@@ -10,6 +10,7 @@ from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
                            M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
                            P2PKt_gpu, M2P_nonvec, P2P_nonvec)
 from classes import Event
+from quadrature import getWeights
 try:
     import pycuda.autoinit
     import pycuda.driver as cuda
@@ -19,43 +20,6 @@ except:
 import time
 
 
-def getWeights(K):
-    """
-    It gets the weights of the Gauss points. 
-
-    Arguments:
-    ----------
-    K: int, number of Gauss points per element. (1, 3, 4, and 7 are supported)
-
-    Returns:
-    --------
-    w: K-size array, weights of the Gauss points.
-    """
-
-    # yapf: disable
-    w = numpy.zeros(K)
-    if K==1:
-        w[0] = 1
-    if K==3:
-        w[0] = 1/3.
-        w[1] = 1/3.
-        w[2] = 1/3.
-    if K==4:
-        w[0] = -27./48
-        w[1] =  25./48
-        w[2] =  25./48
-        w[3] =  25./48
-    if K==7:
-        w[0] = 0.225
-        w[1] = 0.125939180544827
-        w[2] = 0.125939180544827
-        w[3] = 0.125939180544827
-        w[4] = 0.132394152788506
-        w[5] = 0.132394152788506
-        w[6] = 0.132394152788506
-
-    return w
-# yapf: enable
 
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
             ind0, timing, kernel):
