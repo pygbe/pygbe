@@ -236,42 +236,6 @@ def SA_arr(y, x, kappa, same, xk, wk):
     return phi_Y, dphi_Y, phi_L, dphi_L
 
 
-def GQ(y, x, kappa, same):
-   
-
-    # n=7
-    L = numpy.array([y[1] - y[0], y[2] - y[1], y[0] - y[2]])
-    Area = numpy.linalg.norm(cross(L[2], L[1])) / 2
-    normal = numpy.cross(L[0], L[2])
-    normal = normal / numpy.linalg.norm(normal)
-
-    M = numpy.transpose(y)
-    xi = numpy.zeros((7, 3))
-    m = numpy.zeros(7)
-    xi[0] = numpy.dot(M, numpy.array([1 / 3., 1 / 3., 1 / 3.]))
-    xi[1] = numpy.dot(M, numpy.array([.79742699, .10128651, .10128651]))
-    xi[2] = numpy.dot(M, numpy.array([.10128651, .79742699, .10128651]))
-    xi[3] = numpy.dot(M, numpy.array([.10128651, .10128651, .79742699]))
-    xi[4] = numpy.dot(M, numpy.array([.05971587, .47014206, .47014206]))
-    xi[5] = numpy.dot(M, numpy.array([.47014206, .05971587, .47014206]))
-    xi[6] = numpy.dot(M, numpy.array([.47014206, .47014206, .05971587]))
-    r = numpy.sqrt(numpy.sum((x - xi)**2, axis=1))
-
-    m[0] = 0.225
-    m[1] = 0.12593918
-    m[2] = 0.12593918
-    m[3] = 0.12593918
-    m[4] = 0.13239415
-    m[5] = 0.13239415
-    m[6] = 0.13239415
-    Q17 = Area * numpy.sum(m * numpy.exp(-kappa * r) / r)
-    Q27 = Area * numpy.sum(-m * numpy.exp(-kappa * r) *
-                           (kappa + 1 / r) / r**2 * numpy.dot(xi - x, normal))
-
-    if same == 1: Q27 = 2 * pi
-    return Q17, Q27
-
-
 """
 y = array([[-0.38268343, 0.,-0.92387953],[ 0.,-0.38268343, -0.92387953],[0., 0., -1.]])
 #y = array([[-sqrt(2)/2.,-sqrt(2)/2.,0.],[0.,-sqrt(2)/2.,sqrt(2)/2.],[0.,-1.,0.]])
@@ -284,9 +248,6 @@ eps = 1e-16
 kappa=1.5
 xk,wk = GQ_1D(5)
 
-#for i in range(len(x)):
-#    Q1,Q2 = GQ(y,x[i],kappa,same)
-#    print Q1,Q2
 
 IY,dIY,IL,dIL = SA_arr(y,x,kappa,same,xk,wk)
 
@@ -301,7 +262,4 @@ print IY, WY
 print dIY, dWY
 print IL, WL
 print dIL, dWL
-
-#print 'Error G : %s'%(abs(Q1-I1)/I1)
-#print 'Error dG: %s'%(abs(Q2-I2)/I2)
 """
