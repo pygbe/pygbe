@@ -704,8 +704,8 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
 
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     """
-    It computes the far field contribution to the potential using the sorted
-    data.
+    It computes the far field contribution of the double and single layer 
+    potential using the sorted data.
 
     Arguments:
     ----------
@@ -755,17 +755,22 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
 def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
                LorY, timing):
     """
-    It 
+    It computes the far field contribution of the adjoint double potential
+    using the sorted data.
+ 
 
     Arguments:
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
                     points.
-    Ktx_aux:
-    Kty_aux:
-    Kty_aux:
-    surf   :
+    Ktx_aux: array, x component of the far field contribution to the adjoint 
+                    double layer potential.
+    Kty_aux: array, y component of the far field contribution to the adjoint 
+                    double layer potential.
+    Ktz_aux: array, z component of the far field contribution to the adjoint 
+                    double layer potential.
+    surf   : int, position of the source surface in the surface array.
     index  : list, pointers to the location of the mulipole of order i,j,k 
                    in the multipole array.   
     param  : class, parameters related to the surface.
@@ -775,9 +780,12 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
     
     Returns:
     --------
-    Ktx_aux:
-    Kty_aux:
-    Kty_aux:
+    Ktx_aux: array, x component of the far field contribution to the adjoint 
+                    double layer potential.
+    Kty_aux: array, y component of the far field contribution to the adjoint 
+                    double layer potential.
+    Ktz_aux: array, z component of the far field contribution to the adjoint 
+                    double layer potential.
 
     """
 
