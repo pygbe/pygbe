@@ -1,5 +1,29 @@
 """
-Generalized Minimum Residual Method (GMRES), it uses 
+Generalized Minimum Residual Method (GMRES).
+
+This implementation is a RESTARTED version of the algorithm and uses:
+
+ - Arnoldi-Modified Gram-Schmidt method to reduced the dense matrix into an
+   upper Hessenberg matrix. 
+ - Givens Rotations to reduce the Hessenberg matrix to an upper tringular, and
+   to solve the least squares problem.
+
+References:
+
+ - For Arnoldi-Modified Gram-Schmidt:
+    Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
+    (pg. 148).
+ - For Givens Rotations implementation:
+    Iterative methods for linear and non-linear equations - C.T Kelley - (1995).         
+    (pg. 43-45).
+ - For RESTART version:
+    Saad's book (pg. 167)
+
+Guidance code:
+
+ - CUSP library:
+    https://github.com/cusplibrary/cusplibrary/blob/develop/cusp/krylov/
+    detail/gmres.inl   
 """
 
 import numpy
@@ -67,12 +91,13 @@ def ApplyPlaneRotation(dx, dy, cs, sn):
 
 
 def PlaneRotation(H, cs, sn, s, i, R):
+    """
+    It applies the Givens rotations. 
 
-    '''
-    
     Arguments:
     ----------
-    H : 
+    H : matrix, to applied the rotations. In our case is the upper Hessenberg
+                obtained after Arnoldi-Modified Gram-Schmidt. 
     cs: float, cosine.
     sn: float, sine.
     s : array, residual.
@@ -85,8 +110,8 @@ def PlaneRotation(H, cs, sn, s, i, R):
     cs: float, cosine.
     sn: float, sine.
     s : array, residual.
+    """
 
-    '''
     for k in range(i):
         H[k, i], H[k + 1, i] = ApplyPlaneRotation(H[k, i], H[k + 1, i], cs[k],
                                                   sn[k])
