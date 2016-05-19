@@ -42,9 +42,9 @@ class Cell():
     M2P_list  : list, pointer to cells that interact with M2P.
     M2P_size  : list, size of the M2P interaction list.
     list_ready: int, flag to know if P2P list is already generated.
-    twig_array: list, position in the twig array.
-     
+    twig_array: list, position in the twig array.     
     """
+
     def __init__(self, NCRIT, Nm):
         """
         NCRIT: int, maximum number of boundary elements per twig box of tree
@@ -397,9 +397,9 @@ def computeIndices(P, ind0):
     Arguments:
     ----------
     P   : int, order of the Taylor expansion.
-    ind0: class, it contains the indices related to the treecode computation. 
-        
+    ind0: class, it contains the indices related to the treecode computation.         
     """
+
     II = []
     JJ = []
     KK = []
@@ -431,9 +431,9 @@ def precomputeTerms(P, ind0):
     Arguments:
     ----------
     P   : int, order of the Taylor expansion.
-    ind0: class, it contains the indices related to the treecode computation. 
-        
+    ind0: class, it contains the indices related to the treecode computation.         
     """
+
     # Precompute terms for
     ind0.combII = numpy.array([], dtype=numpy.int32)
     ind0.combJJ = numpy.array([], dtype=numpy.int32)
@@ -695,7 +695,6 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
                       position in index_small where the order i changes.    
     """
     
-
     dx = Cells[PC].xc - Cells[CC].xc
     dy = Cells[PC].yc - Cells[CC].yc
     dz = Cells[PC].zc - Cells[CC].zc
@@ -838,8 +837,8 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
     --------
     K_gpu  : array, far field contribution to the double layer potential.
     V_gpu  : array, far field contribution to the single layer potential.
-
     """
+
     if param.GPU == 1:
         tic = cuda.Event()
         toc = cuda.Event()
@@ -1214,7 +1213,6 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
                     potential.
     V_gpu  : array, far plus near field contribution to the single layer
                     potential.
-
     """
 
     if param.GPU == 1:
@@ -1454,7 +1452,6 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     time_M2P: real, time consumed in compute M2P_nonvec function.
     """
  
-
     if (Cells[CJ].ntarget >= par_reac.NCRIT):  # if not a twig
         for c in range(8):
             if (Cells[CJ].nchild & (1 << c)):
