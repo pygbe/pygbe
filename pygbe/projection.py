@@ -294,8 +294,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     return Kt_lyr
 
 
-def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
-    
+def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):    
     """
     It computes the reaction potential.
     To compute this potential we need more terms in the Taylor expansion, that
@@ -399,8 +398,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
 
 def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
-
-    '''
+    """
     It computes the reaction potential on the GPU  and it brings the data 
     to the cpu.
 
@@ -416,7 +414,7 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     --------
     phir_cpu: array, reaction potential brought from the GPU to the cpu. 
     AI_int  : int, counter of the amount of near singular integrals solved.
-    '''
+    """
 
     REAL = par_reac.REAL
     Nq = len(field.xq)
