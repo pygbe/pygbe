@@ -65,6 +65,7 @@ def read_inputs(args):
     |- geometry/Lys1.vert
     |- output/
     """
+
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
     parser.add_argument('problem_folder',
                         type=str,
@@ -167,7 +168,7 @@ def resolve_relative_config_file(config_file, full_path):
 
 
 def check_for_nvcc():
-    '''Check system PATH for nvcc, exit if not found'''
+    """Check system PATH for nvcc, exit if not found"""
     try:
         subprocess.check_output(['which', 'nvcc'])
         check_nvcc_version()
@@ -178,7 +179,7 @@ def check_for_nvcc():
 
 
 def check_nvcc_version():
-    '''Check that version of nvcc <= 7.0'''
+    """Check that version of nvcc <= 7.0"""
     verstr = subprocess.check_output(['nvcc', '--version'])
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
@@ -190,24 +191,24 @@ def check_nvcc_version():
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False):
-    '''
+    """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
 
     Arguments:
     ----------
-    log_output: Bool, default True
-                If False, output is written only to STDOUT and not
-                to a log file
-    return_output_fname: Bool, default False
-                If True, function main() returns the name of the
-                output log file.  This is used for the regression tests
+    log_output         : Bool, default True.
+                         If False, output is written only to STDOUT and not
+                         to a log file.
+    return_output_fname: Bool, default False.
+                         If True, function main() returns the name of the
+                         output log file. This is used for the regression tests.
 
     Returns:
     --------
-    output_fname: str, if kwarg is True
-                  The name of the log file containing problem output
-    '''
+    output_fname       : str, if kwarg is True.
+                         The name of the log file containing problem output
+    """
 
     check_for_nvcc()
 
