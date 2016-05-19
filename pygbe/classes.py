@@ -5,6 +5,7 @@ class Event():
     """
     Class for logging like in pycuda's cuda.Event()
     """
+
     def __init__(self):
         self.t = 0
     def record(self):
@@ -124,6 +125,7 @@ class Surface():
     kDev         : list, quadrature number of each quadrature point, in order. 
                          (on the GPU)  
     """
+
     def __init__(self):
         self.triangle = []  # indices to triangle vertices
         self.vertex   = []  # position of vertices
@@ -234,6 +236,7 @@ class Field():
     zq_gpu: list, z position of charges on GPU.
     q_gpu : list, value of charges on GPU.
     """
+
     def __init__(self):
         self.parent = []    # Pointer to "parent" surface
         self.child  = []    # Pointer to "children" surfaces
@@ -269,6 +272,7 @@ class Timing():
     time_mass : float, time spent in compute the mass of the sources in treecode.
     AI_int    : int, counter of the amount of near singular integrals solved.
     """
+
     def __init__(self):
         self.time_an    = 0.
         self.time_P2P   = 0.
@@ -314,6 +318,7 @@ class Parameters():
     E_field      :  list, Regions where energy will be calculated.
     GPU          :  int, =1: with GPU, =0: no GPU.
     """
+
     def __init__(self):
         self.kappa         = 0.              # inverse of Debye length
         self.restart       = 0               # Restart of GMRES
@@ -379,6 +384,7 @@ class IndexConstant():
 
     indexDev   : list, index_large on GPU.
     """
+
     def __init__(self):
         self.II = []
         self.JJ = []
