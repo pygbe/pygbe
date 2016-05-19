@@ -15,7 +15,7 @@ from classes import Event
 
 
 def dataTransfer(surf_array, field_array, ind, param, kernel):
-    '''
+    """
     It manages the data transfer to the GPU.
 
     Arguments:
@@ -27,8 +27,7 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
                         computation. 
     param      : class, parameters related to the surface. 
     kernel: pycuda source module.
-
-    '''
+    """
 
     REAL = param.REAL
     Nsurf = len(surf_array)
