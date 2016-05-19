@@ -25,7 +25,6 @@ except:
 
 
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
-
     """
     Self surface interior operator:
 
@@ -49,8 +48,8 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     --------
     v     : array, result of the matrix-vector product corresponding to the self
             interior interaction.
-
     """
+
     #    print 'SELF INTERIOR, surface: %i'%s
     K_diag = 2 * pi
     V_diag = 0
@@ -62,8 +61,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     return v
 
 
-def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
-    
+def selfExterior(surf, s, LorY, param, ind0, timing, kernel):    
     """
     Self surface exterior operator:
 
@@ -91,6 +89,7 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     K_lyr : array, self exterior double layer potential.
     V_lyr : array, self exterior single layer potential.
     """
+
     #    print 'SELF EXTERIOR, surface: %i, E_hat: %f'%(s, surf.E_hat)
     K_diag = -2 * pi
     V_diag = 0.
@@ -131,8 +130,8 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     --------
     v     : array, result of the matrix-vector product corresponding to the 
                    non-self exterior interaction.
-
     """
+
     #    print 'NONSELF EXTERIOR, source: %i, target: %i, E_hat: %f'%(src,tar, surf[src].E_hat)
     K_diag = 0
     V_diag = 0
@@ -171,6 +170,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     v     : array, result of the matrix-vector product corresponding to the 
                    non-self interior interaction.
     """
+
     #    print 'NONSELF INTERIOR, source: %i, target: %i'%(src,tar)
     K_diag = 0
     V_diag = 0
@@ -187,7 +187,6 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     """
     Self interaction for the aparent surface charge (ASC) formulation.  
     
-
     Arguments:
     ----------
     surf  : array, contains all the classes of the surface. 
@@ -242,7 +241,6 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     MV         : array, resulting matrix-vector multiplication.
     """
     
-
     Nfield = len(field_array)
     Nsurf = len(surf_array)
 
@@ -650,7 +648,6 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
 
 def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
-
     """
     It generate the right hand side (RHS) for the GMRES suitable for the GPU.
 
