@@ -2,10 +2,8 @@
 It contains the functions to read the all the data from the meshes files, its
 parameters and charges files. 
 """
-
 import numpy
 import os
-
 
 
 def readVertex(filename, REAL):
@@ -23,6 +21,7 @@ def readVertex(filename, REAL):
     -------
     vertex: array, vertices of the triangles.
     """
+
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
     geo_path = os.environ.get('PYGBE_GEOMETRY')
     if geo_path:
