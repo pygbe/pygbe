@@ -71,7 +71,6 @@ def get_K(x, n):
     Returns:
     -------- 
     K: float, polinomials K. 
-
     """
 
     K = 0.
@@ -347,6 +346,7 @@ def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
     -------- 
     phi  : float, potential.
     """
+
     dphi = -sigma0 / epsilon
     phi = -dphi * radius / (1. + kappa * radius)  # Surface potential
 
@@ -516,6 +516,7 @@ def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
     -------- 
     E      : float, total energy.
     """
+
     N = 20  # Number of terms in expansion
 
     qe = 1.60217646e-19
@@ -783,8 +784,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     kappa  : float, reciprocal of Debye length.
     E_1    : float, dielectric constant inside the sphere/molecule.
     E_2    : float, dielectric constant outside the sphere/molecule. 
-
-    
+ 
     Returns:
     -------- 
     E_inter: float, interaction energy.
@@ -903,7 +903,6 @@ def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     kappa  : float, reciprocal of Debye length.
     E_1    : float, dielectric constant inside the sphere/molecule.
     E_2    : float, dielectric constant outside the sphere/molecule. 
-
 
     Returns:
     -------- 
@@ -1031,6 +1030,7 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
     -------- 
     E_inter: float, interaction energy.
     """
+
     #   From Carnie+Chan 1993
 
     N = 20  # Number of terms in expansion
@@ -1098,7 +1098,6 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     It computes the interaction energy for two spheres at constants surface
     charge, according to Carnie&Chan-1993.
 
-
     Arguments:
     ----------
     sigma  : float, constant charge on the surface of the spheres. 
@@ -1106,7 +1105,6 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     R      : float, distance center to center.   
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
-
 
     Returns:
     -------- 
