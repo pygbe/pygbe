@@ -30,6 +30,7 @@ def initializeSurf(field_array, filename, param):
     surf_array : array, contains the surface classes of each region on the
                         surface.
     """
+
     surf_array = []
 
     # Read filenames for surfaces
@@ -94,6 +95,7 @@ def zeroAreas(s, triangle_raw, Area_null):
     --------
     Area_null   : list, indices of the triangles with zero-areas.
     """
+
     for i in range(len(triangle_raw)):
         L0 = s.vertex[triangle_raw[i, 1]] - s.vertex[triangle_raw[i, 0]]
         L2 = s.vertex[triangle_raw[i, 0]] - s.vertex[triangle_raw[i, 2]]
@@ -101,6 +103,7 @@ def zeroAreas(s, triangle_raw, Area_null):
         Area_aux = linalg.norm(normal_aux) / 2
         if Area_aux < 1e-10:
             Area_null.append(i)
+
     return Area_null
 
 
@@ -121,7 +124,6 @@ def fill_surface(surf, param):
     Returns:
     --------
     time_sort: float, time spent in sorting the data needed for the treecode.
-
     """
 
     N = len(surf.triangle)
