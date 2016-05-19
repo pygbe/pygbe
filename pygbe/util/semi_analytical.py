@@ -22,6 +22,7 @@ def GQ_1D(K):
     x: float, location of the gauss point.    
     w: float, weights of the gauss point.   
     """
+
     T = numpy.zeros((K, K))
     nvec = numpy.arange(1., K)
     beta = 0.5 / numpy.sqrt(1 - 1 / (2 * nvec)**2)
@@ -37,7 +38,6 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
     """
     Line integral to solve the non-analytical part (integral in the angle) in
     the semi_analytical integrals needed to calculate the potentials.
-
 
     Arguments:
     ----------
@@ -165,7 +165,6 @@ def intSide(v1, v2, p, kappa, xk, wk):
 
 
 def SA_arr(y, x, kappa, same, xk, wk):
-
     """
     It computes the integral line for all the sides of a triangle and for all
     the collocation points. 
