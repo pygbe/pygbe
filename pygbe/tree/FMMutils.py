@@ -1198,7 +1198,6 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
     V_gpu  : array, far field contribution to the single layer potential.
     surf   : int, position of the source surface in the surface array.
     K_diag : array, diagonal elements of the double layer integral operator.
-    V_diag : array, diagonal elements of the single layer integral operator.
     IorE   : int, internal (1) or external (2).
     L      : float, representative distance of the triangles. (sqrt{2*Area})
     w      : array, gauss points.
