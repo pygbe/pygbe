@@ -118,4 +118,6 @@ def main():
     print 'k=0   : Esolv: '+str(Esolv_k0)+', iterations: '+str(iterations_k0)
 
 if __name__ == "__main__":
+    from check_for_meshes import check_mesh
+    check_mesh()
     main()
