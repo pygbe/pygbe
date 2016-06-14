@@ -108,4 +108,6 @@ def main():
 #
 
 if __name__ == "__main__":
+    from check_for_meshes import check_mesh
+    check_mesh()
     main()
