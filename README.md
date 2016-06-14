@@ -101,6 +101,8 @@ To run this case, you can use
     
 To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to the problem folder. 
 
+If you have a centralized `geometry` folder, or want to reuse existing files without copying them, you can also pass the `-g` flag to `pygbe` to point to the custom location.  Note that this path should point to a folder which contains a folder called `geometry`, not to the `geometry` folder itself.
+
 ### Mesh
 In the `examples` folder, we provide meshes and `.pqr` files for a few example problems. 
 To plug in your own protein data, download the corresponding `.pdb` file from the Protein Data Bank, 
