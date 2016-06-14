@@ -19,3 +19,9 @@ check_mesh()
 
 for test in tests:
     subprocess.call(['python', '{}'.format(test)])
+
+#remove test result cache
+try:
+    os.remove('tests')
+except FileNotFoundError:
+    pass
