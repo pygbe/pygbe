@@ -20,10 +20,11 @@ corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
 * Python 2.7.11
-* Numpy 1.10.4
+* Numpy 1.11.0
 * SWIG 3.0.8
 * NVCC 7.0 
-* PyCUDA 2015.1.3
+    * gcc < 4.10
+* PyCUDA 2016.1.1
 
 #### Python and Numpy 
 
@@ -63,7 +64,7 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04, 13.10 and 15.04. 
+PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc < 4.10). 
 
 ### Installing PyGBe
 
