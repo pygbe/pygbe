@@ -11,3 +11,24 @@ https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py
 
 """
 
+#Defining the function to calculate the Givens rotations
+
+def apply_givens(Q, v, k):
+    """
+    Apply the first k Givens rotations in Q to the vector v.
+
+    Parameter
+    ---------        
+        Q: list, list of consecutive 2x2 Givens rotations
+        v: array, vector to apply the rotations to
+        k: int, number of rotations to apply
+
+    Returns
+    -------
+        v: array, that is changed in place.
+
+    """
+
+    for j in range(k):
+        Qloc = Q[j]
+        v[j:j+2] = scipy.dot(Qloc, v[j:j+2])
