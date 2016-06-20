@@ -231,3 +231,49 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
     return x
 
 
+#Testing: Comparison with scipy and error calculation using direct solve
+#For testing uncomment the following script and run: python gmres.py 
+"""
+xmin = -1.
+xmax = 1.
+N = 5000
+h = (xmax-xmin)/(N-1)
+x = numpy.arange(xmin, xmax+h/2, h)
+
+A = numpy.zeros((N,N) , dtype=numpy.complex128)
+for i in range(N):
+    A[i] = numpy.exp(-abs(x-x[i])**2/(2*h**2)) + i*1j
+
+b = numpy.random.random(N)
+x = numpy.zeros(N, dtype=numpy.complex128)
+M=None
+xtype=None
+R = 50
+max_iter = 5000
+tol = 1e-8
+
+tic = time.time()
+xg = gmres_mgs(A, x, b, R, tol, max_iter) #Not preconditioner
+toc = time.time()
+print ('Time for my GMRES:{}'.format(toc-tic))
+
+tic = time.time()
+xs = solve(A, b)
+toc = time.time()
+print ('Time for straight solve: {}'.format(toc-tic))
+
+tic = time.time()
+xsg = scipy_gmres(A, b, x, tol, R, max_iter)[0]
+toc = time.time()
+print ('Time for scipy GMRES: {}'.format(toc-tic))
+
+#error_xs_xg = numpy.sqrt(sum((xs-xg)**2)/sum(xs**2))
+error_xs_xg = numpy.sqrt(sum((xs-xg)*numpy.conj(xs-xg))/sum(xs*numpy.conj(xs)))
+print ('error straight solve vs gmres_mgs: {}'.format(error_xs_xg))
+
+#error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
+error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))
+print('error stright solve vs scipy_gmres: {}'.format(error_xs_xsg))
+
+"""
+
