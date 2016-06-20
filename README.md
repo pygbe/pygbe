@@ -20,10 +20,11 @@ corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
 * Python 2.7.11
-* Numpy 1.10.4
+* Numpy 1.11.0
 * SWIG 3.0.8
 * NVCC 7.0 
-* PyCUDA 2015.1.3
+    * gcc < 4.10
+* PyCUDA 2016.1.1
 
 #### Python and Numpy 
 
@@ -63,7 +64,7 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04, 13.10 and 15.04. 
+PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc < 4.10). 
 
 ### Installing PyGBe
 
@@ -100,6 +101,8 @@ To run this case, you can use
     > pygbe examples/lys
     
 To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to the problem folder. 
+
+If you have a centralized `geometry` folder, or want to reuse existing files without copying them, you can also pass the `-g` flag to `pygbe` to point to the custom location.  Note that this path should point to a folder which contains a folder called `geometry`, not to the `geometry` folder itself.
 
 ### Mesh
 In the `examples` folder, we provide meshes and `.pqr` files for a few example problems. 
