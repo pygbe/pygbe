@@ -231,7 +231,7 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
     return x
 
 
-#Testing: Comparison with scipy and error calculation using direct solve
+#Testing: Comparison with scipy gmres and error calculation using direct solve
 #For testing uncomment the following script and run: python gmres.py 
 """
 xmin = -1.
