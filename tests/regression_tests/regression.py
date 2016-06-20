@@ -129,7 +129,7 @@ def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
                          '-p', '{}'.format(param),
                          '-c', '{}_{}.config'.format(test_name, mesh[i]),
                          '-o', 'output_{}_{}'.format(test_name, mesh[i]),
-                         '-g', '../../pygbe/',
+                         '-g', './',
                          '{}'.format(problem_folder),], return_output_fname=True)
 
         print 'Scan output file'
