@@ -201,15 +201,15 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
             if inner < max_inner-1:
                 normr = abs(g[inner+1])
                 rel_resid = normr/res_0
-                
-                if iteration%1==0: 
-                    print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))                
-
-                if (inner + 1 == R):
-                    print('Residual: %f. Restart...' % rel_resid)
-    
+                                                    
                 if rel_resid < tol:
                     break
+            
+            if iteration%1==0: 
+                print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))               
+
+            if (inner + 1 == R):
+                print('Residual: %f. Restart...' % rel_resid)
 
         # end inner loop, back to outer loop
 
@@ -222,8 +222,9 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
         normr = norm(r)
         rel_resid = normr/res_0
 
-
+        # test for convergence
         if rel_resid < tol:
+            print('Converged after %i iterations to a residual of %s'%(iteration,rel_resid))
             return x
 
     #end outer loop
@@ -233,7 +234,7 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
 
 #Testing: Comparison with scipy gmres and error calculation using direct solve
 #For testing uncomment the following script and run: python gmres.py 
-"""
+
 xmin = -1.
 xmax = 1.
 N = 5000
@@ -275,5 +276,5 @@ print ('error straight solve vs gmres_mgs: {}'.format(error_xs_xg))
 error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))
 print('error stright solve vs scipy_gmres: {}'.format(error_xs_xsg))
 
-"""
+
 
