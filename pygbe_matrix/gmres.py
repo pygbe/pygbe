@@ -234,7 +234,7 @@ def gmres_mgs(A, x, b, R, tol, max_iter):
 
 #Testing: Comparison with scipy gmres and error calculation using direct solve
 #For testing uncomment the following script and run: python gmres.py 
-
+"""
 xmin = -1.
 xmax = 1.
 N = 5000
@@ -275,6 +275,6 @@ print ('error straight solve vs gmres_mgs: {}'.format(error_xs_xg))
 #error_xs_xsg = numpy.sqrt(sum((xs-xsg)**2)/sum(xs**2))
 error_xs_xsg = numpy.sqrt(sum((xs-xsg)*numpy.conj(xs-xsg))/sum(xs*numpy.conj(xs)))
 print('error stright solve vs scipy_gmres: {}'.format(error_xs_xsg))
-
+"""
 
 
