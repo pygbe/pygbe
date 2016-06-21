@@ -10,6 +10,7 @@ surfaces.
 from numpy                  import pi
 from scipy.misc             import factorial
 from scipy.sparse.linalg    import gmres
+from argparse               import ArgumentParser
 
 from class_definition       import (surfaces, parameters, readParameters, 
                             initializeField, initializeSurf, readElectricField)
@@ -22,9 +23,30 @@ from energyCalculation      import (fill_phi, solvationEnergy, coulombicEnergy,
                             surfaceEnergy, dipoleMoment, extCrossSection)
 import time
 
+def read_inputs():
+    """
+    Parse command-line arguments to run main_matrix.
+
+    User should provide:
+    -param : str, parameter file name.
+    -config: str, config file name.
+    """
+
+    parser = ArgumentParser(description='Manage main_matrix command line arguments')
+
+    parser.add_argument('-p', '--param', dest='param', type=str, default=None,
+                        help="Path to problem param file")
+
+    parser.add_argument('-c', '--config', dest='config', type=str, default=None,
+                        help="Path to problem config file")
+    
+    return parser.parse_args()
+
+args = read_inputs()
+
 tic = time.time()
-param_file = sys.argv[1]
-config_file = sys.argv[2]
+param_file  = args.p
+config_file = args.c
 
 print 'Parameters file: ' + param_file 
 print 'Config file    : ' + config_file 
