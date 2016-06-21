@@ -7,29 +7,20 @@ surfaces.
  -If we have an incident electric field, it returns the extinction cross
   section. 
 """
+from numpy                  import pi
+from scipy.misc             import factorial
+from scipy.sparse.linalg    import gmres
 
-# This code solves the multisurface BEM for proteins  
-# interacting with charged surfaces
-
-from math           import pi
-from scipy.misc     import factorial
-from scipy.sparse.linalg   import gmres
-from scipy.sparse   import *
-import time
-
-# Import self made modules
-import sys 
-sys.path.append('../util')
-#from semi_analyticalwrap import SA_wrap_arr
-from an_solution        import *
-from integral_matfree   import *
-from triangulation      import *
-from class_definition   import surfaces, parameters, readParameters, initializeField, initializeSurf, readElectricField
-from gmres              import gmres_solver
-from blockMatrixGen     import blockMatrix, generateMatrix, generatePreconditioner
-from RHScalculation     import charge2surf, generateRHS
+from class_definition       import (surfaces, parameters, readParameters, 
+                            initializeField, initializeSurf, readElectricField)
+from gmres                  import gmres_mgs
+from blockMatrixGen         import (blockMatrix, generateMatrix,
+                            generatePreconditioner)
+from RHScalculation         import charge2surf, generateRHS
 from interactionCalculation import computeInter
-from energyCalculation      import fill_phi, solvationEnergy, coulombicEnergy, surfaceEnergy, dipoleMoment, extCrossSection
+from energyCalculation      import (fill_phi, solvationEnergy, coulombicEnergy,
+                            surfaceEnergy, dipoleMoment, extCrossSection)
+import time
 
 tic = time.time()
 param_file = sys.argv[1]
