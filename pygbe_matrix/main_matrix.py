@@ -12,6 +12,7 @@ import numpy
 import time
 
 from scipy.misc             import factorial
+from scipy.linalg           import solve
 from scipy.sparse.linalg    import gmres
 from argparse               import ArgumentParser
 
@@ -142,35 +143,42 @@ else:
     phi = numpy.zeros(len(F))
 
 phi = gmres_mgs(MM, phi, FF, param.restart, param.tol, param.max_iter) 
-
 toc = time.time()
-
 gmres_mgs_time = toc-tec
 
 #if type(MM[0,0]) != numpy.complex128:
 #    numpy.savetxt('phi_matrix.txt',phi)
+print '\nTime gmres_mgs = %f s'%(gmres_mgs_time)
 
+#Comparing with scipy gmres and direct solve from scipy.linalg
+#Uncomment the following lines for testing.
+#Don't run this for big problems, the direct solve will take long and lot of
+#memory.
+#Suggestion: Don't go over 2K elements.
 """
-#comparing with scipy
 print '\nSolve system with scipy'
 tec = time.time()
-phi_s = zeros(len(F))
-
 phi_s = gmres(MM, FF, tol=param.tol, restart=param.restart, maxiter=param.max_iter)[0] 
-
 toc = time.time()
-
 gmres_scipy_time = toc-tec
 
-print '\nTime gmres_mgs = %f s'%(gmres_mgs_time)
 print '\nTime gmres_scipy = %f s'%(gmres_scipy_time)
 
-#error compared with scipy
+print '\nSolve system with direct solve from scipy'
+tec = time.time()
+phi_d = solve(MM, FF)
+toc = time.time()
 
-error_scipy_mgs = sqrt(sum((phi_s-phi)**2)/sum(phi_s**2))
-print 'error scipy_gmres vs gmres_mgs: %s'%error_scipy_mgs
+direct_solve_time = toc-tec
+print '\nTime direct solve = %f s'%(direct_solve_time)
+
+#error compare with solve from scipy.linalg
+error_direct_mgs = numpy.sqrt(sum((phi_d-phi)*numpy.conj(phi_d-phi))/sum(phi_d*numpy.conj(phi_d)))
+print '\nerror solve direct vs gmres_mgs: %s'%error_direct_mgs
+
+error_direct_scipy = numpy.sqrt(sum((phi_d-phi_s)*numpy.conj(phi_d-phi_s))/sum(phi_d*numpy.conj(phi_d)))
+print '\nerror solve direct vs gmres_scipy: %s'%error_direct_scipy
 """
-
 
 print '\nEnergy calculation'
 fill_phi(phi, surf_array)
