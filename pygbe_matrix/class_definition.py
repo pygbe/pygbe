@@ -22,7 +22,7 @@
 
 from numpy import *
 import sys
-sys.path.append('../util')
+sys.path.append('../pygbe/util')
 from readData import *
 #sys.path.append('bem_matrix')
 from GaussIntegration import getGaussPoints
