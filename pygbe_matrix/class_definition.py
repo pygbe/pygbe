@@ -21,7 +21,8 @@
 '''
 
 from numpy import *
-from readData_old import (readFields, read_surface, readVertex, readTriangle)
+from readData_old import (readFields, read_surface, readVertex, readTriangle,
+                          readpqr)
 from GaussIntegration import getGaussPoints
 
 
