@@ -148,7 +148,7 @@ def resolve_relative_config_file(config_file, full_path):
     """
     Does its level-headed best to find the config files specified by the user
 
-    Arguments:
+    Arguments
     ---------
     config_file: str
         the given path to a .param or .config file from the command line
@@ -195,7 +195,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
 
-    Arguments:
+    Arguments
     ----------
     log_output         : Bool, default True.
                          If False, output is written only to STDOUT and not
@@ -204,7 +204,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
                          If True, function main() returns the name of the
                          output log file. This is used for the regression tests.
 
-    Returns:
+    Returns
     --------
     output_fname       : str, if kwarg is True.
                          The name of the log file containing problem output
@@ -411,6 +411,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print 'Esurf = %f kcal/mol' % sum(E_surf)
     print 'Ecoul = %f kcal/mol' % sum(E_coul)
     print '\nTime = %f s' % (toc - TIC)
+
+    #reset stdout so regression tests, etc, don't get logged into the output
+    #file that they themselves are trying to read
+    sys.stdout = sys.__stdout__
 
     if return_output_fname and log_output:
         return outputfname

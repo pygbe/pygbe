@@ -18,7 +18,7 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
     """
     It manages the data transfer to the GPU.
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.

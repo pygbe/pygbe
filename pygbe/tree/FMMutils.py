@@ -22,7 +22,7 @@ class Cell():
     """
     Cell class. It contains the information about the cells in the tree.
 
-    Attributes:
+    Attributes
     -----------
     nsource   : int, number of source particles.
     ntarget   : int, number of target particles.
@@ -84,7 +84,7 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
     """
     It adds a child cell to the Cells.
 
-    Arguments:
+    Arguments
     ----------
     octant: int, octant of the child cell. 
     Cells : array, it contains the cells information.
@@ -94,7 +94,7 @@ def add_child(octant, Cells, i, NCRIT, Nm, Ncell):
     Nm    : int, number of multipole coefficients.
     Ncell : int, number of cells in the tree.
 
-    Returns:
+    Returns
     --------
     Ncell : int, number of cells in the tree.
     """
@@ -120,7 +120,7 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     It splits a cell with more than (>=) NCRIT particles.
     Particles in this context means boundary elements.
 
-    Arguments:
+    Arguments
     ----------
     x    : array, x position of the particles.
     y    : array, y position of the particles.
@@ -132,7 +132,7 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     Nm   : int, number of multipole coefficients.
     Ncell: int, number of cells in the tree.
 
-    Returns:
+    Returns
     --------
     Ncell: int, number of cells in the tree.
     """
@@ -159,7 +159,7 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
     """
     It generates a target-based tree.
 
-    Arguments:
+    Arguments
     ----------
     xi      : array, x position of the targets, i.e collocation points.
     yi      : array, y position of the targets, i.e collocation points.
@@ -170,7 +170,7 @@ def generateTree(xi, yi, zi, NCRIT, Nm, N, radius, x_center):
     r       : float, cell radius, i.e half length.
     x_center: array, center of the root cell.
 
-    Returns:
+    Returns
     --------
     Cells   : array, cells of the tree.
     """
@@ -211,7 +211,7 @@ def findTwigs(Cells, C, twig, NCRIT):
     """
     It finds the twig cells, the ones that have < NCRIT.
 
-    Arguments:
+    Arguments
     ----------
     Cells: array, cells of the tree.
     C    : int, index of cell in the Cells array.
@@ -219,7 +219,7 @@ def findTwigs(Cells, C, twig, NCRIT):
     NCRIT: int, maximum number of boundary elements per twig box of tree
                 structure.
 
-    Returns:
+    Returns
     --------
     twig : array, indices of twigs in Cells array.
     """
@@ -242,7 +242,7 @@ def addSources(Cells, twig, K):
     panel.    
     This version works fast when used with sorted arrays. 
 
-    Arguments:
+    Arguments
     ----------
     Cells: array, cells of the tree.
     twig : array, indices of twigs in Cells array.
@@ -264,7 +264,7 @@ def addSources2(x, y, z, j, Cells, C, NCRIT):
     This version is a generic version that loop over the cells looking for
     twigs and sets the sources one it finds a twig.     
     
-    Arguments:
+    Arguments
     ----------
     x    : array, x coordinate of the sources. 
     y    : array, y coordinate of the sources.
@@ -308,7 +308,7 @@ def addSources3(x, y, z, Cells, twig):
     This version works fast when we uses the twig_array, array that contains
     the location in the cells array of the twig cells. 
 
-    Arguments:
+    Arguments
     ----------
     x    : array, x coordinate of the sources. 
     y    : array, y coordinate of the sources.
@@ -347,7 +347,7 @@ def sortPoints(surface, Cells, twig, param):
     We unsort them when we need the information to be analized after it was
     computed.
 
-    Arguments:
+    Arguments
     ----------
     surface: class, surface that we are analysing.
     Cells  : array, cells of the tree.
@@ -394,7 +394,7 @@ def computeIndices(P, ind0):
     """
     It computes the indices (exponents) needed to compute the Taylor expansion. 
 
-    Arguments:
+    Arguments
     ----------
     P   : int, order of the Taylor expansion.
     ind0: class, it contains the indices related to the treecode computation.         
@@ -428,7 +428,7 @@ def precomputeTerms(P, ind0):
     """
     It precomputes the terms for P2M and M2M computation.
 
-    Arguments:
+    Arguments
     ----------
     P   : int, order of the Taylor expansion.
     ind0: class, it contains the indices related to the treecode computation.         
@@ -464,7 +464,7 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
     """
     It finds the list of cells which each twig cell interacts.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -481,7 +481,7 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
     s_src  : int, position (index) in the surface-array of the surface that
                   contains the sources.
     
-    Returns:
+    Returns
     -------- 
     offTwg : array, pointer to the first element in the P2P interaction list 
                     for each twig cell.
@@ -518,7 +518,7 @@ def generateList(surf_array, field_array, param):
     """
     Loops over the surfaces to then compute the interactionList(). 
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
@@ -623,7 +623,7 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
           where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES.
 
-    Arguments:
+    Arguments
     ----------
     Cells: array, it contains the cells information.
     C    : int, index of the cell in the Cells array.    
@@ -669,7 +669,7 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
     """
     It calculates the M2M. Calculation of the multipole for non-twig cells .
 
-    Arguments:
+    Arguments
     ----------
     Cells      : array, it contains the cells information.
     CC         : int, index of the child cell in the Cells array .    
@@ -710,7 +710,7 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     It computes the far field contribution of the double and single layer 
     potential using the sorted data.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -725,7 +725,7 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
     timing : class, it contains timing information for different parts of 
                     the code.
     
-    Returns:
+    Returns
     --------
     K_aux  : array, far field contribution to the double layer potential.
     V_aux  : array, far field contribution to the single layer potential.
@@ -760,7 +760,7 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
     It computes the far field contribution of the adjoint double potential
     using the sorted data.
  
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -779,7 +779,7 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
     timing : class, it contains timing information for different parts of 
                     the code.
     
-    Returns:
+    Returns
     --------
     Ktx_aux: array, x component of the far field contribution to the adjoint 
                     double layer potential.
@@ -818,7 +818,7 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
     It computes the far field contribution of the double and single layer 
     potential using the sorted data, on the GPU.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -833,7 +833,7 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
                     the code.
     kernel : pycuda source module.
 
-    Returns:
+    Returns
     --------
     K_gpu  : array, far field contribution to the double layer potential.
     V_gpu  : array, far field contribution to the single layer potential.
@@ -910,7 +910,7 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
     It computes the far field contribution of the adjoint double potential
     using the sorted data, on the GPU.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -930,7 +930,7 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
                     the code.
     kernel : pycuda source module.
 
-    Returns:
+    Returns
     --------
     Ktx_gpu: array, x component of the far field contribution to the adjoint 
                     double layer potential.
@@ -1015,7 +1015,7 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
           where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -1044,7 +1044,7 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
     timing : class, it contains timing information for different parts of 
                     the code.
     
-    Returns:
+    Returns
     --------
     K_aux  : array, far plus near field contribution to the double layer 
                     potential.
@@ -1100,7 +1100,7 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
           where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES. 
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -1122,7 +1122,7 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
     timing : class, it contains timing information for different parts of 
                     the code.
     
-    Returns:
+    Returns
     --------
     Ktx_aux: array, x component of the far plus near field contribution to the 
                     adjoint double layer potential.
@@ -1177,7 +1177,7 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
           where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES.
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -1206,7 +1206,7 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
                     the code.
     kernel : pycuda source module.
     
-    Returns:
+    Returns
     --------
     K_gpu  : array, far plus near field contribution to the double layer 
                     potential.
@@ -1314,7 +1314,7 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
           where 'vector' is the vector in the matrix-vector multiplication in 
           the GMRES. 
 
-    Arguments:
+    Arguments
     ----------
     surfSrc: class, source surface, the one that contains the gauss points.
     surfTar: class, target surface, the one that contains the collocation
@@ -1337,7 +1337,7 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
                     the code.
     kernel : pycuda source module.
 
-    Returns:
+    Returns
     --------
     Ktx_gpu: array, x component of the far plus near field contribution to the 
                     adjoint double layer potential.
@@ -1428,7 +1428,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
     This is used for the calculation for the reaction potential where the
     targets are the point-charges location.
   
-    Arguments:
+    Arguments
     ----------
     Cells   : array, cells of the tree.
     CJ      : int, index of the source cell.
@@ -1442,7 +1442,7 @@ def M2P_nonvec(Cells, CJ, xq, Kval, Vval, index, par_reac, source, time_M2P):
                     each charge-point interacts by P2P. 
     time_M2P: real, timed consumed in compute M2P_nonvec function.
 
-    Returns:
+    Returns
     --------
     Kval  : array, far field contribution to the double layer potential.
     Vval  : array, far field contribution to the single layer potential.
@@ -1502,7 +1502,7 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
     This is used for the calculation for the reaction potential where the
     targets are the point-charges location.
     
-    Arguments:
+    Arguments
     ----------
     Cells   : array, cells of the tree.
     surface : class, surface where we are computing the P2P_nonvec.
@@ -1529,7 +1529,7 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
     AI_int  : int, counter of the amount of near singular integrals solved.
     time_P2P: real, timed consumed in compute P2P_nonvec function.
 
-    Returns:
+    Returns
     --------
     Kval   : array, far plus near field contribution to the double layer 
                     potential.

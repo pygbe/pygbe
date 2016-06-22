@@ -17,7 +17,7 @@ def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     Nq charges inside.
     Took from Kirkwood (1934).
 
-    Arguments:
+    Arguments
     ----------
     q  : array, charges.
     xq : array, positions of the charges.
@@ -27,7 +27,7 @@ def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     R  : float, radius of the sphere.
     N  : int, number of terms desired in the spherical harmonic expansion. 
 
-    Returns:
+    Returns
     -------- 
     PHI: array, reaction potential. 
     """
@@ -63,12 +63,12 @@ def get_K(x, n):
     It computes the polinomials K needed for Kirkwood-1934 solutions.
     K_n(x) in Equation 4 in Kirkwood 1934.
 
-    Arguments:
+    Arguments
     ----------
     x: float, evaluation point of K.
     n: int, number of terms desired in the expansion. 
     
-    Returns:
+    Returns
     -------- 
     K: float, polinomials K. 
     """
@@ -87,7 +87,7 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
     """
     It computes the solvation energy according to Kirkwood-1934.
 
-    Arguments:
+    Arguments
     ----------
     q    : array, charges.
     xq   : array, positions of the charges.
@@ -98,7 +98,7 @@ def an_P(q, xq, E_1, E_2, R, kappa, a, N):
     a    : float, radius of the Stern Layer. 
     N    : int, number of terms desired in the polinomial expansion.
 
-    Returns:
+    Returns
     -------- 
     E_P  : float, solvation energy.
     """
@@ -164,7 +164,7 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
     molecule with a center charge, both of radius R.
     Follows Cooper&Barba 2016  
 
-    Arguments:
+    Arguments
     ----------
     a    : float, center to center distance.
     R    : float, radius of surface and molecule.
@@ -173,7 +173,7 @@ def two_sphere(a, R, kappa, E_1, E_2, q):
     E_2  : float, dielectric constant outside the sphere. 
     q    : float, number of qe to be asigned to the charge. 
 
-    Returns:
+    Returns
     -------- 
     Einter  : float, interaction energy.
     E1sphere: float, solvation energy of one sphere.
@@ -263,7 +263,7 @@ def constant_potential_single_point(phi0, a, r, kappa):
     with constant potential phi0, immersed in water. Solution to the 
     Poisson-Boltzmann problem. 
 
-    Arguments:
+    Arguments
     ----------
     phi0 : float, constant potential on the surface of the sphere. 
     a    : float, radius of the sphere.
@@ -271,7 +271,7 @@ def constant_potential_single_point(phi0, a, r, kappa):
                   point.
     kappa: float, reciprocal of Debye length.
 
-    Returns:
+    Returns
     -------- 
     phi  : float, potential.
     """
@@ -287,7 +287,7 @@ def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
     with constant charge sigma0 immersed in water. Solution to the 
     Poisson-Boltzmann problem. .
 
-    Arguments:
+    Arguments
     ----------
     sigma0 : float, constant charge on the surface of the sphere.  
     a      : float, radius of the sphere.
@@ -296,7 +296,7 @@ def constant_charge_single_point(sigma0, a, r, kappa, epsilon):
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     phi  : float, potential. 
     """
@@ -312,14 +312,14 @@ def constant_potential_single_charge(phi0, radius, kappa, epsilon):
     It computes the surface charge of a sphere at constant potential, immersed
     in water.
 
-    Arguments:
+    Arguments
     ----------
     phi0   : float, constant potential on the surface of the sphere. 
     radius : float, radius of the sphere.
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant .
 
-    Returns:
+    Returns
     -------- 
     sigma  : float, surface charge.
     """
@@ -335,14 +335,14 @@ def constant_charge_single_potential(sigma0, radius, kappa, epsilon):
     It computes the surface potential on a sphere at constant charged, immersed
     in water.
 
-    Arguments:
+    Arguments
     ----------
     sigma0 : float, constant charge on the surface of the sphere.   
     radius : float, radius of the sphere.
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     phi  : float, potential.
     """
@@ -359,7 +359,7 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
     It computes the solvation energy of two spheres at constant potential,
     immersed in water.
 
-    Arguments:
+    Arguments
     ----------
     phi01  : float, constant potential on the surface of the sphere 1.
     phi02  : float, constant potential on the surface of the sphere 2. 
@@ -369,7 +369,7 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E_solv  : float, solvation energy.
     """
@@ -424,7 +424,7 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
     It computes the solvation energy of two spheres at constant potential,
     immersed in water.
 
-    Arguments:
+    Arguments
     ----------
     phi01  : float, constant potential on the surface of the sphere 1.
     phi02  : float, constant potential on the surface of the sphere 2. 
@@ -434,7 +434,7 @@ def constant_potential_twosphere_2(phi01, phi02, r1, r2, R, kappa, epsilon):
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E_solv  : float, solvation energy.
     """
@@ -462,14 +462,14 @@ def constant_potential_single_energy(phi0, r1, kappa, epsilon):
     It computes the total energy of a single sphere at constant potential,
     inmmersed in water.
 
-    Arguments:
+    Arguments
     ----------
     phi0   : float, constant potential on the surface of the sphere.
     r1     : float, radius of sphere.
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E      : float, total energy.
     """
@@ -505,14 +505,14 @@ def constant_charge_single_energy(sigma0, r1, kappa, epsilon):
     It computes the total energy of a single sphere at constant charge,
     inmmersed in water.
 
-    Arguments:
+    Arguments
     ----------
     sigma0 : float, constant charge on the surface of the sphere.   
     r1     : float, radius of sphere.
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E      : float, total energy.
     """
@@ -550,7 +550,7 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     It computes the interaction energy for dissimilar spheres at constant
     potential, immersed in water.
 
-    Arguments:
+    Arguments
     ----------
     phi01  : float, constant potential on the surface of the sphere 1.
     phi02  : float, constant potential on the surface of the sphere 2. 
@@ -560,7 +560,7 @@ def constant_potential_twosphere_dissimilar(phi01, phi02, r1, r2, R, kappa,
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """
@@ -662,7 +662,7 @@ def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
     It computes the interaction energy between two dissimilar spheres at
     constant charge, immersed in water.
 
-    Arguments:
+    Arguments
     ----------
     sigma01: float, constant charge on the surface of the sphere 1.
     sigma02: float, constant charge on the surface of the sphere 2. 
@@ -672,7 +672,7 @@ def constant_charge_twosphere_dissimilar(sigma01, sigma02, r1, r2, R, kappa,
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """
@@ -774,7 +774,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     point-charge in the center) and a sphere at constant potential, immersed
     in water.
 
-    Arguments:
+    Arguments
     ----------    
     q      : float, number of qe to be asigned to the charge. 
     phi02  : float, constant potential on the surface of the sphere 2. 
@@ -785,7 +785,7 @@ def molecule_constant_potential(q, phi02, r1, r2, R, kappa, E_1, E_2):
     E_1    : float, dielectric constant inside the sphere/molecule.
     E_2    : float, dielectric constant outside the sphere/molecule. 
  
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """
@@ -893,7 +893,7 @@ def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     point-charge in the center) and a sphere at constant charge, immersed
     in water.
 
-    Arguments:
+    Arguments
     ----------    
     q      : float, number of qe to be asigned to the charge. 
     sigma02: float, constant charge on the surface of the sphere 2. 
@@ -904,7 +904,7 @@ def molecule_constant_charge(q, sigma02, r1, r2, R, kappa, E_1, E_2):
     E_1    : float, dielectric constant inside the sphere/molecule.
     E_2    : float, dielectric constant outside the sphere/molecule. 
 
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """
@@ -1012,7 +1012,7 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
     It computes the interaction energy for two spheres at constants surface
     potential, according to Carnie&Chan-1993.
 
-    Arguments:
+    Arguments
     ----------
     phi01  : float, constant potential on the surface of the sphere 1.
     phi02  : float, constant potential on the surface of the sphere 2. 
@@ -1026,7 +1026,7 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
          Even though it admits phi01 and phi02, they should be identical; and
          the same is applicable to r1 and r2. 
 
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """
@@ -1098,7 +1098,7 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     It computes the interaction energy for two spheres at constants surface
     charge, according to Carnie&Chan-1993.
 
-    Arguments:
+    Arguments
     ----------
     sigma  : float, constant charge on the surface of the spheres. 
     a      : float, radius of spheres.
@@ -1106,7 +1106,7 @@ def constant_charge_twosphere_identical(sigma, a, R, kappa, epsilon):
     kappa  : float, reciprocal of Debye length.
     epsilon: float, water dielectric constant.
 
-    Returns:
+    Returns
     -------- 
     E_inter: float, interaction energy.
     """

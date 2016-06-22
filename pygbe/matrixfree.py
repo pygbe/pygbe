@@ -33,7 +33,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     approaches the surface from the inside, then the result is added to the
     interior equation.
 
-    Arguments:
+    Arguments
     ----------
     surf  : array, contains all the classes of the surface. 
     s     : int, position of the surface in the surface array.
@@ -44,7 +44,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
                    code.
     kernel: pycuda source module.
 
-    Returns:
+    Returns
     --------
     v     : array, result of the matrix-vector product corresponding to the self
             interior interaction.
@@ -71,7 +71,7 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     the exterior equation.
     
 
-    Arguments:
+    Arguments
     ----------
     surf  : array, contains all the classes of the surface. 
     s     : int, position of the surface in the surface array.
@@ -82,7 +82,7 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
                    code.
     kernel: pycuda source module.
 
-    Returns:
+    Returns
     --------
     v     : array, result of the matrix-vector product corresponding to the self
             exterior interaction.
@@ -112,7 +112,7 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     we add the result to internal equation.
     
 
-    Arguments:
+    Arguments
     ----------
     surf  : array, contains all the classes of the surface. 
     src   : int, position in the array of the source surface (surface that
@@ -126,7 +126,7 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                    code.
     kernel: pycuda source module.
 
-    Returns:
+    Returns
     --------
     v     : array, result of the matrix-vector product corresponding to the 
                    non-self exterior interaction.
@@ -151,7 +151,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     enclosed by the surface with the strength of the single and double layer
     potentials, and the result has to be added to the exterior equation. 
 
-    Arguments:
+    Arguments
     ----------
     surf  : array, contains all the classes of the surface. 
     src   : int, position in the array of the source surface (surface that
@@ -165,7 +165,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                    code.
     kernel: pycuda source module.
 
-    Returns:
+    Returns
     --------
     v     : array, result of the matrix-vector product corresponding to the 
                    non-self interior interaction.
@@ -187,7 +187,7 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     """
     Self interaction for the aparent surface charge (ASC) formulation.  
     
-    Arguments:
+    Arguments
     ----------
     surf  : array, contains all the classes of the surface. 
     src   : int, position in the array of the source surface (surface that
@@ -201,7 +201,7 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
                    code.
     kernel: pycuda source module.
 
-    Returns:
+    Returns
     --------
     v     : array, result of the matrix-vector product corresponding to the 
                   self interaction in the ASC formulation.
@@ -222,7 +222,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     """
     It computes the matrix-vector product in the GMRES.  
 
-    Arguments:
+    Arguments
     ----------
     X          : array, initial vector guess.
     surf_array : array, contains the surface classes of each region on the
@@ -236,7 +236,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                         the code.
     kernel     : pycuda source module.
 
-    Returns:
+    Returns
     --------
     MV         : array, resulting matrix-vector multiplication.
     """
@@ -353,7 +353,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     """
     It generate the right hand side (RHS) for the GMRES.
 
-    Arguments:
+    Arguments
     ----------
     field_array: array, contains the Field classes of each region on the surface.    
     surf_array : array, contains the surface classes of each region on the
@@ -364,7 +364,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                         the code.
     ind0       : class, it contains the indices related to the treecode computation. 
 
-    Returns:
+    Returns
     --------
     F          : array, RHS.
     """
@@ -651,7 +651,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     """
     It generate the right hand side (RHS) for the GMRES suitable for the GPU.
 
-    Arguments:
+    Arguments
     ----------
     field_array: array, contains the Field classes of each region on the surface.    
     surf_array : array, contains the surface classes of each region on the
@@ -663,7 +663,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     ind0       : class, it contains the indices related to the treecode 
                         computation. 
 
-    Returns:
+    Returns
     --------
     F          : array, RHS suitable for the GPU.
     """
@@ -1044,7 +1044,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     """
     It calculates the solvation energy. 
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
@@ -1052,7 +1052,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     param      : class, parameters related to the surface.     
     kernel     : pycuda source module.
 
-    Returns:
+    Returns
     --------
     E_solv     : float, solvation energy.
     """
@@ -1157,13 +1157,13 @@ def coulombEnergy(f, param):
     """
     It calculates the Coulomb energy .
 
-    Arguments:
+    Arguments
     ----------
     f    : class, region in the field array where we desire to calculate the
                   coloumb energy.  
     param: class, parameters related to the surface.     
 
-    Returns:
+    Returns
     --------
     Ecoul: float, coloumb energy.
     """
@@ -1182,7 +1182,7 @@ def calculateEsurf(surf_array, field_array, param, kernel):
     """
     It calculates the surface energy 
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
@@ -1190,7 +1190,7 @@ def calculateEsurf(surf_array, field_array, param, kernel):
     param      : class, parameters related to the surface.     
     kernel     : pycuda source module.
 
-    Returns:
+    Returns
     --------
     E_surf: float, surface energy.
     """
