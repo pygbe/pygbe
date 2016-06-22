@@ -26,7 +26,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     """
     It computes the single and double layer potentials.
 
-    Arguments:
+    Arguments
     ----------
     XK     : array, input for the double layer potential. 
     XV     : array, input for the single layer potential.
@@ -44,7 +44,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
                     code.
     kernel : pycuda source module.
 
-    Returns:
+    Returns
     --------
     K_lyr  : array, double layer potential.
     V_lyr  : array, single layer potential. 
@@ -166,7 +166,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     """
     It computes the adjoint double layer potential.
 
-    Arguments:
+    Arguments
     ----------
     XKt    : array, input for the adjoint double layer potential.
     LorY   : int, Laplace (1) or Yukawa (2).
@@ -181,7 +181,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
                     code.
     kernel : pycuda source module.
 
-    Returns:
+    Returns
     --------
     Kt_lyr: array, adjoint double layer potential.
     """
@@ -301,7 +301,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     is the reason why we need fine parameters (par_reac class) and a different
     array of indices (ind_reac) than ind0.
 
-    Arguments:
+    Arguments
     ----------
     XK      : array, input for the double layer potential. 
     XV      : array, input for the single layer potential.
@@ -312,7 +312,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     ind_reac: array, it contains the indices related to the treecode
                      computation.
 
-    Returns:
+    Returns
     --------
     phi_reac: array, reaction potential.
     AI_int  : int, counter of the amount of near singular integrals solved.
@@ -402,7 +402,7 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     It computes the reaction potential on the GPU  and it brings the data 
     to the cpu.
 
-    Arguments:
+    Arguments
     ----------
     XK      : array, input for the double layer potential. 
     XV      : array, input for the single layer potential.
@@ -410,7 +410,7 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     field   : class, information about the different regions in the molecule. 
     par_reac: class, fine parameters related to the surface.
     
-    Returns:
+    Returns
     --------
     phir_cpu: array, reaction potential brought from the GPU to the cpu. 
     AI_int  : int, counter of the amount of near singular integrals solved.

@@ -19,13 +19,13 @@ def initializeSurf(field_array, filename, param):
     """
     Initialize the surface of the molecule.  
 
-    Arguments:
+    Arguments
     ----------
     field_array: array, contains the Field classes of each region on the surface.
     filename   : name of the file that contains the surface information.
     param      : class, parameters related to the surface. 
 
-    Returns:
+    Returns
     --------
     surf_array : array, contains the surface classes of each region on the
                         surface.
@@ -85,13 +85,13 @@ def zeroAreas(s, triangle_raw, Area_null):
     Looks for "zero-areas", areas that are really small, almost zero. It appends
     them to Area_null list.
 
-    Arguments:
+    Arguments
     ----------
     s           : class, surface where we whan to look for zero areas. 
     triangle_raw: list, triangles of the surface.
     Area_null   : list, contains the zero areas.
 
-    Returns:
+    Returns
     --------
     Area_null   : list, indices of the triangles with zero-areas.
     """
@@ -116,12 +116,12 @@ def fill_surface(surf, param):
     -It generates preconditioner.
     -It computes the diagonal integral for internal and external equations.
     
-    Arguments:
+    Arguments
     ----------
     surf     : class, surface that we are studying.
     param    : class, parameters related to the surface we are studying.
 
-    Returns:
+    Returns
     --------
     time_sort: float, time spent in sorting the data needed for the treecode.
     """
@@ -256,12 +256,12 @@ def initializeField(filename, param):
     """
     Initialize all the regions in the surface to be solved.
 
-    Arguments:
+    Arguments
     ----------
     filename   : name of the file that contains the surface information.
     param      : class, parameters related to the surface.
 
-    Returns:
+    Returns
     --------
     field_array: array, contains the Field classes of each region on the surface.
     """
@@ -320,7 +320,7 @@ def fill_phi(phi, surf_array):
     """
     It places the result vector on surface structure.
 
-    Arguments:
+    Arguments
     ----------
     phi        : array, result vector.
     surf_array : array, contains the surface classes of each region on the

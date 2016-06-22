@@ -11,13 +11,13 @@ def readVertex(filename, REAL):
     It reads the vertex of the triangles from the mesh file and it stores
     them on an array.
 
-    Arguments:
+    Arguments
     ----------
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
     
-    Returns:
+    Returns
     -------
     vertex: array, vertices of the triangles.
     """
@@ -38,13 +38,13 @@ def readVertex2(filename, REAL):
     them on an array. 
     It reads the file line by line.
 
-    Arguments:
+    Arguments
     ----------
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
     
-    Returns:
+    Returns
     -------
     vertex: array, vertices of the triangles.
     """
@@ -77,13 +77,13 @@ def readTriangle(filename, surf_type):
     It reads the triangles from the mesh file and it stores them on an
     array.
 
-    Arguments:
+    Arguments
     ----------
     filename : name of the file that contains the surface information.
                (filename.faces)
     surf_type: str, type of surface.
     
-    Returns:
+    Returns
     -------
     triangle: array, triangles indices.
     """
@@ -117,12 +117,12 @@ def readTriangle2(filename):
     array.
     It reads the file line by line.
 
-    Arguments:
+    Arguments
     ----------
     filename : name of the file that contains the surface information.
                (filename.faces)
     
-    Returns:
+    Returns
     -------
     triangle: array, triangles indices.
     """
@@ -149,13 +149,13 @@ def readCheck(aux, REAL):
     We use this function to check we are not missing '-' signs in the .pqr
     files, when we read the lines.
 
-    Arguments:
+    Arguments
     ----------
     aux : str, string to be checked.
     REAL: data type.
     
     
-    Returns:
+    Returns
     -------
     X: array, array with the correct '-' signs assigned.
     """
@@ -178,13 +178,13 @@ def readpqr(filename, REAL):
     """
     It reads the pqr file, file that contains the charges information.
 
-    Arguments:
+    Arguments
     ----------
     filename: name of the file that contains the surface information.
                (filename.pqr)
     REAL    : data type.
     
-    Returns:
+    Returns
     -------
     pos     : (Nqx3) array, positions of the charges. 
     q       : (Nqx1) array, value of the charges. 
@@ -232,12 +232,12 @@ def readcrd(filename, REAL):
     """
     It reads the crd file, file that contains the charges information.
 
-    Arguments:
+    Arguments
     ----------
     filename : name of the file that contains the surface information.
     REAL     : data type.
     
-    Returns:
+    Returns
     -------
     pos      : (Nqx3) array, positions of the charges. 
     q        : (Nqx1) array, value of the charges. 
@@ -274,13 +274,13 @@ def readParameters(param, filename):
     It populates the attributes from the Parameters class with the information
     read from the .param file.
 
-    Arguments:
+    Arguments
     ----------
     param   : class, parameters related to the surface.     
     filename: name of the file that contains the parameters information. 
               (filename.param)
         
-    Returns:
+    Returns
     -------
     dataType: we return the dataType of each attributes because we need it for
               other fucntions.  
@@ -323,12 +323,12 @@ def readFields(filename):
     It reads the physical parameters from the configuration file for each region
     in the surface and it appends them on the corresponding list.
 
-    Arguments:
+    Arguments
     ----------
     filename: name of the file that contains the physical parameters of each
               region. (filename.config)
         
-    Returns:
+    Returns
     -------
     LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
                     corresponding to each region.
@@ -393,12 +393,12 @@ def read_surface(filename):
     It reads the type of surface of each region on the surface from the 
     configuration file.
 
-    Arguments:
+    Arguments
     ----------
     filename: name of the file that contains the surface type of each region.
               (filename.config).
   
-    Returns:
+    Returns
     -------
     files    : list, it contains the files corresponding to each region in the
                      surface.
