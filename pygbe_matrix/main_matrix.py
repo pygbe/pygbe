@@ -37,10 +37,10 @@ def read_inputs():
 
     parser = ArgumentParser(description='Manage main_matrix command line arguments')
 
-    parser.add_argument('-p', '--param', dest='param', type=str, default=None,
+    parser.add_argument('-p', '--param', dest='p', type=str, default=None,
                         help="Path to problem param file")
 
-    parser.add_argument('-c', '--config', dest='config', type=str, default=None,
+    parser.add_argument('-c', '--config', dest='c', type=str, default=None,
                         help="Path to problem config file")
     
     return parser.parse_args()
