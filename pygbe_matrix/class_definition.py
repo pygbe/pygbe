@@ -21,10 +21,7 @@
 '''
 
 from numpy import *
-import sys
-sys.path.append('../pygbe/util')
-from readData import *
-#sys.path.append('bem_matrix')
+from readData_old import (readFields, read_surface, readVertex, readTriangle)
 from GaussIntegration import getGaussPoints
 
 
@@ -187,7 +184,7 @@ def initializeSurf(field_array, param, filename):
 
     surf_array = []
 
-    files, surf_type, phi0_file = readSurf(filename)      # Read filenames for surfaces
+    files, surf_type, phi0_file = read_surface(filename)      # Read filenames for surfaces
     Nsurf = len(files)
 
     for i in range(Nsurf):
