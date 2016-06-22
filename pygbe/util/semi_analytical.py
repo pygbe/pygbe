@@ -13,11 +13,11 @@ def GQ_1D(K):
     """
     Gauss quadrature in 1D.
 
-    Arguments:
+    Arguments
     ----------
     K: int, desired number of gauss points. 
     
-    Returns:
+    Returns
     --------
     x: float, location of the gauss point.    
     w: float, weights of the gauss point.   
@@ -39,7 +39,7 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
     Line integral to solve the non-analytical part (integral in the angle) in
     the semi_analytical integrals needed to calculate the potentials.
 
-    Arguments:
+    Arguments
     ----------
     z     : float, distance (height) between the plane of the triangle and the
                    collocation point. 
@@ -50,7 +50,7 @@ def lineInt(z, x, v1, v2, kappa, xk, wk):
     xk    : float, position of the gauss point.   
     wk    : float, weight of the gauss point.
     
-    Returns:
+    Returns
     --------
     phi_Y : float, potential due to a Yukawa kernel.
     dphi_Y: float, normal derivative of potential due to a Yukawa kernel.
@@ -95,7 +95,7 @@ def intSide(v1, v2, p, kappa, xk, wk):
     """
     It solves the integral line over one side of the triangle .
 
-    Arguments:
+    Arguments
     ----------
     v1    : float, low extreme integral value.
     v2    : float, high extreme integral value.
@@ -105,7 +105,7 @@ def intSide(v1, v2, p, kappa, xk, wk):
     xk    : float, position of the gauss point.   
     wk    : float, weight of the gauss point.
     
-    Returns:
+    Returns
     --------
     phi_Y : float, potential due to a Yukawa kernel.
     dphi_Y: float, normal derivative of potential due to a Yukawa kernel.
@@ -169,7 +169,7 @@ def SA_arr(y, x, kappa, same, xk, wk):
     It computes the integral line for all the sides of a triangle and for all
     the collocation points. 
 
-    Arguments:
+    Arguments
     ----------
     y     : array, vertices coordinates of the triangles.
     x     : array, collocation points.
@@ -179,7 +179,7 @@ def SA_arr(y, x, kappa, same, xk, wk):
     xk    : float, position of the gauss point.   
     wk    : float, weight of the gauss point.
     
-    Returns:
+    Returns
     --------
     phi_Y : float, potential due to a Yukawa kernel.
     dphi_Y: float, normal derivative of potential due to a Yukawa kernel.

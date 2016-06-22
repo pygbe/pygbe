@@ -37,14 +37,14 @@ def GeneratePlaneRotation(dx, dy, cs, sn):
     """
     Given a vector (dx, dy), it provides the cosine (cs) and sine (sn). 
   
-    Arguments:
+    Arguments
     ----------
     dx: float, x coordinate of the vector (dx, dy). 
     dy: float, y coordinate of the vector (dx, dy).
     cs: float, cosine.
     sn: float, sine.
         
-    Returns:
+    Returns
     --------
     cs: float, cosine.
     sn: float, sine. 
@@ -70,14 +70,14 @@ def ApplyPlaneRotation(dx, dy, cs, sn):
     Given a vector (dx, dy), the cosine (cs) and sine (sn), it rotates the
     vector.  
 
-    Arguments:
+    Arguments
     ----------
     dx: float, x coordinate of the vector (dx, dy). 
     dy: float, y coordinate of the vector (dx, dy).
     cs: float, cosine.
     sn: float, sine. 
         
-    Returns:
+    Returns
     --------
     dx: float, x component of the rotated vector.
     dy: float, y component of the rotated vector. 
@@ -94,7 +94,7 @@ def PlaneRotation(H, cs, sn, s, i, R):
     """
     It applies the Givens rotations. 
 
-    Arguments:
+    Arguments
     ----------
     H : matrix, to applied the rotations. In our case is the upper Hessenberg
                 obtained after Arnoldi-Modified Gram-Schmidt. 
@@ -104,7 +104,7 @@ def PlaneRotation(H, cs, sn, s, i, R):
     i : int, iteration number of the GMRES.
     R : int, restart parameter, number of iterations for GMRES to do restart.
     
-    Returns:
+    Returns
     --------
     H : 
     cs: float, cosine.
@@ -128,7 +128,7 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
     """
     GMRES solver. 
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
@@ -142,7 +142,7 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
                         the code.
     kernel     : pycuda source module.
 
-    Returns:
+    Returns
     --------
     X          : array, an updated guess to the solution. 
     """

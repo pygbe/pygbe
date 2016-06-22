@@ -8,7 +8,7 @@ def printSummary(surf_array, field_array, param):
     """
     Prints a summary with the main information of the run.
 
-    Arguments:
+    Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.

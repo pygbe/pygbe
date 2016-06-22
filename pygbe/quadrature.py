@@ -8,12 +8,12 @@ def quadratureRule_fine(K):
     """
     Fine quadrature rule, to solve the near singular integrals.
 
-    Arguments:
+    Arguments
     ----------
     K: int (1, 7, 13, 17, 19, 25, 37, 48, 52, 61, 79), number of Gauss points
        per element.
 
-    Returns:
+    Returns
     --------
     X: array, position of the gauss quadrature points.
     W: array, gauss quadrature weights.
@@ -446,11 +446,11 @@ def getWeights(K):
     """
     It gets the weights of the Gauss points. 
 
-    Arguments:
+    Arguments
     ----------
     K: int, number of Gauss points per element. (1, 3, 4, and 7 are supported)
 
-    Returns:
+    Returns
     --------
     w: K-size array, weights of the Gauss points.
     """
@@ -484,13 +484,13 @@ def getGaussPoints(y, triangle, n):
     """
     It gets the Gauss points for far away integrals.
 
-    Arguments:
+    Arguments
     ----------
     y       : list, vertices of the triangles.
     triangle: list, indices for the corresponding triangles.
     n       : int (1,3,4,7), desired Gauss points per element.
 
-    Returns:
+    Returns
     --------
     xi[:,0] : position of the gauss point in the x axis.
     xi[:,1] : position of the gauss point in the y axis.
