@@ -7,7 +7,10 @@ surfaces.
  -If we have an incident electric field, it returns the extinction cross
   section. 
 """
-from numpy                  import pi
+
+import numpy
+import time
+
 from scipy.misc             import factorial
 from scipy.sparse.linalg    import gmres
 from argparse               import ArgumentParser
@@ -21,7 +24,7 @@ from RHScalculation         import charge2surf, generateRHS
 from interactionCalculation import computeInter
 from energyCalculation      import (fill_phi, solvationEnergy, coulombicEnergy,
                             surfaceEnergy, dipoleMoment, extCrossSection)
-import time
+
 
 def read_inputs():
     """
@@ -123,28 +126,50 @@ Ainv = generatePreconditioner(surf_array)
 
 print 'preconditioner generated'
 
+#Apply preconditioner
 MM = Ainv*M
 FF = Ainv*F
-#MM = M
-#FF = F
 
-if type(MM[0,0]) != numpy.complex128:
-    savetxt('RHS_matrix.txt',FF)
+#if type(MM[0,0]) != numpy.complex128:
+#    numpy.savetxt('RHS_matrix.txt',FF)
 
-print '\nSolve system'
+print '\nSolve system with gmres_mgs'
 tec = time.time()
-phi = zeros(len(F))
 
-if type(MM[0,0]) == numpy.complex128:
-    phi = gmres(MM, FF, tol=param.tol, restart=param.restart, maxiter=param.max_iter)[0]
+if MM.dtype == numpy.complex128:
+    phi = numpy.zeros(len(F), dtype=numpy.complex128)
 else:
-    phi = gmres_solver(MM, phi, FF, param.restart, param.tol, param.max_iter) 
+    phi = numpy.zeros(len(F))
 
-converged = -1
+phi = gmres_mgs(MM, phi, FF, param.restart, param.tol, param.max_iter) 
+
 toc = time.time()
 
-if type(MM[0,0]) != numpy.complex128:
-    savetxt('phi_matrix.txt',phi)
+gmres_mgs_time = toc-tec
+
+#if type(MM[0,0]) != numpy.complex128:
+#    numpy.savetxt('phi_matrix.txt',phi)
+
+"""
+#comparing with scipy
+print '\nSolve system with scipy'
+tec = time.time()
+phi_s = zeros(len(F))
+
+phi_s = gmres(MM, FF, tol=param.tol, restart=param.restart, maxiter=param.max_iter)[0] 
+
+toc = time.time()
+
+gmres_scipy_time = toc-tec
+
+print '\nTime gmres_mgs = %f s'%(gmres_mgs_time)
+print '\nTime gmres_scipy = %f s'%(gmres_scipy_time)
+
+#error compared with scipy
+
+error_scipy_mgs = sqrt(sum((phi_s-phi)**2)/sum(phi_s**2))
+print 'error scipy_gmres vs gmres_mgs: %s'%error_scipy_mgs
+"""
 
 
 print '\nEnergy calculation'
@@ -159,7 +184,7 @@ Esurf, surf_Esurf = surfaceEnergy(surf_array, param)
 dipoleMoment(surf_array, electricField)
 
 if abs(electricField)>1e-12:
-    Cext, surf_Cext = extCrossSection(surf_array, array([1,0,0]), array([0,0,1]), wavelength, electricField)
+    Cext, surf_Cext = extCrossSection(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), wavelength, electricField)
 
 toc = time.time()
 
