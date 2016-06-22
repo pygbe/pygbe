@@ -412,6 +412,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print 'Ecoul = %f kcal/mol' % sum(E_coul)
     print '\nTime = %f s' % (toc - TIC)
 
+    #reset stdout so regression tests, etc, don't get logged into the output
+    #file that they themselves are trying to read
+    sys.stdout = sys.__stdout__
+
     if return_output_fname and log_output:
         return outputfname
 
