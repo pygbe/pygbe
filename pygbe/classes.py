@@ -21,7 +21,7 @@ class Surface():
     Surface class.
     It contains information about the solvent excluded surface.
 
-    Attributes:
+    Attributes
     -----------
 
     triangle      : list, indices to triangle vertices.
@@ -217,7 +217,7 @@ class Field():
     Field class.
     It contains the information about each region in the molecule.
 
-    Attributes:
+    Attributes
     -----------
 
     parent: list, Pointer to "parent" surface.
@@ -260,7 +260,7 @@ class Timing():
     Timing class.
     It contains timing information for different parts of the code. 
 
-    Attributes:
+    Attributes
     -----------
     time_an   : float, time spent in compute the near singular integrals.  
     time_P2P  : float, time spent in compute the P2P part of the treecode.
@@ -290,7 +290,7 @@ class Parameters():
     Parameters class.
     It contains the information of the parameters needed to run the code. 
     
-    Attributes:
+    Attributes
     -----------
 
     kappa        :  float, inverse of Debye length.
@@ -350,7 +350,7 @@ class IndexConstant():
     """
     It contains the precompute indices required for the treecode computation.
     
-    Attributes:
+    Attributes
     -----------
 
     II         : list, multipole order in the x-direction for the treecode.
