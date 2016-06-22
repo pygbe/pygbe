@@ -22,9 +22,10 @@
 
 from numpy import *
 from blockMatrixGen import blockMatrix
-import sys
-sys.path.append('../util')
-from semi_analytical import GQ_1D
+from pygbe.util.semi_analytical import GQ_1D                  
+#import sys
+#sys.path.append('../util')
+#from semi_analytical import GQ_1D
 from GaussIntegration import getWeights
 
 def computeInter(surf_array, field_array, param):

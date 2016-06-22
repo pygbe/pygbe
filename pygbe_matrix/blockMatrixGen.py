@@ -23,11 +23,12 @@
 from numpy              import *
 from class_definition   import *
 from scipy.sparse       import *
-import sys
-sys.path.append('../util')
-from triangulation          import *
-from integral_matfree       import *
-from semi_analyticalwrap    import SA_wrap_arr
+from pygbe.util.semi_analyticalwrap import SA_wrap_arr                  
+#import sys
+#sys.path.append('/../pygbe/util')
+#from triangulation          import *
+#from integral_matfree       import *
+#from semi_analyticalwrap    import SA_wrap_arr
 from GaussIntegration       import gaussIntegration_fine
 
 
