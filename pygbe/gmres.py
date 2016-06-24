@@ -37,99 +37,31 @@ from warnings import warn
 
 from matrixfree import gmres_dot 
 
+#Defining the function to calculate the Givens rotations
 
-def GeneratePlaneRotation(dx, dy, cs, sn):
+def apply_givens(Q, v, k):
     """
-    Given a vector (dx, dy), it provides the cosine (cs) and sine (sn). 
-  
-    Arguments
-    ----------
-    dx: float, x coordinate of the vector (dx, dy). 
-    dy: float, y coordinate of the vector (dx, dy).
-    cs: float, cosine.
-    sn: float, sine.
-        
+    Apply the first k Givens rotations in Q to the vector v.
+
+    Parameter
+    ---------        
+        Q: list, list of consecutive 2x2 Givens rotations
+        v: array, vector to apply the rotations to
+        k: int, number of rotations to apply
+
     Returns
-    --------
-    cs: float, cosine.
-    sn: float, sine. 
+    -------
+        v: array, that is changed in place.
+
     """
 
-    if dy == 0:
-        cs = 1.
-        sn = 0.
-    elif (abs(dy) > abs(dx)):
-        temp = dx / dy
-        sn = 1 / numpy.sqrt(1 + temp * temp)
-        cs = temp * sn
-    else:
-        temp = dy / dx
-        cs = 1 / numpy.sqrt(1 + temp * temp)
-        sn = temp * cs
-
-    return cs, sn
+    for j in range(k):
+        Qloc = Q[j]
+        v[j:j+2] = scipy.dot(Qloc, v[j:j+2])
 
 
-def ApplyPlaneRotation(dx, dy, cs, sn):
-    """
-    Given a vector (dx, dy), the cosine (cs) and sine (sn), it rotates the
-    vector.  
 
-    Arguments
-    ----------
-    dx: float, x coordinate of the vector (dx, dy). 
-    dy: float, y coordinate of the vector (dx, dy).
-    cs: float, cosine.
-    sn: float, sine. 
-        
-    Returns
-    --------
-    dx: float, x component of the rotated vector.
-    dy: float, y component of the rotated vector. 
-    """
-    
-    temp = cs * dx + sn * dy
-    dy = -sn * dx + cs * dy
-    dx = temp
-
-    return dx, dy
-
-
-def PlaneRotation(H, cs, sn, s, i, R):
-    """
-    It applies the Givens rotations. 
-
-    Arguments
-    ----------
-    H : matrix, to applied the rotations. In our case is the upper Hessenberg
-                obtained after Arnoldi-Modified Gram-Schmidt. 
-    cs: float, cosine.
-    sn: float, sine.
-    s : array, residual.
-    i : int, iteration number of the GMRES.
-    R : int, restart parameter, number of iterations for GMRES to do restart.
-    
-    Returns
-    --------
-    H : 
-    cs: float, cosine.
-    sn: float, sine.
-    s : array, residual.
-    """
-
-    for k in range(i):
-        H[k, i], H[k + 1, i] = ApplyPlaneRotation(H[k, i], H[k + 1, i], cs[k],
-                                                  sn[k])
-
-    cs[i], sn[i] = GeneratePlaneRotation(H[i, i], H[i + 1, i], cs[i], sn[i])
-    H[i, i], H[i + 1, i] = ApplyPlaneRotation(H[i, i], H[i + 1, i], cs[i],
-                                              sn[i])
-    s[i], s[i + 1] = ApplyPlaneRotation(s[i], s[i + 1], cs[i], sn[i])
-
-    return H, cs, sn, s
-
-
-def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
+def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     """
     GMRES solver. 
 
@@ -151,132 +83,187 @@ def gmres_solver(surf_array, field_array, X, b, param, ind0, timing, kernel):
     --------
     X          : array, an updated guess to the solution. 
     """
-
-    N = len(b)
-    V = numpy.zeros((param.restart + 1, N))
-    H = numpy.zeros((param.restart + 1, param.restart))
-
-    time_Vi = 0.
-    time_Vk = 0.
-    time_rotation = 0.
-    time_lu = 0.
-    time_update = 0.
-
-    # Initializing varibles
-    rel_resid = 1.
-    cs, sn = numpy.zeros(N), numpy.zeros(N)
-
-    iteration = 0
-
-    b_norm = linalg.norm(b)
-
+   
     output_path = os.path.join(
         os.environ.get('PYGBE_PROBLEM_FOLDER'), 'OUTPUT')
 
-    while (iteration < param.max_iter and
-           rel_resid >= param.tol):  # Outer iteration
+    #Defining xtype as dtype of the problem, to decide which BLAS functions
+    #import.
+    xtype = upcast(X.dtype, b.dtype)
 
-        aux = gmres_dot(X, surf_array, field_array, ind0, param, timing,
-                        kernel)
+    # Get fast access to underlying BLAS routines
+    # dotc is the conjugate dot, dotu does no conjugation
 
-        r = b - aux
-        beta = linalg.norm(r)
+    if numpy.iscomplexobj(numpy.zeros((1,), dtype=xtype)):
+        [axpy, dotu, dotc, scal, rotg] =\
+            get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal', 'rotg'], [X])
+    else:
+        # real type
+        [axpy, dotu, dotc, scal, rotg] =\
+            get_blas_funcs(['axpy', 'dot', 'dot',  'scal', 'rotg'], [X])
 
-        if iteration == 0:
-            print 'Analytical integrals: %i of %i, %i' % (
-                timing.AI_int / param.N, param.N, 100 * timing.AI_int / param.N
-                **2) + '%'
+    # Make full use of direct access to BLAS by defining own norm
+    def norm(z):
+        return numpy.sqrt(numpy.real(dotc(z, z)))
 
-        V[0, :] = r[:] / beta
-        if iteration == 0:
-            res_0 = b_norm
+    #Defining dimension
+    dimen = len(X)   
 
-        s = numpy.zeros(param.restart + 1)
-        s[0] = beta
-        i = -1
 
-        while (i + 1 < param.restart and
-               iteration + 1 <= param.max_iter):  # Inner iteration
-            i += 1
-            iteration += 1
+    max_iter = param.max_iter
+    R = param.restart
+    tol = param.tol
 
-            # Compute Vip1
-            tic = time.time()
+    # Set number of outer and inner iterations
+    max_outer = max_iter
+    
+    if R > dimen:
+        warn('Setting number of inner iterations (restrt) to maximum\
+              allowed, which is A.shape[0] ')
+        R = dimen
 
-            Vip1 = gmres_dot(V[i, :], surf_array, field_array, ind0, param,
-                             timing, kernel)
-            toc = time.time()
-            time_Vi += toc - tic
+    max_inner = R
 
-            if iteration < 6:
-                fname = 'Vip1{}.txt'.format(iteration)
-#                numpy.savetxt(os.path.join(output_path,fname), Vip1)
+    # Prep for method
+    aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
+    r = b - aux
+    
+    normr = norm(r)
+    
+    # Check initial guess ( scaling by b, if b != 0, must account for
+    # case when norm(b) is very small)
+    normb = norm(b)
+    if normb == 0.0:
+        normb = 1.0
+    if normr < tol*normb:
+        return X
+            
+    iteration = 0
 
-            tic = time.time()
-            Vk = V[0:i + 1, :]
-            H[0:i + 1, i] = numpy.dot(Vip1, numpy.transpose(Vk))
+    #Here start the GMRES
+    for outer in range(max_outer):
 
-            # This ends up being slower than looping           
-            #            HVk = H[0:i+1,i]*numpy.transpose(Vk)
-            #            Vip1 -= HVk.numpy.sum(axis=1)
+        # Preallocate for Givens Rotations, Hessenberg matrix and Krylov Space
+        # Space required is O(dimen*max_inner).
+        # NOTE:  We are dealing with row-major matrices, so we traverse in a
+        #        row-major fashion,
+        #        i.e., H and V's transpose is what we store.
+        
+        Q = []  # Initialzing Givens Rotations
+        # Upper Hessenberg matrix, which is then
+        # converted to upper triagonal with Givens Rotations
 
-            for k in range(i + 1):
-                Vip1 -= H[k, i] * Vk[k]
-            toc = time.time()
-            time_Vk += toc - tic
+        H = numpy.zeros((max_inner+1, max_inner+1), dtype=xtype)
+        V = numpy.zeros((max_inner+1, dimen), dtype=xtype) #Krylov space
 
-            H[i + 1, i] = linalg.norm(Vip1)
-            V[i + 1, :] = Vip1[:] / H[i + 1, i]
+        # vs store the pointers to each column of V.
+        # This saves a considerable amount of time.
+        vs = []
 
-            tic = time.time()
-            H, cs, sn, s = PlaneRotation(H, cs, sn, s, i, param.restart)
-            toc = time.time()
-            time_rotation += toc - tic
+        # v = r/normr
+        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x  
+        vs.append(V[0, :])
+        
+        #Saving initial residual to be used to calculate the rel_resid            
+        if iteration==0:
+            res_0 = normb
+        
+        #RHS vector in the Krylov space
+        g = numpy.zeros((dimen, ), dtype=xtype)
+        g[0] = normr
 
-            rel_resid = abs(s[i + 1]) / res_0
+        for inner in range(max_inner):
+            #New search direction
+            v= V[inner+1, :]
+            v[:] = gmres_dot(vs[-1], surf_array, field_array, ind0, param,
+ timing, kernel)   
+            vs.append(v)
+            normv_old = norm(v)
 
-            if iteration % 1 == 0:
-                print 'iteration: %i, rel resid: %s' % (iteration, rel_resid)
+            #Modified Gram Schmidt
+            for k in range(inner+1):                
+                vk = vs[k]
+                alpha = dotc(vk, v)
+                H[inner, k] = alpha
+                v[:] = axpy(vk, v, dimen, -alpha)  # y := a*x + y 
+                #axpy is a wrapper for daxpy (blas function)              
+    
+            normv = norm(v)
+            H[inner, inner+1] = normv
 
-            if (i + 1 == param.restart):
+
+            #Check for breakdown
+            if H[inner, inner+1] != 0.0:
+                v[:] = scal(1.0/H[inner, inner+1], v)
+
+            #Apply for Givens rotations to H
+            if inner > 0:
+                apply_givens(Q, H[inner, :], inner)
+
+            #Calculate and apply next complex-valued Givens rotations
+            
+            #If max_inner = dimen, we don't need to calculate, this
+            #is unnecessary for the last inner iteration when inner = dimen -1 
+
+            if inner != dimen - 1:
+                if H[inner, inner+1] != 0:
+                    #rotg is a blas function that computes the parameters
+                    #for a Givens rotation
+                    [c, s] = rotg(H[inner, inner], H[inner, inner+1])
+                    Qblock = numpy.array([[c, s], [-numpy.conjugate(s),c]], dtype=xtype)
+                    Q.append(Qblock)
+
+                    #Apply Givens Rotations to RHS for the linear system in
+                    # the krylov space. 
+                    g[inner:inner+2] = scipy.dot(Qblock, g[inner:inner+2])
+
+                    #Apply Givens rotations to H
+                    H[inner, inner] = dotu(Qblock[0,:], H[inner, inner:inner+2])
+                    H[inner, inner+1] = 0.0
+
+            iteration+= 1
+
+            if inner < max_inner-1:
+                normr = abs(g[inner+1])
+                rel_resid = normr/res_0
+                                                    
+                if rel_resid < tol:
+                    break
+            
+            if iteration%1==0: 
+                print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))               
+
+            if (inner + 1 == R):
                 print('Residual: %f. Restart...' % rel_resid)
-            if rel_resid <= param.tol:
-                break
 
-        # Solve the triangular system
-        tic = time.time()
-        piv = numpy.arange(i + 1)
-        y = linalg.lu_solve((H[0:i + 1, 0:i + 1], piv), s[0:i + 1], trans=0)
-        toc = time.time()
-        time_lu += toc - tic
+        # end inner loop, back to outer loop
 
-        # Update solution
-        tic = time.time()
-        Vj = numpy.zeros(N)
-        for j in range(i + 1):
-            # Compute Vj
-            Vj[:] = V[j, :]
-            X += y[j] * Vj
-        toc = time.time()
-        time_update += toc - tic
+        # Find best update to X in Krylov Space V.  Solve inner X inner system.
+        y = scipy.linalg.solve (H[0:inner+1, 0:inner+1].T, g[0:inner+1])
+        update = numpy.ravel(scipy.mat(V[:inner+1, :]).T * y.reshape(-1,1))
+        X= X + update
+        aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
+        r = b - aux
 
-#    print 'Time Vip1    : %fs'%time_Vi
-#    print 'Time Vk      : %fs'%time_Vk
-#    print 'Time rotation: %fs'%time_rotation
-#    print 'Time lu      : %fs'%time_lu
-#    print 'Time update  : %fs'%time_update
-    print 'GMRES solve'
-    print 'Converged after %i iterations to a residual of %s' % (iteration,
-                                                                 rel_resid)
-    print 'Time weight vector: %f' % timing.time_mass
-    print 'Time sort         : %f' % timing.time_sort
-    print 'Time data transfer: %f' % timing.time_trans
-    print 'Time P2M          : %f' % timing.time_P2M
-    print 'Time M2M          : %f' % timing.time_M2M
-    print 'Time M2P          : %f' % timing.time_M2P
-    print 'Time P2P          : %f' % timing.time_P2P
-    print '\tTime analy: %f' % timing.time_an
-    #    print 'Tolerance: %f, maximum iterations: %f'%(tol, max_iter)
+        normr = norm(r)
+        rel_resid = normr/res_0
+
+        # test for convergence
+        if rel_resid < tol:
+            print 'GMRES solve'
+            print('Converged after %i iterations to a residual of %s'%(iteration,rel_resid))
+            print 'Time weight vector: %f'%timing.time_mass
+            print 'Time sort         : %f'%timing.time_sort
+            print 'Time data transfer: %f'%timing.time_trans
+            print 'Time P2M          : %f'%timing.time_P2M
+            print 'Time M2M          : %f'%timing.time_M2M
+            print 'Time M2P          : %f'%timing.time_M2P
+            print 'Time P2P          : %f'%timing.time_P2P
+            print '\tTime analy: %f'%timing.time_an
+
+            return X
+
+    #end outer loop
 
     return X
-
+    
