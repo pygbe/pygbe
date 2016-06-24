@@ -29,7 +29,7 @@ import scipy
 import time
 import os
 
-from scipy.lianlg         import get_blas_funcs, solve
+from scipy.linalg         import get_blas_funcs, solve
 from scipy.sparse.sputils import upcast
 from scipy.sparse.linalg  import gmres as scipy_gmres
 
