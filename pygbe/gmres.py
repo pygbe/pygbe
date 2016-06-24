@@ -1,14 +1,13 @@
 """
 Generalized Minimum Residual Method (GMRES).
 
-This implementation is a RESTARTED version of the algorithm and uses:
+GMRES iteratively refines the initial solution guess to the system Ax=b. 
 
- - Arnoldi-Modified Gram-Schmidt method to reduced the dense matrix into an
-   upper Hessenberg matrix. 
- - Givens Rotations to reduce the Hessenberg matrix to an upper tringular, and
-   to solve the least squares problem.
+This implementation was based mainly on the gmres_mgs from PyAMG, where
+modified Gram-Schmidt is used to orthogonalize the Krylov Space and
+Givens Rotations are used to provide the residual norm each iteration.
 
-References:
+Reading references:
 
  - For Arnoldi-Modified Gram-Schmidt:
     Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
@@ -21,9 +20,8 @@ References:
 
 Guidance code:
 
- - CUSP library:
-    https://github.com/cusplibrary/cusplibrary/blob/develop/cusp/krylov/
-    detail/gmres.inl   
+ - PyAMG library:
+      https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py 
 """
 
 import numpy
