@@ -25,10 +25,17 @@ Guidance code:
 """
 
 import numpy
-import os
-from scipy import linalg
+import scipy
 import time
-from matrixfree import gmres_dot as gmres_dot
+import os
+
+from scipy.lianlg         import get_blas_funcs, solve
+from scipy.sparse.sputils import upcast
+from scipy.sparse.linalg  import gmres as scipy_gmres
+
+from warnings import warn
+
+from matrixfree import gmres_dot 
 
 
 def GeneratePlaneRotation(dx, dy, cs, sn):
