@@ -14,7 +14,7 @@ import subprocess
 from argparse import ArgumentParser
 
 # Import self made modules
-from gmres import gmres_solver
+from gmres import gmres_mgs
 from projection import get_phir
 from classes import Timing, Parameters, IndexConstant
 from gpuio import dataTransfer
@@ -349,7 +349,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     ### Solve
     print 'Solve'
     phi = numpy.zeros(param.Neq)
-    phi = gmres_solver(surf_array, field_array, phi, F, param, ind0, timing,
+    phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
                        kernel)
     toc = time.time()
     solve_time = toc - tic
