@@ -14,7 +14,7 @@ ESURF_REGEX = re.compile('[^: ]Esurf = (\-*\d*\.\d*)\ kcal\/mol')
 ECOUL_REGEX = re.compile('[^: ]Ecoul = (\-*\d*\.\d*)\ kcal\/mol')
 TIME_REGEX = re.compile('Time = (\-*\d*\.\d*)\ s')
 
-mesh = ['500', '2K', '8K', '32K', '130K']
+mesh = ['500', '2K', '8K', '32K']
 lysozome_mesh = ['1','2','4','8']
 
 def picklesave(test_outputs):
