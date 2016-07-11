@@ -186,9 +186,13 @@ def fill_surface(surf, param):
 
     # Generate preconditioner
     # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
-    surf.Precond = numpy.zeros(
-        (4, N)
-    )  # Stores the inverse of the block diagonal (also a tridiag matrix)
+    #If we have complex dielectric constants we need to initialize Precon with
+    #complex type else it'll be float.
+    if type(surf.E_hat) == complex:
+        surf.Precond = numpy.zeros((4, N), complex)
+    else:     
+        surf.Precond = numpy.zeros((4, N))
+    # Stores the inverse of the block diagonal (also a tridiag matrix)
     # Order: Top left, top right, bott left, bott right
     centers = numpy.zeros((N, 3))
     centers[:, 0] = surf.xi[:]
