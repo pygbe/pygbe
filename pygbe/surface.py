@@ -278,18 +278,21 @@ def initializeField(filename, param):
     Nchild_aux = 0
     for i in range(Nfield):
         if int(pot[i]) == 1:
-            param.E_field.append(
-                i)  # This field is where the energy will be calculated
+            param.E_field.append(i)  # This field is where the energy will be calculated
         field_aux = Field()
 
         try:
             field_aux.LorY = int(LorY[i])  # Laplace of Yukawa
         except ValueError:
             field_aux.LorY = 0
-        try:
-            field_aux.E = param.REAL(E[i])  # Dielectric constant
-        except ValueError:
-            field_aux.E = 0
+
+        if 'j' in E[i]:
+            field_aux.E = complex(E[i])
+        else:
+            try:
+                field_aux.E = param.REAL(E[i])  # Dielectric constant
+            except ValueError:
+                field_aux.E = 0
         try:
             field_aux.kappa = param.REAL(kappa[i])  # inverse Debye length
         except ValueError:
