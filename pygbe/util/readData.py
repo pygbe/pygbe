@@ -425,3 +425,33 @@ def read_surface(filename):
                     phi0_file.append('no_file')
 
     return files, surf_type, phi0_file
+
+def readElectricField(param, filename):
+    """
+    It reads the information about the incident electric field. 
+
+    Arguments:
+    ----------
+    param        : class, parameters related to the surface.     
+    filename     : name of the file that contains the infromation of the incident
+                   electric field. (filname.config)
+
+    Returns:
+    --------
+    electricField:
+    wavelength   : float, wavelength of the incident electric field.   
+    """
+
+    electricField = 0
+    wavelength = 0
+    for line in file(filename):
+        line = line.split()
+
+        if len(line)>0:
+            if line[0] == 'WAVE':
+                electricField = param.REAL((line[1]))
+                wavelength    = param.REAL((line[2]))
+
+    return electricField, wavelength
+
+
