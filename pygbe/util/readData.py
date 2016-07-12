@@ -438,7 +438,8 @@ def readElectricField(param, filename):
 
     Returns:
     --------
-    electricField:
+    electricField: float, electric field intensity, it is in the 'z'
+                          direction, '-' indicates '-z'. 
     wavelength   : float, wavelength of the incident electric field.   
     """
 
