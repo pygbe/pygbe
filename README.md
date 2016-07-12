@@ -1,17 +1,14 @@
-# PyGBe: Python GPU code for Boundary elements
+# PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics
 
-This is a boundary element method code that does molecular electrostatics 
-calculations with a continuum approach. It calculates solvation energies for 
-proteins modeled with any number of dielectric regions. We use the formulation 
-presented in the paper by Yoon and Lenhoff: ["A Boundary Element Method for Molecular 
-Electrostatics with Electrolyte Effects", Journal of Computational Chemistry, 
-Vol. 11, No. 9, 1990](http://dx.doi.org/10.1002/jcc.540110911). Proper user guide is under development.
+PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics 
+calculations in a continuum model.
+It computes solvation energies for proteins modeled with any number of dielectric regions. 
+The mathematical formulation follows Yoon and Lenhoff (1990) for solving the Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model in integral form.
 
-This code is accelerated using the Barnes-Hut treecode so that each GMRES 
-iteration scales as O(NlogN).
-The code is written in Python putting the most computationally intensive 
-parts on the GPU, interfacing with PyCUDA, and some parts are wrapped in 
-C++ using SWIG. 
+PyGBe achieves both algorithmic and hardware acceleration.
+The solution algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. 
+It exploits NVIDIA GPU hardware on the most computationally intensive parts of the code using CUDA kernels in the treecode, interfacing with PyCUDA. 
+Some parts of the code written in C++, wrapped using SWIG. 
 
 ## Installation
 
@@ -111,8 +108,9 @@ then get its `.pqr` file using any PDB to PQR converter (there are online tools 
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's 
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).  
 
-Let us know if you have any questions/feedback.
 
-Enjoy!
+## References
 
-Christopher (cdcooper@bu.edu)
+* Barnes, J. and Hut, P. (1986), "A hierarchical O(N log N) force-calculation algorithm," _Nature_, **324**: 446–449, [doi: 10.1038/324446a0](http://dx.doi.org/10.1038/324446a0)
+* Yoon, B.J. and Lenhoff, A.M. (1990), "A boundary element method for molecular electrostatics with electrolyte effects," _Journal of Computational Chemistry_, 
+**11**(9): 1080–1086, [doi: 10.1002/jcc.540110911](http://dx.doi.org/10.1002/jcc.540110911). 
