@@ -1,5 +1,5 @@
 """
-It contains the necessary functions to set up the surface to be solved. 
+It contains the necessary functions to set up the surface to be solved.
 """
 
 import time
@@ -17,13 +17,13 @@ from classes import Surface, Field
 
 def initializeSurf(field_array, filename, param):
     """
-    Initialize the surface of the molecule.  
+    Initialize the surface of the molecule.
 
     Arguments
     ----------
     field_array: array, contains the Field classes of each region on the surface.
     filename   : name of the file that contains the surface information.
-    param      : class, parameters related to the surface. 
+    param      : class, parameters related to the surface.
 
     Returns
     --------
@@ -87,7 +87,7 @@ def zeroAreas(s, triangle_raw, Area_null):
 
     Arguments
     ----------
-    s           : class, surface where we whan to look for zero areas. 
+    s           : class, surface where we whan to look for zero areas.
     triangle_raw: list, triangles of the surface.
     Area_null   : list, contains the zero areas.
 
@@ -110,12 +110,12 @@ def zeroAreas(s, triangle_raw, Area_null):
 def fill_surface(surf, param):
     """
     It fills the surface with all the necessary information to solve it.
-    
+
     -It sets the Gauss points.
     -It generates tree, computes the indices and precompute terms for M2M.
     -It generates preconditioner.
     -It computes the diagonal integral for internal and external equations.
-    
+
     Arguments
     ----------
     surf     : class, surface that we are studying.
@@ -190,7 +190,7 @@ def fill_surface(surf, param):
     #complex type else it'll be float.
     if type(surf.E_hat) == complex:
         surf.Precond = numpy.zeros((4, N), complex)
-    else:     
+    else:
         surf.Precond = numpy.zeros((4, N))
     # Stores the inverse of the block diagonal (also a tridiag matrix)
     # Order: Top left, top right, bott left, bott right

@@ -1,7 +1,7 @@
 """
 Generalized Minimum Residual Method (GMRES).
 
-GMRES iteratively refines the initial solution guess to the system Ax=b. 
+GMRES iteratively refines the initial solution guess to the system Ax=b.
 
 This implementation was based mainly on the gmres_mgs from PyAMG, where
 modified Gram-Schmidt is used to orthogonalize the Krylov Space and
@@ -13,7 +13,7 @@ Reading references:
     Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
     (pg. 148).
  - For Givens Rotations implementation:
-    Iterative methods for linear and non-linear equations - C.T Kelley - (1995).         
+    Iterative methods for linear and non-linear equations - C.T Kelley - (1995).
     (pg. 43-45).
  - For RESTART version:
     Saad's book (pg. 167)
@@ -21,7 +21,7 @@ Reading references:
 Guidance code:
 
  - PyAMG library:
-      https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py 
+      https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py
 """
 
 import numpy
@@ -35,7 +35,7 @@ from scipy.sparse.linalg  import gmres as scipy_gmres
 
 from warnings import warn
 
-from matrixfree import gmres_dot 
+from matrixfree import gmres_dot
 
 #Defining the function to calculate the Givens rotations
 
@@ -44,7 +44,7 @@ def apply_givens(Q, v, k):
     Apply the first k Givens rotations in Q to the vector v.
 
     Parameter
-    ---------        
+    ---------
         Q: list, list of consecutive 2x2 Givens rotations
         v: array, vector to apply the rotations to
         k: int, number of rotations to apply
@@ -63,27 +63,27 @@ def apply_givens(Q, v, k):
 
 def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     """
-    GMRES solver. 
+    GMRES solver.
 
     Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
     field_array: array, contains the Field classes of each region on the surface.
-    X          : array, initial guess. 
+    X          : array, initial guess.
     b          : array, right hand side.
-    param      : class, parameters related to the surface.     
-    ind0       : class, it contains the indices related to the treecode 
-                        computation.     
-    timing     : class, it contains timing information for different parts of 
+    param      : class, parameters related to the surface.
+    ind0       : class, it contains the indices related to the treecode
+                        computation.
+    timing     : class, it contains timing information for different parts of
                         the code.
     kernel     : pycuda source module.
 
     Returns
     --------
-    X          : array, an updated guess to the solution. 
+    X          : array, an updated guess to the solution.
     """
-   
+
     output_path = os.path.join(
         os.environ.get('PYGBE_PROBLEM_FOLDER'), 'OUTPUT')
 
@@ -107,7 +107,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         return numpy.sqrt(numpy.real(dotc(z, z)))
 
     #Defining dimension
-    dimen = len(X)   
+    dimen = len(X)
 
 
     max_iter = param.max_iter
@@ -116,7 +116,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     # Set number of outer and inner iterations
     max_outer = max_iter
-    
+
     if R > dimen:
         warn('Setting number of inner iterations (restrt) to maximum\
               allowed, which is A.shape[0] ')
@@ -127,9 +127,9 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     # Prep for method
     aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
     r = b - aux
-    
+
     normr = norm(r)
-    
+
     # Check initial guess ( scaling by b, if b != 0, must account for
     # case when norm(b) is very small)
     normb = norm(b)
@@ -137,7 +137,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         normb = 1.0
     if normr < tol*normb:
         return X
-            
+
     iteration = 0
 
     #Here start the GMRES
@@ -148,7 +148,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         # NOTE:  We are dealing with row-major matrices, so we traverse in a
         #        row-major fashion,
         #        i.e., H and V's transpose is what we store.
-        
+
         Q = []  # Initialzing Givens Rotations
         # Upper Hessenberg matrix, which is then
         # converted to upper triagonal with Givens Rotations
@@ -161,13 +161,13 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         vs = []
 
         # v = r/normr
-        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x  
+        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x
         vs.append(V[0, :])
-        
-        #Saving initial residual to be used to calculate the rel_resid            
+
+        #Saving initial residual to be used to calculate the rel_resid
         if iteration==0:
             res_0 = normb
-        
+
         #RHS vector in the Krylov space
         g = numpy.zeros((dimen, ), dtype=xtype)
         g[0] = normr
@@ -176,18 +176,18 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             #New search direction
             v= V[inner+1, :]
             v[:] = gmres_dot(vs[-1], surf_array, field_array, ind0, param,
- timing, kernel)   
+ timing, kernel)
             vs.append(v)
             normv_old = norm(v)
 
             #Modified Gram Schmidt
-            for k in range(inner+1):                
+            for k in range(inner+1):
                 vk = vs[k]
                 alpha = dotc(vk, v)
                 H[inner, k] = alpha
-                v[:] = axpy(vk, v, dimen, -alpha)  # y := a*x + y 
-                #axpy is a wrapper for daxpy (blas function)              
-    
+                v[:] = axpy(vk, v, dimen, -alpha)  # y := a*x + y
+                #axpy is a wrapper for daxpy (blas function)
+
             normv = norm(v)
             H[inner, inner+1] = normv
 
@@ -201,9 +201,9 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
                 apply_givens(Q, H[inner, :], inner)
 
             #Calculate and apply next complex-valued Givens rotations
-            
+
             #If max_inner = dimen, we don't need to calculate, this
-            #is unnecessary for the last inner iteration when inner = dimen -1 
+            #is unnecessary for the last inner iteration when inner = dimen -1
 
             if inner != dimen - 1:
                 if H[inner, inner+1] != 0:
@@ -214,7 +214,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
                     Q.append(Qblock)
 
                     #Apply Givens Rotations to RHS for the linear system in
-                    # the krylov space. 
+                    # the krylov space.
                     g[inner:inner+2] = scipy.dot(Qblock, g[inner:inner+2])
 
                     #Apply Givens rotations to H
@@ -226,12 +226,12 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             if inner < max_inner-1:
                 normr = abs(g[inner+1])
                 rel_resid = normr/res_0
-                                                    
+
                 if rel_resid < tol:
                     break
-            
-            if iteration%1==0: 
-                print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))               
+
+            if iteration%1==0:
+                print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))
 
             if (inner + 1 == R):
                 print('Residual: %f. Restart...' % rel_resid)
@@ -266,4 +266,3 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     #end outer loop
 
     return X
-    

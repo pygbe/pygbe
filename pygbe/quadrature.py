@@ -1,6 +1,6 @@
 """
 It contains the functions to compute the fine Gaussian quadrature and the
-wights and gauss points for the regular Gauss quadrature.      
+wights and gauss points for the regular Gauss quadrature.
 """
 import numpy
 
@@ -444,7 +444,7 @@ def quadratureRule_fine(K):
 
 def getWeights(K):
     """
-    It gets the weights of the Gauss points. 
+    It gets the weights of the Gauss points.
 
     Arguments
     ----------

@@ -1,6 +1,6 @@
 """
 It contains the functions to read the all the data from the meshes files, its
-parameters and charges files. 
+parameters and charges files.
 """
 import numpy
 import os
@@ -16,7 +16,7 @@ def readVertex(filename, REAL):
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
-    
+
     Returns
     -------
     vertex: array, vertices of the triangles.
@@ -35,7 +35,7 @@ def readVertex(filename, REAL):
 def readVertex2(filename, REAL):
     """
     It reads the vertex of the triangles from the mesh file and it stores
-    them on an array. 
+    them on an array.
     It reads the file line by line.
 
     Arguments
@@ -43,7 +43,7 @@ def readVertex2(filename, REAL):
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
-    
+
     Returns
     -------
     vertex: array, vertices of the triangles.
@@ -82,7 +82,7 @@ def readTriangle(filename, surf_type):
     filename : name of the file that contains the surface information.
                (filename.faces)
     surf_type: str, type of surface.
-    
+
     Returns
     -------
     triangle: array, triangles indices.
@@ -121,7 +121,7 @@ def readTriangle2(filename):
     ----------
     filename : name of the file that contains the surface information.
                (filename.faces)
-    
+
     Returns
     -------
     triangle: array, triangles indices.
@@ -153,8 +153,8 @@ def readCheck(aux, REAL):
     ----------
     aux : str, string to be checked.
     REAL: data type.
-    
-    
+
+
     Returns
     -------
     X: array, array with the correct '-' signs assigned.
@@ -183,11 +183,11 @@ def readpqr(filename, REAL):
     filename: name of the file that contains the surface information.
                (filename.pqr)
     REAL    : data type.
-    
+
     Returns
     -------
-    pos     : (Nqx3) array, positions of the charges. 
-    q       : (Nqx1) array, value of the charges. 
+    pos     : (Nqx3) array, positions of the charges.
+    q       : (Nqx1) array, value of the charges.
     Nq      : int, number of charges.
     """
 
@@ -236,11 +236,11 @@ def readcrd(filename, REAL):
     ----------
     filename : name of the file that contains the surface information.
     REAL     : data type.
-    
+
     Returns
     -------
-    pos      : (Nqx3) array, positions of the charges. 
-    q        : (Nqx1) array, value of the charges. 
+    pos      : (Nqx3) array, positions of the charges.
+    q        : (Nqx1) array, value of the charges.
     Nq       : int, number of charges.
     """
 
@@ -276,14 +276,14 @@ def readParameters(param, filename):
 
     Arguments
     ----------
-    param   : class, parameters related to the surface.     
-    filename: name of the file that contains the parameters information. 
+    param   : class, parameters related to the surface.
+    filename: name of the file that contains the parameters information.
               (filename.param)
-        
+
     Returns
     -------
     dataType: we return the dataType of each attributes because we need it for
-              other fucntions.  
+              other fucntions.
     """
 
     val = []
@@ -318,7 +318,7 @@ def readParameters(param, filename):
     return dataType
 
 
-def readFields(filename):  
+def readFields(filename):
     """
     It reads the physical parameters from the configuration file for each region
     in the surface and it appends them on the corresponding list.
@@ -327,7 +327,7 @@ def readFields(filename):
     ----------
     filename: name of the file that contains the physical parameters of each
               region. (filename.config)
-        
+
     Returns
     -------
     LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
@@ -342,16 +342,16 @@ def readFields(filename):
                     charges in this region.
     coulomb : list, it contains integers indicating to calculate (1) or not (2)
                     the coulomb energy in this region.
-    qfile   : list, location of the '.pqr' file with the location of the charges.    
+    qfile   : list, location of the '.pqr' file with the location of the charges.
     Nparent : list, it contains integers indicating the number of 'parent'
                     surfaces (surface containing this region)
-    parent  : list, it contains the file of the parent surface mesh, according 
+    parent  : list, it contains the file of the parent surface mesh, according
                     to their position in the FILE list, starting from 0 (eg. if
-                    the mesh file for the parent is the third one specified in 
+                    the mesh file for the parent is the third one specified in
                     the FILE section, parent=2)
     Nchild  : list, it contains integers indicating number of child surfaces
                     (surfaces completely contained in this region).
-    child   :  list, it contains position of the mesh files for the children 
+    child   :  list, it contains position of the mesh files for the children
                      surface in the FILE section.
     """
 
@@ -390,14 +390,14 @@ def readFields(filename):
 
 def read_surface(filename):
     """
-    It reads the type of surface of each region on the surface from the 
+    It reads the type of surface of each region on the surface from the
     configuration file.
 
     Arguments
     ----------
     filename: name of the file that contains the surface type of each region.
               (filename.config).
-  
+
     Returns
     -------
     files    : list, it contains the files corresponding to each region in the
@@ -428,19 +428,19 @@ def read_surface(filename):
 
 def readElectricField(param, filename):
     """
-    It reads the information about the incident electric field. 
+    It reads the information about the incident electric field.
 
     Arguments:
     ----------
-    param        : class, parameters related to the surface.     
+    param        : class, parameters related to the surface.
     filename     : name of the file that contains the infromation of the incident
                    electric field. (filname.config)
 
     Returns:
     --------
     electricField: float, electric field intensity, it is in the 'z'
-                          direction, '-' indicates '-z'. 
-    wavelength   : float, wavelength of the incident electric field.   
+                          direction, '-' indicates '-z'.
+    wavelength   : float, wavelength of the incident electric field.
     """
 
     electricField = 0
@@ -454,5 +454,3 @@ def readElectricField(param, filename):
                 wavelength    = param.REAL((line[2]))
 
     return electricField, wavelength
-
-

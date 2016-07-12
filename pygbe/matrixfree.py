@@ -1,5 +1,5 @@
 """
-Matrix free formulation of the matrix vector product in the GMRES. 
+Matrix free formulation of the matrix vector product in the GMRES.
 """
 
 import numpy
@@ -18,7 +18,7 @@ try:
 except:
     pass
 
-## Note: 
+## Note:
 ##  Remember ordering of equations:
 ##      Same order as defined in config file,
 ##      with internal equation first and then the external equation.
@@ -35,11 +35,11 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
 
     Arguments
     ----------
-    surf  : array, contains all the classes of the surface. 
+    surf  : array, contains all the classes of the surface.
     s     : int, position of the surface in the surface array.
     LorY  : int, Laplace (1) or Yukawa (2).
-    param : class, parameters related to the surface. 
-    ind0  : class, it contains the indices related to the treecode computation. 
+    param : class, parameters related to the surface.
+    ind0  : class, it contains the indices related to the treecode computation.
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -61,23 +61,23 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     return v
 
 
-def selfExterior(surf, s, LorY, param, ind0, timing, kernel):    
+def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     """
     Self surface exterior operator:
 
     The evaluation point and the strengths of both the single and double layer
-    potential are on the same surface. When we take the limit, the evaluation 
+    potential are on the same surface. When we take the limit, the evaluation
     point approaches the surface from the outside, then the result is added to
     the exterior equation.
-    
+
 
     Arguments
     ----------
-    surf  : array, contains all the classes of the surface. 
+    surf  : array, contains all the classes of the surface.
     s     : int, position of the surface in the surface array.
     LorY  : int, Laplace (1) or Yukawa (2).
-    param : class, parameters related to the surface. 
-    ind0  : class, it contains the indices related to the treecode computation. 
+    param : class, parameters related to the surface.
+    ind0  : class, it contains the indices related to the treecode computation.
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
@@ -110,25 +110,25 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     potentials. If both surfaces share a common external region, we add the
     result to the external equation. If they don't share a common external region
     we add the result to internal equation.
-    
+
 
     Arguments
     ----------
-    surf  : array, contains all the classes of the surface. 
+    surf  : array, contains all the classes of the surface.
     src   : int, position in the array of the source surface (surface that
                  contains the gauss points).
     tar   : int, position in the array of the target surface (surface that
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
-    param : class, parameters related to the surface. 
-    ind0  : class, it contains the indices related to the treecode computation. 
+    param : class, parameters related to the surface.
+    ind0  : class, it contains the indices related to the treecode computation.
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
 
     Returns
     --------
-    v     : array, result of the matrix-vector product corresponding to the 
+    v     : array, result of the matrix-vector product corresponding to the
                    non-self exterior interaction.
     """
 
@@ -149,25 +149,25 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 
     The evaluation point resides in a surface that is inside the region
     enclosed by the surface with the strength of the single and double layer
-    potentials, and the result has to be added to the exterior equation. 
+    potentials, and the result has to be added to the exterior equation.
 
     Arguments
     ----------
-    surf  : array, contains all the classes of the surface. 
+    surf  : array, contains all the classes of the surface.
     src   : int, position in the array of the source surface (surface that
                  contains the gauss points).
     tar   : int, position in the array of the target surface (surface that
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
-    param : class, parameters related to the surface. 
-    ind0  : class, it contains the indices related to the treecode computation. 
+    param : class, parameters related to the surface.
+    ind0  : class, it contains the indices related to the treecode computation.
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
 
     Returns
     --------
-    v     : array, result of the matrix-vector product corresponding to the 
+    v     : array, result of the matrix-vector product corresponding to the
                    non-self interior interaction.
     """
 
@@ -179,31 +179,31 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
     v = K_lyr - V_lyr
-    
+
     return v
 
 
 def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     """
-    Self interaction for the aparent surface charge (ASC) formulation.  
-    
+    Self interaction for the aparent surface charge (ASC) formulation.
+
     Arguments
     ----------
-    surf  : array, contains all the classes of the surface. 
+    surf  : array, contains all the classes of the surface.
     src   : int, position in the array of the source surface (surface that
                  contains the gauss points).
     tar   : int, position in the array of the target surface (surface that
                  contains the collocation points).
     LorY  : int, Laplace (1) or Yukawa (2).
-    param : class, parameters related to the surface. 
-    ind0  : class, it contains the indices related to the treecode computation. 
+    param : class, parameters related to the surface.
+    ind0  : class, it contains the indices related to the treecode computation.
     timing: class, it contains timing information for different parts of the
                    code.
     kernel: pycuda source module.
 
     Returns
     --------
-    v     : array, result of the matrix-vector product corresponding to the 
+    v     : array, result of the matrix-vector product corresponding to the
                   self interaction in the ASC formulation.
     """
 
@@ -214,13 +214,13 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
                         timing, kernel)
 
     v = -Kt_lyr
-    
+
     return v
 
 
 def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     """
-    It computes the matrix-vector product in the GMRES.  
+    It computes the matrix-vector product in the GMRES.
 
     Arguments
     ----------
@@ -230,9 +230,9 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     field_array: array, contains the Field classes of each region on the
                         surface.
     ind0       : class, it contains the indices related to the treecode
-                        computation. 
-    param      : class, parameters related to the surface.     
-    timing     : class, it contains timing information for different parts of 
+                        computation.
+    param      : class, parameters related to the surface.
+    timing     : class, it contains timing information for different parts of
                         the code.
     kernel     : pycuda source module.
 
@@ -240,7 +240,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     --------
     MV         : array, resulting matrix-vector multiplication.
     """
-    
+
     Nfield = len(field_array)
     Nsurf = len(surf_array)
 
@@ -307,7 +307,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                             surf_array[c1].Xout_ext += v
 
 #           if child and parent surface -> parent-child and child-parent interaction
-#           parent->child: non-self interior saved on exterior vector 
+#           parent->child: non-self interior saved on exterior vector
 #           child->parent: non-self exterior saved on interior vector
             if len(field_array[F].child) > 0 and len(field_array[
                     F].parent) > 0:
@@ -355,20 +355,20 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
     Arguments
     ----------
-    field_array: array, contains the Field classes of each region on the surface.    
+    field_array: array, contains the Field classes of each region on the surface.
     surf_array : array, contains the surface classes of each region on the
                         surface.
-    param      : class, parameters related to the surface.     
+    param      : class, parameters related to the surface.
     kernel     : pycuda source module.
-    timing     : class, it contains timing information for different parts of 
+    timing     : class, it contains timing information for different parts of
                         the code.
-    ind0       : class, it contains the indices related to the treecode computation. 
+    ind0       : class, it contains the indices related to the treecode computation.
 
     Returns
     --------
     F          : array, RHS.
     """
-    
+
     F = numpy.zeros(param.Neq)
 
     #   Point charge contribution to RHS
@@ -405,7 +405,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     else:
                         aux += field_array[j].q[i] / (field_array[j].E * R_pq)
 
-#               For CHILD surfaces, q contributes to RHS in 
+#               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
 #               No preconditioner
@@ -413,7 +413,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
 #               With preconditioner
 #               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
-#               We do this only here (and not in the parent case) because interaction of charges 
+#               We do this only here (and not in the parent case) because interaction of charges
 #               with dirichlet or neumann surface happens only for the surface as a child surfaces.
                 if surf_array[
                         s].surf_type == 'dirichlet_surface' or surf_array[
@@ -517,9 +517,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charged surface, the surface has only one equation, 
+                    #                   if s is a charged surface, the surface has only one equation,
                     #                   else, s has 2 equations and K_lyr affects the external
-                    #                   equation (SIBLING surfaces), which is placed after the internal 
+                    #                   equation (SIBLING surfaces), which is placed after the internal
                     #                   one, hence Precond[1,:] and Precond[3,:].
                     if surf_array[
                             s].surf_type == 'dirichlet_surface' or surf_array[
@@ -557,7 +557,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charge surface, the surface has only one equation, 
+                    #                   if s is a charge surface, the surface has only one equation,
                     #                   else, s has 2 equations and V_lyr affects the external
                     #                   equation, which is placed after the internal one, hence
                     #                   Precond[1,:] and Precond[3,:].
@@ -574,7 +574,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                           s_size] += -V_lyr * surf_array[s].Precond[3, :]
 
 #           Now look at influence on PARENT surface
-#           The dirichlet/neumann surface will never be the parent, 
+#           The dirichlet/neumann surface will never be the parent,
 #           since we are not solving for anything inside them.
 #           Then, in this case we will not look at self interaction,
 #           which is dealt with by the sibling surface section
@@ -653,15 +653,15 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
     Arguments
     ----------
-    field_array: array, contains the Field classes of each region on the surface.    
+    field_array: array, contains the Field classes of each region on the surface.
     surf_array : array, contains the surface classes of each region on the
                         surface.
-    param      : class, parameters related to the surface.     
+    param      : class, parameters related to the surface.
     kernel     : pycuda source module.
-    timing     : class, it contains timing information for different parts of 
+    timing     : class, it contains timing information for different parts of
                         the code.
-    ind0       : class, it contains the indices related to the treecode 
-                        computation. 
+    ind0       : class, it contains the indices related to the treecode
+                        computation.
 
     Returns
     --------
@@ -748,7 +748,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                           aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
                           aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
-#               For CHILD surfaces, q contributes to RHS in 
+#               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
 #               No preconditioner
@@ -759,7 +759,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
 #               With preconditioner
 #               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
-#               We do this only here (and not in the parent case) because interaction of charges 
+#               We do this only here (and not in the parent case) because interaction of charges
 #               with dirichlet or neumann surface happens only for the surface as a child surfaces.
                 if surf_array[
                         s].surf_type == 'dirichlet_surface' or surf_array[
@@ -849,7 +849,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                           aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
                           aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
-#               For PARENT surface, q contributes to RHS in 
+#               For PARENT surface, q contributes to RHS in
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
 
 #               No preconditioner
@@ -911,7 +911,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charged surface, the surface has only one equation, 
+                    #                   if s is a charged surface, the surface has only one equation,
                     #                   else, s has 2 equations and K_lyr affects the external
                     #                   equation, which is placed after the internal one, hence
                     #                   Precond[1,:] and Precond[3,:].
@@ -951,7 +951,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charged surface, the surface has only one equation, 
+                    #                   if s is a charged surface, the surface has only one equation,
                     #                   else, s has 2 equations and V_lyr affects the external
                     #                   equation, which is placed after the internal one, hence
                     #                   Precond[1,:] and Precond[3,:].
@@ -968,7 +968,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                           s_size] += -V_lyr * surf_array[s].Precond[3, :]
 
 #           Now look at influence on PARENT surface
-#           The dirichlet/neumann surface will never be the parent, 
+#           The dirichlet/neumann surface will never be the parent,
 #           since we are not solving for anything inside them.
 #           Then, in this case we will not look at self interaction.
             if len(field_array[j].parent) == 1:
@@ -1042,14 +1042,14 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
 def calculateEsolv(surf_array, field_array, param, kernel):
     """
-    It calculates the solvation energy. 
+    It calculates the solvation energy.
 
     Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
-    field_array: array, contains the Field classes of each region on the surface.    
-    param      : class, parameters related to the surface.     
+    field_array: array, contains the Field classes of each region on the surface.
+    param      : class, parameters related to the surface.
     kernel     : pycuda source module.
 
     Returns
@@ -1092,7 +1092,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
             #           First look at CHILD surfaces
             #           Need to account for normals pointing outwards
-            #           and E_hat coefficient (as region is outside and 
+            #           and E_hat coefficient (as region is outside and
             #           dphi_dn is defined inside)
             for i in field_array[f].child:
                 s = surf_array[i]
@@ -1160,8 +1160,8 @@ def coulombEnergy(f, param):
     Arguments
     ----------
     f    : class, region in the field array where we desire to calculate the
-                  coloumb energy.  
-    param: class, parameters related to the surface.     
+                  coloumb energy.
+    param: class, parameters related to the surface.
 
     Returns
     --------
@@ -1180,14 +1180,14 @@ def coulombEnergy(f, param):
 
 def calculateEsurf(surf_array, field_array, param, kernel):
     """
-    It calculates the surface energy 
+    It calculates the surface energy
 
     Arguments
     ----------
     surf_array : array, contains the surface classes of each region on the
                         surface.
-    field_array: array, contains the Field classes of each region on the surface.    
-    param      : class, parameters related to the surface.     
+    field_array: array, contains the Field classes of each region on the surface.
+    param      : class, parameters related to the surface.
     kernel     : pycuda source module.
 
     Returns
