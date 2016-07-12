@@ -35,3 +35,4 @@ lys
 
 ### Removed
 * Makefiles (functionality replaced by `setup.py`)
+* `pygbe_matrix` and `scripts` folder -- to be relocated to a more appropriate repo somewhere
