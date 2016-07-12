@@ -12,6 +12,7 @@
   * `-g` to specify geometry folder
 * Docstrings to all functions
 * Checks for NVCC version and to warn if user doesn't have NVCC on PATH
+* Sphinx documentation
   
 
 ### Changed
