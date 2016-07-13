@@ -1235,3 +1235,33 @@ def calculateEsurf(surf_array, field_array, param, kernel):
             E_surf.append(0.5 * C0 * Esurf_aux)
 
     return E_surf
+
+def dipoleMoment (surf_array, electricField):
+    """
+    It calculates the dipole moment on a surface and stores it in the 'dipole'
+    attribute of the surface class. The dipole is expressed as a boundary
+    integral.
+
+    Arguments:
+    ----------
+    surf_array   : array, contains the surface classes of each region on the
+                          surface.
+    electricField: float, electric field intensity, it is in the 'z'
+                          direction, '-' indicates '-z'.     
+    """
+    
+    for i in range(len(surf_array)):
+
+        s = surf_array[i]
+        xc = numpy.array([s.xi, s.yi, s.zi])
+
+        #Changing dphi to outer side of surfaces
+        dphi = s.dphi * s.E_hat - (1 - s.E_hat) * electricField * s.normal[:,2]
+
+        I1 = numpy.sum(xc * dphi * s.Area, axis=1)
+        I2 = numpy.sum(numpy.transpose(s.normal) * s.phi * s.Area, axis=1)
+
+        s.dipole = s.Eout * (I1-I2)
+
+
+
