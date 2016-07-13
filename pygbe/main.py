@@ -23,8 +23,8 @@ from output import printSummary
 from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
 
-from util.readData import readVertex, readTriangle, readpqr, readParameters,
-                          readElectricField
+from util.readData import (readVertex, readTriangle, readpqr, readParameters,
+                          readElectricField)
 from util.an_solution import an_P, two_sphere
 
 from tree.FMMutils import computeIndices, precomputeTerms, generateList
