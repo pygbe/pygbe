@@ -89,6 +89,7 @@ class Surface():
                           potential (neumann).
     phi           : list, potential on surface.
     dphi          : list, derivative of potential on surface.
+    dipole        : list, dipole moment vector from a surface.
 
     # Device data:
 
@@ -184,6 +185,7 @@ class Surface():
         self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
         self.phi          = []  # Potential on surface
         self.dphi         = []  # Derivative of potential on surface
+        self.dipole       = []  # Dipole moment vector from a surface
 
         # Device data
         self.xiDev      = []
