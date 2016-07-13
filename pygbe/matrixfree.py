@@ -1236,7 +1236,7 @@ def calculateEsurf(surf_array, field_array, param, kernel):
 
     return E_surf
 
-def dipoleMoment (surf_array, electricField):
+def dipoleMoment(surf_array, electricField):
     """
     It calculates the dipole moment on a surface and stores it in the 'dipole'
     attribute of the surface class. The dipole is expressed as a boundary
@@ -1264,4 +1264,43 @@ def dipoleMoment (surf_array, electricField):
         s.dipole = s.Eout * (I1-I2)
 
 
+def extCrossSection(surf_array, k, n, wavelength, electricField):
+    """
+    It computes the extinction cross section (Acording to Mischenko2007).
+
+    Arguments:
+    ----------
+    surf_array   : array, contains the surface classes of each region on the
+                          surface.
+    k            : array, unit vector in direction of wave propagation.
+    n            : array, unit vector in direction of electric field.
+    wavelength   : float, wavelength of the incident electric field.   
+    electricField: float, electric field intensity, it is in the 'z'
+                          direction, '-' indicates '-z'.    
+
+    Returns:
+    --------
+    Cext         : list, contains the extinction cross section of surfaces.
+    surf_Cext    : list, indeces of the surface where Cext is being calculated.  
+    """
+    
+    Cext = []
+    surf_Cext = []
+
+    for i in range(len(surf_array)):
+
+        s = surf_array[i]
+
+        diffractionCoeff = numpy.sqrt(s.Eout)
+        waveNumber = 2 * numpy.pi * diffractionCoeff / wavelength
+
+        v1 = numpy.cross(k, s.dipole)
+        v2 = numpy.cross(v1, k)
+
+        C1 = numpy.dot(n, v2) * waveNumber**2 / (s.Eout * electricField)
+
+        Cext.append(1 / waveNumber.real * C1.imag)
+        surf_Cext.append(i)
+
+    return Cext, surf_Cext
 
