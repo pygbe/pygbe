@@ -265,6 +265,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     ### Generate array of surfaces and read in elements
     surf_array = initializeSurf(field_array, configFile, param)
 
+    ### Read electric field and its wavelength.
+    electricField, wavelength = readElectricField(param, configFile) 
+
     ### Fill surface class
     time_sort = 0.
     for i in range(len(surf_array)):
