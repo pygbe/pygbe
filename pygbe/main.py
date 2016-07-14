@@ -348,15 +348,30 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print '------------------------------'
     print 'Total setup time   : %fs\n' % setup_time
 
-    tic = time.time()
+
+    #   Check if there is a complex dielectric
+    complexDiel = 0
+    for f in field_array:
+        if type(f.E) == complex:
+            complexDiel = 1
+
 
     ### Solve
+    tic = time.time()
+
     print 'Solve'
-    phi = numpy.zeros(param.Neq)
+
+    # Initializing phi dtype according to the porblem we are solving. 
+    if complexDiel == 1:
+        phi = numpy.zeros(param.Neq, complex)
+    else:    
+        phi = numpy.zeros(param.Neq)
+
     phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
                        kernel)
     toc = time.time()
     solve_time = toc - tic
+
     print 'Solve time        : %fs' % solve_time
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
