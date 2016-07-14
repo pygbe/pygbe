@@ -361,7 +361,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
 
     print 'Solve'
 
-    # Initializing phi dtype according to the porblem we are solving. 
+    # Initializing phi dtype according to the problem we are solving. 
     if complexDiel == 1:
         phi = numpy.zeros(param.Neq, complex)
     else:    
