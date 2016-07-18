@@ -12,6 +12,22 @@ New features should follow the following rules:
 2. New features should include unit tests 
 3. All functions should have NumPy style doctrings.  See [here](https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt) for reference)
 
+# Running the tests
+
+PyGBe currently only has regression tests.  
+Once everything is installed, you can navigate to `pygbe/tests/regression_tests`.  
+To run any of the regression tests individually, just run the corresponding script.
+
+```python
+python lysozyme.py
+```
+
+or to run all of the tests, use the helper script
+
+```python
+python run_all_regression_tests.py
+```
+
 # Generating documentation
 
 Ensure `sphinx` is installed.  
