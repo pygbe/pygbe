@@ -11,3 +11,4 @@ geometry/sphere/sphere520K*
 
 # regression test output
 tests/regression_tests/figs/*
+_build

@@ -394,7 +394,7 @@ def read_surface(filename):
     configuration file.
 
     Arguments
-    ----------
+    ---------
     filename: name of the file that contains the surface type of each region.
               (filename.config).
 
@@ -430,14 +430,14 @@ def readElectricField(param, filename):
     """
     It reads the information about the incident electric field.
 
-    Arguments:
-    ----------
+    Arguments
+    ---------
     param        : class, parameters related to the surface.
     filename     : name of the file that contains the infromation of the incident
                    electric field. (filname.config)
 
-    Returns:
-    --------
+    Returns
+    -------
     electricField: float, electric field intensity, it is in the 'z'
                           direction, '-' indicates '-z'.
     wavelength   : float, wavelength of the incident electric field.

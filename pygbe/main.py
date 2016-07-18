@@ -57,13 +57,13 @@ def read_inputs(args):
     Assumes that in the absence of specific command line arguments that pygbe
     problem folder resembles the following structure
 
-    lys
-    |- lys.param
-    |- lys.config
-    |- built_parse.pqr
-    |- geometry/Lys1.face
-    |- geometry/Lys1.vert
-    |- output/
+    lys/
+    - lys.param
+    - lys.config
+    - built_parse.pqr
+    - geometry/Lys1.face
+    - geometry/Lys1.vert
+    - output/
     """
 
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
