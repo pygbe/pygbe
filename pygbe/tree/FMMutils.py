@@ -1,21 +1,20 @@
 """
 It contains the functions to build the tree and compute all the interactions.
 """
+import time
 import numpy
 from scipy.misc import factorial, comb
 
 # Wrapped code
-from multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
-from direct import direct_c, direct_sort, directKt_sort
-from calculateMultipoles import P2M, M2M
+from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
+from pygbe.tree.direct import direct_c, direct_sort, directKt_sort
+from pygbe.tree.calculateMultipoles import P2M, M2M
 
 # CUDA libraries
 try:
     import pycuda.driver as cuda
 except:
     print('PyCUDA not installed, performance might not be so hot')
-
-import time
 
 
 class Cell():

@@ -2,8 +2,8 @@
 It contains the functions to read the all the data from the meshes files, its
 parameters and charges files.
 """
-import numpy
 import os
+import numpy
 
 
 def readVertex(filename, REAL):

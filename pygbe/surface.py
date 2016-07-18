@@ -5,14 +5,14 @@ It contains the necessary functions to set up the surface to be solved.
 import time
 import numpy
 from scipy import linalg
-from tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
-from tree.direct import computeDiagonal
-from util.semi_analytical import GQ_1D
-from util.readData import (readVertex, readTriangle, readpqr, readcrd,
-                           readFields, read_surface)
 
-from quadrature import quadratureRule_fine, getGaussPoints
-from classes import Surface, Field
+from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
+from pygbe.tree.direct import computeDiagonal
+from pygbe.util.semi_analytical import GQ_1D
+from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
+                           readFields, read_surface)
+from pygbe.quadrature import quadratureRule_fine, getGaussPoints
+from pygbe.classes import Surface, Field
 
 
 def initializeSurf(field_array, filename, param):

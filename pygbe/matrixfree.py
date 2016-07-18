@@ -2,14 +2,15 @@
 Matrix free formulation of the matrix vector product in the GMRES.
 """
 
+import time
 import numpy
 from numpy import pi
-from tree.FMMutils import computeIndices, precomputeTerms
-from tree.direct import coulomb_direct
-from projection import project, project_Kt, get_phir, get_phir_gpu
-from classes import Parameters, IndexConstant
-import time
-from util.semi_analytical import GQ_1D
+
+from pygbe.tree.FMMutils import computeIndices, precomputeTerms
+from pygbe.tree.direct import coulomb_direct
+from pygbe.projection import project, project_Kt, get_phir, get_phir_gpu
+from pygbe.classes import Parameters, IndexConstant
+from pygbe.util.semi_analytical import GQ_1D
 
 # PyCUDA libraries
 try:

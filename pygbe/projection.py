@@ -6,11 +6,13 @@ It contains the functions to calculate the different potentials:
 """
 import numpy
 from numpy import pi
-from tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
+
+from pygbe.classes import Event
+from pygbe.quadrature import getWeights
+from pygbe.tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
                            M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
                            P2PKt_gpu, M2P_nonvec, P2P_nonvec)
-from classes import Event
-from quadrature import getWeights
+
 try:
     import pycuda.autoinit
     import pycuda.driver as cuda
@@ -18,7 +20,6 @@ except:
     pass
 
 import time
-
 
 
 def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,

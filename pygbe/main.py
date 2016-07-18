@@ -14,22 +14,22 @@ import subprocess
 from argparse import ArgumentParser
 
 # Import self made modules
-from gmres import gmres_mgs
-from projection import get_phir
-from classes import Timing, Parameters, IndexConstant
-from gpuio import dataTransfer
-from surface import initializeSurf, fill_surface, initializeField, fill_phi
-from output import printSummary
-from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
+from pygbe.gmres import gmres_mgs
+from pygbe.projection import get_phir
+from pygbe.classes import Timing, Parameters, IndexConstant
+from pygbe.gpuio import dataTransfer
+from pygbe.surface import initializeSurf, fill_surface, initializeField, fill_phi
+from pygbe.output import printSummary
+from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
 
-from util.readData import readVertex, readTriangle, readpqr, readParameters
-from util.an_solution import an_P, two_sphere
+from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
+from pygbe.util.an_solution import an_P, two_sphere
 
-from tree.FMMutils import computeIndices, precomputeTerms, generateList
+from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
-    from tree.cuda_kernels import kernels
+    from pygbe.tree.cuda_kernels import kernels
 except:
     pass
 

@@ -10,7 +10,6 @@ from scipy.misc import factorial
 from math import gamma
 
 
-
 def an_spherical(q, xq, E_1, E_2, E_0, R, N):
     """
     It computes the analytical solution of the potential of a sphere with

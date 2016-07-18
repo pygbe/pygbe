@@ -35,7 +35,7 @@ from scipy.sparse.linalg  import gmres as scipy_gmres
 
 from warnings import warn
 
-from matrixfree import gmres_dot
+from pygbe.matrixfree import gmres_dot
 
 #Defining the function to calculate the Givens rotations
 
