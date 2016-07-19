@@ -223,6 +223,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             os.environ['PYGBE_GEOMETRY'] = geo_path
         else:
             sys.exit('Invalid geometry prefix provided (Folder not found)')
+    else:
+        geo_path = os.path.join(full_path, 'geometry')
 
     #try to expand ~ if present in output path
     args.output = os.path.expanduser(args.output)
@@ -249,6 +251,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print '\tTime: %i:%i:%i' % (timestamp.tm_hour, timestamp.tm_min,
                                 timestamp.tm_sec)
     TIC = time.time()
+
+    print('Config file: {}'.format(configFile))
+    print('Parameter file: {}'.format(paramfile))
+    print('Geometry folder: {}'.format(geo_path))
+    print('Running in: {}'.format(full_path))
 
     ### Read parameters
     param = Parameters()
