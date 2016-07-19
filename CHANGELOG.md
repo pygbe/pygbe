@@ -13,6 +13,7 @@
 * Docstrings to all functions
 * Checks for NVCC version and to warn if user doesn't have NVCC on PATH
 * Sphinx documentation
+* In addition to text output, numerical results are stored to a pickled dictionary for easy access
   
 
 ### Changed
@@ -28,6 +29,8 @@ lys
   ˫ geometry/Lys1.face
   ˫ geometry/Lys1.vert
   ˫ output/
+
+* Support running in current directory by passing '.' as path
 ```
 * Refactored regression tests, added simple caching to avoid test repeats
 * Move many, many functions around so that individual `.py` filenames are more descriptive and accurate

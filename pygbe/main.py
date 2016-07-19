@@ -4,13 +4,14 @@ We use a boundary element method (BEM) to perform molecular electrostatics
 calculations with a continuum approach. It calculates solvation energies for
 proteins modeled with any number of dielectric regions.
 """
-import numpy
-import time
-from datetime import datetime
 import os
-import sys
 import re
+import sys
+import time
+import numpy
+import pickle
 import subprocess
+from datetime import datetime
 from argparse import ArgumentParser
 
 # Import self made modules
@@ -127,10 +128,8 @@ def find_config_files(cliargs):
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
     #use the name of the rightmost folder in path as problem name
-    prob_rel_path = os.path.split(prob_path)
+    prob_rel_path = os.path.split(full_path)
     prob_name = prob_rel_path[1]
-    if not prob_name:
-        prob_name = os.path.split(prob_rel_path[0])[1]
 
     if cliargs.config is None:
         cliargs.config = os.path.join(full_path, prob_name + '.config')
@@ -240,8 +239,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     except OSError:
         pass
 
+    results_dict = {}
     timestamp = time.localtime()
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
+    results_dict['output_file'] = outputfname
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     ### Time stamp
@@ -256,6 +257,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print('Parameter file: {}'.format(paramfile))
     print('Geometry folder: {}'.format(geo_path))
     print('Running in: {}'.format(full_path))
+    results_dict['config_file'] = configFile
+    results_dict['param_file'] = paramfile
+    results_dict['geo_file'] = geo_path
+    results_dict['full_path'] = full_path
 
     ### Read parameters
     param = Parameters()
@@ -276,17 +281,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     time_sort = 0.
     for i in range(len(surf_array)):
         time_sort += fill_surface(surf_array[i], param)
-    '''
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    #ss=surf_array[0]
-    for i in range(1):
-        ss = surf_array[i]
-        ax.scatter(ss.xi,ss.yi,ss.zi,c='b',marker='o')
-        ax.scatter(ss.xi+ss.normal[:,0], ss.yi+ss.normal[:,1], ss.zi+ss.normal[:,2],c='r', marker='o')
-    plt.show()
-    quit()
-    '''
 
     ### Output setup summary
     param.N = 0
@@ -300,6 +294,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             param.Neq += 2 * N_aux
     print '\nTotal elements : %i' % param.N
     print 'Total equations: %i' % param.Neq
+
+    results_dict['total_elements'] = param.N
+    results_dict['N_equation'] = param.Neq
 
     printSummary(surf_array, field_array, param)
 
@@ -342,8 +339,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     toc = time.time()
     rhs_time = toc - tic
 
-    #    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
-
     setup_time = toc - TIC
     print 'List time          : %fs' % list_time
     print 'Data transfer time : %fs' % transfer_time
@@ -362,8 +357,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     solve_time = toc - tic
     print 'Solve time        : %fs' % solve_time
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
+    results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
-    #phi = loadtxt('phi.txt')
+
 
     # Put result phi in corresponding surfaces
     fill_phi(phi, surf_array)
@@ -381,6 +377,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             ii += 1
             print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol' % (
                 f, E_solv[ii], E_solv[ii] * 4.184)
+            results_dict['E_solv_kcal'] = E_solv[ii]
+            results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
     ### Calculate surface energy
     print '\nCalculate Esurf'
@@ -394,6 +392,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             ii += 1
             print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol' % (
                 f, E_surf[ii], E_surf[ii] * 4.184)
+            results_dict['E_surf_kcal'] = E_surf[ii]
+            results_dict['E_surf_kJ'] = E_surf[ii] * 4.184
     print 'Time Esurf: %fs' % (toc - tic)
 
     ### Calculate Coulombic interaction
@@ -408,6 +408,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             E_coul.append(coulombEnergy(f, param))
             print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol' % (
                 i, E_coul[-1], E_coul[-1] * 4.184)
+            results_dict['E_coul_kcal'] = E_coul[-1]
+            results_dict['E_coul_kJ'] = E_coul[-1] * 4.184
     toc = time.time()
     print 'Time Ecoul: %fs' % (toc - tic)
 
@@ -418,6 +420,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     print 'Esurf = %f kcal/mol' % sum(E_surf)
     print 'Ecoul = %f kcal/mol' % sum(E_coul)
     print '\nTime = %f s' % (toc - TIC)
+    results_dict['total_time'] = (toc - TIC)
+
+    output_pickle = outputfname.split('-')
+    output_pickle.pop(-1)
+    output_pickle.append('resultspickle')
+    output_pickle = '-'.join(output_pickle)
+    with open(os.path.join(output_dir, output_pickle), 'w') as f:
+        pickle.dump(results_dict, f)
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
