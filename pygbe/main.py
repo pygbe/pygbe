@@ -9,7 +9,7 @@ import re
 import sys
 import time
 import numpy
-import pickle
+import cPickle as pickle
 import subprocess
 from datetime import datetime
 from argparse import ArgumentParser
@@ -20,7 +20,7 @@ from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
 from pygbe.surface import initializeSurf, fill_surface, initializeField, fill_phi
-from pygbe.output import printSummary
+from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
 
@@ -298,7 +298,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     results_dict['total_elements'] = param.N
     results_dict['N_equation'] = param.Neq
 
-    printSummary(surf_array, field_array, param)
+    results_dict = print_summary(surf_array, field_array, param, results_dict)
 
     ### Precomputation
     ind0 = IndexConstant()
@@ -426,7 +426,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     output_pickle.pop(-1)
     output_pickle.append('resultspickle')
     output_pickle = '-'.join(output_pickle)
-    with open(os.path.join(output_dir, output_pickle), 'w') as f:
+    with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f)
 
     #reset stdout so regression tests, etc, don't get logged into the output

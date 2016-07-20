@@ -4,7 +4,7 @@ Prints output with the main information.
 import numpy
 
 # yapf: disable
-def printSummary(surf_array, field_array, param):
+def print_summary(surf_array, field_array, param, results_dict):
     """
     Prints a summary with the main information of the run.
 
@@ -72,4 +72,11 @@ def printSummary(surf_array, field_array, param):
     print '\tGMRES restart iteration : %i'%param.restart
 
     print 28*'-'+'\n'
+    try:
+        key = 'elem_sq_angstrom_surf{}'.format(i)
+        results_dict[key] = [1/numpy.average(surf_array[i].Area)]
+    except IndexError:
+        pass
+
+    return results_dict
 # yapf: enable
