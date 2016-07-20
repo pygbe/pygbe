@@ -80,8 +80,9 @@ def generate_plot(compiled_results, filetype='pdf'):
                             [0.098,0.089,0.098]])
     timeAPB = numpy.array([4.3,8.6,17.7,54,161,352,768])
     EsolvAPB = numpy.array([-2237,-2172.9,-2142,-2121.5,-2102.6,-2093.7,-2090.7])
-    pyg_ext = -2082.5
     apb_ext = -2070.47
+
+    pyg_ext = richardson_extrapolation(res)
 
     font = {'family':'serif', 'size':7}
     pyplot.figure(figsize=(3, 2), dpi=80)
@@ -100,7 +101,7 @@ def generate_plot(compiled_results, filetype='pdf'):
 
     pyplot.ylabel('$\Delta G_{solv}$ [kJ/mol]', fontsize=10)
     pyplot.xlabel('N',fontsize=10)
-    pyplot.text(5e5, -2101,'PyGBe extrap.',fontsize=6,rotation=0)
+    pyplot.text(5e5, pyg_ext - 25,'PyGBe extrap.',fontsize=6,rotation=0)
     pyplot.text(1e7, -2067,'APBS extrap.',fontsize=6,rotation=0)
     pyplot.subplots_adjust(left=0.22, bottom=0.21, right=0.96, top=0.95)
     pyplot.axis([xmin,xmax,-2450,-2040])
@@ -239,8 +240,10 @@ def main():
         run_check()
         files = [os.path.join('output', a)
                  for a in os.listdir('output') if 'pickle' in a]
+        files.sort()
         compiled_results = compile_dict_results(files)
-        generate_plot(compiled_results, filetype='png')
+        generate_plot(compiled_results, filetype='pdf')
+        return compiled_results
 
 if __name__ == '__main__':
     main()
