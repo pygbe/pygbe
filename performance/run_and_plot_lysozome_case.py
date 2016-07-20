@@ -46,6 +46,26 @@ def compile_dict_results(files):
     return compiled_results
 
 
+def richardson_extrapolation(compiled_results):
+    """
+    Performs an estimate of the exact solution using
+    Richardson extrapolation, given by
+
+    f_ex = (f_1 * f_3 - f_2^2) / (f_3 - 2*f_2+f_1)
+
+    where f_1 is a result from the finest grid and f_3 is from the coarsest.
+    The grids f_1, f_2, f_3 should have the same refinement ratio (e.g. 2 -> 4 -> 8)
+    """
+
+    esolv = compiled_results['E_solv_kJ']
+    f1 = esolv[5] # assuming 6 runs: 1, 2, 4, 8, 12, 16
+    f2 = esolv[3]
+    f3 = esolv[2]
+
+    return (f1 * f3 - f2**2) / (f3 - 2 * f2 + f1)
+
+
+
 def generate_plot(compiled_results, filetype='pdf'):
     """
     Generates a plot with some hard-coded info based on APBS runs
