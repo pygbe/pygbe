@@ -179,12 +179,13 @@ def run_check():
     except OSError:
         pass
     if [a for a in os.listdir('output') if 'pickle' in a]:
-        run_check_yn = raw_input('There are already results in your output directory.'
-                              'Do you want to re-run the tests?  If you select "no"'
-                              'then the plotting routine will still run.  If you select'
-                              '"yes", note that this script is not smart enough to'
-                              'distinguish between "old" and "new" runs and will just'
-                              'jam everything together into one figure (yes/no)')
+        run_check_yn = raw_input('\n\n\n'
+                              'There are already results in your output directory.  '
+                              'Do you want to re-run the tests?  If you select "no" '
+                              'then the plotting routine will still run.  If you select '
+                              '"yes", note that this script is not smart enough to '
+                              'distinguish between "old" and "new" runs and will just '
+                              'jam everything together into one figure (yes/no): ')
 
         if run_check_yn in ['No', 'no', 'n']:
             return
@@ -205,10 +206,10 @@ def run_lysozome():
 
 
 def main():
-    run_yn = raw_input('This will run 6 lysozyme cases in order to generate'
+    run_yn = raw_input('This will run 6 lysozyme cases in order to generate '
                        'results necessary to generate a few figures. It '
                        'takes around 10 minutes to run on a Tesla K40 '
-                       'and also time to download meshes from Zenodo (~11MB).'
+                       'and also time to download meshes from Zenodo (~11MB).  '
                        'Type "y" or some variant of yes to accept this: ')
 
     if run_yn in ['Yes', 'yes', 'y', 'Y']:
@@ -216,7 +217,8 @@ def main():
         check_mesh()
         #run the lysozome problems
         run_check()
-        files = [a for a in os.listdir('output') if 'pickle' in a]
+        files = [os.path.join('output', a)
+                 for a in os.listdir('output') if 'pickle' in a]
         compiled_results = compile_dict_results(files)
         generate_plot(compiled_results, filetype='png')
 
