@@ -112,6 +112,15 @@ Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
 Docs are available on http://barbagroup.github.io/pygbe/
 
+### Performance:
+
+[PyGbe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb)
+
+### Tests
+
+To run the regression tests, go to the folder `tests/regression_tests` and run the script `run_all_regression_tests.py`, it will prompt you for permission, then automatically download the meshes needed.
+The meshes are hosted on [zenodo](https://zenodo.org/record/55349?ln=en#.V5EWsu35RhE).
+
 ## References
 
 * Barnes, J. and Hut, P. (1986), "A hierarchical O(N log N) force-calculation algorithm," _Nature_, **324**: 446–449, [doi: 10.1038/324446a0](http://dx.doi.org/10.1038/324446a0)
