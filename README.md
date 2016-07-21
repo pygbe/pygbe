@@ -78,7 +78,7 @@ If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), the
 
 ### Run PyGBe
 
-PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.  Additional problem folders can be downloaded from [coming soon]().
+PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.  
 
 Test the PyGBe installation by running the Lysozyme (`lys`) example in the folder `examples`.
 The structure of the folder is as follows:
