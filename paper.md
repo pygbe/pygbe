@@ -10,6 +10,7 @@ authors:
  - name: Natalia C. Clementi
    affiliation: The George Washington University
  - name: Gilbert Forsyth
+ - orcid: 0000-0002-4983-1978
    affiliation: The George Washington University
  - name: Lorena A. Barba
    orcid: 0000-0001-5812-2711
@@ -28,6 +29,6 @@ The mathematical formulation follows Yoon and Lenhoff (1990) for solving the Poi
 PyGBe achieves both algorithmic and hardware acceleration.
 The solution algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. 
 It exploits NVIDIA GPU hardware on the most computationally intensive parts of the code using CUDA kernels in the treecode, interfacing with PyCUDA. 
-Some parts of the code written in C++, wrapped using SWIG. 
+Some parts of the code are written in C++, wrapped using SWIG. 
 
 # References
