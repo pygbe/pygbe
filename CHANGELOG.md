@@ -1,7 +1,16 @@
 # PyGBe Change Log
 ----
+## Current development
+---
+### Added
 
-## Current developments
+### Changed
+
+### Fixed
+
+### Removed
+
+## 0.2
 ---
 ### Added
 * `setup.py` installer
