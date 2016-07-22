@@ -6,6 +6,7 @@ tags:
   - Poisson-Boltzmann
 authors:
  - name: Christopher D. Cooper
+ - orcid: 0000-0003-0282-8998
    affiliation: Universidad Técnica Federico Santa María
  - name: Natalia C. Clementi
  - orcid: 0000-0002-0575-5520
