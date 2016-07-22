@@ -8,6 +8,7 @@ authors:
  - name: Christopher D. Cooper
    affiliation: Universidad Técnica Federico Santa María
  - name: Natalia C. Clementi
+ - orcid: 0000-0002-0575-5520
    affiliation: The George Washington University
  - name: Gilbert Forsyth
  - orcid: 0000-0002-4983-1978
