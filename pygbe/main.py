@@ -9,7 +9,7 @@ import re
 import sys
 import time
 import numpy
-import cPickle as pickle
+import pickle
 import subprocess
 from datetime import datetime
 from argparse import ArgumentParser
@@ -179,7 +179,7 @@ def check_for_nvcc():
 
 def check_nvcc_version():
     """Check that version of nvcc <= 7.0"""
-    verstr = subprocess.check_output(['nvcc', '--version'])
+    verstr = subprocess.check_output(['nvcc', '--version']).decode()
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
