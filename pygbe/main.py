@@ -246,11 +246,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     ### Time stamp
-    print 'Run started on:'
-    print '\tDate: %i/%i/%i' % (timestamp.tm_year, timestamp.tm_mon,
-                                timestamp.tm_mday)
-    print '\tTime: %i:%i:%i' % (timestamp.tm_hour, timestamp.tm_min,
-                                timestamp.tm_sec)
+    print('Run started on:')
+    print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
+                                timestamp.tm_mday))
+    print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
+                                timestamp.tm_sec))
     TIC = time.time()
 
     print('Config file: {}'.format(configFile))
@@ -292,8 +292,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             param.Neq += N_aux
         else:
             param.Neq += 2 * N_aux
-    print '\nTotal elements : %i' % param.N
-    print 'Total equations: %i' % param.Neq
+    print('\nTotal elements : {}'.format(param.N))
+    print('Total equations: {}'.format(param.Neq))
 
     results_dict['total_elements'] = param.N
     results_dict['N_equation'] = param.Neq
@@ -312,14 +312,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         kernel = 1
 
     ### Generate interaction list
-    print 'Generate interaction list'
+    print('Generate interaction list')
     tic = time.time()
     generateList(surf_array, field_array, param)
     toc = time.time()
     list_time = toc - tic
 
     ### Transfer data to GPU
-    print 'Transfer data to GPU'
+    print('Transfer data to GPU')
     tic = time.time()
     if param.GPU == 1:
         dataTransfer(surf_array, field_array, ind0, param, kernel)
@@ -329,7 +329,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     timing = Timing()
 
     ### Generate RHS
-    print 'Generate RHS'
+    print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
         F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
@@ -340,22 +340,22 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     rhs_time = toc - tic
 
     setup_time = toc - TIC
-    print 'List time          : %fs' % list_time
-    print 'Data transfer time : %fs' % transfer_time
-    print 'RHS generation time: %fs' % rhs_time
-    print '------------------------------'
-    print 'Total setup time   : %fs\n' % setup_time
+    print('List time          : {}s'.format(list_time)
+    print('Data transfer time : {}s'.format(transfer_time)
+    print('RHS generation time: {}s'.format(rhs_time)
+    print('-'*30)
+    print('Total setup time   : {}s'.format(setup_time)})
 
     tic = time.time()
 
     ### Solve
-    print 'Solve'
+    print('Solve')
     phi = numpy.zeros(param.Neq)
     phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
                        kernel)
     toc = time.time()
     solve_time = toc - tic
-    print 'Solve time        : %fs' % solve_time
+    print('Solve time        : {}s'.format(solve_time))
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
@@ -365,23 +365,24 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     fill_phi(phi, surf_array)
 
     ### Calculate solvation energy
-    print '\nCalculate Esolv'
+    print('Calculate Esolv')
     tic = time.time()
     E_solv = calculateEsolv(surf_array, field_array, param, kernel)
     toc = time.time()
-    print 'Time Esolv: %fs' % (toc - tic)
+    print('Time Esolv: {}s'.format(toc - tic))
     ii = -1
     for f in param.E_field:
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
             ii += 1
-            print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol' % (
-                f, E_solv[ii], E_solv[ii] * 4.184)
+            print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(f,
+                                                                      E_solv[ii],
+                                                                      E_solv[ii] * 4.184))
             results_dict['E_solv_kcal'] = E_solv[ii]
             results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
     ### Calculate surface energy
-    print '\nCalculate Esurf'
+    print('\nCalculate Esurf')
     tic = time.time()
     E_surf = calculateEsurf(surf_array, field_array, param, kernel)
     toc = time.time()
@@ -390,36 +391,36 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
             ii += 1
-            print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol' % (
-                f, E_surf[ii], E_surf[ii] * 4.184)
+            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+                f, E_surf[ii], E_surf[ii] * 4.184))
             results_dict['E_surf_kcal'] = E_surf[ii]
             results_dict['E_surf_kJ'] = E_surf[ii] * 4.184
-    print 'Time Esurf: %fs' % (toc - tic)
+    print('Time Esurf: {}s'.format(toc - tic))
 
     ### Calculate Coulombic interaction
-    print '\nCalculate Ecoul'
+    print('\nCalculate Ecoul')
     tic = time.time()
     i = -1
     E_coul = []
     for f in field_array:
         i += 1
         if f.coulomb == 1:
-            print 'Calculate Coulomb energy for region %i' % i
+            print('Calculate Coulomb energy for region {}'.format(i))
             E_coul.append(coulombEnergy(f, param))
-            print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol' % (
-                i, E_coul[-1], E_coul[-1] * 4.184)
+            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+                i, E_coul[-1], E_coul[-1] * 4.184))
             results_dict['E_coul_kcal'] = E_coul[-1]
             results_dict['E_coul_kJ'] = E_coul[-1] * 4.184
     toc = time.time()
-    print 'Time Ecoul: %fs' % (toc - tic)
+    print('Time Ecoul: {}s'.format(toc - tic))
 
     ### Output summary
-    print '\n--------------------------------'
-    print 'Totals:'
-    print 'Esolv = %f kcal/mol' % sum(E_solv)
-    print 'Esurf = %f kcal/mol' % sum(E_surf)
-    print 'Ecoul = %f kcal/mol' % sum(E_coul)
-    print '\nTime = %f s' % (toc - TIC)
+    print('\n'+'-'*30)
+    print('Totals:')
+    print('esolv = {} kcal/mol'.format(sum(e_solv)))
+    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
+    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+    print('\nTime = {} s'.format(toc - TIC))
     results_dict['total_time'] = (toc - TIC)
 
     output_pickle = outputfname.split('-')
