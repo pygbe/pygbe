@@ -38,7 +38,7 @@ def initializeSurf(field_array, filename, param):
     Nsurf = len(files)
 
     for i in range(Nsurf):
-        print '\nReading surface %i from file ' % i + files[i]
+        print('\nReading surface {} from file {}'.format(i, files[i]))
 
         s = Surface()
 
@@ -46,17 +46,17 @@ def initializeSurf(field_array, filename, param):
 
         if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface':
             s.phi0 = numpy.loadtxt(phi0_file[i])
-            print '\nReading phi0 file for surface %i from ' % i + phi0_file[i]
+            print('\nReading phi0 file for surface {} from {}'.format(i, phi0_file[i])
 
         Area_null = []
         tic = time.time()
         s.vertex = readVertex(files[i] + '.vert', param.REAL)
         triangle_raw = readTriangle(files[i] + '.face', s.surf_type)
         toc = time.time()
-        print 'Time load mesh: %f' % (toc - tic)
+        print('Time load mesh: {}'.format(toc - tic))
         Area_null = zeroAreas(s, triangle_raw, Area_null)
         s.triangle = numpy.delete(triangle_raw, Area_null, 0)
-        print 'Removed areas=0: %i' % len(Area_null)
+        print('Removed areas=0: {}'.format(len(Area_null)))
 
         # Look for regions inside/outside
         for j in range(Nsurf + 1):
@@ -144,18 +144,6 @@ def fill_surface(surf, param):
     surf.normal[:, 0] = surf.normal[:, 0] / (2 * surf.Area)
     surf.normal[:, 1] = surf.normal[:, 1] / (2 * surf.Area)
     surf.normal[:, 2] = surf.normal[:, 2] / (2 * surf.Area)
-    '''
-    n1 = surf.xi + surf.normal[:,0]
-    n2 = surf.yi + surf.normal[:,1]
-    n3 = surf.zi + surf.normal[:,2]
-
-    rtest = numpy.sqrt(n1*n1+n2*n2+n3*n3)
-    counter = 0
-    for i in range(len(rtest)):
-        if rtest[i]<R:
-            counter += 1
-    print 'wrong normal %i times'%counter
-    '''
 
     # Set Gauss points (sources)
     surf.xj, surf.yj, surf.zj = getGaussPoints(surf.vertex, surf.triangle,
@@ -302,10 +290,10 @@ def initializeField(filename, param):
         if int(charges[i]) == 1:  # if there are charges
             if qfile[i][-4:] == '.crd':
                 xq, q, Nq = readcrd(qfile[i], param.REAL)  # read charges
-                print '\nReading crd for region %i from ' % i + qfile[i]
+                print('\nReading crd for region {} from {}'.format(i, qfile[i]))
             if qfile[i][-4:] == '.pqr':
                 xq, q, Nq = readpqr(qfile[i], param.REAL)  # read charges
-                print '\nReading pqr for region %i from ' % i + qfile[i]
+                print('\nReading pqr for region {} from {}'.format(i, qfile[i]))
             field_aux.xq = xq  # charges positions
             field_aux.q = q  # charges values
         if int(Nparent[i]) == 1:  # if it is an enclosed region
