@@ -74,15 +74,15 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     X_Vc = numpy.zeros(Ns * K)
 
     NsK = numpy.arange(Ns * K)
-    X_V[:] = XV[NsK / K] * w[NsK % K] * surfSrc.Area[NsK / K]
-    X_Kx[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 0]
-    X_Ky[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 1]
-    X_Kz[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 2]
-    X_Kc[:] = XK[NsK / K]
-    X_Vc[:] = XV[NsK / K]
+    X_V[:] = XV[NsK // K] * w[NsK % K] * surfSrc.Area[NsK // K]
+    X_Kx[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 0]
+    X_Ky[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 1]
+    X_Kz[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 2]
+    X_Kc[:] = XK[NsK // K]
+    X_Vc[:] = XV[NsK // K]
 
     toc.record()
     toc.synchronize()
