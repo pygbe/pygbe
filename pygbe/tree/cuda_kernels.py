@@ -1,6 +1,6 @@
 try:
     from pycuda.compiler import SourceModule
-except:
+except ImportError:
     pass
 
 def kernels(BSZ, Nm, K_fine, P, REAL):
