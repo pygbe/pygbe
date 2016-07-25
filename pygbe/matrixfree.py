@@ -1076,7 +1076,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
             E_solv_aux = 0
             ff += 1
-            print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format((
+            print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
                 f, ff))
 
             AI_int = 0

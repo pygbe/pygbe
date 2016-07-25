@@ -340,11 +340,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     rhs_time = toc - tic
 
     setup_time = toc - TIC
-    print('List time          : {}s'.format(list_time)
-    print('Data transfer time : {}s'.format(transfer_time)
-    print('RHS generation time: {}s'.format(rhs_time)
+    print('List time          : {}s'.format(list_time))
+    print('Data transfer time : {}s'.format(transfer_time))
+    print('RHS generation time: {}s'.format(rhs_time))
     print('-'*30)
-    print('Total setup time   : {}s'.format(setup_time)})
+    print('Total setup time   : {}s'.format(setup_time))
 
     tic = time.time()
 

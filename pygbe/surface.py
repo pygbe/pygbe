@@ -46,7 +46,7 @@ def initializeSurf(field_array, filename, param):
 
         if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface':
             s.phi0 = numpy.loadtxt(phi0_file[i])
-            print('\nReading phi0 file for surface {} from {}'.format(i, phi0_file[i])
+            print('\nReading phi0 file for surface {} from {}'.format(i, phi0_file[i]))
 
         Area_null = []
         tic = time.time()
