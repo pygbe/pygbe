@@ -6,7 +6,7 @@ both types.
 """
 
 import numpy
-from semi_analyticalwrap import SA_wrap_arr
+from pygbe.util.semi_analyticalwrap import SA_wrap_arr
 
 
 def GQ_1D(K):
