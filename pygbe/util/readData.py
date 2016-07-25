@@ -52,14 +52,16 @@ def readVertex2(filename, REAL):
     x = []
     y = []
     z = []
-    for line in file(filename):
-        line = line.split()
-        x0 = line[0]
-        y0 = line[1]
-        z0 = line[2]
-        x.append(REAL(x0))
-        y.append(REAL(y0))
-        z.append(REAL(z0))
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            x0 = line[0]
+            y0 = line[1]
+            z0 = line[2]
+            x.append(REAL(x0))
+            y.append(REAL(y0))
+            z.append(REAL(z0))
 
     x = numpy.array(x)
     y = numpy.array(y)
@@ -129,13 +131,15 @@ def readTriangle2(filename):
 
     triangle = []
 
-    for line in file(filename):
-        line = line.split()
-        v1 = line[0]
-        v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
-        v3 = line[1]
-        triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
-        # -1-> python starts from 0, matlab from 1
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            v1 = line[0]
+            v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
+            v3 = line[1]
+            triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
+            # -1-> python starts from 0, matlab from 1
 
     triangle = numpy.array(triangle)
 
@@ -193,8 +197,11 @@ def readpqr(filename, REAL):
 
     pos = []
     q = []
-    for line in file(filename):
-        line = numpy.array(line.split())
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = numpy.array(line.split())
+
         line_aux = []
 
         if line[0] == 'ATOM':
@@ -248,21 +255,18 @@ def readcrd(filename, REAL):
     q = []
 
     start = 0
-    for line in file(filename):
-        line = numpy.array(line.split())
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
 
-        if len(line) > 8 and line[0] != '*':  # and start==2:
-            x = line[4]
-            y = line[5]
-            z = line[6]
-            q.append(REAL(line[9]))
-            pos.append([REAL(x), REAL(y), REAL(z)])
-        '''
-        if len(line)==1:
-            start += 1
-            if start==2:
-                Nq = int(line[0])
-        '''
+            if len(line) > 8 and line[0] != '*':  # and start==2:
+                x = line[4]
+                y = line[5]
+                z = line[6]
+                q.append(REAL(line[9]))
+                pos.append([REAL(x), REAL(y), REAL(z)])
+
     pos = numpy.array(pos)
     q = numpy.array(q)
     Nq = len(q)
@@ -287,9 +291,11 @@ def readParameters(param, filename):
     """
 
     val = []
-    for line in file(filename):
-        line = line.split()
-        val.append(line[1])
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            val.append(line[1])
 
     dataType = val[0]  # Data type
     if dataType == 'double':
@@ -367,23 +373,25 @@ def readFields(filename):
     Nchild = []
     child = []
 
-    for line in file(filename):
-        line = line.split()
-        if len(line) > 0:
-            if line[0] == 'FIELD':
-                LorY.append(line[1])
-                pot.append(line[2])
-                E.append(line[3])
-                kappa.append(line[4])
-                charges.append(line[5])
-                coulomb.append(line[6])
-                qfile.append(line[7] if line[7] == 'NA' else
-                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
-                Nparent.append(line[8])
-                parent.append(line[9])
-                Nchild.append(line[10])
-                for i in range(int(Nchild[-1])):
-                    child.append(line[11 + i])
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            if len(line) > 0:
+                if line[0] == 'FIELD':
+                    LorY.append(line[1])
+                    pot.append(line[2])
+                    E.append(line[3])
+                    kappa.append(line[4])
+                    charges.append(line[5])
+                    coulomb.append(line[6])
+                    qfile.append(line[7] if line[7] == 'NA' else
+                        os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                    Nparent.append(line[8])
+                    parent.append(line[9])
+                    Nchild.append(line[10])
+                    for i in range(int(Nchild[-1])):
+                        child.append(line[11 + i])
 
     return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
 
@@ -410,19 +418,21 @@ def read_surface(filename):
     files = []
     surf_type = []
     phi0_file = []
-    for line in file(filename):
-        line = line.split()
-        if len(line) > 0:
-            if line[0] == 'FILE':
-                files.append(line[1])
-                surf_type.append(line[2])
-                if (line[2] == 'dirichlet_surface' or
-                        line[2] == 'neumann_surface' or
-                        line[2] == 'neumann_surface_hyper'):
-                    phi0_file.append(os.path.join(
-                        os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
-                else:
-                    phi0_file.append('no_file')
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            if len(line) > 0:
+                if line[0] == 'FILE':
+                    files.append(line[1])
+                    surf_type.append(line[2])
+                    if (line[2] == 'dirichlet_surface' or
+                            line[2] == 'neumann_surface' or
+                            line[2] == 'neumann_surface_hyper'):
+                        phi0_file.append(os.path.join(
+                            os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
+                    else:
+                        phi0_file.append('no_file')
 
     return files, surf_type, phi0_file
 
@@ -445,12 +455,14 @@ def readElectricField(param, filename):
 
     electricField = 0
     wavelength = 0
-    for line in file(filename):
-        line = line.split()
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
 
-        if len(line)>0:
-            if line[0] == 'WAVE':
-                electricField = param.REAL((line[1]))
-                wavelength    = param.REAL((line[2]))
+            if len(line)>0:
+                if line[0] == 'WAVE':
+                    electricField = param.REAL((line[1]))
+                    wavelength    = param.REAL((line[2]))
 
     return electricField, wavelength
