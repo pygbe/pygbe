@@ -417,7 +417,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     ### Output summary
     print('\n'+'-'*30)
     print('Totals:')
-    print('esolv = {} kcal/mol'.format(sum(e_solv)))
+    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
     print('Esurf = {} kcal/mol'.format(sum(E_surf)))
     print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
     print('\nTime = {} s'.format(toc - TIC))
