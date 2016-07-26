@@ -24,7 +24,7 @@ def print_summary(surf_array, field_array, param, results_dict):
         rr = numpy.zeros(len(surf_array[i].tree))
         for ii in range(len(surf_array[i].tree)):
             rr[ii] = surf_array[i].tree[ii].r
-        Levels = numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1
+        Levels = int(numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1)
 
         print('Surface {}:'.format(i))
         print('\t{} elements'.format(N_aux))
