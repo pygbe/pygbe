@@ -1057,7 +1057,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
-    par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6.
+    par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) // 6
 
     ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)

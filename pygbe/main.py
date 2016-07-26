@@ -267,7 +267,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     precision = readParameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
-        param.P + 3) / 6  # Number of terms in Taylor expansion
+        param.P + 3) // 6  # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT / float(param.BSZ))
                               )  # CUDA blocks that fit per twig
 
