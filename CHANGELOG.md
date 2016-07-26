@@ -6,6 +6,8 @@
 
 ### Changed
 
+* Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but it is probably possible to maintain it for the time being.
+
 ### Fixed
 
 ### Removed
