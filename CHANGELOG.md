@@ -5,6 +5,8 @@
 ### Added
 
 ### Changed
+* `config` and `param` files are now globbed for so they can have a name different
+  than the folder which contains them.  
 
 ### Fixed
 
