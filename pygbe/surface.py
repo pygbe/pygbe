@@ -11,7 +11,7 @@ from pygbe.tree.direct import computeDiagonal
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
                            readFields, read_surface)
-from pygbe.quadrature import quadratureRule_fine, getGaussPoints
+from pygbe.quadrature import quadratureRule_fine
 from pygbe.classes import Surface, Field
 
 

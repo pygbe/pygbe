@@ -6,7 +6,7 @@ from pygbe.tree.direct import computeDiagonal
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
                            readFields, read_surface)
-from pygbe.quadrature import quadratureRule_fine, getGaussPoints
+from pygbe.quadrature import quadratureRule_fine
 
 class Event():
     """
@@ -245,7 +245,7 @@ class Surface():
 
         self.calc_norms()
         # Set Gauss points (sources)
-        self.getGaussPoints(param.K)
+        self.get_gauss_points(param.K)
 
         #Calculate distances, get R_C0
         self.calc_distance(param)
@@ -294,7 +294,7 @@ class Surface():
                         (self.zi - self.x_center[2])**2)
         self.R_C0 = max(dist)
 
-    def getGaussPoints(self, n):
+    def get_gauss_points(self, n):
         """
         It gets the Gauss points for far away integrals.
 
@@ -314,35 +314,33 @@ class Surface():
         #N  = len(triangle) # Number of triangles
         gauss_array = numpy.zeros((self.N*n,3))
         if n==1:
-            gauss_array[:,0] = numpy.average(self.vertex[self.triangle[:],0], axis=1)
-            gauss_array[:,1] = numpy.average(self.vertex[self.triangle[:],1], axis=1)
-            gauss_array[:,2] = numpy.average(self.vertex[self.triangle[:],2], axis=1)
+            gauss_array = numpy.average(self.vertex[self.triangle], axis=1)
 
-        if n==3:
+        elif n==3:
             for i in range(self.N):
-                M = numpy.transpose(self.vertex[self.triangle[i]])
-                gauss_array[n*i,:] = numpy.dot(M, numpy.array([0.5, 0.5, 0.]))
-                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([0., 0.5, 0.5]))
-                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([0.5, 0., 0.5]))
+                M = self.vertex[self.triangle[i]]
+                gauss_array[n*i,:] = numpy.dot(M.T, numpy.array([0.5, 0.5, 0.]))
+                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([0., 0.5, 0.5]))
+                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([0.5, 0., 0.5]))
 
-        if n==4:
+        elif n==4:
             for i in range(self.N):
-                M = numpy.transpose(self.vertex[self.triangle[i]])
-                gauss_array[n*i,:] = numpy.dot(M, numpy.array([1/3., 1/3., 1/3.]))
-                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([3/5., 1/5., 1/5.]))
-                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([1/5., 3/5., 1/5.]))
-                gauss_array[n*i+3,:] = numpy.dot(M, numpy.array([1/5., 1/5., 3/5.]))
+                M = self.vertex[self.triangle[i]]
+                gauss_array[n*i,:] = numpy.dot(M.T, numpy.array([1/3., 1/3., 1/3.]))
+                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([3/5., 1/5., 1/5.]))
+                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([1/5., 3/5., 1/5.]))
+                gauss_array[n*i+3,:] = numpy.dot(M.T, numpy.array([1/5., 1/5., 3/5.]))
 
-        if n==7:
+        elif n==7:
             for i in range(self.N):
-                M = numpy.transpose(self.vertex[self.triangle[i]])
-                gauss_array[n*i+0,:] = numpy.dot(M, numpy.array([1/3.,1/3.,1/3.]))
-                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([.797426985353087,.101286507323456,.101286507323456]))
-                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([.101286507323456,.797426985353087,.101286507323456]))
-                gauss_array[n*i+3,:] = numpy.dot(M, numpy.array([.101286507323456,.101286507323456,.797426985353087]))
-                gauss_array[n*i+4,:] = numpy.dot(M, numpy.array([.059715871789770,.470142064105115,.470142064105115]))
-                gauss_array[n*i+5,:] = numpy.dot(M, numpy.array([.470142064105115,.059715871789770,.470142064105115]))
-                gauss_array[n*i+6,:] = numpy.dot(M, numpy.array([.470142064105115,.470142064105115,.059715871789770]))
+                M = self.vertex[self.triangle[i]]
+                gauss_array[n*i+0,:] = numpy.dot(M.T, numpy.array([1/3.,1/3.,1/3.]))
+                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([.797426985353087,.101286507323456,.101286507323456]))
+                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([.101286507323456,.797426985353087,.101286507323456]))
+                gauss_array[n*i+3,:] = numpy.dot(M.T, numpy.array([.101286507323456,.101286507323456,.797426985353087]))
+                gauss_array[n*i+4,:] = numpy.dot(M.T, numpy.array([.059715871789770,.470142064105115,.470142064105115]))
+                gauss_array[n*i+5,:] = numpy.dot(M.T, numpy.array([.470142064105115,.059715871789770,.470142064105115]))
+                gauss_array[n*i+6,:] = numpy.dot(M.T, numpy.array([.470142064105115,.470142064105115,.059715871789770]))
 
         self.xj, self.yj, self.zj = gauss_array.T
 
