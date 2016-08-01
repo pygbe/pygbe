@@ -19,7 +19,7 @@ from pygbe.gmres import gmres_mgs
 from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
-from pygbe.surface import initializeSurf, fill_surface, initializeField, fill_phi
+from pygbe.surface import initializeSurf, initializeField, fill_phi
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)

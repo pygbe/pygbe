@@ -155,7 +155,7 @@ class Surface():
 #        self.Xsk      = []  # position of gauss points for near singular integrals
 #        self.Wsk      = []  # weight of gauss points for near singular integrals
 #        self.tree     = []  # tree structure
-        self.twig     = []  # tree twigs
+#        self.twig     = []  # tree twigs
 #        self.xiSort   = []  # sorted x component of center
 #        self.yiSort   = []  # sorted y component of center
 #        self.ziSort   = []  # sorted z component of center
@@ -217,6 +217,7 @@ class Surface():
 #        self.XskDev     = []
 #        self.WskDev     = []
 #        self.kDev       = []
+        self.twig = []
 
     def fill_surface(self, param):
         """
@@ -244,32 +245,120 @@ class Surface():
 
         self.calc_norms()
         # Set Gauss points (sources)
-        self.xj, self.yj, self.zj = getGaussPoints(self.vertex, self.triangle,
-                                                param.K)
+        self.getGaussPoints(param.K)
 
-        x_center = numpy.zeros(3)
-        x_center[0] = numpy.average(self.xi).astype(param.REAL)
-        x_center[1] = numpy.average(self.yi).astype(param.REAL)
-        x_center[2] = numpy.average(self.zi).astype(param.REAL)
-        dist = numpy.sqrt((self.xi - x_center[0])**2 + (self.yi - x_center[1])**2 +
-                        (self.zi - x_center[2])**2)
-        R_C0 = max(dist)
+        #x_center = numpy.zeros(3)
+        #x_center[0] = numpy.average(self.xi).astype(param.REAL)
+        #x_center[1] = numpy.average(self.yi).astype(param.REAL)
+        #x_center[2] = numpy.average(self.zi).astype(param.REAL)
+        #dist = numpy.sqrt((self.xi - x_center[0])**2 + (self.yi - x_center[1])**2 +
+        #                (self.zi - x_center[2])**2)
+        #R_C0 = max(dist)
+        self.calc_distance(param)
 
         # Generate tree, compute indices and precompute terms for M2M
         self.tree = generateTree(self.xi, self.yi, self.zi, param.NCRIT, param.Nm,
-                                self.N, R_C0, x_center)
+                                self.N, self.R_C0, self.x_center)
         C = 0
         self.twig = findTwigs(self.tree, C, self.twig, param.NCRIT)
 
         addSources(self.tree, self.twig, param.K)
-        #    addSources3(self.xj,self.yj,self.zj,self.tree,self.twig)
-        #    for j in range(Nj):
-        #        C = 0
-        #        addSources2(self.xj,self.yj,self.zj,j,self.tree,C,param.NCRIT)
 
         self.xk, self.wk = GQ_1D(param.Nk)
         self.Xsk, self.Wsk = quadratureRule_fine(param.K_fine)
 
+        self.generate_preconditioner()
+
+        tic = time.time()
+        sortPoints(self, self.tree, self.twig, param)
+        toc = time.time()
+        time_sort = toc - tic
+
+        return time_sort
+
+    def calc_centers(self):
+        self.xi = numpy.average(self.vertex[self.triangle[:], 0], axis=1)
+        self.yi = numpy.average(self.vertex[self.triangle[:], 1], axis=1)
+        self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
+
+    def calc_norms(self):
+        self.normal = numpy.zeros((self.N, 3))
+        self.Area = numpy.zeros(self.N)
+
+        L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
+        L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
+        self.normal = numpy.cross(L0, L2)
+        self.Area = numpy.sqrt(self.normal[:, 0]**2 + self.normal[:, 1]**2 +
+                            self.normal[:, 2]**2) / 2
+        self.normal[:, 0] = self.normal[:, 0] / (2 * self.Area)
+        self.normal[:, 1] = self.normal[:, 1] / (2 * self.Area)
+        self.normal[:, 2] = self.normal[:, 2] / (2 * self.Area)
+
+    def calc_distance(self, param):
+
+        self.x_center = numpy.zeros(3)
+        self.x_center[0] = numpy.average(self.xi).astype(param.REAL)
+        self.x_center[1] = numpy.average(self.yi).astype(param.REAL)
+        self.x_center[2] = numpy.average(self.zi).astype(param.REAL)
+        dist = numpy.sqrt((self.xi - self.x_center[0])**2 + (self.yi - self.x_center[1])**2 +
+                        (self.zi - self.x_center[2])**2)
+        self.R_C0 = max(dist)
+
+    def getGaussPoints(self, n):
+        """
+        It gets the Gauss points for far away integrals.
+
+        Arguments
+        ----------
+        y       : list, vertices of the triangles.
+        triangle: list, indices for the corresponding triangles.
+        n       : int (1,3,4,7), desired Gauss points per element.
+
+        Returns
+        --------
+        xi[:,0] : position of the gauss point in the x axis.
+        xi[:,1] : position of the gauss point in the y axis.
+        xi[:,2] : position of the gauss point in the z axis.
+        """
+
+        #N  = len(triangle) # Number of triangles
+        gauss_array = numpy.zeros((self.N*n,3))
+        if n==1:
+            gauss_array[:,0] = numpy.average(self.vertex[self.triangle[:],0], axis=1)
+            gauss_array[:,1] = numpy.average(self.vertex[self.triangle[:],1], axis=1)
+            gauss_array[:,2] = numpy.average(self.vertex[self.triangle[:],2], axis=1)
+
+        if n==3:
+            for i in range(self.N):
+                M = numpy.transpose(self.vertex[self.triangle[i]])
+                gauss_array[n*i,:] = numpy.dot(M, numpy.array([0.5, 0.5, 0.]))
+                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([0., 0.5, 0.5]))
+                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([0.5, 0., 0.5]))
+
+        if n==4:
+            for i in range(self.N):
+                M = numpy.transpose(self.vertex[self.triangle[i]])
+                gauss_array[n*i,:] = numpy.dot(M, numpy.array([1/3., 1/3., 1/3.]))
+                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([3/5., 1/5., 1/5.]))
+                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([1/5., 3/5., 1/5.]))
+                gauss_array[n*i+3,:] = numpy.dot(M, numpy.array([1/5., 1/5., 3/5.]))
+
+        if n==7:
+            for i in range(self.N):
+                M = numpy.transpose(self.vertex[self.triangle[i]])
+                gauss_array[n*i+0,:] = numpy.dot(M, numpy.array([1/3.,1/3.,1/3.]))
+                gauss_array[n*i+1,:] = numpy.dot(M, numpy.array([.797426985353087,.101286507323456,.101286507323456]))
+                gauss_array[n*i+2,:] = numpy.dot(M, numpy.array([.101286507323456,.797426985353087,.101286507323456]))
+                gauss_array[n*i+3,:] = numpy.dot(M, numpy.array([.101286507323456,.101286507323456,.797426985353087]))
+                gauss_array[n*i+4,:] = numpy.dot(M, numpy.array([.059715871789770,.470142064105115,.470142064105115]))
+                gauss_array[n*i+5,:] = numpy.dot(M, numpy.array([.470142064105115,.059715871789770,.470142064105115]))
+                gauss_array[n*i+6,:] = numpy.dot(M, numpy.array([.470142064105115,.470142064105115,.059715871789770]))
+
+        self.xj, self.yj, self.zj = gauss_array.T
+
+#        return xi[:,0], xi[:,1], xi[:,2]
+
+    def generate_preconditioner(self):
         # Generate preconditioner
         # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
         #If we have complex dielectric constants we need to initialize Precon with
@@ -333,31 +422,6 @@ class Surface():
             self.Precond[0, :] = 1 / VY  # So far only for Yukawa outside
         elif self.surf_type == 'neumann_surface' or self.surf_type == 'asc_surface':
             self.Precond[0, :] = 1 / (2 * numpy.pi)
-
-        tic = time.time()
-        sortPoints(self, self.tree, self.twig, param)
-        toc = time.time()
-        time_sort = toc - tic
-
-        return time_sort
-
-    def calc_centers(self):
-        self.xi = numpy.average(self.vertex[self.triangle[:], 0], axis=1)
-        self.yi = numpy.average(self.vertex[self.triangle[:], 1], axis=1)
-        self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
-
-    def calc_norms(self):
-        self.normal = numpy.zeros((self.N, 3))
-        self.Area = numpy.zeros(self.N)
-
-        L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
-        L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
-        self.normal = numpy.cross(L0, L2)
-        self.Area = numpy.sqrt(self.normal[:, 0]**2 + self.normal[:, 1]**2 +
-                            self.normal[:, 2]**2) / 2
-        self.normal[:, 0] = self.normal[:, 0] / (2 * self.Area)
-        self.normal[:, 1] = self.normal[:, 1] / (2 * self.Area)
-        self.normal[:, 2] = self.normal[:, 2] / (2 * self.Area)
 
 class Field():
     """
