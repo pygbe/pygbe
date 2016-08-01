@@ -247,13 +247,7 @@ class Surface():
         # Set Gauss points (sources)
         self.getGaussPoints(param.K)
 
-        #x_center = numpy.zeros(3)
-        #x_center[0] = numpy.average(self.xi).astype(param.REAL)
-        #x_center[1] = numpy.average(self.yi).astype(param.REAL)
-        #x_center[2] = numpy.average(self.zi).astype(param.REAL)
-        #dist = numpy.sqrt((self.xi - x_center[0])**2 + (self.yi - x_center[1])**2 +
-        #                (self.zi - x_center[2])**2)
-        #R_C0 = max(dist)
+        #Calculate distances, get R_C0
         self.calc_distance(param)
 
         # Generate tree, compute indices and precompute terms for M2M
@@ -282,17 +276,13 @@ class Surface():
         self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
 
     def calc_norms(self):
-        self.normal = numpy.zeros((self.N, 3))
-        self.Area = numpy.zeros(self.N)
 
         L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
         L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
+
         self.normal = numpy.cross(L0, L2)
-        self.Area = numpy.sqrt(self.normal[:, 0]**2 + self.normal[:, 1]**2 +
-                            self.normal[:, 2]**2) / 2
-        self.normal[:, 0] = self.normal[:, 0] / (2 * self.Area)
-        self.normal[:, 1] = self.normal[:, 1] / (2 * self.Area)
-        self.normal[:, 2] = self.normal[:, 2] / (2 * self.Area)
+        self.Area = numpy.sqrt(numpy.sum(self.normal**2, axis=1)) / 2
+        self.normal /= (2 * self.Area[:, numpy.newaxis])
 
     def calc_distance(self, param):
 
@@ -356,7 +346,6 @@ class Surface():
 
         self.xj, self.yj, self.zj = gauss_array.T
 
-#        return xi[:,0], xi[:,1], xi[:,2]
 
     def generate_preconditioner(self):
         # Generate preconditioner
