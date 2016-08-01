@@ -107,8 +107,6 @@ def zeroAreas(s, triangle_raw, Area_null):
     return Area_null
 
 
-
-
 def initializeField(filename, param):
     """
     Initialize all the regions in the surface to be solved.

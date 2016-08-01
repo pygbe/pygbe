@@ -4,9 +4,8 @@ import time
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
 from pygbe.tree.direct import computeDiagonal
 from pygbe.util.semi_analytical import GQ_1D
-from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
-                           readFields, read_surface)
 from pygbe.quadrature import quadratureRule_fine
+
 
 class Event():
     """
@@ -134,108 +133,21 @@ class Surface():
     """
 
     def __init__(self):
-#        self.triangle = []  # indices to triangle vertices
-#        self.vertex   = []  # position of vertices
-#        self.XinV     = []  # weights input for single layer potential
-#        self.XinK     = []  # weights input for double layer potential
-#        self.Xout_int = []  # output vector of interior operators
-#        self.Xout_ext = []  # output vector of exterior operators
-#        self.xi       = []  # x component of center
-#        self.yi       = []  # y component of center
-#        self.zi       = []  # z component of center
-#        self.xj       = []  # x component of gauss nodes
-#        self.yj       = []  # y component of gauss nodes
-#        self.zj       = []  # z component of gauss nodes
-#        self.Area     = []  # Area of triangles
-#        self.normal   = []  # normal of triangles
-#        self.sglInt_int = []  # singular integrals for V for internal equation
-#        self.sglInt_ext = []  # singular integrals for V for external equation
-#        self.xk       = []  # position of gauss points on edges
-#        self.wk       = []  # weight of gauss points on edges
-#        self.Xsk      = []  # position of gauss points for near singular integrals
-#        self.Wsk      = []  # weight of gauss points for near singular integrals
-#        self.tree     = []  # tree structure
-#        self.twig     = []  # tree twigs
-#        self.xiSort   = []  # sorted x component of center
-#        self.yiSort   = []  # sorted y component of center
-#        self.ziSort   = []  # sorted z component of center
-#        self.xjSort   = []  # sorted x component of gauss nodes
-#        self.yjSort   = []  # sorted y component of gauss nodes
-#        self.zjSort   = []  # sorted z component of gauss nodes
-#        self.xcSort   = []  # sorted x component box centers according to M2P_list array
-#        self.ycSort   = []  # sorted y component box centers according to M2P_list array
-#        self.zcSort   = []  # sorted z component box centers according to M2P_list array
-#        self.AreaSort = []  # sorted array of areas
-#        self.sglInt_intSort  = []  # sorted array of singular integrals for V for internal equation
-#        self.sglInt_extSort  = []  # sorted array of singular integrals for V for external equation
-#        self.unsort       = []  # array of indices to unsort targets
-#        self.triangleSort = []  # sorted array of triangles
-#        self.sortTarget   = []  # array of indices to sort targets
-#        self.sortSource   = []  # array of indices to sort sources
-#        self.offsetSource = []  # array with offsets to sorted source array
-#        self.offsetTarget = []  # array with offsets to sorted target array
-#        self.sizeTarget   = []  # array with number of targets per twig
-#        self.offsetTwigs  = []  # offset to twig in P2P list array
-#        self.P2P_list     = []  # pointers to twigs for P2P interaction list
-#        self.offsetMlt    = []  # offset to multipoles in M2P list array
-#        self.M2P_list     = []  # pointers to boxes for M2P interaction list
-#        self.Precond      = []  # Sparse representation of preconditioner for self interaction block
-#        self.Ein          = 0   # Permitivitty inside surface
-#        self.Eout         = 0   # Permitivitty outside surface
-#        self.E_hat        = 0   # ratio of Ein/Eout
-#        self.kappa_in     = 0   # kappa inside surface
-#        self.kappa_out    = 0   # kappa inside surface
-#        self.LorY_in      = 0   # Laplace or Yukawa in inner region
-#        self.LorY_out     = 0   # Laplace or Yukawa in outer region
-#        self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)
-#        self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
-#        self.phi          = []  # Potential on surface
-#        self.dphi         = []  # Derivative of potential on surface
-#
-#        # Device data
-#        self.xiDev      = []
-#        self.yiDev      = []
-#        self.ziDev      = []
-#        self.xjDev      = []
-#        self.yjDev      = []
-#        self.zjDev      = []
-#        self.xcDev      = []
-#        self.ycDev      = []
-#        self.zcDev      = []
-#        self.AreaDev    = []
-#        self.sglInt_intDev = []
-#        self.sglInt_extDev = []
-#        self.vertexDev  = []
-#        self.sizeTarDev = []
-#        self.offSrcDev  = []
-#        self.offMltDev  = []
-#        self.offTwgDev  = []
-#        self.M2P_lstDev = []
-#        self.P2P_lstDev = []
-#        self.xkDev      = []
-#        self.wkDev      = []
-#        self.XskDev     = []
-#        self.WskDev     = []
-#        self.kDev       = []
         self.twig = []
 
     def fill_surface(self, param):
         """
-        It fills the surface with all the necessary information to solve it.
+        Fill the surface with all the necessary information to solve it.
 
-        -It sets the Gauss points.
-        -It generates tree, computes the indices and precompute terms for M2M.
-        -It generates preconditioner.
-        -It computes the diagonal integral for internal and external equations.
+        -Set the Gauss points.
+        -Generate tree, compute the indices and precompute terms for M2M.
+        -Generate preconditioner.
+        -Compute the diagonal integral for internal and external equations.
 
         Arguments
         ----------
-        surf     : class, surface that we are studying.
         param    : class, parameters related to the surface we are studying.
 
-        Returns
-        --------
-        time_sort: float, time spent in sorting the data needed for the treecode.
         """
 
         self.N = len(self.triangle)
@@ -247,12 +159,12 @@ class Surface():
         # Set Gauss points (sources)
         self.get_gauss_points(param.K)
 
-        #Calculate distances, get R_C0
+        # Calculate distances, get R_C0
         self.calc_distance(param)
 
         # Generate tree, compute indices and precompute terms for M2M
         self.tree = generateTree(self.xi, self.yi, self.zi, param.NCRIT, param.Nm,
-                                self.N, self.R_C0, self.x_center)
+                                 self.N, self.R_C0, self.x_center)
         C = 0
         self.twig = findTwigs(self.tree, C, self.twig, param.NCRIT)
 
@@ -290,8 +202,9 @@ class Surface():
         self.x_center[0] = numpy.average(self.xi).astype(param.REAL)
         self.x_center[1] = numpy.average(self.yi).astype(param.REAL)
         self.x_center[2] = numpy.average(self.zi).astype(param.REAL)
-        dist = numpy.sqrt((self.xi - self.x_center[0])**2 + (self.yi - self.x_center[1])**2 +
-                        (self.zi - self.x_center[2])**2)
+        dist = numpy.sqrt((self.xi - self.x_center[0])**2 +
+                          (self.yi - self.x_center[1])**2 +
+                          (self.zi - self.x_center[2])**2)
         self.R_C0 = max(dist)
 
     def get_gauss_points(self, n):
@@ -319,28 +232,28 @@ class Surface():
         elif n==3:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
-                gauss_array[n*i,:] = numpy.dot(M.T, numpy.array([0.5, 0.5, 0.]))
-                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([0., 0.5, 0.5]))
-                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([0.5, 0., 0.5]))
+                gauss_array[n*i, :] = numpy.dot(M.T, numpy.array([0.5, 0.5, 0.]))
+                gauss_array[n*i+1, :] = numpy.dot(M.T, numpy.array([0., 0.5, 0.5]))
+                gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([0.5, 0., 0.5]))
 
         elif n==4:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
-                gauss_array[n*i,:] = numpy.dot(M.T, numpy.array([1/3., 1/3., 1/3.]))
-                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([3/5., 1/5., 1/5.]))
-                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([1/5., 3/5., 1/5.]))
-                gauss_array[n*i+3,:] = numpy.dot(M.T, numpy.array([1/5., 1/5., 3/5.]))
+                gauss_array[n*i, :] = numpy.dot(M.T, numpy.array([1/3., 1/3., 1/3.]))
+                gauss_array[n*i+1, :] = numpy.dot(M.T, numpy.array([3/5., 1/5., 1/5.]))
+                gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([1/5., 3/5., 1/5.]))
+                gauss_array[n*i+3, :] = numpy.dot(M.T, numpy.array([1/5., 1/5., 3/5.]))
 
         elif n==7:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
-                gauss_array[n*i+0,:] = numpy.dot(M.T, numpy.array([1/3.,1/3.,1/3.]))
-                gauss_array[n*i+1,:] = numpy.dot(M.T, numpy.array([.797426985353087,.101286507323456,.101286507323456]))
-                gauss_array[n*i+2,:] = numpy.dot(M.T, numpy.array([.101286507323456,.797426985353087,.101286507323456]))
-                gauss_array[n*i+3,:] = numpy.dot(M.T, numpy.array([.101286507323456,.101286507323456,.797426985353087]))
-                gauss_array[n*i+4,:] = numpy.dot(M.T, numpy.array([.059715871789770,.470142064105115,.470142064105115]))
-                gauss_array[n*i+5,:] = numpy.dot(M.T, numpy.array([.470142064105115,.059715871789770,.470142064105115]))
-                gauss_array[n*i+6,:] = numpy.dot(M.T, numpy.array([.470142064105115,.470142064105115,.059715871789770]))
+                gauss_array[n*i+0, :] = numpy.dot(M.T, numpy.array([1/3.,1/3.,1/3.]))
+                gauss_array[n*i+1, :] = numpy.dot(M.T, numpy.array([.797426985353087, .101286507323456, .101286507323456]))
+                gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([.101286507323456, .797426985353087, .101286507323456]))
+                gauss_array[n*i+3, :] = numpy.dot(M.T, numpy.array([.101286507323456, .101286507323456, .797426985353087]))
+                gauss_array[n*i+4, :] = numpy.dot(M.T, numpy.array([.059715871789770, .470142064105115, .470142064105115]))
+                gauss_array[n*i+5, :] = numpy.dot(M.T, numpy.array([.470142064105115, .059715871789770, .470142064105115]))
+                gauss_array[n*i+6, :] = numpy.dot(M.T, numpy.array([.470142064105115, .470142064105115, .059715871789770]))
 
         self.xj, self.yj, self.zj = gauss_array.T
 
@@ -348,18 +261,15 @@ class Surface():
     def generate_preconditioner(self):
         # Generate preconditioner
         # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
-        #If we have complex dielectric constants we need to initialize Precon with
-        #complex type else it'll be float.
+        # If we have complex dielectric constants we need to initialize Precon with
+        # complex type else it'll be float.
         if type(self.E_hat) == complex:
             self.Precond = numpy.zeros((4, self.N), complex)
         else:
             self.Precond = numpy.zeros((4, self.N))
         # Stores the inverse of the block diagonal (also a tridiag matrix)
         # Order: Top left, top right, bott left, bott right
-        centers = numpy.zeros((self.N, 3))
-        centers[:, 0] = self.xi[:]
-        centers[:, 1] = self.yi[:]
-        centers[:, 2] = self.zi[:]
+        centers = numpy.vstack((self.xi, self.yi, self.zi)).T
 
         #   Compute diagonal integral for internal equation
         VL = numpy.zeros(self.N)
@@ -378,7 +288,7 @@ class Surface():
             dX12 = -VY
             self.sglInt_int = VY  # Array for singular integral of V through interior
         else:
-            self.sglInt_int = numpy.zeros(N)
+            self.sglInt_int = numpy.zeros(self.N)
 
     #   Compute diagonal integral for external equation
         VL = numpy.zeros(self.N)
