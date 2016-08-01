@@ -1,6 +1,13 @@
 import numpy
 import time
 
+from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
+from pygbe.tree.direct import computeDiagonal
+from pygbe.util.semi_analytical import GQ_1D
+from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
+                           readFields, read_surface)
+from pygbe.quadrature import quadratureRule_fine, getGaussPoints
+
 class Event():
     """
     Class for logging like in pycuda's cuda.Event()
@@ -127,90 +134,230 @@ class Surface():
     """
 
     def __init__(self):
-        self.triangle = []  # indices to triangle vertices
-        self.vertex   = []  # position of vertices
-        self.XinV     = []  # weights input for single layer potential
-        self.XinK     = []  # weights input for double layer potential
-        self.Xout_int = []  # output vector of interior operators
-        self.Xout_ext = []  # output vector of exterior operators
-        self.xi       = []  # x component of center
-        self.yi       = []  # y component of center
-        self.zi       = []  # z component of center
-        self.xj       = []  # x component of gauss nodes
-        self.yj       = []  # y component of gauss nodes
-        self.zj       = []  # z component of gauss nodes
-        self.Area     = []  # Area of triangles
-        self.normal   = []  # normal of triangles
-        self.sglInt_int = []  # singular integrals for V for internal equation
-        self.sglInt_ext = []  # singular integrals for V for external equation
-        self.xk       = []  # position of gauss points on edges
-        self.wk       = []  # weight of gauss points on edges
-        self.Xsk      = []  # position of gauss points for near singular integrals
-        self.Wsk      = []  # weight of gauss points for near singular integrals
-        self.tree     = []  # tree structure
+#        self.triangle = []  # indices to triangle vertices
+#        self.vertex   = []  # position of vertices
+#        self.XinV     = []  # weights input for single layer potential
+#        self.XinK     = []  # weights input for double layer potential
+#        self.Xout_int = []  # output vector of interior operators
+#        self.Xout_ext = []  # output vector of exterior operators
+#        self.xi       = []  # x component of center
+#        self.yi       = []  # y component of center
+#        self.zi       = []  # z component of center
+#        self.xj       = []  # x component of gauss nodes
+#        self.yj       = []  # y component of gauss nodes
+#        self.zj       = []  # z component of gauss nodes
+#        self.Area     = []  # Area of triangles
+#        self.normal   = []  # normal of triangles
+#        self.sglInt_int = []  # singular integrals for V for internal equation
+#        self.sglInt_ext = []  # singular integrals for V for external equation
+#        self.xk       = []  # position of gauss points on edges
+#        self.wk       = []  # weight of gauss points on edges
+#        self.Xsk      = []  # position of gauss points for near singular integrals
+#        self.Wsk      = []  # weight of gauss points for near singular integrals
+#        self.tree     = []  # tree structure
         self.twig     = []  # tree twigs
-        self.xiSort   = []  # sorted x component of center
-        self.yiSort   = []  # sorted y component of center
-        self.ziSort   = []  # sorted z component of center
-        self.xjSort   = []  # sorted x component of gauss nodes
-        self.yjSort   = []  # sorted y component of gauss nodes
-        self.zjSort   = []  # sorted z component of gauss nodes
-        self.xcSort   = []  # sorted x component box centers according to M2P_list array
-        self.ycSort   = []  # sorted y component box centers according to M2P_list array
-        self.zcSort   = []  # sorted z component box centers according to M2P_list array
-        self.AreaSort = []  # sorted array of areas
-        self.sglInt_intSort  = []  # sorted array of singular integrals for V for internal equation
-        self.sglInt_extSort  = []  # sorted array of singular integrals for V for external equation
-        self.unsort       = []  # array of indices to unsort targets
-        self.triangleSort = []  # sorted array of triangles
-        self.sortTarget   = []  # array of indices to sort targets
-        self.sortSource   = []  # array of indices to sort sources
-        self.offsetSource = []  # array with offsets to sorted source array
-        self.offsetTarget = []  # array with offsets to sorted target array
-        self.sizeTarget   = []  # array with number of targets per twig
-        self.offsetTwigs  = []  # offset to twig in P2P list array
-        self.P2P_list     = []  # pointers to twigs for P2P interaction list
-        self.offsetMlt    = []  # offset to multipoles in M2P list array
-        self.M2P_list     = []  # pointers to boxes for M2P interaction list
-        self.Precond      = []  # Sparse representation of preconditioner for self interaction block
-        self.Ein          = 0   # Permitivitty inside surface
-        self.Eout         = 0   # Permitivitty outside surface
-        self.E_hat        = 0   # ratio of Ein/Eout
-        self.kappa_in     = 0   # kappa inside surface
-        self.kappa_out    = 0   # kappa inside surface
-        self.LorY_in      = 0   # Laplace or Yukawa in inner region
-        self.LorY_out     = 0   # Laplace or Yukawa in outer region
-        self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)
-        self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
-        self.phi          = []  # Potential on surface
-        self.dphi         = []  # Derivative of potential on surface
+#        self.xiSort   = []  # sorted x component of center
+#        self.yiSort   = []  # sorted y component of center
+#        self.ziSort   = []  # sorted z component of center
+#        self.xjSort   = []  # sorted x component of gauss nodes
+#        self.yjSort   = []  # sorted y component of gauss nodes
+#        self.zjSort   = []  # sorted z component of gauss nodes
+#        self.xcSort   = []  # sorted x component box centers according to M2P_list array
+#        self.ycSort   = []  # sorted y component box centers according to M2P_list array
+#        self.zcSort   = []  # sorted z component box centers according to M2P_list array
+#        self.AreaSort = []  # sorted array of areas
+#        self.sglInt_intSort  = []  # sorted array of singular integrals for V for internal equation
+#        self.sglInt_extSort  = []  # sorted array of singular integrals for V for external equation
+#        self.unsort       = []  # array of indices to unsort targets
+#        self.triangleSort = []  # sorted array of triangles
+#        self.sortTarget   = []  # array of indices to sort targets
+#        self.sortSource   = []  # array of indices to sort sources
+#        self.offsetSource = []  # array with offsets to sorted source array
+#        self.offsetTarget = []  # array with offsets to sorted target array
+#        self.sizeTarget   = []  # array with number of targets per twig
+#        self.offsetTwigs  = []  # offset to twig in P2P list array
+#        self.P2P_list     = []  # pointers to twigs for P2P interaction list
+#        self.offsetMlt    = []  # offset to multipoles in M2P list array
+#        self.M2P_list     = []  # pointers to boxes for M2P interaction list
+#        self.Precond      = []  # Sparse representation of preconditioner for self interaction block
+#        self.Ein          = 0   # Permitivitty inside surface
+#        self.Eout         = 0   # Permitivitty outside surface
+#        self.E_hat        = 0   # ratio of Ein/Eout
+#        self.kappa_in     = 0   # kappa inside surface
+#        self.kappa_out    = 0   # kappa inside surface
+#        self.LorY_in      = 0   # Laplace or Yukawa in inner region
+#        self.LorY_out     = 0   # Laplace or Yukawa in outer region
+#        self.surf_type    = 0   # Surface type: internal_cavity (=0), stern or dielecric_interface (=1)
+#        self.phi0         = []  # Known surface potential (dirichlet) or derivative of potential (neumann)
+#        self.phi          = []  # Potential on surface
+#        self.dphi         = []  # Derivative of potential on surface
+#
+#        # Device data
+#        self.xiDev      = []
+#        self.yiDev      = []
+#        self.ziDev      = []
+#        self.xjDev      = []
+#        self.yjDev      = []
+#        self.zjDev      = []
+#        self.xcDev      = []
+#        self.ycDev      = []
+#        self.zcDev      = []
+#        self.AreaDev    = []
+#        self.sglInt_intDev = []
+#        self.sglInt_extDev = []
+#        self.vertexDev  = []
+#        self.sizeTarDev = []
+#        self.offSrcDev  = []
+#        self.offMltDev  = []
+#        self.offTwgDev  = []
+#        self.M2P_lstDev = []
+#        self.P2P_lstDev = []
+#        self.xkDev      = []
+#        self.wkDev      = []
+#        self.XskDev     = []
+#        self.WskDev     = []
+#        self.kDev       = []
 
-        # Device data
-        self.xiDev      = []
-        self.yiDev      = []
-        self.ziDev      = []
-        self.xjDev      = []
-        self.yjDev      = []
-        self.zjDev      = []
-        self.xcDev      = []
-        self.ycDev      = []
-        self.zcDev      = []
-        self.AreaDev    = []
-        self.sglInt_intDev = []
-        self.sglInt_extDev = []
-        self.vertexDev  = []
-        self.sizeTarDev = []
-        self.offSrcDev  = []
-        self.offMltDev  = []
-        self.offTwgDev  = []
-        self.M2P_lstDev = []
-        self.P2P_lstDev = []
-        self.xkDev      = []
-        self.wkDev      = []
-        self.XskDev     = []
-        self.WskDev     = []
-        self.kDev       = []
+    def fill_surface(self, param):
+        """
+        It fills the surface with all the necessary information to solve it.
 
+        -It sets the Gauss points.
+        -It generates tree, computes the indices and precompute terms for M2M.
+        -It generates preconditioner.
+        -It computes the diagonal integral for internal and external equations.
+
+        Arguments
+        ----------
+        surf     : class, surface that we are studying.
+        param    : class, parameters related to the surface we are studying.
+
+        Returns
+        --------
+        time_sort: float, time spent in sorting the data needed for the treecode.
+        """
+
+        self.N = len(self.triangle)
+        self.Nj = self.N * param.K
+        # Calculate centers
+        self.calc_centers()
+
+        self.calc_norms()
+        # Set Gauss points (sources)
+        self.xj, self.yj, self.zj = getGaussPoints(self.vertex, self.triangle,
+                                                param.K)
+
+        x_center = numpy.zeros(3)
+        x_center[0] = numpy.average(self.xi).astype(param.REAL)
+        x_center[1] = numpy.average(self.yi).astype(param.REAL)
+        x_center[2] = numpy.average(self.zi).astype(param.REAL)
+        dist = numpy.sqrt((self.xi - x_center[0])**2 + (self.yi - x_center[1])**2 +
+                        (self.zi - x_center[2])**2)
+        R_C0 = max(dist)
+
+        # Generate tree, compute indices and precompute terms for M2M
+        self.tree = generateTree(self.xi, self.yi, self.zi, param.NCRIT, param.Nm,
+                                self.N, R_C0, x_center)
+        C = 0
+        self.twig = findTwigs(self.tree, C, self.twig, param.NCRIT)
+
+        addSources(self.tree, self.twig, param.K)
+        #    addSources3(self.xj,self.yj,self.zj,self.tree,self.twig)
+        #    for j in range(Nj):
+        #        C = 0
+        #        addSources2(self.xj,self.yj,self.zj,j,self.tree,C,param.NCRIT)
+
+        self.xk, self.wk = GQ_1D(param.Nk)
+        self.Xsk, self.Wsk = quadratureRule_fine(param.K_fine)
+
+        # Generate preconditioner
+        # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
+        #If we have complex dielectric constants we need to initialize Precon with
+        #complex type else it'll be float.
+        if type(self.E_hat) == complex:
+            self.Precond = numpy.zeros((4, self.N), complex)
+        else:
+            self.Precond = numpy.zeros((4, self.N))
+        # Stores the inverse of the block diagonal (also a tridiag matrix)
+        # Order: Top left, top right, bott left, bott right
+        centers = numpy.zeros((self.N, 3))
+        centers[:, 0] = self.xi[:]
+        centers[:, 1] = self.yi[:]
+        centers[:, 2] = self.zi[:]
+
+        #   Compute diagonal integral for internal equation
+        VL = numpy.zeros(self.N)
+        KL = numpy.zeros(self.N)
+        VY = numpy.zeros(self.N)
+        KY = numpy.zeros(self.N)
+        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
+                        numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
+                        self.xk, self.wk)
+        if self.LorY_in == 1:
+            dX11 = KL
+            dX12 = -VL
+            self.sglInt_int = VL  # Array for singular integral of V through interior
+        elif self.LorY_in == 2:
+            dX11 = KY
+            dX12 = -VY
+            self.sglInt_int = VY  # Array for singular integral of V through interior
+        else:
+            self.sglInt_int = numpy.zeros(N)
+
+    #   Compute diagonal integral for external equation
+        VL = numpy.zeros(self.N)
+        KL = numpy.zeros(self.N)
+        VY = numpy.zeros(self.N)
+        KY = numpy.zeros(self.N)
+        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
+                        numpy.ravel(centers), self.kappa_out, 2 * numpy.pi, 0.,
+                        self.xk, self.wk)
+        if self.LorY_out == 1:
+            dX21 = KL
+            dX22 = self.E_hat * VL
+            self.sglInt_ext = VL  # Array for singular integral of V through exterior
+        elif self.LorY_out == 2:
+            dX21 = KY
+            dX22 = self.E_hat * VY
+            self.sglInt_ext = VY  # Array for singular integral of V through exterior
+        else:
+            self.sglInt_ext = numpy.zeros(N)
+
+        if self.surf_type != 'dirichlet_surface' and self.surf_type != 'neumann_surface':
+            d_aux = 1 / (dX22 - dX21 * dX12 / dX11)
+            self.Precond[0, :] = 1 / dX11 + 1 / dX11 * dX12 * d_aux * dX21 / dX11
+            self.Precond[1, :] = -1 / dX11 * dX12 * d_aux
+            self.Precond[2, :] = -d_aux * dX21 / dX11
+            self.Precond[3, :] = d_aux
+        elif self.surf_type == 'dirichlet_surface':
+            self.Precond[0, :] = 1 / VY  # So far only for Yukawa outside
+        elif self.surf_type == 'neumann_surface' or self.surf_type == 'asc_surface':
+            self.Precond[0, :] = 1 / (2 * numpy.pi)
+
+        tic = time.time()
+        sortPoints(self, self.tree, self.twig, param)
+        toc = time.time()
+        time_sort = toc - tic
+
+        return time_sort
+
+    def calc_centers(self):
+        self.xi = numpy.average(self.vertex[self.triangle[:], 0], axis=1)
+        self.yi = numpy.average(self.vertex[self.triangle[:], 1], axis=1)
+        self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
+
+    def calc_norms(self):
+        self.normal = numpy.zeros((self.N, 3))
+        self.Area = numpy.zeros(self.N)
+
+        L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
+        L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
+        self.normal = numpy.cross(L0, L2)
+        self.Area = numpy.sqrt(self.normal[:, 0]**2 + self.normal[:, 1]**2 +
+                            self.normal[:, 2]**2) / 2
+        self.normal[:, 0] = self.normal[:, 0] / (2 * self.Area)
+        self.normal[:, 1] = self.normal[:, 1] / (2 * self.Area)
+        self.normal[:, 2] = self.normal[:, 2] / (2 * self.Area)
 
 class Field():
     """

@@ -280,7 +280,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     ### Fill surface class
     time_sort = 0.
     for i in range(len(surf_array)):
-        time_sort += fill_surface(surf_array[i], param)
+        time_sort += surf_array[i].fill_surface(param)
 
     ### Output setup summary
     param.N = 0
