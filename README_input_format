@@ -73,6 +73,8 @@ Parameters file format:
 
 - Nk:           number of Gauss points per triangle edge for semi-analytical integration.
 
+- K_fine:       number of Gauss points per element for near singular integrals.
+
 - threshold:    defines region near singularity where semi-analytical technique is used. 
                 if sqrt(2*Area)/r > threshold, integration is done semi-analytically.
 
