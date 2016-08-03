@@ -16,16 +16,28 @@ The following instructions assume that the operating system is Ubuntu. Run the
 corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
-* Python 2.7.11
-* Numpy 1.11.0
+* Python 2.7.12
+* Numpy 1.11.1
+* SciPy 0.17.1
 * SWIG 3.0.8
-* NVCC 7.0
+* NVCC 7.5 
     * gcc < 4.10
-* PyCUDA 2016.1.1
+* PyCUDA 2016.1.3
+* matplotlib 1.5.1 (optional, for post-processing only)
 
 #### Python and Numpy
 
 To install the specific version of these packages we recommend using either [conda](http://conda.pydata.org/docs/get-started.html) or [pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
+
+To create a new environment for using PyGBe with `conda` you can do the following:
+
+```console
+conda create -n pygbe python=2.7 numpy scipy swig matplotlib
+source activate pygbe
+```
+
+and then proceed with the rest of the installation instructions (although note that if youdo this, `swig` is already installed.
+
 
 #### SWIG
 
@@ -43,9 +55,9 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > cd $HOME
     > mkdir src
     > cd src
-    > wget https://pypi.python.org/packages/source/p/pycuda/pycuda-2015.1.3.tar.gz
-    > tar -xvzf pycuda-2015.1.3.tar.gz
-    > cd pycuda-2015.1.3
+    > wget https://github.com/inducer/pycuda/archive/v2016.1.2.tar.gz
+    > tar -xvzf pycuda-2016.1.2.tar.gz
+    > cd pycuda-2016.1.2
     > python configure.py --cuda-root=/usr/local/cuda
     > make
     > sudo make install

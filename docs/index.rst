@@ -3,13 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyGBe's documentation!
-=================================
-
-Contents:
+.. include:: intro.rst
 
 .. toctree::
+   :titlesonly:
    :maxdepth: 2
+
+   installation
+   contributing
+   input_format
+   references
 
 
 

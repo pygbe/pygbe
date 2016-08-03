@@ -619,6 +619,7 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
 
     Note: In this context when we refer to mass we mean
                  mass  = (vector x gauss weights)
+
           where 'vector' is the vector in the matrix-vector multiplication in
           the GMRES.
 
@@ -1011,6 +1012,7 @@ def P2P_sort(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_aux, V_aux, surf,
     Note: In this context when we refer to mass we mean
                  mass       = (vector x gauss weights)
                  mass-clean = (vector)
+
           where 'vector' is the vector in the matrix-vector multiplication in
           the GMRES.
 
@@ -1096,6 +1098,7 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
     Note: In this context when we refer to mass we mean
                  mass       = (vector x gauss weights)
                  mass-clean = (vector)
+
           where 'vector' is the vector in the matrix-vector multiplication in
           the GMRES.
 
@@ -1173,6 +1176,7 @@ def P2P_gpu(surfSrc, surfTar, m, mx, my, mz, mKc, mVc, K_gpu, V_gpu, surf,
     Note: In this context when we refer to mass we mean
                  mass       = (vector x gauss weights)
                  mass-clean = (vector)
+
           where 'vector' is the vector in the matrix-vector multiplication in
           the GMRES.
 
@@ -1308,8 +1312,10 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
     given as an input, on the GPU.
 
     Note: In this context when we refer to mass we mean
+
                  mass       = (vector x gauss weights)
                  mass-clean = (vector)
+
           where 'vector' is the vector in the matrix-vector multiplication in
           the GMRES.
 
@@ -1344,6 +1350,7 @@ def P2PKt_gpu(surfSrc, surfTar, m, mKtc, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, LorY,
                     adjoint double layer potential.
     Ktz_gpu: array, z component of the far plus near field contribution to the
                     adjoint double layer potential.
+
     """
 
     if param.GPU == 1:
