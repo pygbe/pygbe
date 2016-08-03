@@ -7,9 +7,9 @@ for file in ['README', 'README_input_format', 'CONTRIBUTING']:
                      '--from', 'markdown', '--to', 'rst',
                      '-s', '-o', '{}.rst'.format(file.lower())])
 
-os.rename('README_input_format.rst', 'input_format.rst')
+os.rename('readme_input_format.rst', 'input_format.rst')
 
-with open('README.rst', 'r') as f:
+with open('readme.rst', 'r') as f:
     readme = f.read()
 
 readme = readme.split('Installation', 1)
