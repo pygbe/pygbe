@@ -36,7 +36,7 @@ conda create -n pygbe python=2.7 numpy scipy swig matplotlib
 source activate pygbe
 ```
 
-and then proceed with the rest of the installation instructions (although note that if youdo this, `swig` is already installed.
+and then proceed with the rest of the installation instructions (although note that if you do this, `swig` is already installed.
 
 
 #### SWIG
