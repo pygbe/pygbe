@@ -23,5 +23,5 @@ for test in tests:
 #remove test result cache
 try:
     os.remove('tests')
-except FileNotFoundError:
+except IOError:
     pass
