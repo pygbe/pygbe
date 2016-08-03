@@ -28,3 +28,5 @@ with open('installation.rst', 'w') as f:
 with open('references.rst', 'w') as f:
     f.write('References')
     f.write(references)
+
+os.remove('readme.rst')
