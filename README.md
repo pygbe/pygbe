@@ -29,6 +29,16 @@ corresponding commands in your flavor of Linux to install.
 
 To install the specific version of these packages we recommend using either [conda](http://conda.pydata.org/docs/get-started.html) or [pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
 
+To create a new environment for using PyGBe with `conda` you can do the following:
+
+```console
+conda create -n pygbe python=2.7 numpy scipy swig matplotlib
+source activate pygbe
+```
+
+and then proceed with the rest of the installation instructions (although note that if youdo this, `swig` is already installed.
+
+
 #### SWIG
 
 To install SWIG we recommend using either `conda`, your distribution package manager or [SWIG's website](http://www.swig.org/download.html).  
