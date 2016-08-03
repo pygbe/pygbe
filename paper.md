@@ -25,7 +25,7 @@ bibliography: paper.bib
 
 PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics 
 calculations in a continuum model.
-It computes solvation energies for proteins modeled with any number of dielectric regions, which is relevant in calculations of protein binding affinity, protein-surface interaction (see @CooperClementiBarba2015 and @CooperBarba2016), acid-dissociation contants, among other applications. 
+It computes solvation energies for proteins modeled with any number of dielectric regions, which is relevant in calculations of protein binding affinity, protein-surface interaction, acid-dissociation contants, among other applications. 
 The mathematical formulation follows @YoonLenhoff1990 for solving the Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model in integral form.
 
 PyGBe achieves both algorithmic and hardware acceleration, as detailed in @CooperBardhanBarba2014.
