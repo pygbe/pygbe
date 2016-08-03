@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import time
+import glob
 import numpy
 import cPickle as pickle
 import subprocess
@@ -132,11 +133,11 @@ def find_config_files(cliargs):
     prob_name = prob_rel_path[1]
 
     if cliargs.config is None:
-        cliargs.config = os.path.join(full_path, prob_name + '.config')
+        cliargs.config = glob.iglob(os.path.join(full_path, '*.config')).next()
     else:
         cliargs.config = resolve_relative_config_file(cliargs.config, full_path)
     if cliargs.param is None:
-        cliargs.param = os.path.join(full_path, prob_name + '.param')
+        cliargs.param = glob.iglob(os.path.join(full_path, '*.param')).next()
     else:
         cliargs.param = resolve_relative_config_file(cliargs.param, full_path)
 
