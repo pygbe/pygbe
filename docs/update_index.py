@@ -14,8 +14,17 @@ with open('readme.rst', 'r') as f:
 
 readme = readme.split('Installation', 1)
 
-with open('index_intro.rst', 'w') as f:
-    f.write(readme[0])
+intro, installation = readme
 
-with open('index_outro.rst', 'w') as f:
-    f.write(readme[1])
+installation, references = installation.split('References', 1)
+
+with open('intro.rst', 'w') as f:
+    f.write(intro)
+
+with open('installation.rst', 'w') as f:
+    f.write('Installation')
+    f.write(installation)
+
+with open('references.rst', 'w') as f:
+    f.write('References')
+    f.write(references)
