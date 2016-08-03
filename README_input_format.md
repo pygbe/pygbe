@@ -1,8 +1,8 @@
 # Input File Format
 
 In this file, the format for the input files is detailed.
-To run, PyGBe needs two input files: a `config` file and a `parameters` file, 
-which are in the `./bem_pycuda/input_files` directory.
+To run, PyGBe needs two input files: a `config` file and a `parameters` file.  
+You can find samples of these files in the `examples` directory.
 
 ## Config file format
 This file has two parts:
