@@ -88,7 +88,7 @@ If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), the
 
     > sudo python setup.py install clean
 
-### Run PyGBe
+## Run PyGBe
 
 PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.
 
