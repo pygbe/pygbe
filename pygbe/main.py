@@ -171,10 +171,12 @@ def check_for_nvcc():
     try:
         subprocess.check_output(['which', 'nvcc'])
         check_nvcc_version()
+        return True
     except subprocess.CalledProcessError:
         print(
             "Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH"
         )
+        return False
 
 
 def check_nvcc_version():
@@ -209,7 +211,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
                          The name of the log file containing problem output
     """
 
-    check_for_nvcc()
 
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
@@ -270,6 +271,19 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         param.P + 3) / 6  # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT / float(param.BSZ))
                               )  # CUDA blocks that fit per twig
+
+    HAS_GPU = check_for_nvcc()
+    if param.GPU == 1 and not HAS_GPU:
+        print('\n\n\n\n')
+        print('{:-^{}}'.format('No GPU DETECTED', 60))
+        print("Your param file has `GPU = 1` but CUDA was not detected.\n"
+              "Continuing using CPU.  If you do not want this, use Ctrl-C\n"
+              "to stop the program and check that your CUDA installation\n"
+              "is on your $PATH")
+        print('{:-^{}}'.format('No GPU DETECTED', 60))
+        print('\n\n\n\n')
+        param.GPU = 0
+        time.sleep(3)
 
     ### Generate array of fields
     field_array = initializeField(configFile, param)
