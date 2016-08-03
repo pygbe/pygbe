@@ -19,9 +19,9 @@ corresponding commands in your flavor of Linux to install.
 * Python 2.7.11
 * Numpy 1.11.0
 * SWIG 3.0.8
-* NVCC 7.0 
+* NVCC 7.5 
     * gcc < 4.10
-* PyCUDA 2016.1.1
+* PyCUDA 2016.1.3
 
 #### Python and Numpy 
 
@@ -43,9 +43,9 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > cd $HOME
     > mkdir src
     > cd src
-    > wget https://pypi.python.org/packages/source/p/pycuda/pycuda-2015.1.3.tar.gz
-    > tar -xvzf pycuda-2015.1.3.tar.gz
-    > cd pycuda-2015.1.3
+    > wget https://github.com/inducer/pycuda/archive/v2016.1.2.tar.gz
+    > tar -xvzf pycuda-2016.1.2.tar.gz
+    > cd pycuda-2016.1.2
     > python configure.py --cuda-root=/usr/local/cuda
     > make
     > sudo make install 

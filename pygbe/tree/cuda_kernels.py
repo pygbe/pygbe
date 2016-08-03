@@ -1061,7 +1061,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
     }
 
-    __device__ REAL norm(REAL *x)
+    __device__ REAL mynorm(REAL *x)
     {
         return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
     }
@@ -1179,7 +1179,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             v21u[i] = v2[i] - v1[i];
         }
 
-        REAL L21 = norm(v21u);
+        REAL L21 = mynorm(v21u);
         axip(v21u, 1/L21, 3);
 
         REAL unit[3] = {0.,0.,1.};
@@ -1235,8 +1235,8 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
         // Find panel coordinate system X: 0->1
         cross(y1_panel, y2_panel, Z);
-        REAL Xnorm = norm(X);
-        REAL Znorm = norm(Z);
+        REAL Xnorm = mynorm(X);
+        REAL Znorm = mynorm(Z);
         for (int i=0; i<3; i++)
         {
             X[i] /= Xnorm;
@@ -2296,6 +2296,6 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     }
 
 
-    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_near':K_fine, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
+    """%{'blocksize':BSZ, 'Nmult':Nm, 'K_near':K_fine, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math"])
 
     return mod

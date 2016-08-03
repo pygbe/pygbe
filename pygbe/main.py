@@ -178,13 +178,13 @@ def check_for_nvcc():
 
 
 def check_nvcc_version():
-    """Check that version of nvcc <= 7.0"""
+    """Check that version of nvcc <= 7.5"""
     verstr = subprocess.check_output(['nvcc', '--version'])
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
-    if version > 7.0:
-        sys.exit('PyGBe only supports CUDA <= 7.0\n'
+    if version > 7.5:
+        sys.exit('PyGBe only supports CUDA <= 7.5\n'
                  'Please install an earlier version of the CUDA toolkit\n'
                  'or remove `nvcc` from your PATH to use CPU only.')
 
