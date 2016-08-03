@@ -57,7 +57,12 @@ def richardson_extrapolation(compiled_results):
     The grids f_1, f_2, f_3 should have the same refinement ratio (e.g. 2 -> 4 -> 8)
     """
 
-    esolv = compiled_results['E_solv_kJ']
+    try:
+        esolv = compiled_results['E_solv_kJ']
+    except KeyError:
+        print('No results found for solvation energy.  \n'
+              'Something has gone wrong.')
+        sys.exit()
     f1 = esolv[5] # assuming 6 runs: 1, 2, 4, 8, 12, 16
     f2 = esolv[3]
     f3 = esolv[2]
