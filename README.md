@@ -16,12 +16,14 @@ The following instructions assume that the operating system is Ubuntu. Run the
 corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
-* Python 2.7.11
-* Numpy 1.11.0
+* Python 2.7.12
+* Numpy 1.11.1
+* SciPy 0.17.1
 * SWIG 3.0.8
 * NVCC 7.5 
     * gcc < 4.10
 * PyCUDA 2016.1.3
+* matplotlib 1.5.1 (optional, for post-processing only)
 
 #### Python and Numpy 
 
