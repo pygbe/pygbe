@@ -2,13 +2,33 @@
 ----
 ## Current development
 ---
+
 ### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+## 0.2.1
+---
+### Added
+
+* All documentation is available on github pages
+* Support for Cuda 7.5
+* One liner for setting up Py2.7 environment (sans PyCUDA)
 
 ### Changed
 * `config` and `param` files are now globbed for so they can have a name different
   than the folder which contains them.  
+* Updated license with new contributors
 
 ### Fixed
+
+* Uncaught exception when pygbe doesnt run correctly
+* Wrong error type in regression test master script
+* Performance runs work on non-X backends
 
 ### Removed
 
