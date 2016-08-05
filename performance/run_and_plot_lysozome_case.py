@@ -5,6 +5,10 @@ import pickle
 import zipfile
 import urllib2
 import subprocess
+
+import matplotlib
+matplotlib.use('Agg') #don't use X backend so headless servers don't die
+
 from matplotlib import pyplot
 
 
