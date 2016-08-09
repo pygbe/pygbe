@@ -12,3 +12,17 @@ geometry/sphere/sphere520K*
 # regression test output
 tests/regression_tests/figs/*
 _build
+
+# compiletime stuff
+PyGBe.egg-info/
+build/
+dist/
+examples/sphere/output/
+pygbe/tree/calculateMultipoles.py
+pygbe/tree/calculateMultipoles_wrap.cpp
+pygbe/tree/direct.py
+pygbe/tree/direct_wrap.cpp
+pygbe/tree/multipole.py
+pygbe/tree/multipole_wrap.cpp
+pygbe/util/semi_analyticalwrap.py
+pygbe/util/semi_analyticalwrap_wrap.cpp
