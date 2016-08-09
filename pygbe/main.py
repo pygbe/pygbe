@@ -133,11 +133,11 @@ def find_config_files(cliargs):
     prob_name = prob_rel_path[1]
 
     if cliargs.config is None:
-        cliargs.config = glob.iglob(os.path.join(full_path, '*.config')).next()
+        cliargs.config = next(glob.iglob(os.path.join(full_path, '*.config')))
     else:
         cliargs.config = resolve_relative_config_file(cliargs.config, full_path)
     if cliargs.param is None:
-        cliargs.param = glob.iglob(os.path.join(full_path, '*.param')).next()
+        cliargs.param = next(glob.iglob(os.path.join(full_path, '*.param')))
     else:
         cliargs.param = resolve_relative_config_file(cliargs.param, full_path)
 
@@ -182,7 +182,7 @@ def check_for_nvcc():
 
 def check_nvcc_version():
     """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version'])
+    verstr = subprocess.check_output(['nvcc', '--version']).decode()
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
@@ -284,7 +284,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         print('{:-^{}}'.format('No GPU DETECTED', 60))
         print('\n\n\n\n')
         param.GPU = 0
-        time.sleep(3)
 
     ### Generate array of fields
     field_array = initializeField(configFile, param)
