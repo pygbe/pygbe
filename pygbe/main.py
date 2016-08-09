@@ -284,7 +284,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         print('{:-^{}}'.format('No GPU DETECTED', 60))
         print('\n\n\n\n')
         param.GPU = 0
-        time.sleep(3)
 
     ### Generate array of fields
     field_array = initializeField(configFile, param)
