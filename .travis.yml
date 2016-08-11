@@ -7,12 +7,15 @@ env:
 
 
 sudo: false
-
+addons:
+  apt:
+    packages:
+      - pandoc
 # install miniconda and create env for pygbe
 # also use pip to install doctr py3.5
-install:
+before_install:
   - pip install doctr
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
