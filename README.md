@@ -127,9 +127,9 @@ then get its `.pqr` file using any PDB to PQR converter (there are online tools 
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
-### API Documentation
+### Developer Documentation
 
-Docs are available on http://barbagroup.github.io/pygbe/
+Developer documentation is available on http://barbagroup.github.io/pygbe/
 
 ### Performance:
 
