@@ -16,8 +16,8 @@
 
 
 
-Indices and tables
-==================
+Developer Documentation
+=======================
 
 * :ref:`genindex`
 * :ref:`modindex`
