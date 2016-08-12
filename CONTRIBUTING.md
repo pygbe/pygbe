@@ -68,4 +68,7 @@ Ensure that the docs have built correctly and that formatting, etc, is functiona
 firefox _build/html/index.html
 ```
 
-If all looks right, then add and commit the changes to the `rst` files in `docs/source` and push.   Don't add or commit the `_build` directory as readthedocs will automatically generate documentation.
+If there are any errors in the build (or warnings), then fix them.
+If there are no errors and the docs look good on your local build, then you're done!
+Open a PR with your changes and when it is merged, the changes to the documentation will be automatically built and pushed
+by Travis to the `gh-pages` branch.
