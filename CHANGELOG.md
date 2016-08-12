@@ -18,17 +18,20 @@
 * All documentation is available on github pages
 * Support for Cuda 7.5
 * One liner for setting up Py2.7 environment (sans PyCUDA)
+* Use Doctr to automatically generate documentation using Travis
 
 ### Changed
 * `config` and `param` files are now globbed for so they can have a name different
   than the folder which contains them.  
 * Updated license with new contributors
+* Layout of sphinx documentationt toolbars (home button added, more verbose layout)
 
 ### Fixed
 
 * Uncaught exception when pygbe doesnt run correctly
 * Wrong error type in regression test master script
 * Performance runs work on non-X backends
+* Uncaught out-of-memory exceptions in regression tests
 
 ### Removed
 
