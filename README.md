@@ -129,7 +129,7 @@ Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
 ### Developer Documentation
 
-Developer documentation is available on http://barbagroup.github.io/pygbe/
+Developer documentation is available on http://barbagroup.github.io/pygbe/docs
 
 ### Performance:
 
