@@ -28,6 +28,14 @@ pygbe.util.semi_analytical module
     :undoc-members:
     :show-inheritance:
 
+pygbe.util.semi_analyticalwrap module
+-------------------------------------
+
+.. automodule:: pygbe.util.semi_analyticalwrap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
