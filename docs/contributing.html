@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developer’s Guide &mdash; PyGBe 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyGBe 0.2 documentation" href="index.html" />
+    <link rel="next" title="Input File Format" href="input_format.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-s-guide">
+<h1>Developer&#8217;s Guide<a class="headerlink" href="#developer-s-guide" title="Permalink to this headline">¶</a></h1>
+<p>Welcome to PyGBe&#8217;s developer&#8217;s guide! This is a place to keep track of
+information that does not belong in a regular userguide.</p>
+<div class="section" id="contributing-to-pygbe">
+<h2>Contributing to PyGBe<a class="headerlink" href="#contributing-to-pygbe" title="Permalink to this headline">¶</a></h2>
+<p>All code must go through the pull request review procedure.
+If you want to add something to PyGBe, first fork the repository. Make
+your changes on your fork of the repository and then open a pull request
+with your changes against the main PyGBe repository.</p>
+<p>New features should follow the following rules: 1. PEP8 style guide
+should be followed 2. New features should include unit tests 3. All
+functions should have NumPy style doctrings. See
+<a class="reference external" href="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt">here</a>
+for reference)</p>
+</div>
+<div class="section" id="running-the-tests">
+<h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h2>
+<p>PyGBe currently only has regression tests.
+Once everything is installed, you can navigate to
+<code class="docutils literal"><span class="pre">pygbe/tests/regression_tests</span></code>.
+To run any of the regression tests individually, just run the
+corresponding script.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>or to run all of the tests, use the helper script</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_all_regression_tests</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="generating-documentation">
+<h2>Generating documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Ensure <code class="docutils literal"><span class="pre">sphinx</span></code> is installed.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ pip install sphinx
+$ conda install sphinx
+</pre></div>
+</div>
+<p>Once you have added docstrings to some new functions, first reinstall
+PyGBe using either</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python setup.py install
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python setup.py develop
+</pre></div>
+</div>
+<p>In the root of <code class="docutils literal"><span class="pre">pygbe</span></code> run</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ sphinx-apidoc -f -o docs/source pygbe
+</pre></div>
+</div>
+<p>Then enter the docs folder and run <code class="docutils literal"><span class="pre">make</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ cd docs
+$ make html
+</pre></div>
+</div>
+<p>Ensure that the docs have built correctly and that formatting, etc, is
+functional by opening the local docs in your browser</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">firefox</span> <span class="n">_build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>If all looks right, then add and commit the changes to the <code class="docutils literal"><span class="pre">rst</span></code> files
+in <code class="docutils literal"><span class="pre">docs/source</span></code> and push. Don&#8217;t add or commit the <code class="docutils literal"><span class="pre">_build</span></code>
+directory as readthedocs will automatically generate documentation.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Developer&#8217;s Guide</a><ul>
+<li><a class="reference internal" href="#contributing-to-pygbe">Contributing to PyGBe</a></li>
+<li><a class="reference internal" href="#running-the-tests">Running the tests</a></li>
+<li><a class="reference internal" href="#generating-documentation">Generating documentation</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="input_format.html" title="next chapter">Input File Format</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
