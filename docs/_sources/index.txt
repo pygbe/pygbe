@@ -1,10 +1,6 @@
 .. include:: intro.rst
 
 .. toctree::
-
-   self
-
-.. toctree::
    :titlesonly:
    :maxdepth: 2
 
