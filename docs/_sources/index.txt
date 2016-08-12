@@ -1,7 +1,6 @@
 .. include:: intro.rst
 
 .. toctree::
-   :hidden:
 
    self
 
