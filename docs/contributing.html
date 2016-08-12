@@ -101,9 +101,11 @@ functional by opening the local docs in your browser</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">firefox</span> <span class="n">_build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
 </pre></div>
 </div>
-<p>If all looks right, then add and commit the changes to the <code class="docutils literal"><span class="pre">rst</span></code> files
-in <code class="docutils literal"><span class="pre">docs/source</span></code> and push. Don&#8217;t add or commit the <code class="docutils literal"><span class="pre">_build</span></code>
-directory as readthedocs will automatically generate documentation.</p>
+<p>If there are any errors in the build (or warnings), then fix them. If
+there are no errors and the docs look good on your local build, then
+you&#8217;re done! Open a PR with your changes and when it is merged, the
+changes to the documentation will be automatically built and pushed by
+Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></code> branch.</p>
 </div>
 </div>
 

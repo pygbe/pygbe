@@ -168,7 +168,7 @@ Developer Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Developer documentation is available on
-http://barbagroup.github.io/pygbe/
+http://barbagroup.github.io/pygbe/docs
 
 Performance:
 ~~~~~~~~~~~~
