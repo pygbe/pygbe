@@ -30,7 +30,7 @@ def test_PGB_mut_sensor(key):
 
 @functools.lru_cache(5)
 def get_results():
-    print('Generating results for lysozyme example...')
+    print('Generating results for 1PGBmut example...')
     results = main(['','../examples/1PGBmut_sensor'],
                     log_output=False,
                     return_results_dict=True)
