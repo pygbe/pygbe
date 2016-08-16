@@ -1,9 +1,12 @@
 import pickle
 import pytest
+# TODO change this to `import functools` for py3 port
+import functools32 as functools
 
 try:
     import pycuda
 except ImportError:
+    # TODO change this to `input` for py3 port
     ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
     if ans in ['Y', 'y']:
         pass
@@ -18,11 +21,18 @@ from pygbe.main import main
                                  'E_coul_kJ',
                                  'E_solv_kcal'])
 def test_lysozyme(key):
-    results = main(['', '../examples/lys',
-                    'log_output=False',
-                    'return_results_dict=True'])
+    results = get_results()
 
     with open('lysozyme.pickle', 'r') as f:
         base_results = pickle.load(f)
 
     assert base_results[key] == results[key]
+
+@functools.lru_cache(5)
+def get_results():
+    print('Generating results for lysozyme example...')
+    results = main(['','../examples/lys'],
+                    log_output=False,
+                    return_results_dict=True)
+
+    return results
