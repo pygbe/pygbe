@@ -68,7 +68,7 @@ def scanOutput(filename):
 
 def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction'):
     """
-    Prints out information for the regression tests.
+    Prints out information for the convergence tests.
 
     Inputs:
     -------
@@ -108,9 +108,9 @@ def report_results(error, N, iterations, E, analytical, total_time, energy_type=
 
 
 
-def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
+def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
     """
-    Runs regression tests over a series of mesh sizes
+    Runs convergence tests over a series of mesh sizes
 
     Inputs:
     ------

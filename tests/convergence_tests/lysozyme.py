@@ -5,8 +5,8 @@ import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import scanOutput, run_regression, picklesave, pickleload
-from regression import lysozome_mesh as mesh
+from convergence import scanOutput, run_convergence, picklesave, pickleload
+from convergence import lysozome_mesh as mesh
 
 def main():
     print('{:-^60}'.format('Running lysozyme test'))
@@ -21,7 +21,7 @@ def main():
     param = 'lys.param'
     test_name = 'lys_single'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -30,7 +30,7 @@ def main():
     param = 'lys.param'
     test_name = 'lys'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
@@ -41,7 +41,7 @@ def main():
     param = 'lys.param'
     test_name = 'lys_k0'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(mesh, test_name, problem_folder, param)
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
