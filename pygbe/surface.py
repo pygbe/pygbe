@@ -170,7 +170,7 @@ class Surface():
     xj            : list, x component of gauss nodes.
     yj            : list, y component of gauss nodes.
     zj            : list, z component of gauss nodes.
-    Area          : list, areas of triangles.
+    area          : list, areas of triangles.
     normal        : list, normal of triangles.
     sglInt_int    : list, singular integrals for V for internal equation.
     sglInt_ext    : list, singular integrals for V for external equation.
@@ -192,7 +192,7 @@ class Surface():
                           M2P_list array.
     zcSort        : list, sorted z component of the box centers according to
                           M2P_list array.
-    AreaSort      : list, sorted array of areas.
+    areaSort      : list, sorted array of areas.
     sglInt_intSort: list, sorted array of singular integrals for V for internal
                           equation.
     sglInt_extSort: list, sorted array of singular integrals for V for external
@@ -238,7 +238,7 @@ class Surface():
                          M2P_list array (on the GPU).
     zcDev        : list, sorted z component of the box centers according to
                          M2P_list array (on the GPU).
-    AreaDev      : list, areas of triangles (on the GPU).
+    areaDev      : list, areas of triangles (on the GPU).
     sglInt_intDev: list, singular integrals for V for internal equation (on the
                          GPU).
     sglInt_extDev: list, singular integrals for V for external equation (on the
@@ -270,14 +270,16 @@ class Surface():
 
 
     def define_surface(self, files, param):
+        """Load the vertices and triangles that define the molecule surface"""
         tic = time.time()
         self.vertex = readVertex(files + '.vert', param.REAL)
         triangle_raw = readTriangle(files + '.face', self.surf_type)
         toc = time.time()
         print('Time load mesh: {}'.format(toc - tic))
-        Area_null = self.zero_areas(triangle_raw)
-        self.triangle = numpy.delete(triangle_raw, Area_null, 0)
-        print('Removed areas=0: {}'.format(len(Area_null)))
+        area_null = self.zero_areas(triangle_raw)
+        self.triangle = numpy.delete(triangle_raw, area_null, 0)
+        print('Removed areas=0: {}'.format(len(area_null)))
+
 
     def define_regions(self, field_array, i):
         # Look for regions inside/outside
@@ -297,6 +299,7 @@ class Surface():
             self.E_hat = self.Ein / self.Eout
         else:
             self.E_hat = 1
+
 
     def fill_surface(self, param):
         """
@@ -345,10 +348,13 @@ class Surface():
 
         return time_sort
 
+
     def calc_centers(self):
+        """Calculate the centers of each element of the surface"""
         self.xi = numpy.average(self.vertex[self.triangle[:], 0], axis=1)
         self.yi = numpy.average(self.vertex[self.triangle[:], 1], axis=1)
         self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
+
 
     def calc_norms(self):
 
@@ -356,8 +362,9 @@ class Surface():
         L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
 
         self.normal = numpy.cross(L0, L2)
-        self.Area = numpy.sqrt(numpy.sum(self.normal**2, axis=1)) / 2
-        self.normal /= (2 * self.Area[:, numpy.newaxis])
+        self.area = numpy.sqrt(numpy.sum(self.normal**2, axis=1)) / 2
+        self.normal /= (2 * self.area[:, numpy.newaxis])
+
 
     def calc_distance(self, param):
 
@@ -368,6 +375,7 @@ class Surface():
                           (self.yi - self.x_center[1])**2 +
                           (self.zi - self.x_center[2])**2)
         self.R_C0 = max(dist)
+
 
     def get_gauss_points(self, n):
         """
@@ -485,17 +493,17 @@ class Surface():
     def zero_areas(self, triangle_raw, area_null=[]):
         """
         Looks for "zero-areas", areas that are really small, almost zero. It appends
-        them to Area_null list.
+        them to area_null list.
 
         Arguments
         ----------
         s           : class, surface where we whan to look for zero areas.
         triangle_raw: list, triangles of the surface.
-        Area_null   : list, contains the zero areas.
+        area_null   : list, contains the zero areas.
 
         Returns
         --------
-        Area_null   : list, indices of the triangles with zero-areas.
+        area_null   : list, indices of the triangles with zero-areas.
         """
 
         for i in range(len(triangle_raw)):

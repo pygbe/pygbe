@@ -38,12 +38,12 @@ def print_summary(surf_array, field_array, param, results_dict):
                                                          surf_array[i].tree[0].zc))
         print('\tTwig cell size     : {}'.format(numpy.min(rr)))
         print('\tRbox/theta         : {}'.format(numpy.min(rr)/param.theta))
-        print('\tAnalytic distance  : {}'.format(numpy.average(numpy.sqrt(2*surf_array[i].Area))/param.threshold))
-        print('\tElem. per sq Ang   : {}'.format(1/numpy.average(surf_array[i].Area)))
-        print('\tMax, min, avg elem.: {}, {}, {}'.format(numpy.max(surf_array[i].Area),
-                                                         numpy.min(surf_array[i].Area),
-                                                         numpy.average(surf_array[i].Area)))
-        print('\tTotal area         : {}'.format(numpy.sum(surf_array[i].Area)))
+        print('\tAnalytic distance  : {}'.format(numpy.average(numpy.sqrt(2*surf_array[i].area))/param.threshold))
+        print('\tElem. per sq Ang   : {}'.format(1/numpy.average(surf_array[i].area)))
+        print('\tMax, min, avg elem.: {}, {}, {}'.format(numpy.max(surf_array[i].area),
+                                                         numpy.min(surf_array[i].area),
+                                                         numpy.average(surf_array[i].area)))
+        print('\tTotal area         : {}'.format(numpy.sum(surf_array[i].area)))
 
     print(30*'-'+'\n')
 

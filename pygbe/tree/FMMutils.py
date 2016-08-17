@@ -383,7 +383,7 @@ def sortPoints(surface, Cells, twig, param):
     surface.xjSort = surface.xj[surface.sortSource]
     surface.yjSort = surface.yj[surface.sortSource]
     surface.zjSort = surface.zj[surface.sortSource]
-    surface.AreaSort = surface.Area[surface.sortSource // param.K]
+    surface.AreaSort = surface.area[surface.sortSource // param.K]
     surface.sglInt_intSort = surface.sglInt_int[surface.sortSource // param.K]
     surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource // param.K]
     surface.triangleSort = surface.triangle[surface.sortSource // param.K]
@@ -1590,7 +1590,7 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
              s_mVc,
              numpy.array(
                  [-1], dtype=numpy.int32),
-             surface.Area,
+             surface.area,
              surface.sglInt_int,
              surface.sglInt_ext,
              surface.xk,

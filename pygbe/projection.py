@@ -61,7 +61,7 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
     Nt = len(surfTar.triangle)
-    L = numpy.sqrt(2 * surfSrc.Area)  # Representative length
+    L = numpy.sqrt(2 * surfSrc.area)  # Representative length
 
     tic.record()
     K = param.K
@@ -74,12 +74,12 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     X_Vc = numpy.zeros(Ns * K)
 
     NsK = numpy.arange(Ns * K)
-    X_V[:] = XV[NsK // K] * w[NsK % K] * surfSrc.Area[NsK // K]
-    X_Kx[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+    X_V[:] = XV[NsK // K] * w[NsK % K] * surfSrc.area[NsK // K]
+    X_Kx[:] = XK[NsK // K] * w[NsK % K] * surfSrc.area[
         NsK // K] * surfSrc.normal[NsK // K, 0]
-    X_Ky[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+    X_Ky[:] = XK[NsK // K] * w[NsK % K] * surfSrc.area[
         NsK // K] * surfSrc.normal[NsK // K, 1]
-    X_Kz[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+    X_Kz[:] = XK[NsK // K] * w[NsK % K] * surfSrc.area[
         NsK // K] * surfSrc.normal[NsK // K, 2]
     X_Kc[:] = XK[NsK // K]
     X_Vc[:] = XV[NsK // K]
@@ -416,7 +416,7 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     Nq = len(field.xq)
     N = len(XK)
     MV = numpy.zeros(len(XK))
-    L = numpy.sqrt(2 * surface.Area)  # Representative length
+    L = numpy.sqrt(2 * surface.area)  # Representative length
     AI_int = 0
 
     # Setup vector
@@ -431,12 +431,12 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     X_Vc = numpy.zeros(N * K)
 
     for i in range(N * K):
-        X_V[i] = XV[i // K] * w[i % K] * surface.Area[i // K]
-        X_Kx[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_V[i] = XV[i // K] * w[i % K] * surface.area[i // K]
+        X_Kx[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 0]
-        X_Ky[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_Ky[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 1]
-        X_Kz[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_Kz[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 2]
         X_Kc[i] = XK[i // K]
         X_Vc[i] = XV[i // K]
