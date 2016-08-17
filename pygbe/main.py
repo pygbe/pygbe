@@ -360,7 +360,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     ### Solve
     tic = time.time()
 
-    print 'Solve'
+    print('Solve')
 
     # Initializing phi dtype according to the problem we are solving. 
     if complexDiel == 1:
