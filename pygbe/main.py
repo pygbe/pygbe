@@ -24,7 +24,8 @@ from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
 
-from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
+from pygbe.util.readData import (readVertex, readTriangle, readpqr, readParameters,
+                                readElectricField)
 from pygbe.util.an_solution import an_P, two_sphere
 
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
