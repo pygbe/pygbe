@@ -20,7 +20,7 @@ from pygbe.gmres import gmres_mgs
 from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
-from pygbe.surface import initializeSurf, initializeField, fill_phi
+from pygbe.surface import initialize_surface, initialize_field, fill_phi
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
@@ -286,10 +286,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         param.GPU = 0
 
     ### Generate array of fields
-    field_array = initializeField(configFile, param)
+    field_array = initialize_field(configFile, param)
 
     ### Generate array of surfaces and read in elements
-    surf_array = initializeSurf(field_array, configFile, param)
+    surf_array = initialize_surface(field_array, configFile, param)
 
     ### Fill surface class
     time_sort = 0.

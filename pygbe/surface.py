@@ -15,7 +15,7 @@ from pygbe.quadrature import quadratureRule_fine
 from pygbe.classes import Surface, Field
 
 
-def initializeSurf(field_array, filename, param):
+def initialize_surface(field_array, filename, param):
     """
     Initialize the surface of the molecule.
 
@@ -54,7 +54,7 @@ def initializeSurf(field_array, filename, param):
         triangle_raw = readTriangle(files[i] + '.face', s.surf_type)
         toc = time.time()
         print('Time load mesh: {}'.format(toc - tic))
-        Area_null = zeroAreas(s, triangle_raw, Area_null)
+        Area_null = zero_areas(s, triangle_raw, Area_null)
         s.triangle = numpy.delete(triangle_raw, Area_null, 0)
         print('Removed areas=0: {}'.format(len(Area_null)))
 
@@ -80,7 +80,7 @@ def initializeSurf(field_array, filename, param):
     return surf_array
 
 
-def zeroAreas(s, triangle_raw, Area_null):
+def zero_areas(s, triangle_raw, Area_null):
     """
     Looks for "zero-areas", areas that are really small, almost zero. It appends
     them to Area_null list.
@@ -107,7 +107,7 @@ def zeroAreas(s, triangle_raw, Area_null):
     return Area_null
 
 
-def initializeField(filename, param):
+def initialize_field(filename, param):
     """
     Initialize all the regions in the surface to be solved.
 
