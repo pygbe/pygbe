@@ -1,10 +1,10 @@
 try:
     from pycuda.compiler import SourceModule
-except:
+except ImportError:
     pass
 
 def kernels(BSZ, Nm, K_fine, P, REAL):
-    
+
     mod = SourceModule( """
 
     #define REAL %(precision)s
@@ -17,18 +17,18 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     /*
     __device__ int getIndex(int P, int i, int j, int k)
     {
-        int I=0, ii, jj; 
+        int I=0, ii, jj;
         for (ii=0; ii<i; ii++)
-        {   
+        {
             for (jj=1; jj<P+2-ii; jj++)
-            {   
+            {
                 I+=jj;
-            }   
-        }   
+            }
+        }
         for (jj=P+2-j; jj<P+2; jj++)
-        {   
+        {
             I+=jj-i;
-        }   
+        }
         I+=k;
 
         return I;
@@ -36,8 +36,8 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     */
 
     __device__ int getIndex(int i, int j, int k, int *Index)
-    {   
-        return Index[(P+1)*(P+1)*i + (P+1)*j + k]; 
+    {
+        return Index[(P+1)*(P+1)*i + (P+1)*j + k];
     }
 
     __device__ void getCoeff(REAL *a, REAL dx, REAL dy, REAL dz, REAL kappa, int *index, int LorY)
@@ -47,26 +47,26 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         REAL R = sqrt(dx*dx+dy*dy+dz*dz);
         REAL R2 = R*R;
         REAL R3 = R2*R;
-        
+
         int i,j,k,I,Im1x,Im2x,Im1y,Im2y,Im1z,Im2z;
         REAL C,C1,C2,Cb;
 
         if (LorY==2) // if Yukawa
-        {   
+        {
             b[0] = exp(-kappa*R);
             a[0] = b[0]/R;
-        }   
+        }
 
         if (LorY==1) // if Laplace
-        {   
+        {
             a[0] = 1/R;
-        }   
+        }
 
         // Two indices = 0
         I = getIndex(1,0,0, index);
 
         if (LorY==2) // if Yukawa
-        {   
+        {
             b[I]   = -kappa * (dx*a[0]); // 1,0,0
             b[P+1] = -kappa * (dy*a[0]); // 0,1,0
             b[1]   = -kappa * (dz*a[0]); // 0,0,1
@@ -74,32 +74,32 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             a[I]   = -1/R2*(kappa*dx*b[0]+dx*a[0]);
             a[P+1] = -1/R2*(kappa*dy*b[0]+dy*a[0]);
             a[1]   = -1/R2*(kappa*dz*b[0]+dz*a[0]);
-        
-        }   
+
+        }
 
         if (LorY==1) // if Laplace
-        {   
+        {
             a[I]   = -dx/R3;
             a[P+1] = -dy/R3;
             a[1]   = -dz/R3;
 
-        }   
-        
+        }
+
         for (i=2; i<P+1; i++)
-        {   
+        {
             Cb   = -kappa/i;
             C    = 1./(i*R2);
             I    = getIndex(i,0,0, index);
             Im1x = getIndex(i-1,0,0, index);
             Im2x = getIndex(i-2,0,0, index);
             if (LorY==2) // if Yukawa
-            {   
+            {
                 b[I] = Cb * (dx*a[Im1x] + a[Im2x]);
                 a[I] = C * ( -kappa*(dx*b[Im1x] + b[Im2x]) -(2*i-1)*dx*a[Im1x] - (i-1)*a[Im2x] );
             }
 
             if (LorY==1) // if Laplace
-            {   
+            {
                 a[I] = C * ( -(2*i-1)*dx*a[Im1x] - (i-1)*a[Im2x] );
             }
 
@@ -503,26 +503,26 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         REAL R = sqrt(dx*dx+dy*dy+dz*dz);
         REAL R2 = R*R;
         REAL R3 = R2*R;
-        
+
         int i,j,k,I,Im1x,Im2x,Im1y,Im2y,Im1z,Im2z;
         REAL C,C1,C2,Cb;
 
         if (LorY==2) // if Yukawa
-        {   
+        {
             b[0] = exp(-kappa*R);
             a[0] = b[0]/R;
-        }   
+        }
 
         if (LorY==1) // if Laplace
-        {   
+        {
             a[0] = 1/R;
-        }   
+        }
 
         // Two indices = 0
         I = getIndex(1,0,0, index);
 
         if (LorY==2) // if Yukawa
-        {   
+        {
             b[I]   = -kappa * (dx*a[0]); // 1,0,0
             b[P+1] = -kappa * (dy*a[0]); // 0,1,0
             b[1]   = -kappa * (dz*a[0]); // 0,0,1
@@ -530,36 +530,36 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             a[I]   = -1/R2*(kappa*dx*b[0]+dx*a[0]);
             a[P+1] = -1/R2*(kappa*dy*b[0]+dy*a[0]);
             a[1]   = -1/R2*(kappa*dz*b[0]+dz*a[0]);
-        
-        }   
+
+        }
 
         if (LorY==1) // if Laplace
-        {   
+        {
             a[I]   = -dx/R3;
             a[P+1] = -dy/R3;
             a[1]   = -dz/R3;
 
-        }   
-        
+        }
+
         ax[0] = a[I];
         ay[0] = a[P+1];
         az[0] = a[1];
 
         for (i=2; i<P+1; i++)
-        {   
+        {
             Cb   = -kappa/i;
             C    = 1./(i*R2);
             I    = getIndex(i,0,0, index);
             Im1x = getIndex(i-1,0,0, index);
             Im2x = getIndex(i-2,0,0, index);
             if (LorY==2) // if Yukawa
-            {   
+            {
                 b[I] = Cb * (dx*a[Im1x] + a[Im2x]);
                 a[I] = C * ( -kappa*(dx*b[Im1x] + b[Im2x]) -(2*i-1)*dx*a[Im1x] - (i-1)*a[Im2x] );
             }
 
             if (LorY==1) // if Laplace
-            {   
+            {
                 a[I] = C * ( -(2*i-1)*dx*a[Im1x] - (i-1)*a[Im2x] );
             }
 
@@ -1042,7 +1042,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         {
             offset = (CJ_start+j)*Nm + jblock*BSZ*Nm + i;
             V += M[offset] * a[i];
-            K += Md[offset]* a[i]; 
+            K += Md[offset]* a[i];
         }
 
     }
@@ -1186,8 +1186,8 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         REAL orthog[3];
         cross(unit, v21u, orthog);
 
-        REAL v1new_x = dot_prod(orthog, v1); 
-        REAL v1new_y = dot_prod(v21u, v1); 
+        REAL v1new_x = dot_prod(orthog, v1);
+        REAL v1new_y = dot_prod(v21u, v1);
 
         if (v1new_x<0)
         {
@@ -1197,7 +1197,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             v1new_y = dot_prod(v21u, v1);
         }
 
-        REAL v2new_y = dot_prod(v21u, v2); 
+        REAL v2new_y = dot_prod(v21u, v2);
 
         if ((v1new_y>0 && v2new_y<0) || (v1new_y<0 && v2new_y>0))
         {
@@ -1215,9 +1215,9 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         }
     }
 
-    __device__ void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL x0, REAL x1, REAL x2, 
+    __device__ void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL x0, REAL x1, REAL x2,
                        REAL K_diag, REAL V_diag, REAL kappa, int same, REAL *xk, REAL *wk, int K, int LorY)
-    {   
+    {
         REAL y0_panel[3], y1_panel[3], y2_panel[3], x_panel[3];
         REAL X[3], Y[3], Z[3];
 
@@ -1234,14 +1234,14 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
 
         // Find panel coordinate system X: 0->1
-        cross(y1_panel, y2_panel, Z); 
-        REAL Xnorm = norm(X); 
-        REAL Znorm = norm(Z); 
+        cross(y1_panel, y2_panel, Z);
+        REAL Xnorm = norm(X);
+        REAL Znorm = norm(Z);
         for (int i=0; i<3; i++)
-        {   
+        {
             X[i] /= Xnorm;
             Z[i] /= Znorm;
-        }   
+        }
 
         cross(Z,X,Y);
 
@@ -1278,11 +1278,11 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
         // Shift origin so it matches collocation point
         for (int i=0; i<2; i++)
-        {   
-            y0_panel[i] -= x_panel[i]; 
-            y1_panel[i] -= x_panel[i]; 
-            y2_panel[i] -= x_panel[i]; 
-        }   
+        {
+            y0_panel[i] -= x_panel[i];
+            y1_panel[i] -= x_panel[i];
+            y2_panel[i] -= x_panel[i];
+        }
 
         // Loop over sides
         intSide(PHI_K, PHI_V, y0_panel, y1_panel, x_panel[2], kappa, xk, wk, K, LorY); // Side 0
@@ -1294,10 +1294,10 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             PHI_K += K_diag;
             PHI_V += V_diag;
         }
-        
+
     }
 
-    __device__ __inline__ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, int J, REAL xi, REAL yi, REAL zi, 
+    __device__ __inline__ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, int J, REAL xi, REAL yi, REAL zi,
                             REAL kappa, REAL *Xk, REAL *Wk, REAL *Area, int LorY)
     {
         REAL nx, ny, nz;
@@ -1338,7 +1338,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     }
 
 
-    __device__ __inline__ void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, int J, 
+    __device__ __inline__ void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, int J,
                             REAL xi, REAL yi, REAL zi, REAL kappa, REAL *Xk, REAL *Wk, REAL *Area, int LorY)
     {
         REAL dx, dy, dz, r, aux;
@@ -1375,7 +1375,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     }
 
 
-    __global__ void M2P(REAL *K_gpu, REAL *V_gpu, int *offMlt, int *sizeTar, REAL *xc, REAL *yc, REAL *zc, 
+    __global__ void M2P(REAL *K_gpu, REAL *V_gpu, int *offMlt, int *sizeTar, REAL *xc, REAL *yc, REAL *zc,
                         REAL *M, REAL *Md, REAL *xt, REAL *yt, REAL *zt,
                         int *Index, int ptr_off, int ptr_lst, REAL kappa, int BpT, int NCRIT, int LorY)
     {
@@ -1385,7 +1385,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
 
         REAL xi, yi, zi,
-             dx, dy, dz; 
+             dx, dy, dz;
         REAL a[Nm];
 
         __shared__ REAL xc_sh[BSZ],
@@ -1395,7 +1395,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
         for (int ind=0; ind<((P+1)*(P+1)*(P+1)-1)/BSZ; ind++)
         {
-            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];    
+            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];
         }
 
         int ind = ((P+1)*(P+1)*(P+1)-1)/BSZ;
@@ -1412,7 +1412,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             xi = xt[i];
             yi = yt[i];
             zi = zt[i];
-            
+
             REAL K = 0., V = 0.;
 
             for(int jblock=0; jblock<(Nmlt-1)/BSZ; jblock++)
@@ -1430,13 +1430,13 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                         dx = xi - xc_sh[j];
                         dy = yi - yc_sh[j];
                         dz = zi - zc_sh[j];
-                        getCoeff(a, dx, dy, dz, 
+                        getCoeff(a, dx, dy, dz,
                                 kappa, Index_sh, LorY);
                         multipole(K, V, M, Md, a,
                                 CJ_start, jblock, j);
                     }
                 }
-            } 
+            }
 
             __syncthreads();
             int jblock = (Nmlt-1)/BSZ;
@@ -1444,7 +1444,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             yc_sh[threadIdx.x] = yc[ptr_lst + CJ_start + jblock*BSZ + threadIdx.x];
             zc_sh[threadIdx.x] = zc[ptr_lst + CJ_start + jblock*BSZ + threadIdx.x];
             __syncthreads();
-            
+
             if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
             {
                 for (int j=0; j<Nmlt-(jblock*BSZ); j++)
@@ -1452,7 +1452,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     dx = xi - xc_sh[j];
                     dy = yi - yc_sh[j];
                     dz = zi - zc_sh[j];
-                    getCoeff(a, dx, dy, dz, 
+                    getCoeff(a, dx, dy, dz,
                             kappa, Index_sh, LorY);
                     multipole(K, V, M, Md, a,
                             CJ_start, jblock, j);
@@ -1462,14 +1462,14 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
             {
                 K_gpu[i] += K;
-                V_gpu[i] += V; 
+                V_gpu[i] += V;
             }
         }
-        
+
     }
-    
-    __global__ void M2PKt(REAL *Ktx_gpu, REAL *Kty_gpu, REAL *Ktz_gpu, 
-                        int *offMlt, int *sizeTar, REAL *xc, REAL *yc, REAL *zc, 
+
+    __global__ void M2PKt(REAL *Ktx_gpu, REAL *Kty_gpu, REAL *Ktz_gpu,
+                        int *offMlt, int *sizeTar, REAL *xc, REAL *yc, REAL *zc,
                         REAL *M, REAL *xt, REAL *yt, REAL *zt,
                         int *Index, int ptr_off, int ptr_lst, REAL kappa, int BpT, int NCRIT, int LorY)
     {
@@ -1479,7 +1479,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
 
         REAL xi, yi, zi,
-             dx, dy, dz; 
+             dx, dy, dz;
         REAL ax[Nm], ay[Nm], az[Nm];
 
         __shared__ REAL xc_sh[BSZ],
@@ -1489,7 +1489,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
         for (int ind=0; ind<((P+1)*(P+1)*(P+1)-1)/BSZ; ind++)
         {
-            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];    
+            Index_sh[ind*BSZ + threadIdx.x] = Index[ind*BSZ + threadIdx.x];
         }
 
         int ind = ((P+1)*(P+1)*(P+1)-1)/BSZ;
@@ -1506,7 +1506,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             xi = xt[i];
             yi = yt[i];
             zi = zt[i];
-            
+
             REAL Ktx = 0., Kty = 0., Ktz = 0.;
 
             for(int jblock=0; jblock<(Nmlt-1)/BSZ; jblock++)
@@ -1531,13 +1531,13 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                         dx = xi - xc_sh[j];
                         dy = yi - yc_sh[j];
                         dz = zi - zc_sh[j];
-                        getCoeff_shift(ax, ay, az, dx, dy, dz, 
+                        getCoeff_shift(ax, ay, az, dx, dy, dz,
                                 kappa, Index_sh, LorY);
                         multipoleKt(Ktx, Kty, Ktz, M, ax, ay, az,
                                 CJ_start, jblock, j);
                     }
                 }
-            } 
+            }
 
             __syncthreads();
             int jblock = (Nmlt-1)/BSZ;
@@ -1545,7 +1545,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
             yc_sh[threadIdx.x] = yc[ptr_lst + CJ_start + jblock*BSZ + threadIdx.x];
             zc_sh[threadIdx.x] = zc[ptr_lst + CJ_start + jblock*BSZ + threadIdx.x];
             __syncthreads();
-            
+
             if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
             {
                 for (int j=0; j<Nmlt-(jblock*BSZ); j++)
@@ -1560,7 +1560,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     dx = xi - xc_sh[j];
                     dy = yi - yc_sh[j];
                     dz = zi - zc_sh[j];
-                    getCoeff_shift(ax, ay, az, dx, dy, dz, 
+                    getCoeff_shift(ax, ay, az, dx, dy, dz,
                             kappa, Index_sh, LorY);
                     multipoleKt(Ktx, Kty, Ktz, M, ax, ay, az,
                             CJ_start, jblock, j);
@@ -1574,25 +1574,25 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                 Ktz_gpu[i] += Ktz;
             }
         }
-        
-    }
-    
 
-    __global__ void P2P(REAL *K_gpu, REAL *V_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k, 
-                        REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc, 
-                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *sglInt, REAL *vertex, 
-                        int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold, 
+    }
+
+
+    __global__ void P2P(REAL *K_gpu, REAL *V_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k,
+                        REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc,
+                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *sglInt, REAL *vertex,
+                        int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold,
                         int BpT, int NCRIT, REAL K_diag, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
         int list_start = offTwg[ptr_off+blockIdx.x];
         int list_end   = offTwg[ptr_off+blockIdx.x+1];
-        
+
         REAL xi, yi, zi, dx, dy, dz, r, auxK, auxV;
 
         __shared__ REAL ver_sh[9*BSZ],
                         xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ], sglInt_sh[BSZ],
-                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ], 
+                        m_sh[BSZ], mx_sh[BSZ], my_sh[BSZ], mz_sh[BSZ], mKc_sh[BSZ],
                         mVc_sh[BSZ], Xsk_sh[K_fine*3], Wsk_sh[K_fine];
 
 
@@ -1655,7 +1655,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             near = ((2*A_sh[j]*r) > threshold*threshold);
                             auxV = 0.;
                             auxK = 0.;
-                           
+
                             if (near==0)
                             {
                                 dx = xi - xj_sh[j];
@@ -1675,7 +1675,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                     auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*(r*r*r);
                                 }
                             }
-                            
+
                             if ( (near==1) && (k_sh[j]==0))
                             {
                                 if (same==1)
@@ -1689,10 +1689,10 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 }
 
                                 auxV *= mVc_sh[j];
-                                auxK *= mKc_sh[j]; 
+                                auxK *= mKc_sh[j];
                                 an_counter += 1;
                             }
-                            
+
                             sum_V += auxV;
                             sum_K += auxK;
                         }
@@ -1754,7 +1754,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 auxK = (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)*(r*r*r);
                             }
                         }
-                        
+
                         if ( (near==1) && (k_sh[j]==0))
                         {
                             if (same==1)
@@ -1771,38 +1771,38 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             auxK *= mKc_sh[j];
                             an_counter += 1;
                         }
-                       
+
                         sum_V += auxV;
                         sum_K += auxK;
                     }
                 }
             }
-        
+
             if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
             {
                 K_gpu[i] += sum_K;
-                V_gpu[i] += sum_V; 
+                V_gpu[i] += sum_V;
 
                 AI_int_gpu[i] = an_counter;
             }
         }
     }
-   
-    __global__ void P2PKt(REAL *Ktx_gpu, REAL *Kty_gpu, REAL *Ktz_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k, 
+
+    __global__ void P2PKt(REAL *Ktx_gpu, REAL *Kty_gpu, REAL *Ktz_gpu, int *offSrc, int *offTwg, int *P2P_list, int *sizeTar, int *k,
                         REAL *xj, REAL *yj, REAL *zj, REAL *m, REAL *mKtc,
-                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *vertex, 
-                        int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold, 
+                        REAL *xt, REAL *yt, REAL *zt, REAL *Area, REAL *vertex,
+                        int ptr_off, int ptr_lst, int LorY, REAL kappa, REAL threshold,
                         int BpT, int NCRIT, int *AI_int_gpu, REAL *Xsk, REAL *Wsk)
     {
         int I = threadIdx.x + blockIdx.x*NCRIT;
         int list_start = offTwg[ptr_off+blockIdx.x];
         int list_end   = offTwg[ptr_off+blockIdx.x+1];
-        
+
         REAL xi, yi, zi, dx, dy, dz, r, auxKtx, auxKty, auxKtz;
 
         __shared__ REAL ver_sh[9*BSZ],
                         xj_sh[BSZ], yj_sh[BSZ], zj_sh[BSZ], A_sh[BSZ], k_sh[BSZ],
-                        m_sh[BSZ], mKtc_sh[BSZ], 
+                        m_sh[BSZ], mKtc_sh[BSZ],
                         Xsk_sh[K_fine*3], Wsk_sh[K_fine];
 
 
@@ -1861,7 +1861,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             auxKtx = 0.;
                             auxKty = 0.;
                             auxKtz = 0.;
-                           
+
                             if (near==0)
                             {
                                 dx = xi - xj_sh[j];
@@ -1883,7 +1883,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                     auxKtx *= dx;
                                 }
                             }
-                            
+
                             if ( (near==1) && (k_sh[j]==0))
                             {
                                 if (same==1)
@@ -1902,7 +1902,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 auxKtz *= mKtc_sh[j];
                                 an_counter += 1;
                             }
-                            
+
                             sum_Ktx += auxKtx;
                             sum_Kty += auxKty;
                             sum_Ktz += auxKtz;
@@ -1964,7 +1964,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                                 auxKtx *= dx;
                             }
                         }
-                        
+
                         if ( (near==1) && (k_sh[j]==0))
                         {
                             if (same==1)
@@ -1983,14 +1983,14 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                             auxKtz *= mKtc_sh[j];
                             an_counter += 1;
                         }
-                       
+
                         sum_Ktx += auxKtx;
                         sum_Kty += auxKty;
                         sum_Ktz += auxKtz;
                     }
                 }
             }
-        
+
             if (threadIdx.x+iblock*BSZ<sizeTar[blockIdx.x])
             {
                 Ktx_gpu[i] += sum_Ktx;
@@ -2003,9 +2003,9 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
     }
 
     __global__ void get_phir(REAL *phir, REAL *xq, REAL *yq, REAL *zq,
-                            REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc, 
-                            REAL *xj, REAL *yj, REAL *zj, REAL *Area, int *k, REAL *vertex, 
-                            int Nj, int Nq, int K, REAL *xk, REAL *wk, 
+                            REAL *m, REAL *mx, REAL *my, REAL *mz, REAL *mKc, REAL *mVc,
+                            REAL *xj, REAL *yj, REAL *zj, REAL *Area, int *k, REAL *vertex,
+                            int Nj, int Nq, int K, REAL *xk, REAL *wk,
                             REAL threshold, int *AI_int_gpu, int Nk, REAL *Xsk, REAL *Wsk)
     {
         int i = threadIdx.x + blockIdx.x*BSZ;
@@ -2026,7 +2026,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         int an_counter = 0;
 
         for(jblock=0; jblock<(Nj-1)/BSZ; jblock++)
-        {   
+        {
             __syncthreads();
             xj_sh[threadIdx.x] = xj[jblock*BSZ + threadIdx.x];
             yj_sh[threadIdx.x] = yj[jblock*BSZ + threadIdx.x];
@@ -2045,7 +2045,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                 ver_sh[9*threadIdx.x+vert] = vertex[9*triangle+vert];
             }
             __syncthreads();
-            
+
             for (int j=0; j<BSZ; j++)
             {
                 dx = xi - (ver_sh[9*j] + ver_sh[9*j+3] + ver_sh[9*j+6])/3;
@@ -2059,7 +2059,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     dy = yi - yj_sh[j];
                     dz = zi - zj_sh[j];
                     r = sqrt(dx*dx + dy*dy + dz*dz);
-                    sum_V  += m_sh[j]/r; 
+                    sum_V  += m_sh[j]/r;
                     sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
                 }
                 else if(k_sh[j]==0)
@@ -2071,16 +2071,16 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     //REAL panel[9] = {ver_sh[9*j], ver_sh[9*j+1], ver_sh[9*j+2],
                     //                 ver_sh[9*j+3], ver_sh[9*j+4], ver_sh[9*j+5],
                     //                 ver_sh[9*j+6], ver_sh[9*j+7], ver_sh[9*j+8]};
-                    //SA(PHI_K, PHI_V, panel, xi, yi, zi, 
+                    //SA(PHI_K, PHI_V, panel, xi, yi, zi,
                     //   1., 1., 1e-15, 0, xk, wk, 9, 1);
-        
+
                     sum_V += PHI_V * mVc_sh[j];
                     sum_K += PHI_K * mKc_sh[j];
                     an_counter += 1;
                 }
             }
         }
-    
+
         __syncthreads();
         jblock = (Nj-1)/BSZ;
         if (threadIdx.x<Nj-jblock*BSZ)
@@ -2121,7 +2121,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     dy = yi - yj_sh[j];
                     dz = zi - zj_sh[j];
                     r = sqrt(dx*dx + dy*dy + dz*dz);
-                    sum_V  += m_sh[j]/r; 
+                    sum_V  += m_sh[j]/r;
                     sum_K += (mx_sh[j]*dx+my_sh[j]*dy+mz_sh[j]*dz)/(r*r*r);
                 }
 
@@ -2131,15 +2131,15 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                     REAL PHI_V = 0.;
 
                     GQ_fine(PHI_K, PHI_V, ver_sh, 9*j, xi, yi, zi, 1e-15, Xsk, Wsk, A_sh, 1);
-        
+
                     sum_V += PHI_V * mVc_sh[j];
                     sum_K += PHI_K * mKc_sh[j];
-                    
+
                     an_counter += 1;
                 }
             }
         }
-       
+
         if (i<Nq)
         {
             phir[i] = (-sum_K + sum_V)/(4*M_PI);
@@ -2149,7 +2149,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
     __global__ void compute_RHS(REAL *F, REAL *xq, REAL *yq, REAL *zq,
                                 REAL *q, REAL *xi, REAL *yi, REAL *zi,
-                                int *sizeTar, int Nq, REAL E_1, 
+                                int *sizeTar, int Nq, REAL E_1,
                                 int NCRIT, int BpT)
     {
         int II = threadIdx.x + blockIdx.x*NCRIT;
@@ -2189,7 +2189,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                 }
             }
 
-            int block = (Nq-1)/BSZ; 
+            int block = (Nq-1)/BSZ;
             __syncthreads();
             xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
             yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
@@ -2219,7 +2219,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
 
     __global__ void compute_RHSKt(REAL *Fx, REAL *Fy, REAL *Fz, REAL *xq, REAL *yq, REAL *zq,
                                 REAL *q, REAL *xi, REAL *yi, REAL *zi,
-                                int *sizeTar, int Nq, REAL E_1, 
+                                int *sizeTar, int Nq, REAL E_1,
                                 int NCRIT, int BpT)
     {
         int II = threadIdx.x + blockIdx.x*NCRIT;
@@ -2262,7 +2262,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
                 }
             }
 
-            int block = (Nq-1)/BSZ; 
+            int block = (Nq-1)/BSZ;
             __syncthreads();
             xq_sh[threadIdx.x] = xq[block*BSZ+threadIdx.x];
             yq_sh[threadIdx.x] = yq[block*BSZ+threadIdx.x];
@@ -2295,7 +2295,7 @@ def kernels(BSZ, Nm, K_fine, P, REAL):
         }
     }
 
-    
+
     """%{'blocksize':BSZ, 'Nmult':Nm, 'K_near':K_fine, 'Ptree':P, 'precision':REAL}, nvcc="nvcc", options=["-use_fast_math","-Xptxas=-v,-abi=no"])
 
     return mod

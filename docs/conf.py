@@ -286,3 +286,10 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    main(['-f', '-o', './source', '../pygbe', '--force'])
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)

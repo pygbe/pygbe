@@ -106,12 +106,12 @@ class Surface():
     zcDev        : list, sorted z component of the box centers according to
                          M2P_list array (on the GPU).
     AreaDev      : list, areas of triangles (on the GPU).
-    sglInt_intDev: list, singular integrals for V for internal equation (on the 
+    sglInt_intDev: list, singular integrals for V for internal equation (on the
                          GPU).
     sglInt_extDev: list, singular integrals for V for external equation (on the
                          GPU).
     vertexDev    : list, sorted vertex of the triangles.
-    sizeTarDev   : list, number of targets per twig (on the GPU). 
+    sizeTarDev   : list, number of targets per twig (on the GPU).
     offSrcDev    : list, offsets to sorted source array (on the GPU).
     offMltDev    : list, offset to multipoles in M2P list array (on the GPU).
     offTwgDev    : list, offset to twig in P2P list array (on the GPU).
@@ -119,12 +119,12 @@ class Surface():
     P2P_lstDev   : list, pointers to twigs for P2P interaction list (on the GPU).
     xkDev        : list, position of gauss points on edges (on the GPU).
     wkDev        : list, weight of gauss points on edges (on the GPU).
-    XskDev       : list, position of gauss points for near singular integrals 
+    XskDev       : list, position of gauss points for near singular integrals
                          (on the GPU).
     WskDev       : list, weight of gauss points for near singular integrals (on
                          the GPU).
-    kDev         : list, quadrature number of each quadrature point, in order. 
-                         (on the GPU)  
+    kDev         : list, quadrature number of each quadrature point, in order.
+                         (on the GPU)
     """
 
     def __init__(self):
@@ -260,11 +260,11 @@ class Field():
 class Timing():
     """
     Timing class.
-    It contains timing information for different parts of the code. 
+    It contains timing information for different parts of the code.
 
     Attributes
     -----------
-    time_an   : float, time spent in compute the near singular integrals.  
+    time_an   : float, time spent in compute the near singular integrals.
     time_P2P  : float, time spent in compute the P2P part of the treecode.
     time_P2M  : float, time spent in compute the P2M part of the treecode.
     time_M2M  : float, time spent in compute the M2M part of the treecode.
@@ -290,8 +290,8 @@ class Timing():
 class Parameters():
     """
     Parameters class.
-    It contains the information of the parameters needed to run the code. 
-    
+    It contains the information of the parameters needed to run the code.
+
     Attributes
     -----------
 
@@ -351,21 +351,21 @@ class Parameters():
 class IndexConstant():
     """
     It contains the precompute indices required for the treecode computation.
-    
+
     Attributes
     -----------
 
     II         : list, multipole order in the x-direction for the treecode.
-    JJ         : list, multipole order in the y-direction for the treecode. 
-    KK         : list, multipole order in the z-direction for the treecode. 
-    index_large: list, pointers to the position of multipole order i, j, k 
-                       in the multipole array, organized in a 1D array of size 
+    JJ         : list, multipole order in the y-direction for the treecode.
+    KK         : list, multipole order in the z-direction for the treecode.
+    index_large: list, pointers to the position of multipole order i, j, k
+                       in the multipole array, organized in a 1D array of size
                        P*P*P. Index is given by index[i*P*P+j*P+k]
-    index_small: list, pointers to the position of multipole order i, j, k 
-                       in the multipole array, organized in a 1D array which is 
-                       compressed with respect to index_large (does not consider 
+    index_small: list, pointers to the position of multipole order i, j, k
+                       in the multipole array, organized in a 1D array which is
+                       compressed with respect to index_large (does not consider
                        combinations of i,j,k which do not have a multipole).
-    index      : list, copy of index_small 
+    index      : list, copy of index_small
     index_ptr  : list, pointer to index_small. Data in index_small is organized
                       in a i-major fashion (i,j,k), and index_ptr points at the
                       position in index_small where the order i changes.

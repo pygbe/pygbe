@@ -11,7 +11,7 @@ try:
 except:
     pass
 
-from classes import Event
+from pygbe.classes import Event
 
 
 def dataTransfer(surf_array, field_array, ind, param, kernel):
@@ -24,8 +24,8 @@ def dataTransfer(surf_array, field_array, ind, param, kernel):
                         surface.
     field_array: array, contains the Field classes of each region on the surface.
     ind        : class, it contains the indices related to the treecode
-                        computation. 
-    param      : class, parameters related to the surface. 
+                        computation.
+    param      : class, parameters related to the surface.
     kernel: pycuda source module.
     """
 

@@ -4,33 +4,33 @@ We use a boundary element method (BEM) to perform molecular electrostatics
 calculations with a continuum approach. It calculates solvation energies for
 proteins modeled with any number of dielectric regions.
 """
-import numpy
-import time
-from datetime import datetime
 import os
-import sys
 import re
+import sys
+import time
+import numpy
+import pickle
 import subprocess
+from datetime import datetime
 from argparse import ArgumentParser
 
 # Import self made modules
-from gmres import gmres_mgs
-from projection import get_phir
-from classes import Timing, Parameters, IndexConstant
-from gpuio import dataTransfer
-from surface import initializeSurf, fill_surface, initializeField, fill_phi
-from output import printSummary
-from matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
+from pygbe.gmres import gmres_mgs
+from pygbe.projection import get_phir
+from pygbe.classes import Timing, Parameters, IndexConstant
+from pygbe.gpuio import dataTransfer
+from pygbe.surface import initializeSurf, fill_surface, initializeField, fill_phi
+from pygbe.output import print_summary
+from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
                         coulombEnergy, calculateEsurf)
 
-from util.readData import (readVertex, readTriangle, readpqr, readParameters,
-                          readElectricField)
-from util.an_solution import an_P, two_sphere
+from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
+from pygbe.util.an_solution import an_P, two_sphere
 
-from tree.FMMutils import computeIndices, precomputeTerms, generateList
+from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
-    from tree.cuda_kernels import kernels
+    from pygbe.tree.cuda_kernels import kernels
 except:
     pass
 
@@ -58,13 +58,13 @@ def read_inputs(args):
     Assumes that in the absence of specific command line arguments that pygbe
     problem folder resembles the following structure
 
-    lys
-    |- lys.param
-    |- lys.config
-    |- built_parse.pqr
-    |- geometry/Lys1.face
-    |- geometry/Lys1.vert
-    |- output/
+    lys/
+    - lys.param
+    - lys.config
+    - built_parse.pqr
+    - geometry/Lys1.face
+    - geometry/Lys1.vert
+    - output/
     """
 
     parser = ArgumentParser(description='Manage PyGBe command line arguments')
@@ -128,10 +128,8 @@ def find_config_files(cliargs):
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
     #use the name of the rightmost folder in path as problem name
-    prob_rel_path = os.path.split(prob_path)
+    prob_rel_path = os.path.split(full_path)
     prob_name = prob_rel_path[1]
-    if not prob_name:
-        prob_name = os.path.split(prob_rel_path[0])[1]
 
     if cliargs.config is None:
         cliargs.config = os.path.join(full_path, prob_name + '.config')
@@ -181,7 +179,7 @@ def check_for_nvcc():
 
 def check_nvcc_version():
     """Check that version of nvcc <= 7.0"""
-    verstr = subprocess.check_output(['nvcc', '--version'])
+    verstr = subprocess.check_output(['nvcc', '--version']).decode()
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
@@ -224,6 +222,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             os.environ['PYGBE_GEOMETRY'] = geo_path
         else:
             sys.exit('Invalid geometry prefix provided (Folder not found)')
+    else:
+        geo_path = os.path.join(full_path, 'geometry')
 
     #try to expand ~ if present in output path
     args.output = os.path.expanduser(args.output)
@@ -239,24 +239,35 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     except OSError:
         pass
 
+    results_dict = {}
     timestamp = time.localtime()
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
+    results_dict['output_file'] = outputfname
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     ### Time stamp
-    print 'Run started on:'
-    print '\tDate: %i/%i/%i' % (timestamp.tm_year, timestamp.tm_mon,
-                                timestamp.tm_mday)
-    print '\tTime: %i:%i:%i' % (timestamp.tm_hour, timestamp.tm_min,
-                                timestamp.tm_sec)
+    print('Run started on:')
+    print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
+                                timestamp.tm_mday))
+    print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
+                                timestamp.tm_sec))
     TIC = time.time()
+
+    print('Config file: {}'.format(configFile))
+    print('Parameter file: {}'.format(paramfile))
+    print('Geometry folder: {}'.format(geo_path))
+    print('Running in: {}'.format(full_path))
+    results_dict['config_file'] = configFile
+    results_dict['param_file'] = paramfile
+    results_dict['geo_file'] = geo_path
+    results_dict['full_path'] = full_path
 
     ### Read parameters
     param = Parameters()
     precision = readParameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
-        param.P + 3) / 6  # Number of terms in Taylor expansion
+        param.P + 3) // 6  # Number of terms in Taylor expansion
     param.BlocksPerTwig = int(numpy.ceil(param.NCRIT / float(param.BSZ))
                               )  # CUDA blocks that fit per twig
 
@@ -273,17 +284,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     time_sort = 0.
     for i in range(len(surf_array)):
         time_sort += fill_surface(surf_array[i], param)
-    '''
-    fig = plt.figure()
-    ax = Axes3D(fig)
-    #ss=surf_array[0]
-    for i in range(1):
-        ss = surf_array[i]
-        ax.scatter(ss.xi,ss.yi,ss.zi,c='b',marker='o')
-        ax.scatter(ss.xi+ss.normal[:,0], ss.yi+ss.normal[:,1], ss.zi+ss.normal[:,2],c='r', marker='o')
-    plt.show()
-    quit()
-    '''
 
     ### Output setup summary
     param.N = 0
@@ -295,10 +295,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
             param.Neq += N_aux
         else:
             param.Neq += 2 * N_aux
-    print '\nTotal elements : %i' % param.N
-    print 'Total equations: %i' % param.Neq
+    print('\nTotal elements : {}'.format(param.N))
+    print('Total equations: {}'.format(param.Neq))
 
-    printSummary(surf_array, field_array, param)
+    results_dict['total_elements'] = param.N
+    results_dict['N_equation'] = param.Neq
+
+    results_dict = print_summary(surf_array, field_array, param, results_dict)
 
     ### Precomputation
     ind0 = IndexConstant()
@@ -312,14 +315,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         kernel = 1
 
     ### Generate interaction list
-    print 'Generate interaction list'
+    print('Generate interaction list')
     tic = time.time()
     generateList(surf_array, field_array, param)
     toc = time.time()
     list_time = toc - tic
 
     ### Transfer data to GPU
-    print 'Transfer data to GPU'
+    print('Transfer data to GPU')
     tic = time.time()
     if param.GPU == 1:
         dataTransfer(surf_array, field_array, ind0, param, kernel)
@@ -329,7 +332,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     timing = Timing()
 
     ### Generate RHS
-    print 'Generate RHS'
+    print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
         F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
@@ -339,14 +342,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     toc = time.time()
     rhs_time = toc - tic
 
-    #    numpy.savetxt(os.path.join(output_dir,'RHS.txt'),F)
-
     setup_time = toc - TIC
-    print 'List time          : %fs' % list_time
-    print 'Data transfer time : %fs' % transfer_time
-    print 'RHS generation time: %fs' % rhs_time
-    print '------------------------------'
-    print 'Total setup time   : %fs\n' % setup_time
+    print('List time          : {}s'.format(list_time))
+    print('Data transfer time : {}s'.format(transfer_time))
+    print('RHS generation time: {}s'.format(rhs_time))
+    print('-'*30)
+    print('Total setup time   : {}s'.format(setup_time))
 
 
     #   Check if there is a complex dielectric
@@ -371,31 +372,34 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
                        kernel)
     toc = time.time()
     solve_time = toc - tic
-
-    print 'Solve time        : %fs' % solve_time
+    print('Solve time        : {}s'.format(solve_time))
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
+    results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
-    #phi = loadtxt('phi.txt')
+
 
     # Put result phi in corresponding surfaces
     fill_phi(phi, surf_array)
 
     ### Calculate solvation energy
-    print '\nCalculate Esolv'
+    print('Calculate Esolv')
     tic = time.time()
     E_solv = calculateEsolv(surf_array, field_array, param, kernel)
     toc = time.time()
-    print 'Time Esolv: %fs' % (toc - tic)
+    print('Time Esolv: {}s'.format(toc - tic))
     ii = -1
     for f in param.E_field:
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
             ii += 1
-            print 'Region %i: Esolv = %f kcal/mol = %f kJ/mol' % (
-                f, E_solv[ii], E_solv[ii] * 4.184)
+            print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(f,
+                                                                      E_solv[ii],
+                                                                      E_solv[ii] * 4.184))
+            results_dict['E_solv_kcal'] = E_solv[ii]
+            results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
     ### Calculate surface energy
-    print '\nCalculate Esurf'
+    print('\nCalculate Esurf')
     tic = time.time()
     E_surf = calculateEsurf(surf_array, field_array, param, kernel)
     toc = time.time()
@@ -404,32 +408,44 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
             ii += 1
-            print 'Region %i: Esurf = %f kcal/mol = %f kJ/mol' % (
-                f, E_surf[ii], E_surf[ii] * 4.184)
-    print 'Time Esurf: %fs' % (toc - tic)
+            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+                f, E_surf[ii], E_surf[ii] * 4.184))
+            results_dict['E_surf_kcal'] = E_surf[ii]
+            results_dict['E_surf_kJ'] = E_surf[ii] * 4.184
+    print('Time Esurf: {}s'.format(toc - tic))
 
     ### Calculate Coulombic interaction
-    print '\nCalculate Ecoul'
+    print('\nCalculate Ecoul')
     tic = time.time()
     i = -1
     E_coul = []
     for f in field_array:
         i += 1
         if f.coulomb == 1:
-            print 'Calculate Coulomb energy for region %i' % i
+            print('Calculate Coulomb energy for region {}'.format(i))
             E_coul.append(coulombEnergy(f, param))
-            print 'Region %i: Ecoul = %f kcal/mol = %f kJ/mol' % (
-                i, E_coul[-1], E_coul[-1] * 4.184)
+            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+                i, E_coul[-1], E_coul[-1] * 4.184))
+            results_dict['E_coul_kcal'] = E_coul[-1]
+            results_dict['E_coul_kJ'] = E_coul[-1] * 4.184
     toc = time.time()
-    print 'Time Ecoul: %fs' % (toc - tic)
+    print('Time Ecoul: {}s'.format(toc - tic))
 
     ### Output summary
-    print '\n--------------------------------'
-    print 'Totals:'
-    print 'Esolv = %f kcal/mol' % sum(E_solv)
-    print 'Esurf = %f kcal/mol' % sum(E_surf)
-    print 'Ecoul = %f kcal/mol' % sum(E_coul)
-    print '\nTime = %f s' % (toc - TIC)
+    print('\n'+'-'*30)
+    print('Totals:')
+    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
+    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
+    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+    print('\nTime = {} s'.format(toc - TIC))
+    results_dict['total_time'] = (toc - TIC)
+
+    output_pickle = outputfname.split('-')
+    output_pickle.pop(-1)
+    output_pickle.append('resultspickle')
+    output_pickle = '-'.join(output_pickle)
+    with open(os.path.join(output_dir, output_pickle), 'wb') as f:
+        pickle.dump(results_dict, f)
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read

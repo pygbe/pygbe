@@ -8,7 +8,7 @@ The mathematical formulation follows Yoon and Lenhoff (1990) for solving the Poi
 PyGBe achieves both algorithmic and hardware acceleration.
 The solution algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. 
 It exploits NVIDIA GPU hardware on the most computationally intensive parts of the code using CUDA kernels in the treecode, interfacing with PyCUDA. 
-Some parts of the code written in C++, wrapped using SWIG. 
+Some parts of the code are written in C++, wrapped using SWIG. 
 
 ## Installation
 
@@ -78,7 +78,7 @@ If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), the
 
 ### Run PyGBe
 
-PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.  Additional problem folders can be downloaded from [coming soon]().
+PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.  
 
 Test the PyGBe installation by running the Lysozyme (`lys`) example in the folder `examples`.
 The structure of the folder is as follows:
@@ -108,6 +108,18 @@ then get its `.pqr` file using any PDB to PQR converter (there are online tools 
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's 
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).  
 
+### API Documentation 
+
+Docs are available on http://barbagroup.github.io/pygbe/
+
+### Performance:
+
+[PyGbe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb)
+
+### Tests
+
+To run the regression tests, go to the folder `tests/regression_tests` and run the script `run_all_regression_tests.py`, it will prompt you for permission, then automatically download the meshes needed.
+The meshes are hosted on [zenodo](https://zenodo.org/record/55349?ln=en#.V5EWsu35RhE).
 
 ## References
 
@@ -120,3 +132,17 @@ Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 * Cooper, C.D, Bardhan, J.P. and Barba, L.A. (2014), "A biomolecular electrostatics solver using Python, GPUs and boundary elements that can handle solvent-filled cavities and Stern layers," _Computer Physics Communications_, **185**(3): 720–729, [doi: 10.1016/j.cpc.2013.10.028](http://dx.doi.org/10.1016/j.cpc.2013.10.028), [arxiv:1309.4018](http://arxiv.org/abs/1309.4018)
 * Cooper, C.D and Barba, L.A. (2016), "Poisson–Boltzmann model for protein–surface electrostatic interactions and grid-convergence study using the PyGBe code," _Computer Physics Communications_, **202**: 23–32, [doi: 10.1016/j.cpc.2015.12.019](http://dx.doi.org/10.1016/j.cpc.2015.12.019), [arXiv:1506.03745](http://arxiv.org/abs/1506.03745)
 * Cooper, C.D, Clementi, N.C. and Barba, L.A. (2015), "Probing protein orientation near charged nanosurfaces for simulation-assisted biosensor design," _Journal of Chemical Physics_, **143**: 124709 [doi: 10.1063/1.4931113](http://dx.doi.org/10.1063/1.4931113), [arXiv:1503.08150v4](http://arxiv.org/abs/1506.03745).
+
+### Other software
+
+A few other open-source packages exist for solving implicit-solvent models of the Poisson-Boltzmann equation.
+
+#### Volumetric-based solvers
+
+* [Delphi](http://compbio.clemson.edu/delphi)
+* [APBS](http://www.poissonboltzmann.org/)
+  
+#### Boundary-element method
+
+* AFMPB (both [serial](http://cpc.cs.qub.ac.uk/summaries/AEGB_v1_1.html) and [parallel](http://cpc.cs.qub.ac.uk/summaries/AEGB_v2_0.html) versions exist)
+* [TABI](http://faculty.smu.edu/wgeng/research/bipb.html)

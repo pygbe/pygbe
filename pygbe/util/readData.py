@@ -1,9 +1,9 @@
 """
 It contains the functions to read the all the data from the meshes files, its
-parameters and charges files. 
+parameters and charges files.
 """
-import numpy
 import os
+import numpy
 
 
 def readVertex(filename, REAL):
@@ -16,7 +16,7 @@ def readVertex(filename, REAL):
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
-    
+
     Returns
     -------
     vertex: array, vertices of the triangles.
@@ -35,7 +35,7 @@ def readVertex(filename, REAL):
 def readVertex2(filename, REAL):
     """
     It reads the vertex of the triangles from the mesh file and it stores
-    them on an array. 
+    them on an array.
     It reads the file line by line.
 
     Arguments
@@ -43,7 +43,7 @@ def readVertex2(filename, REAL):
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
-    
+
     Returns
     -------
     vertex: array, vertices of the triangles.
@@ -52,14 +52,16 @@ def readVertex2(filename, REAL):
     x = []
     y = []
     z = []
-    for line in file(filename):
-        line = line.split()
-        x0 = line[0]
-        y0 = line[1]
-        z0 = line[2]
-        x.append(REAL(x0))
-        y.append(REAL(y0))
-        z.append(REAL(z0))
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            x0 = line[0]
+            y0 = line[1]
+            z0 = line[2]
+            x.append(REAL(x0))
+            y.append(REAL(y0))
+            z.append(REAL(z0))
 
     x = numpy.array(x)
     y = numpy.array(y)
@@ -82,7 +84,7 @@ def readTriangle(filename, surf_type):
     filename : name of the file that contains the surface information.
                (filename.faces)
     surf_type: str, type of surface.
-    
+
     Returns
     -------
     triangle: array, triangles indices.
@@ -121,7 +123,7 @@ def readTriangle2(filename):
     ----------
     filename : name of the file that contains the surface information.
                (filename.faces)
-    
+
     Returns
     -------
     triangle: array, triangles indices.
@@ -129,13 +131,15 @@ def readTriangle2(filename):
 
     triangle = []
 
-    for line in file(filename):
-        line = line.split()
-        v1 = line[0]
-        v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
-        v3 = line[1]
-        triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
-        # -1-> python starts from 0, matlab from 1
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            v1 = line[0]
+            v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
+            v3 = line[1]
+            triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
+            # -1-> python starts from 0, matlab from 1
 
     triangle = numpy.array(triangle)
 
@@ -153,8 +157,8 @@ def readCheck(aux, REAL):
     ----------
     aux : str, string to be checked.
     REAL: data type.
-    
-    
+
+
     Returns
     -------
     X: array, array with the correct '-' signs assigned.
@@ -183,45 +187,39 @@ def readpqr(filename, REAL):
     filename: name of the file that contains the surface information.
                (filename.pqr)
     REAL    : data type.
-    
+
     Returns
     -------
-    pos     : (Nqx3) array, positions of the charges. 
-    q       : (Nqx1) array, value of the charges. 
+    pos     : (Nqx3) array, positions of the charges.
+    q       : (Nqx1) array, value of the charges.
     Nq      : int, number of charges.
     """
 
     pos = []
     q = []
-    for line in file(filename):
-        line = numpy.array(line.split())
-        line_aux = []
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = numpy.array(line.split())
 
-        if line[0] == 'ATOM':
-            for l in range(len(line) - 6):
-                aux = line[5 + len(line_aux)]
-                if len(aux) > 14:
-                    X = readCheck(aux, REAL)
-                    for i in range(len(X)):
-                        line_aux.append(X[i])
-#                        line_test.append(str(X[i]))
-                else:
-                    #                    line_test.append(line[5+len(line_aux)])
-                    line_aux.append(REAL(line[5 + len(line_aux)]))
+            line_aux = []
 
-#            line_test.append(line[len(line)-1])
-            x = line_aux[0]
-            y = line_aux[1]
-            z = line_aux[2]
-            q.append(line_aux[3])
-            pos.append([x, y, z])
+            if line[0] == 'ATOM':
+                for l in range(len(line) - 6):
+                    aux = line[5 + len(line_aux)]
+                    if len(aux) > 14:
+                        X = readCheck(aux, REAL)
+                        for i in range(len(X)):
+                            line_aux.append(X[i])
+                    else:
+                        line_aux.append(REAL(line[5 + len(line_aux)]))
 
-#           for i in range(10):
-#                f.write("%s\t"%line_test[i])
-#            f.write("\n")
+                x = line_aux[0]
+                y = line_aux[1]
+                z = line_aux[2]
+                q.append(line_aux[3])
+                pos.append([x, y, z])
 
-#    f.close()
-#    quit()
     pos = numpy.array(pos)
     q = numpy.array(q)
     Nq = len(q)
@@ -236,11 +234,11 @@ def readcrd(filename, REAL):
     ----------
     filename : name of the file that contains the surface information.
     REAL     : data type.
-    
+
     Returns
     -------
-    pos      : (Nqx3) array, positions of the charges. 
-    q        : (Nqx1) array, value of the charges. 
+    pos      : (Nqx3) array, positions of the charges.
+    q        : (Nqx1) array, value of the charges.
     Nq       : int, number of charges.
     """
 
@@ -248,21 +246,18 @@ def readcrd(filename, REAL):
     q = []
 
     start = 0
-    for line in file(filename):
-        line = numpy.array(line.split())
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
 
-        if len(line) > 8 and line[0] != '*':  # and start==2:
-            x = line[4]
-            y = line[5]
-            z = line[6]
-            q.append(REAL(line[9]))
-            pos.append([REAL(x), REAL(y), REAL(z)])
-        '''
-        if len(line)==1:
-            start += 1
-            if start==2:
-                Nq = int(line[0])
-        '''
+            if len(line) > 8 and line[0] != '*':  # and start==2:
+                x = line[4]
+                y = line[5]
+                z = line[6]
+                q.append(REAL(line[9]))
+                pos.append([REAL(x), REAL(y), REAL(z)])
+
     pos = numpy.array(pos)
     q = numpy.array(q)
     Nq = len(q)
@@ -276,20 +271,22 @@ def readParameters(param, filename):
 
     Arguments
     ----------
-    param   : class, parameters related to the surface.     
-    filename: name of the file that contains the parameters information. 
+    param   : class, parameters related to the surface.
+    filename: name of the file that contains the parameters information.
               (filename.param)
-        
+
     Returns
     -------
     dataType: we return the dataType of each attributes because we need it for
-              other fucntions.  
+              other fucntions.
     """
 
     val = []
-    for line in file(filename):
-        line = line.split()
-        val.append(line[1])
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            val.append(line[1])
 
     dataType = val[0]  # Data type
     if dataType == 'double':
@@ -318,7 +315,7 @@ def readParameters(param, filename):
     return dataType
 
 
-def readFields(filename):  
+def readFields(filename):
     """
     It reads the physical parameters from the configuration file for each region
     in the surface and it appends them on the corresponding list.
@@ -327,7 +324,7 @@ def readFields(filename):
     ----------
     filename: name of the file that contains the physical parameters of each
               region. (filename.config)
-        
+
     Returns
     -------
     LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
@@ -342,16 +339,16 @@ def readFields(filename):
                     charges in this region.
     coulomb : list, it contains integers indicating to calculate (1) or not (2)
                     the coulomb energy in this region.
-    qfile   : list, location of the '.pqr' file with the location of the charges.    
+    qfile   : list, location of the '.pqr' file with the location of the charges.
     Nparent : list, it contains integers indicating the number of 'parent'
                     surfaces (surface containing this region)
-    parent  : list, it contains the file of the parent surface mesh, according 
+    parent  : list, it contains the file of the parent surface mesh, according
                     to their position in the FILE list, starting from 0 (eg. if
-                    the mesh file for the parent is the third one specified in 
+                    the mesh file for the parent is the third one specified in
                     the FILE section, parent=2)
     Nchild  : list, it contains integers indicating number of child surfaces
                     (surfaces completely contained in this region).
-    child   :  list, it contains position of the mesh files for the children 
+    child   :  list, it contains position of the mesh files for the children
                      surface in the FILE section.
     """
 
@@ -367,37 +364,39 @@ def readFields(filename):
     Nchild = []
     child = []
 
-    for line in file(filename):
-        line = line.split()
-        if len(line) > 0:
-            if line[0] == 'FIELD':
-                LorY.append(line[1])
-                pot.append(line[2])
-                E.append(line[3])
-                kappa.append(line[4])
-                charges.append(line[5])
-                coulomb.append(line[6])
-                qfile.append(line[7] if line[7] == 'NA' else
-                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
-                Nparent.append(line[8])
-                parent.append(line[9])
-                Nchild.append(line[10])
-                for i in range(int(Nchild[-1])):
-                    child.append(line[11 + i])
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            if len(line) > 0:
+                if line[0] == 'FIELD':
+                    LorY.append(line[1])
+                    pot.append(line[2])
+                    E.append(line[3])
+                    kappa.append(line[4])
+                    charges.append(line[5])
+                    coulomb.append(line[6])
+                    qfile.append(line[7] if line[7] == 'NA' else
+                        os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                    Nparent.append(line[8])
+                    parent.append(line[9])
+                    Nchild.append(line[10])
+                    for i in range(int(Nchild[-1])):
+                        child.append(line[11 + i])
 
     return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
 
 
 def read_surface(filename):
     """
-    It reads the type of surface of each region on the surface from the 
+    It reads the type of surface of each region on the surface from the
     configuration file.
 
     Arguments
-    ----------
+    ---------
     filename: name of the file that contains the surface type of each region.
               (filename.config).
-  
+
     Returns
     -------
     files    : list, it contains the files corresponding to each region in the
@@ -410,49 +409,51 @@ def read_surface(filename):
     files = []
     surf_type = []
     phi0_file = []
-    for line in file(filename):
-        line = line.split()
-        if len(line) > 0:
-            if line[0] == 'FILE':
-                files.append(line[1])
-                surf_type.append(line[2])
-                if (line[2] == 'dirichlet_surface' or
-                        line[2] == 'neumann_surface' or
-                        line[2] == 'neumann_surface_hyper'):
-                    phi0_file.append(os.path.join(
-                        os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
-                else:
-                    phi0_file.append('no_file')
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
+            if len(line) > 0:
+                if line[0] == 'FILE':
+                    files.append(line[1])
+                    surf_type.append(line[2])
+                    if (line[2] == 'dirichlet_surface' or
+                            line[2] == 'neumann_surface' or
+                            line[2] == 'neumann_surface_hyper'):
+                        phi0_file.append(os.path.join(
+                            os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
+                    else:
+                        phi0_file.append('no_file')
 
     return files, surf_type, phi0_file
 
 def readElectricField(param, filename):
     """
-    It reads the information about the incident electric field. 
+    It reads the information about the incident electric field.
 
-    Arguments:
-    ----------
-    param        : class, parameters related to the surface.     
+    Arguments
+    ---------
+    param        : class, parameters related to the surface.
     filename     : name of the file that contains the infromation of the incident
                    electric field. (filname.config)
 
-    Returns:
-    --------
+    Returns
+    -------
     electricField: float, electric field intensity, it is in the 'z'
-                          direction, '-' indicates '-z'. 
-    wavelength   : float, wavelength of the incident electric field.   
+                          direction, '-' indicates '-z'.
+    wavelength   : float, wavelength of the incident electric field.
     """
 
     electricField = 0
     wavelength = 0
-    for line in file(filename):
-        line = line.split()
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split()
 
-        if len(line)>0:
-            if line[0] == 'WAVE':
-                electricField = param.REAL((line[1]))
-                wavelength    = param.REAL((line[2]))
+            if len(line)>0:
+                if line[0] == 'WAVE':
+                    electricField = param.REAL((line[1]))
+                    wavelength    = param.REAL((line[2]))
 
     return electricField, wavelength
-
-
