@@ -198,10 +198,9 @@ class Surface():
 
     def calc_distance(self, param):
 
-        self.x_center = numpy.zeros(3)
-        self.x_center[0] = numpy.average(self.xi).astype(param.REAL)
-        self.x_center[1] = numpy.average(self.yi).astype(param.REAL)
-        self.x_center[2] = numpy.average(self.zi).astype(param.REAL)
+        self.x_center = numpy.average(numpy.vstack((self.xi,
+                                                   self.yi,
+                                                   self.zi)), axis=1).astype(param.REAL)
         dist = numpy.sqrt((self.xi - self.x_center[0])**2 +
                           (self.yi - self.x_center[1])**2 +
                           (self.zi - self.x_center[2])**2)
