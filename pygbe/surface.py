@@ -40,43 +40,11 @@ def initialize_surface(field_array, filename, param):
     for i in range(Nsurf):
         print('\nReading surface {} from file {}'.format(i, files[i]))
 
-        s = Surface()
-
-        s.surf_type = surf_type[i]
-
-        if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface':
-            s.phi0 = numpy.loadtxt(phi0_file[i])
-            print('\nReading phi0 file for surface {} from {}'.format(i, phi0_file[i]))
-
-        Area_null = []
-        tic = time.time()
-        s.vertex = readVertex(files[i] + '.vert', param.REAL)
-        triangle_raw = readTriangle(files[i] + '.face', s.surf_type)
-        toc = time.time()
-        print('Time load mesh: {}'.format(toc - tic))
-        Area_null = s.zero_areas(triangle_raw, Area_null)
-        s.triangle = numpy.delete(triangle_raw, Area_null, 0)
-        print('Removed areas=0: {}'.format(len(Area_null)))
-
-        # Look for regions inside/outside
-        for j in range(Nsurf + 1):
-            if len(field_array[j].parent) > 0:
-                if field_array[j].parent[0] == i:  # Inside region
-                    s.kappa_in = field_array[j].kappa
-                    s.Ein = field_array[j].E
-                    s.LorY_in = field_array[j].LorY
-            if len(field_array[j].child) > 0:
-                if i in field_array[j].child:  # Outside region
-                    s.kappa_out = field_array[j].kappa
-                    s.Eout = field_array[j].E
-                    s.LorY_out = field_array[j].LorY
-
-        if s.surf_type != 'dirichlet_surface' and s.surf_type != 'neumann_surface':
-            s.E_hat = s.Ein / s.Eout
-        else:
-            s.E_hat = 1
-
+        s = Surface(Nsurf, surf_type[i], phi0_file[i])
+        s.define_surface(files[i], param)
+        s.define_regions(field_array, i)
         surf_array.append(s)
+
     return surf_array
 
 
@@ -292,8 +260,43 @@ class Surface():
                          (on the GPU)
     """
 
-    def __init__(self):
+    def __init__(self, Nsurf, surf_type, phi0_file):
         self.twig = []
+        self.surf_type = surf_type
+        self.Nsurf = Nsurf
+
+        if surf_type in ['dirichlet_surface', 'neumann_surface']:
+            self.phi0 = numpy.loadtxt(phi0_file)
+
+
+    def define_surface(self, files, param):
+        tic = time.time()
+        self.vertex = readVertex(files + '.vert', param.REAL)
+        triangle_raw = readTriangle(files + '.face', self.surf_type)
+        toc = time.time()
+        print('Time load mesh: {}'.format(toc - tic))
+        Area_null = self.zero_areas(triangle_raw)
+        self.triangle = numpy.delete(triangle_raw, Area_null, 0)
+        print('Removed areas=0: {}'.format(len(Area_null)))
+
+    def define_regions(self, field_array, i):
+        # Look for regions inside/outside
+        for j in range(self.Nsurf + 1):
+            if len(field_array[j].parent) > 0:
+                if field_array[j].parent[0] == i:  # Inside region
+                    self.kappa_in = field_array[j].kappa
+                    self.Ein = field_array[j].E
+                    self.LorY_in = field_array[j].LorY
+            if len(field_array[j].child) > 0:
+                if i in field_array[j].child:  # Outside region
+                    self.kappa_out = field_array[j].kappa
+                    self.Eout = field_array[j].E
+                    self.LorY_out = field_array[j].LorY
+
+        if self.surf_type not in ['dirichlet_surface', 'neumann_surface']:
+            self.E_hat = self.Ein / self.Eout
+        else:
+            self.E_hat = 1
 
     def fill_surface(self, param):
         """
@@ -479,7 +482,7 @@ class Surface():
         elif self.surf_type == 'neumann_surface' or self.surf_type == 'asc_surface':
             self.Precond[0, :] = 1 / (2 * numpy.pi)
 
-    def zero_areas(self, triangle_raw, area_null):
+    def zero_areas(self, triangle_raw, area_null=[]):
         """
         Looks for "zero-areas", areas that are really small, almost zero. It appends
         them to Area_null list.
