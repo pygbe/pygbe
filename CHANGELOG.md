@@ -5,11 +5,20 @@
 
 ### Added
 
+* Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but who cares.
+* Better regression tests (faster, anyway) using pytest
+
 ### Changed
+
+* Old regression test suite renamed to `convergence_tests`
 
 ### Fixed
 
+* Py3 syntax for generator iteration
+
 ### Removed
+
+* All commented out code
 
 ## 0.2.1
 ---
@@ -26,7 +35,6 @@
 * Updated license with new contributors
 * Layout of sphinx documentationt toolbars (home button added, more verbose layout)
 
-* Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but it is probably possible to maintain it for the time being.
 
 ### Fixed
 
