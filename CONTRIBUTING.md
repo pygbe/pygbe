@@ -49,7 +49,7 @@ python lysozyme.py
 or
 
 ```python
-python sphere_dirichlet.python
+python sphere_dirichlet.py
 ```
 
 ## Generating documentation
