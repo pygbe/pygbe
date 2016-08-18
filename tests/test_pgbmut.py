@@ -1,3 +1,4 @@
+import os
 import pickle
 import pytest
 import functools
@@ -29,8 +30,15 @@ def test_PGB_mut_sensor(key):
 @functools.lru_cache(5)
 def get_results():
     print('Generating results for 1PGBmut example...')
-    results = main(['','../examples/1PGBmut_sensor'],
-                    log_output=False,
-                    return_results_dict=True)
+    if os.getcwd().rsplit('/', 1)[1] == 'tests':
+        results = main(['','../examples/1PGBmut_sensor'],
+                        log_output=False,
+                        return_results_dict=True)
+    elif os.getcwd().rsplit('/', 1)[1] == 'pygbe':
+        results = main(['','./examples/1PGBmut_sensor'],
+                        log_output=False,
+                        return_results_dict=True)
+    else:
+        print("Run tests from either the main repo directory or the tests directory")
 
     return results
