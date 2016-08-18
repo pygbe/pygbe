@@ -13,7 +13,7 @@ def main():
     print('{:-^60}'.format('Running sphere_molecule_stern test'))
     try:
         test_outputs = pickleload()
-    except IOError:
+    except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'

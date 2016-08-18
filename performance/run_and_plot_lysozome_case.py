@@ -156,7 +156,7 @@ def check_mesh():
     If not, download the mesh files from Zenodo.
     """
     if not os.path.isdir('geometry'):
-        dl_check = raw_input('The meshes for the performance check don\'t appear '
+        dl_check = input('The meshes for the performance check don\'t appear '
                          'to be loaded. Would you like to download them from '
                              'Zenodo? (~11MB) (y/n): ')
         if dl_check == 'y':
@@ -209,7 +209,7 @@ def run_check():
     except OSError:
         pass
     if [a for a in os.listdir('output') if 'pickle' in a]:
-        run_check_yn = raw_input('\n\n\n'
+        run_check_yn = input('\n\n\n'
                               'There are already results in your output directory.  '
                               'Do you want to re-run the tests?  If you select "no" '
                               'then the plotting routine will still run.  If you select '
@@ -236,7 +236,7 @@ def run_lysozome():
 
 
 def main():
-    run_yn = raw_input('This will run 6 lysozyme cases in order to generate '
+    run_yn = input('This will run 6 lysozyme cases in order to generate '
                        'results necessary to generate a few figures. It '
                        'takes around 10 minutes to run on a Tesla K40 '
                        'and also time to download meshes from Zenodo (~11MB).  '

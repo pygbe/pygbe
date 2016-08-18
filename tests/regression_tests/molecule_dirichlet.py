@@ -15,7 +15,7 @@ def main():
 
     try:
         test_outputs = pickleload()
-    except IOError:
+   except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'

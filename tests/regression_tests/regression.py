@@ -9,7 +9,7 @@ import pickle
 try:
     import pycuda
 except ImportError:
-    ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
     if ans in ['Y', 'y']:
         pass
     else:
@@ -30,7 +30,7 @@ lysozome_mesh = ['1','2','4','8']
 
 def picklesave(test_outputs):
     with open('tests','w') as f:
-        pickle.dump(test_outputs, f)
+        pickle.dump(test_outputs, f, 2)
 
 def pickleload():
     with open('tests', 'r') as f:
