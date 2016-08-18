@@ -133,11 +133,11 @@ def find_config_files(cliargs):
     prob_name = prob_rel_path[1]
 
     if cliargs.config is None:
-        cliargs.config = glob.iglob(os.path.join(full_path, '*.config')).next()
+        cliargs.config = next(glob.iglob(os.path.join(full_path, '*.config')))
     else:
         cliargs.config = resolve_relative_config_file(cliargs.config, full_path)
     if cliargs.param is None:
-        cliargs.param = glob.iglob(os.path.join(full_path, '*.param')).next()
+        cliargs.param = next(glob.iglob(os.path.join(full_path, '*.param')))
     else:
         cliargs.param = resolve_relative_config_file(cliargs.param, full_path)
 
@@ -182,7 +182,7 @@ def check_for_nvcc():
 
 def check_nvcc_version():
     """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version'])
+    verstr = subprocess.check_output(['nvcc', '--version']).decode('utf-8')
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
