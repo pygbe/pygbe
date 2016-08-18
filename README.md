@@ -1,5 +1,7 @@
 # PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics
 
+[![DOI](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
+
 PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics
 calculations in a continuum model.
 It computes solvation energies for proteins modeled with any number of dielectric regions.
