@@ -12,6 +12,9 @@ os.rename('readme_input_format.rst', 'input_format.rst')
 with open('readme.rst', 'r') as f:
     readme = f.read()
 
+# strip out the mis-converted DOI badge from the readme (annoying)
+readme = ''.join(readme.split('|DOI|'))
+
 readme = readme.split('Installation', 1)
 
 intro, installation = readme
