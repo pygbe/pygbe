@@ -2,7 +2,7 @@
 
 Welcome to PyGBe's developer's guide!  This is a place to keep track of information that does not belong in a regular userguide.  
 
-# Contributing to PyGBe
+## Contributing to PyGBe
 
 All code must go through the pull request review procedure.  
 If you want to add something to PyGBe, first fork the repository.  Make your changes on your fork of the repository and then open a pull request with your changes against the main PyGBe repository.  
@@ -12,7 +12,7 @@ New features should follow the following rules:
 2. New features should include unit tests 
 3. All functions should have NumPy style doctrings.  See [here](https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt) for reference)
 
-# Running the tests
+## Running the tests
 
 PyGBe currently only has regression tests.  
 Once everything is installed, you can navigate to `pygbe/tests/regression_tests`.  
@@ -28,7 +28,7 @@ or to run all of the tests, use the helper script
 python run_all_regression_tests.py
 ```
 
-# Generating documentation
+## Generating documentation
 
 Ensure `sphinx` is installed.  
 
@@ -68,4 +68,7 @@ Ensure that the docs have built correctly and that formatting, etc, is functiona
 firefox _build/html/index.html
 ```
 
-If all looks right, then add and commit the changes to the `rst` files in `docs/source` and push.   Don't add or commit the `_build` directory as readthedocs will automatically generate documentation.
+If there are any errors in the build (or warnings), then fix them.
+If there are no errors and the docs look good on your local build, then you're done!
+Open a PR with your changes and when it is merged, the changes to the documentation will be automatically built and pushed
+by Travis to the `gh-pages` branch.

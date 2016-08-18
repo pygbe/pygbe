@@ -1,8 +1,19 @@
 import re
 import os
-import shutil
+import sys
+import time
 import numpy
+import shutil
 import pickle
+
+try:
+    import pycuda
+except ImportError:
+    ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    if ans in ['Y', 'y']:
+        pass
+    else:
+        sys.exit()
 
 from pygbe.main import main as pygbe
 
@@ -124,21 +135,27 @@ def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
     Ecoul = numpy.zeros(len(mesh))
     Time = numpy.zeros(len(mesh))
     for i in range(len(mesh)):
-        print 'Start run for mesh '+mesh[i]
-        outfile = pygbe(['',
-                         '-p', '{}'.format(param),
-                         '-c', '{}_{}.config'.format(test_name, mesh[i]),
-                         '-o', 'output_{}_{}'.format(test_name, mesh[i]),
-                         '-g', './',
-                         '{}'.format(problem_folder),], return_output_fname=True)
+        try:
+            print 'Start run for mesh '+mesh[i]
+            outfile = pygbe(['',
+                            '-p', '{}'.format(param),
+                            '-c', '{}_{}.config'.format(test_name, mesh[i]),
+                            '-o', 'output_{}_{}'.format(test_name, mesh[i]),
+                            '-g', './',
+                            '{}'.format(problem_folder),], return_output_fname=True)
 
-        print 'Scan output file'
-        outfolder = os.path.join('{}'.format(problem_folder),
-                                 'output_{}_{}'.format(test_name, mesh[i]))
-        outfile = os.path.join(outfolder, outfile)
-        N[i],iterations[i],Esolv[i],Esurf[i],Ecoul[i],Time[i] = scanOutput(outfile)
-        if delete_output:
-            shutil.rmtree(outfolder)
+            print 'Scan output file'
+            outfolder = os.path.join('{}'.format(problem_folder),
+                                    'output_{}_{}'.format(test_name, mesh[i]))
+            outfile = os.path.join(outfolder, outfile)
+            N[i],iterations[i],Esolv[i],Esurf[i],Ecoul[i],Time[i] = scanOutput(outfile)
+            if delete_output:
+                shutil.rmtree(outfolder)
+
+        except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
+            print('Mesh {} failed due to insufficient memory.'
+                  'Skipping this test, but convergence test should still complete'.format(mesh[i]))
+            time.sleep(4)
 
 
     return(N, iterations, Esolv, Esurf, Ecoul, Time)
