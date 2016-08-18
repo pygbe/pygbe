@@ -1,13 +1,11 @@
 import pickle
 import pytest
-# TODO change this to `import functools` for py3 port
-import functools32 as functools
+import functools
 
 try:
     import pycuda
 except ImportError:
-    # TODO change this to `input` for py3 port
-    ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
     if ans in ['Y', 'y']:
         pass
     else:

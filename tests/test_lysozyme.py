@@ -1,13 +1,11 @@
 import pickle
 import pytest
-# TODO change this to `import functools` for py3 port
-import functools32 as functools
+import functools
 
 try:
     import pycuda
 except ImportError:
-    # TODO change this to `input` for py3 port
-    ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
     if ans in ['Y', 'y']:
         pass
     else:
@@ -23,7 +21,7 @@ from pygbe.main import main
 def test_lysozyme(key):
     results = get_results()
 
-    with open('lysozyme.pickle', 'r') as f:
+    with open('lysozyme.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
     assert base_results[key] == results[key]
