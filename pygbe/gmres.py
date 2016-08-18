@@ -115,14 +115,20 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     tol = param.tol
 
     # Set number of outer and inner iterations
-    max_outer = max_iter
-
+    
     if R > dimen:
         warn('Setting number of inner iterations (restrt) to maximum\
               allowed, which is A.shape[0] ')
         R = dimen
 
     max_inner = R
+
+    #max_outer should be max_iter/max_inner but this might not be an integer
+    #so we get the ceil of the division.
+    #In the inner loop there is a if statement to break in case max_iter is
+    #reached. 
+ 
+    max_outer = numpy.ceil(max_iter/max_inner)
 
     # Prep for method
     aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
