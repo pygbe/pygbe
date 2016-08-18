@@ -264,7 +264,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         # test for convergence
         if rel_resid < tol:
             print('GMRES solve')
-            print('Converged after %i iterations to a residual of %s'%(iteration,rel_resid))
+            print('Converged after {} iterations to a residual of {}'.format(iteration,rel_resid))
             print('Time weight vector: {}'.format(timing.time_mass))
             print('Time sort         : {}'.format(timing.time_sort))
             print('Time data transfer: {}'.format(timing.time_trans))
