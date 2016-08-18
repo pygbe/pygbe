@@ -1,6 +1,17 @@
 import os
 import subprocess
 
+#remove DOI badge from readme before conversion to RST
+with open('../README.md', 'r') as f:
+    readme = f.readlines()
+
+for line in readme:
+    if '[DOI]' in line:
+        readme.remove(line)
+
+with open('../README.md', 'w') as f:
+    f.writelines(readme)
+
 #convert README to rst
 for file in ['README', 'README_input_format', 'CONTRIBUTING']:
     subprocess.call(['pandoc', '../{}.md'.format(file),
@@ -11,9 +22,6 @@ os.rename('readme_input_format.rst', 'input_format.rst')
 
 with open('readme.rst', 'r') as f:
     readme = f.read()
-
-# strip out the mis-converted DOI badge from the readme (annoying)
-readme = ''.join(readme.split('|DOI|'))
 
 readme = readme.split('Installation', 1)
 
