@@ -5,13 +5,12 @@ import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import (scanOutput, run_regression, picklesave, pickleload,
+from convergence import (scanOutput, run_convergence, picklesave, pickleload,
                         report_results, mesh)
 
 
 def main():
-
-    print('{:-^60}'.format('Running molecule_dirichlet test'))
+    print('{:-^60}'.format('Running molecule_neumann test'))
 
     try:
         test_outputs = pickleload()
@@ -20,50 +19,54 @@ def main():
 
     problem_folder = 'input_files'
 
-    #molecule_dirichlet
+    #molecule_neumann
+    print('Runs for molecule + set phi/dphi surface')
     param = 'sphere_fine.param'
-    test_name = 'molecule_dirichlet'
+    test_name = 'molecule_neumann'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
 
     #molecule_single_center
+    print('Runs for isolated molecule')
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
 
-    #dirichlet_surface
+    #neumann_surface
+    print('Runs for isolated surface')
     param = 'sphere_fine.param'
-    test_name = 'dirichlet_surface'
+    test_name = 'neumann_surface'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
 
-    Esolv, Esurf, Ecoul = test_outputs['molecule_dirichlet'][2:5]
+    #Load results for analysis
+    Esolv, Esurf, Ecoul = test_outputs['molecule_neumann'][2:5]
     Esolv_mol, Esurf_mol, Ecoul_mol = test_outputs['molecule_single_center'][2:
                                                                              5]
-    Esolv_surf, Esurf_surf, Ecoul_surf = test_outputs['dirichlet_surface'][2:5]
-    Time = test_outputs['molecule_dirichlet'][-1]
+    Esolv_surf, Esurf_surf, Ecoul_surf = test_outputs['neumann_surface'][2:5]
+    Time = test_outputs['molecule_neumann'][-1]
     Time_mol = test_outputs['molecule_single_center'][-1]
-    Time_surf = test_outputs['dirichlet_surface'][-1]
-    N, iterations = test_outputs['molecule_dirichlet'][:2]
+    Time_surf = test_outputs['neumann_surface'][-1]
+    N, iterations = test_outputs['molecule_neumann'][:2]
 
     Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
     total_time = Time + Time_mol + Time_surf
 
-    analytical = an_solution.molecule_constant_potential(1., 1., 5., 4., 12.,
-                                                         0.125, 4., 80.)
+    analytical = an_solution.molecule_constant_charge(1., -80 * 1., 5., 4.,
+                                                      12., 0.125, 4., 80.)
 
     error = abs(Einter - analytical) / abs(analytical)
 
