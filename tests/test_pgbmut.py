@@ -21,7 +21,7 @@ from pygbe.main import main
 def test_PGB_mut_sensor(key):
     results = get_results()
 
-    with open('pgbmut.pickle', 'r') as f:
+    with open('pgbmut.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
     assert base_results[key] == results[key]
