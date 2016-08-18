@@ -128,7 +128,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     #In the inner loop there is a if statement to break in case max_iter is
     #reached. 
  
-    max_outer = numpy.ceil(max_iter/max_inner)
+    max_outer = int(numpy.ceil(max_iter/max_inner))
 
     # Prep for method
     aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
@@ -244,7 +244,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
             if iteration==max_iter:
                 print('You have reached the maximum number of iterations : {}.'.format(iteration))
-                print('The run will stop. Check the residual behaviour you might have a bug.)
+                print('The run will stop. Check the residual behaviour you might have a bug.')
                 print('For future runs you might consider changing the \
                        tolerance or increasing the number of max_iter.')
                 break     
