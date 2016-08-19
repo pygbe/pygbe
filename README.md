@@ -16,7 +16,7 @@ The following instructions assume that the operating system is Ubuntu. Run the
 corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
-* Python 2.7.12
+* Python 3.4+
 * Numpy 1.11.1
 * SciPy 0.17.1
 * SWIG 3.0.8
@@ -32,7 +32,7 @@ To install the specific version of these packages we recommend using either [con
 To create a new environment for using PyGBe with `conda` you can do the following:
 
 ```console
-conda create -n pygbe python=2.7 numpy scipy swig matplotlib
+conda create -n pygbe python=3.5 numpy scipy swig matplotlib
 source activate pygbe
 ```
 
