@@ -150,8 +150,27 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
         PHI_K += K_diag
         PHI_V += V_diag
 
-# Need compute diagonal
-## requires SA
-### requires cross, norm, matvec, intSide
-## intSide
-### requires ax, cross, axpy, dot_prod, norm, matvec, lineint
+
+@numba.njit(cache=True)
+def compute_diagonal(vl, vlsize, kl, klsize, vy, vysize, ky, kysize, triangle, trianglesize, centers, centerssize, kappa, k_diag, v_diag, xk, xksize, wk, wksize):
+
+    for i in range(vlsize):
+        panel = triangle[i*9: i*9+9]
+        center = centers[3*i: 3*i+3]
+
+        PHI_K, PHI_V = 0, 0
+        LorY = 1 # Laplace
+        sa(PHI_K, PHI_V, panel, center, 1e-12, 1, k_diag, v_diag, LorY, xk, xksize, wk)
+
+        vl[i] = PHI_V
+        kl[i] = PHI_K
+
+        PHI_K = 0
+        PHI_V = 0
+
+        LorY = 2 # Yukawa
+        sa(PHI_K, PHI_V, panel, center, kappa, 1, k_diag, v_diag, LorY, xk, xksize, wk)
+
+        vy[i] = PHI_V
+        ky[i] = PHI_K
+
