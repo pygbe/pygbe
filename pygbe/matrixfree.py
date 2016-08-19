@@ -1216,7 +1216,7 @@ def calculateEsurf(surf_array, field_array, param, kernel):
             print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
                 f, ff))
             Esurf_aux = -numpy.sum(-parent_surf.Eout * parent_surf.dphi *
-                                   parent_surf.phi * parent_surf.Area)
+                                   parent_surf.phi * parent_surf.area)
             E_surf.append(0.5 * C0 * Esurf_aux)
 
         if parent_surf.surf_type in ['neumann_surface']:
@@ -1224,6 +1224,6 @@ def calculateEsurf(surf_array, field_array, param, kernel):
             print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
                 f, ff))
             Esurf_aux = numpy.sum(-parent_surf.Eout * parent_surf.dphi *
-                                   parent_surf.phi * parent_surf.Area)
+                                   parent_surf.phi * parent_surf.area)
             E_surf.append(0.5 * C0 * Esurf_aux)
     return E_surf

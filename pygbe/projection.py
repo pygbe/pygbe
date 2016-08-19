@@ -197,7 +197,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
     Nt = len(surfTar.triangle)
-    L = numpy.sqrt(2 * surfSrc.Area)  # Representative length
+    L = numpy.sqrt(2 * surfSrc.area)  # Representative length
 
     tic.record()
     K = param.K
@@ -206,7 +206,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     X_Ktc = numpy.zeros(Ns * K)
 
     NsK = numpy.arange(Ns * K)
-    X_Kt[:] = XKt[NsK // K] * w[NsK % K] * surfSrc.Area[NsK // K]
+    X_Kt[:] = XKt[NsK // K] * w[NsK % K] * surfSrc.area[NsK // K]
     X_Ktc[:] = XKt[NsK // K]
 
     toc.record()
@@ -322,7 +322,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     REAL = par_reac.REAL
     N = len(XK)
     MV = numpy.zeros(len(XK))
-    L = numpy.sqrt(2 * surface.Area)  # Representative length
+    L = numpy.sqrt(2 * surface.area)  # Representative length
     AI_int = 0
 
     # Setup vector
@@ -337,12 +337,12 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     X_Vc = numpy.zeros(N * K)
 
     for i in range(N * K):
-        X_V[i] = XV[i // K] * w[i % K] * surface.Area[i // K]
-        X_Kx[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_V[i] = XV[i // K] * w[i % K] * surface.area[i // K]
+        X_Kx[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 0]
-        X_Ky[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_Ky[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 1]
-        X_Kz[i] = XK[i // K] * w[i % K] * surface.Area[
+        X_Kz[i] = XK[i // K] * w[i % K] * surface.area[
             i // K] * surface.normal[i // K, 2]
         X_Kc[i] = XK[i // K]
         X_Vc[i] = XV[i // K]

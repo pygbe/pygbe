@@ -362,6 +362,7 @@ class Surface():
         L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
         L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
 
+        self.area = numpy.zeros(self.N)
         self.normal = numpy.cross(L0, L2)
         self.area = numpy.sqrt(numpy.sum(self.normal**2, axis=1)) / 2
         self.normal /= (2 * self.area[:, numpy.newaxis])

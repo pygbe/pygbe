@@ -78,7 +78,7 @@ def print_summary(surf_array, field_array, param, results_dict):
     print(28*'-'+'\n')
     try:
         key = 'elem_sq_angstrom_surf{}'.format(i)
-        results_dict[key] = [1/numpy.average(surf_array[i].Area)]
+        results_dict[key] = [1/numpy.average(surf_array[i].area)]
     except IndexError:
         pass
 
