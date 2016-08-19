@@ -276,7 +276,8 @@ class Surface():
         triangle_raw = readTriangle(files + '.face', self.surf_type)
         toc = time.time()
         print('Time load mesh: {}'.format(toc - tic))
-        area_null = self.zero_areas(triangle_raw)
+        area_null = []
+        area_null = self.zero_areas(triangle_raw, area_null)
         self.triangle = numpy.delete(triangle_raw, area_null, 0)
         print('Removed areas=0: {}'.format(len(area_null)))
 
@@ -490,7 +491,7 @@ class Surface():
         elif self.surf_type == 'neumann_surface' or self.surf_type == 'asc_surface':
             self.Precond[0, :] = 1 / (2 * numpy.pi)
 
-    def zero_areas(self, triangle_raw, area_null=[]):
+    def zero_areas(self, triangle_raw, area_null):
         """
         Looks for "zero-areas", areas that are really small, almost zero. It appends
         them to area_null list.
