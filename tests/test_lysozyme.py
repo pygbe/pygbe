@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-from pygbe.main import main
-
-def test_lysozyme():
-    res = main(['', '../examples/lys', return_output_dict=True])
-
-=======
 import os
 import pickle
 import pytest
@@ -49,4 +42,3 @@ def get_results():
         print("Run tests from either the main repo directory or the tests directory")
 
     return results
->>>>>>> py3port
