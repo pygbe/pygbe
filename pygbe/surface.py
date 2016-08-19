@@ -7,7 +7,7 @@ import numpy
 from scipy import linalg
 
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
-from pygbe.tree.direct import computeDiagonal
+from pygbe.direct import compute_diagonal
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.quadrature import quadratureRule_fine
 from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
@@ -448,9 +448,12 @@ class Surface():
         KL = numpy.zeros(self.N)
         VY = numpy.zeros(self.N)
         KY = numpy.zeros(self.N)
-        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
+        compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
                         numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
                         self.xk, self.wk)
+        import ipdb; ipdb.set_trace()
+        VL = numpy.zeros_like(VL)
+        VY = numpy.zeros_like(VY)
         if self.LorY_in == 1:
             dX11 = KL
             dX12 = -VL
@@ -467,9 +470,12 @@ class Surface():
         KL = numpy.zeros(self.N)
         VY = numpy.zeros(self.N)
         KY = numpy.zeros(self.N)
-        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
+        compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
                         numpy.ravel(centers), self.kappa_out, 2 * numpy.pi, 0.,
                         self.xk, self.wk)
+        VL = numpy.zeros(self.N)
+        VY = numpy.zeros(self.N)
+
         if self.LorY_out == 1:
             dX21 = KL
             dX22 = self.E_hat * VL
