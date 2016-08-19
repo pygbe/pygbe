@@ -182,7 +182,7 @@ def check_for_nvcc():
 
 def check_nvcc_version():
     """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version']).decode()
+    verstr = subprocess.check_output(['nvcc', '--version']).decode('utf-8')
     cuda_ver = re.compile('release (\d\.\d)')
     match = re.search(cuda_ver, verstr)
     version = float(match.group(1))
@@ -192,7 +192,8 @@ def check_nvcc_version():
                  'or remove `nvcc` from your PATH to use CPU only.')
 
 
-def main(argv=sys.argv, log_output=True, return_output_fname=False):
+def main(argv=sys.argv, log_output=True, return_output_fname=False,
+         return_results_dict=False):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
@@ -442,11 +443,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False):
     output_pickle.append('resultspickle')
     output_pickle = '-'.join(output_pickle)
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
-        pickle.dump(results_dict, f)
+        pickle.dump(results_dict, f, 2)
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
     sys.stdout = sys.__stdout__
+
+    if return_results_dict:
+        return results_dict
 
     if return_output_fname and log_output:
         return outputfname

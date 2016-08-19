@@ -39,7 +39,7 @@ def unzip(meshzip):
 def check_mesh():
     #check if there's a geometry folder present in the directory
     if not os.path.isdir('geometry'):
-        dl_check = raw_input('The meshes for regression tests don\'t appear to '
+        dl_check = input('The meshes for regression tests don\'t appear to '
                          'be loaded. Would you like to download them from '
                              'Zenodo? (~10MB) (y/n): ')
         if dl_check == 'y':

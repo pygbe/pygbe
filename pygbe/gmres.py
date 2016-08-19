@@ -37,11 +37,12 @@ from warnings import warn
 
 from pygbe.matrixfree import gmres_dot
 
+
 def apply_givens(Q, v, k):
     """
     Apply the first k Givens rotations in Q to the vector v.
 
-    Parameter
+    Arguments
     ---------
         Q: list, list of consecutive 2x2 Givens rotations
         v: array, vector to apply the rotations to
