@@ -6,32 +6,18 @@ def norm(x):
     return numpy.sqrt(numpy.sum(x**2))
 
 
-#@numba.jit(cache=True)
+@numba.jit()
 def cross(a, b):
 
-    return numpy.array([a[1]*b[2] - a[2]*b[1],
+    c = numpy.array([a[1]*b[2] - a[2]*b[1],
                         a[2]*b[0] - a[0]*b[2],
                         a[0]*b[1] - a[1]*b[0]])
-
-
-#@numba.jit(cache=True)
-def matvec(a, b):
-    return a @ b
+    return c
 
 
 #@numba.jit(cache=True)
 def dot(a, b):
     return numpy.dot(a, b)
-
-
-#@numba.jit(cache=True)
-def axpy(a, x, y, sign):
-    return sign * a * x + y
-
-
-#@numba.jit(cache=True)
-def ax(a, x):
-    return a * x
 
 
 #@numba.jit(cache=True)
@@ -50,7 +36,6 @@ def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
     Rtheta = x / numpy.cos(thetak)
     R = numpy.sqrt(Rtheta**2 + z**2)
     expKr = numpy.exp(-kappa * R)
-
     if LorY == 2:
         if kappa > 1e-12:
             expKz = numpy.exp(-kappa * abs(z))
@@ -63,11 +48,11 @@ def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
         PHI_V += numpy.sum(wk * (R - abs(z)) * dtheta / 2)
         PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta / 2)
 
-
     return PHI_V, PHI_K
 
+
 #@numba.jit(cache=True)
-def int_side(PHI_K, PHI_V, v2, v1, p, kappa, xk, wk, K, LorY):
+def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, K, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
     v21u = 1./l21 * v21
@@ -87,15 +72,16 @@ def int_side(PHI_K, PHI_V, v2, v1, p, kappa, xk, wk, K, LorY):
 
     v1new = rotate_vert @ v1
 
-    if v1new[0] < 0:
+    if v1new.ravel()[0] < 0:
         v21u *= -1
         orthog += -1
         rotate_vert *= -1
-        rotate_vert[8] = 1
+        rotate_vert.ravel()[8] = 1
         v1new = rotate_vert @ v1
 
     v2new = rotate_vert @ v2
     rorthognew = rotate_vert @ rorthog
+
 
     if (v1new[1] > 0 and v2new[1] < 0) or (v1new[1] < 0 and v2new[1] > 0):
         PHI1_K, PHI1_V, PHI2_K, PHI2_V = 0, 0, 0, 0
@@ -161,8 +147,8 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
 def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, xk, wk):
 
     for i in range(len(vl)):
-        panel = triangle[i*9: i*9+9]
-        center = centers[3*i: 3*i+3]
+        panel = triangle[i*9: i*9+9].copy()
+        center = centers[3*i: 3*i+3].copy()
 
         PHI_K = 0
         PHI_V = 0
@@ -179,5 +165,7 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
 
         vy[i] = PHI_V
         ky[i] = PHI_K
+
+    return vl, kl, vy, ky
 
 
