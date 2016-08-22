@@ -141,9 +141,9 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
     panel1_final = panel1_plane.copy()
     panel2_final = panel2_plane.copy()
 
-    panel0_final[:3] = panel0_plane[:3] - x_plane[:3]
-    panel1_final[:3] = panel1_plane[:3] - x_plane[:3]
-    panel2_final[:3] = panel2_plane[:3] - x_plane[:3]
+    panel0_final[:2] = panel0_plane[:2] - x_plane[:2]
+    panel1_final[:2] = panel1_plane[:2] - x_plane[:2]
+    panel2_final[:2] = panel2_plane[:2] - x_plane[:2]
 
     PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel0_final, panel1_final, x_plane[2],
              kappa, xk, wk, xkSize, LorY) # Side 0
