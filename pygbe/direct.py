@@ -70,14 +70,13 @@ def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
 def int_side(PHI_K, PHI_V, v2, v1, p, kappa, xk, wk, K, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
-#    v21u = numpy.clip(1./l21 * v21, 1e-16, 1e16)
     v21u = 1./l21 * v21
     unit = numpy.array([0., 0., 1.])
     orthog = cross(unit, v21u)
 
     alpha = dot(v21, v1) / (l21**2)
 
-    #a, x, y, sign
+    #x, y, z, alpha, sign
     rorthog = -1 * alpha * v21 + v1
 
     d_toedge = norm(rorthog)
@@ -95,7 +94,7 @@ def int_side(PHI_K, PHI_V, v2, v1, p, kappa, xk, wk, K, LorY):
         rotate_vert[8] = 1
         v1new = rotate_vert @ v1
 
-    v2new = rotate_vert @ v21u
+    v2new = rotate_vert @ v2
     rorthognew = rotate_vert @ rorthog
 
     if (v1new[1] > 0 and v2new[1] < 0) or (v1new[1] < 0 and v2new[1] > 0):
