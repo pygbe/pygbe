@@ -448,9 +448,13 @@ class Surface():
         KL = numpy.zeros(self.N)
         VY = numpy.zeros(self.N)
         KY = numpy.zeros(self.N)
-        compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
-                        numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
-                        self.xk, self.wk)
+        triangle = numpy.ravel(self.vertex[self.triangle[:]])
+        kappa_in = self.kappa_in
+        xk = self.xk
+        wk = self.wk
+        compute_diagonal(VL, KL, VY, KY, triangle,
+                        numpy.ravel(centers), kappa_in, 2 * numpy.pi, 0.,
+                        xk, wk)
         if self.LorY_in == 1:
             dX11 = KL
             dX12 = -VL
@@ -467,9 +471,13 @@ class Surface():
         KL = numpy.zeros(self.N)
         VY = numpy.zeros(self.N)
         KY = numpy.zeros(self.N)
-        compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
-                        numpy.ravel(centers), self.kappa_out, 2 * numpy.pi, 0.,
-                        self.xk, self.wk)
+        triangle = numpy.ravel(self.vertex[self.triangle[:]])
+        kappa_out = self.kappa_out
+        xk = self.xk
+        wk = self.wk
+        compute_diagonal(VL, KL, VY, KY, triangle,
+                        numpy.ravel(centers), kappa_out, 2 * numpy.pi, 0.,
+                        xk, wk)
         if self.LorY_out == 1:
             dX21 = KL
             dX22 = self.E_hat * VL

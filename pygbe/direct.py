@@ -1,12 +1,12 @@
 import numpy
 import numba
 
-#@numba.jit(cache=True)
+@numba.njit(cache=True)
 def norm(x):
     return numpy.sqrt(numpy.sum(x**2))
 
 
-@numba.jit()
+@numba.njit(cache=True)
 def cross(a, b):
 
     c = numpy.array([a[1]*b[2] - a[2]*b[1],
@@ -15,13 +15,15 @@ def cross(a, b):
     return c
 
 
-#@numba.jit(cache=True)
+@numba.njit(cache=True)
 def dot(a, b):
     return numpy.dot(a, b)
 
 
-#@numba.jit(cache=True)
-def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
+@numba.njit()
+def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
+    PHI_K = 0
+    PHI_V = 0
     theta1 = numpy.arctan2(v1, x)
     theta2 = numpy.arctan2(v2, x)
     dtheta = theta2 - theta1
@@ -51,8 +53,8 @@ def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
     return PHI_K, PHI_V
 
 
-#@numba.jit(cache=True)
-def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, K, LorY):
+@numba.jit(cache=True)
+def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
     v21u = 1./l21 * v21
@@ -84,15 +86,15 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, K, LorY):
 
 
     if (v1new[1] > 0 and v2new[1] < 0) or (v1new[1] < 0 and v2new[1] > 0):
-        PHI1_K, PHI1_V, PHI2_K, PHI2_V = 0, 0, 0, 0
-        PHI1_K, PHI1_V = line_int(PHI1_K, PHI1_V, p, v1new[0], 0, v1new[1], kappa, xk, wk, K, LorY)
-        PHI2_K, PHI2_V = line_int(PHI2_K, PHI2_V, p, v1new[0], v2new[1], 0, kappa, xk, wk, K, LorY)
+#        PHI1_K, PHI1_V, PHI2_K, PHI2_V = 0, 0, 0, 0
+        PHI1_K, PHI1_V = line_int(p, v1new[0], 0, v1new[1], kappa, xk, wk, LorY)
+        PHI2_K, PHI2_V = line_int(p, v1new[0], v2new[1], 0, kappa, xk, wk, LorY)
 
         PHI_K += PHI1_K + PHI2_K
         PHI_V += PHI1_V + PHI2_V
     else:
-        PHI_Kaux, PHI_Vaux = 0, 0
-        PHI_Kaux, PHI_Vaux = line_int(PHI_Kaux, PHI_Vaux, p, v1new[0], v1new[1], v2new[1], kappa, xk, wk, K, LorY)
+#        PHI_Kaux, PHI_Vaux = 0, 0
+        PHI_Kaux, PHI_Vaux = line_int(p, v1new[0], v1new[1], v2new[1], kappa, xk, wk, LorY)
 
         PHI_K -= PHI_Kaux
         PHI_V -= PHI_Vaux
@@ -100,8 +102,8 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, K, LorY):
     return PHI_K, PHI_V
 
 
-#@numba.jit(cache=True)
-def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
+@numba.jit()
+def sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk):
     x_panel = x[:3] - y[:3]
     y0_panel = numpy.zeros(3)
     y1_panel = y[3:6] - y[:3]
@@ -115,7 +117,11 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
 
     Y = cross(Z, X)
 
-    rot_matrix = numpy.vstack((X, Y, Z))
+    #rot_matrix = numpy.vstack((X, Y, Z))
+    rot_matrix = numpy.zeros((3, 3))
+    rot_matrix[0, :] = X
+    rot_matrix[1, :] = Y
+    rot_matrix[2, :] = Z
 
     panel0_plane = rot_matrix @ y0_panel
     panel1_plane = rot_matrix @ y1_panel
@@ -130,12 +136,12 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
     panel1_final[:2] = panel1_plane[:2] - x_plane[:2]
     panel2_final[:2] = panel2_plane[:2] - x_plane[:2]
 
-    PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel0_final, panel1_final, x_plane[2],
-             kappa, xk, wk, xkSize, LorY) # Side 0
+    PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
+             kappa, xk, wk, LorY) # Side 0
     PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
-             kappa, xk, wk, xkSize, LorY) # Side 1
+             kappa, xk, wk, LorY) # Side 1
     PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
-             kappa, xk, wk, xkSize, LorY) # Side 2
+             kappa, xk, wk, LorY) # Side 2
 
     if same == 1:
         PHI_K += K_diag
@@ -143,7 +149,8 @@ def sa(PHI_K, PHI_V, y, x, kappa, same, K_diag, V_diag, LorY, xk, xkSize, wk):
 
     return PHI_K, PHI_V
 
-#@numba.jit(cache=True)
+
+@numba.jit(cache=True)
 def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, xk, wk):
 
     for i in range(len(vl)):
@@ -153,7 +160,7 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
         PHI_K = 0
         PHI_V = 0
         LorY = 1 # Laplace
-        PHI_K, PHI_V = sa(PHI_K, PHI_V, panel, center, 1e-12, 1, k_diag, v_diag, LorY, xk, len(xk), wk)
+        PHI_K, PHI_V = sa(panel, center, 1e-12, 1, k_diag, v_diag, LorY, xk, wk)
         vl[i] = PHI_V
         kl[i] = PHI_K
 
@@ -161,7 +168,7 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
         PHI_V = 0
 
         LorY = 2 # Yukawa
-        PHI_K, PHI_V = sa(PHI_K, PHI_V, panel, center, kappa, 1, k_diag, v_diag, LorY, xk, len(xk), wk)
+        PHI_K, PHI_V = sa(panel, center, kappa, 1, k_diag, v_diag, LorY, xk, wk)
 
         vy[i] = PHI_V
         ky[i] = PHI_K
