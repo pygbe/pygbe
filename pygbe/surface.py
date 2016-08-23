@@ -451,8 +451,6 @@ class Surface():
         compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
                         numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
                         self.xk, self.wk)
-        VL = numpy.zeros_like(VL)
-        VY = numpy.zeros_like(VY)
         if self.LorY_in == 1:
             dX11 = KL
             dX12 = -VL
@@ -472,9 +470,6 @@ class Surface():
         compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
                         numpy.ravel(centers), self.kappa_out, 2 * numpy.pi, 0.,
                         self.xk, self.wk)
-        VL = numpy.zeros(self.N)
-        VY = numpy.zeros(self.N)
-
         if self.LorY_out == 1:
             dX21 = KL
             dX22 = self.E_hat * VL
