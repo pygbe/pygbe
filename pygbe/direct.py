@@ -48,7 +48,7 @@ def line_int(PHI_K, PHI_V, z, x, v1, v2, kappa, xk, wk, K, LorY):
         PHI_V += numpy.sum(wk * (R - abs(z)) * dtheta / 2)
         PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta / 2)
 
-    return PHI_V, PHI_K
+    return PHI_K, PHI_V
 
 
 #@numba.jit(cache=True)
