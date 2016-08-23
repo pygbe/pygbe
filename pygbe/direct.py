@@ -20,7 +20,7 @@ def dot(a, b):
     return numpy.dot(a, b)
 
 
-@numba.njit()
+@numba.njit(cache=True)
 def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
     PHI_K = 0
     PHI_V = 0
@@ -53,7 +53,7 @@ def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
     return PHI_K, PHI_V
 
 
-@numba.jit(cache=True)
+@numba.njit()
 def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
@@ -70,7 +70,12 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     #a, x
     side_vec = cross(v21, -1 * v1)
 
-    rotate_vert = numpy.vstack((orthog, v21u, unit))
+#    rotate_vert = numpy.vstack((orthog, v21u, unit))
+    rotate_vert = numpy.zeros((3, 3))
+    for i in range(3):
+        rotate_vert[0, i] = orthog[i]
+        rotate_vert[1, i] = v21u[i]
+        rotate_vert[2, i] = unit[i]
 
     v1new = rotate_vert @ v1
 
@@ -102,8 +107,8 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     return PHI_K, PHI_V
 
 
-@numba.jit()
-def sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk):
+@numba.njit(cache=True)
+def sa(y, x, kappa):
     x_panel = x[:3] - y[:3]
     y0_panel = numpy.zeros(3)
     y1_panel = y[3:6] - y[:3]
@@ -136,21 +141,10 @@ def sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk):
     panel1_final[:2] = panel1_plane[:2] - x_plane[:2]
     panel2_final[:2] = panel2_plane[:2] - x_plane[:2]
 
-    PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
-             kappa, xk, wk, LorY) # Side 0
-    PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
-             kappa, xk, wk, LorY) # Side 1
-    PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
-             kappa, xk, wk, LorY) # Side 2
-
-    if same == 1:
-        PHI_K += K_diag
-        PHI_V += V_diag
-
-    return PHI_K, PHI_V
+    return panel0_final, panel1_final, panel2_final, x_plane
 
 
-@numba.jit(cache=True)
+@numba.njit(cache=True)
 def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, xk, wk):
 
     for i in range(len(vl)):
@@ -160,7 +154,19 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
         PHI_K = 0
         PHI_V = 0
         LorY = 1 # Laplace
-        PHI_K, PHI_V = sa(panel, center, 1e-12, 1, k_diag, v_diag, LorY, xk, wk)
+        panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center, 1e-12)
+
+        PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 0
+        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 1
+        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 2
+
+        # this is replacing `same == 1`
+        PHI_K += k_diag
+        PHI_V += v_diag
+
         vl[i] = PHI_V
         kl[i] = PHI_K
 
@@ -168,7 +174,19 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
         PHI_V = 0
 
         LorY = 2 # Yukawa
-        PHI_K, PHI_V = sa(panel, center, kappa, 1, k_diag, v_diag, LorY, xk, wk)
+        # was sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk)
+        panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center, kappa)
+
+        PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 0
+        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 1
+        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
+                kappa, xk, wk, LorY) # Side 2
+
+        # this is replacing `same == 1`
+        PHI_K += k_diag
+        PHI_V += v_diag
 
         vy[i] = PHI_V
         ky[i] = PHI_K
