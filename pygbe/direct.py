@@ -53,7 +53,18 @@ def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
     return PHI_K, PHI_V
 
 
-@numba.njit()
+@numba.njit(cache=True)
+def generate_rot_matrix(a, b, c):
+    rot_matrix = numpy.empty((3, 3))
+    for i in range(3):
+        rot_matrix[0, i] = a[i]
+        rot_matrix[1, i] = b[i]
+        rot_matrix[2, i] = c[i]
+
+    return rot_matrix
+
+
+@numba.njit(cache=True)
 def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
@@ -70,20 +81,15 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     #a, x
     side_vec = cross(v21, -1 * v1)
 
-#    rotate_vert = numpy.vstack((orthog, v21u, unit))
-    rotate_vert = numpy.zeros((3, 3))
-    for i in range(3):
-        rotate_vert[0, i] = orthog[i]
-        rotate_vert[1, i] = v21u[i]
-        rotate_vert[2, i] = unit[i]
+    rotate_vert = generate_rot_matrix(orthog, v21u, unit)
 
     v1new = rotate_vert @ v1
 
-    if v1new.ravel()[0] < 0:
+    if v1new[0] < 0:
         v21u *= -1
         orthog += -1
         rotate_vert *= -1
-        rotate_vert.ravel()[8] = 1
+        rotate_vert[2, 2] = 1
         v1new = rotate_vert @ v1
 
     v2new = rotate_vert @ v2
@@ -91,14 +97,12 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
 
 
     if (v1new[1] > 0 and v2new[1] < 0) or (v1new[1] < 0 and v2new[1] > 0):
-#        PHI1_K, PHI1_V, PHI2_K, PHI2_V = 0, 0, 0, 0
         PHI1_K, PHI1_V = line_int(p, v1new[0], 0, v1new[1], kappa, xk, wk, LorY)
         PHI2_K, PHI2_V = line_int(p, v1new[0], v2new[1], 0, kappa, xk, wk, LorY)
 
         PHI_K += PHI1_K + PHI2_K
         PHI_V += PHI1_V + PHI2_V
     else:
-#        PHI_Kaux, PHI_Vaux = 0, 0
         PHI_Kaux, PHI_Vaux = line_int(p, v1new[0], v1new[1], v2new[1], kappa, xk, wk, LorY)
 
         PHI_K -= PHI_Kaux
@@ -122,11 +126,7 @@ def sa(y, x, kappa):
 
     Y = cross(Z, X)
 
-    #rot_matrix = numpy.vstack((X, Y, Z))
-    rot_matrix = numpy.zeros((3, 3))
-    rot_matrix[0, :] = X
-    rot_matrix[1, :] = Y
-    rot_matrix[2, :] = Z
+    rot_matrix = generate_rot_matrix(X, Y, Z)
 
     panel0_plane = rot_matrix @ y0_panel
     panel1_plane = rot_matrix @ y1_panel
