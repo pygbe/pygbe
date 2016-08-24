@@ -17,7 +17,7 @@ def cross(a, b):
     return c
 
 
-#@numba.jit('UniTuple(float64, 2)(float64, float64[:], float64[:], float64[:], float64, float64[:], float64[:], int32)', nopython=True)
+#@numba.jit('UniTuple(float64, 2)(float64, float64, float64, float64, float64, float64[:], float64[:], int32)', nopython=True, cache=True)
 @numba.njit(cache=True)
 def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
     PHI_K = 0
