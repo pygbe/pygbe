@@ -1,13 +1,14 @@
 import numpy
 import numba
+from numba import float64
 
 
-@numba.njit(cache=True)
+@numba.jit('float64(float64[:])', nopython=True, cache=True)
 def norm(x):
     return numpy.sqrt(numpy.sum(x**2))
 
 
-@numba.njit(cache=True)
+@numba.jit('float64[:](float64[:], float64[:])', nopython=True, cache=True)
 def cross(a, b):
 
     c = numpy.array([a[1]*b[2] - a[2]*b[1],
@@ -16,40 +17,41 @@ def cross(a, b):
     return c
 
 
+#@numba.jit('UniTuple(float64, 2)(float64, float64[:], float64[:], float64[:], float64, float64[:], float64[:], int32)', nopython=True)
 @numba.njit(cache=True)
 def line_int(z, x, v1, v2, kappa, xk, wk, LorY):
     PHI_K = 0
     PHI_V = 0
     theta1 = numpy.arctan2(v1, x)
     theta2 = numpy.arctan2(v2, x)
-    dtheta = theta2 - theta1
+    dtheta = (theta2 - theta1) / 2  # we only ever use this divided by two
     thetam = (theta2 + theta1) / 2
 
-    if abs(z) < 1e-10:
+    absZ = abs(z)
+    if absZ < 1e-10:
         signZ = 0
     else:
-        signZ = z / abs(z)
+        signZ = z / absZ
 
-    thetak = dtheta / 2 * xk + thetam
-    Rtheta = x / numpy.cos(thetak)
+    Rtheta = x / numpy.cos(dtheta * xk + thetam)
     R = numpy.sqrt(Rtheta**2 + z**2)
     expKr = numpy.exp(-kappa * R)
     if LorY == 2:
         if kappa > 1e-12:
-            expKz = numpy.exp(-kappa * abs(z))
-            PHI_V += numpy.sum(-wk * (expKr - expKz) / kappa * dtheta / 2)
-            PHI_K += numpy.sum(wk * (z / R * expKr - expKz * signZ) * dtheta / 2)
+            expKz = numpy.exp(-kappa * absZ)
+            PHI_V += numpy.sum(-wk * (expKr - expKz) / kappa * dtheta)
+            PHI_K += numpy.sum(wk * (z / R * expKr - expKz * signZ) * dtheta)
         else:
-            PHI_V += numpy.sum(wk * (R - abs(z)) * dtheta / 2)
-            PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta / 2)
-    if LorY == 1:
-        PHI_V += numpy.sum(wk * (R - abs(z)) * dtheta / 2)
-        PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta / 2)
+            PHI_V += numpy.sum(wk * (R - absZ) * dtheta)
+            PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta)
+    elif LorY == 1:
+        PHI_V += numpy.sum(wk * (R - absZ) * dtheta)
+        PHI_K += numpy.sum(wk * (z / R - signZ) * dtheta)
 
     return PHI_K, PHI_V
 
 
-@numba.njit(cache=True)
+@numba.jit('float64[:, :](float64[:], float64[:], float64[:])', nopython=True, cache=True)
 def generate_rot_matrix(a, b, c):
     rot_matrix = numpy.empty((3, 3))
     for i in range(3):
@@ -60,7 +62,7 @@ def generate_rot_matrix(a, b, c):
     return rot_matrix
 
 
-@numba.njit(cache=True)
+@numba.jit('UniTuple(float64, 2)(float64, float64, float64[:], float64[:], float64, float64, float64[:], float64[:], int32)', nopython=True, cache=True)
 def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     v21 = v2 - v1
     l21 = norm(v21)
@@ -97,7 +99,7 @@ def int_side(PHI_K, PHI_V, v1, v2, p, kappa, xk, wk, LorY):
     return PHI_K, PHI_V
 
 
-@numba.njit(cache=True)
+@numba.jit('UniTuple(float64[:], 4)(float64[:], float64[:], float64)', nopython=True, cache=True)
 def sa(y, x, kappa):
     x_panel = x[:3] - y[:3]
     y0_panel = numpy.zeros(3)
@@ -127,51 +129,51 @@ def sa(y, x, kappa):
     return panel0_plane, panel1_plane, panel2_plane, x_plane
 
 
-@numba.njit(cache=True)
+@numba.jit(numba.types.UniTuple(float64[:], 4)(float64[:], float64[:],
+                                               float64[:], float64[:],
+                                               float64[:], float64[:],
+                                               float64, float64, float64,
+                                               float64[:], float64[:]),
+                                               nopython=True, cache=True)
 def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, xk, wk):
 
     for i in range(len(vl)):
         panel = triangle[i*9: i*9+9]
         center = centers[3*i: 3*i+3]
 
-        PHI_K = 0
-        PHI_V = 0
+        kl[i] = 0  # PHI_K = 0
+        vl[i] = 0  # PHI_V = 0
         LorY = 1  # Laplace
         panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center, 1e-12)
 
-        PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
+        kl[i], vl[i] = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 0
-        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
+        kl[i], vl[i] = int_side(kl[i], vl[i], panel1_final, panel2_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 1
-        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
+        kl[i], vl[i] = int_side(kl[i], vl[i], panel2_final, panel0_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 2
 
         # this is replacing `same == 1`
-        PHI_K += k_diag
-        PHI_V += v_diag
+        kl[i] += k_diag
+        vl[i] += v_diag
 
-        vl[i] = PHI_V
-        kl[i] = PHI_K
 
-        PHI_K = 0
-        PHI_V = 0
+        ky[i] = 0  # PHI_K = 0
+        vy[i] = 0  # PHI_V = 0
 
         LorY = 2  # Yukawa
         # was sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk)
         panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center, kappa)
 
-        PHI_K, PHI_V = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
+        ky[i], vy[i] = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 0
-        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel1_final, panel2_final, x_plane[2],
+        ky[i], vy[i] = int_side(ky[i], vy[i], panel1_final, panel2_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 1
-        PHI_K, PHI_V = int_side(PHI_K, PHI_V, panel2_final, panel0_final, x_plane[2],
+        ky[i], vy[i] = int_side(ky[i], vy[i], panel2_final, panel0_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 2
 
         # this is replacing `same == 1`
-        PHI_K += k_diag
-        PHI_V += v_diag
-
-        vy[i] = PHI_V
-        ky[i] = PHI_K
+        ky[i] += k_diag
+        vy[i] += v_diag
 
     return vl, kl, vy, ky
