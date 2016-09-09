@@ -50,5 +50,3 @@ Boundary-element method
    `parallel <http://cpc.cs.qub.ac.uk/summaries/AEGB_v2_0.html>`_
    versions exist)
 -  `TABI <http://faculty.smu.edu/wgeng/research/bipb.html>`_
-
-..  image:: http://joss.theoj.org/papers/10.21105/joss.00043/status.svg
