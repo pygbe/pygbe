@@ -1,6 +1,3 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 import numpy
 import pickle
 
@@ -77,45 +74,52 @@ def main():
     for i in range(len(error_single)):
         if error_single[i]>thresh:
             flag = 1
-            print 'Solvation energy not agreeing for single surface simulation, mesh %i by %f'%(i,error_single[i])
+            print('Solvation energy not agreeing for single surface simulation,'
+                    'mesh {} by {}'.format(i,error_single[i]))
 
         if error_full[i]>thresh:
             flag = 1
-            print 'Solvation energy not agreeing for full surface simulation, mesh %i by %f'%(i,error_full[i])
+            print('Solvation energy not agreeing for full surface simulation,'
+                    'mesh {} by {}'.format(i,error_full[i]))
 
         if error_FFTSVD[i]>thresh:
             flag = 1
-            print 'Solvation energy not agreeing with FFTSVD, mesh %i by %f'%(i,error_FFTSVD[i])
+            print('Solvation energy not agreeing with FFTSVD, mesh {} by'
+                '{}'.format(i,error_FFTSVD[i]))
 
     if flag==0:
-        print '\nPassed Esolv test!'
+        print('\nPassed Esolv test!')
     else:
-        print '\nFAILED Esolv test'
+        print('\nFAILED Esolv test')
 
     flag = 0
     thresh = 3
     for i in range(len(iter_diff_single)):
         if abs(iter_diff_single[i])>thresh:
             flag = 1
-            print 'Solvation energy not agreeing for single surface simulation, mesh %i by %f'%(i,iter_diff_single[i])
+            print('Solvation energy not agreeing for single surface simulation,'
+                  'mesh {} by {}'.format(i,iter_diff_single[i]))
 
         if abs(iter_diff_full[i])>thresh:
             flag = 1
-            print 'Solvation energy not agreeing for full surface simulation, mesh %i by %f'%(i,iter_diff_full[i])
+            print('Solvation energy not agreeing for full surface simulation, '
+                  'mesh {} by {}'.format(i,iter_diff_full[i]))
 
         if abs(iter_diff_FFTSVD[i])>thresh:
             flag = 1
-            print 'Solvation energy not agreeing with FFTSVD, mesh %i by %f'%(i,iter_diff_FFTSVD[i])
+            print('Solvation energy not agreeing with FFTSVD,'
+                  'mesh {} by {}'.format(i,iter_diff_FFTSVD[i]))
 
     if flag==0:
-        print '\nPassed iterations test! They are all within %i iterations of reference'%thresh
+        print('\nPassed iterations test! They are all within {} iterations of '
+              'reference'.format(thresh))
     else:
-        print '\nFAILED iterations test'
+        print('\nFAILED iterations test')
 
-    print 'Summary:'
-    print 'Single: Esolv: '+str(Esolv_single)+', iterations: '+str(iterations_single)
-    print 'Full  : Esolv: '+str(Esolv_full)+', iterations: '+str(iterations_full)
-    print 'k=0   : Esolv: '+str(Esolv_k0)+', iterations: '+str(iterations_k0)
+    print('Summary:')
+    print('Single: Esolv: '+str(Esolv_single)+', iterations: '+str(iterations_single))
+    print('Full  : Esolv: '+str(Esolv_full)+', iterations: '+str(iterations_full))
+    print('k=0   : Esolv: '+str(Esolv_k0)+', iterations: '+str(iterations_k0))
 
 if __name__ == "__main__":
     from check_for_meshes import check_mesh

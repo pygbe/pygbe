@@ -127,7 +127,7 @@ def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
         Ecoul: array of coulomb energy
         Time: time to solution (wall-time)
     """
-    print 'Runs for molecule + set phi/dphi surface'
+    print('Runs for molecule + set phi/dphi surface')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
     Esolv = numpy.zeros(len(mesh))
@@ -136,7 +136,7 @@ def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
     Time = numpy.zeros(len(mesh))
     for i in range(len(mesh)):
         try:
-            print 'Start run for mesh '+mesh[i]
+            print('Start run for mesh '+mesh[i])
             outfile = pygbe(['',
                             '-p', '{}'.format(param),
                             '-c', '{}_{}.config'.format(test_name, mesh[i]),
@@ -144,7 +144,7 @@ def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
                             '-g', './',
                             '{}'.format(problem_folder),], return_output_fname=True)
 
-            print 'Scan output file'
+            print('Scan output file')
             outfolder = os.path.join('{}'.format(problem_folder),
                                     'output_{}_{}'.format(test_name, mesh[i]))
             outfile = os.path.join(outfolder, outfile)
