@@ -167,10 +167,26 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     V_diag = 0
     IorE = 1
 
-    K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
+    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+        
+        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
+                                 LorY, surf[src], surf[tar], K_diag, V_diag,
+                                 IorE, src, param, ind0, timing, kernel)
+        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, surf[src].XinV.imag,
+                                 LorY, surf[src], surf[tar], K_diag, V_diag,
+                                 IorE, src, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
+
+    else:
+        K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
+
     v = -K_lyr + surf[src].E_hat * V_lyr
+
     return v
 
 
@@ -205,6 +221,21 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     K_diag = 0
     V_diag = 0
     IorE = 2
+
+    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+
+        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
+                                    LorY, surf[src], surf[tar], K_diag, V_diag,
+                                    IorE, src, param, ind0, timing, kernel)
+
+        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, surf[src].XinV.imag,
+                                    LorY, surf[src], surf[tar], K_diag, V_diag,
+                                    IorE, src, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+    else:
+
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
