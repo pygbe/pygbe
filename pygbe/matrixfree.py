@@ -234,7 +234,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 
     else:
 
-    K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
+        K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
     v = K_lyr - V_lyr
