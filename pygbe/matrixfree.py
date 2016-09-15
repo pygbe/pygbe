@@ -67,8 +67,7 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
         K_lyr = K_lyr_Re + 1j * K_lyr_Im
         V_lyr = V_lyr_Re + 1j * V_lyr_Im
     
-    else:
-    
+    else:   
         K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
 
@@ -122,7 +121,6 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
         V_lyr = V_lyr_Re + 1j * V_lyr_Im
 
     else:
-
         K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
 
@@ -179,7 +177,6 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
         K_lyr = K_lyr_Re + 1j * K_lyr_Im
         V_lyr = V_lyr_Re + 1j * V_lyr_Im
 
-
     else:
         K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
@@ -234,6 +231,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
 
         K_lyr = K_lyr_Re + 1j * K_lyr_Im
         V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
     else:
 
     K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
