@@ -54,8 +54,24 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = 2 * pi
     V_diag = 0
     IorE = 1
-    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
+
+    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+        
+        K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.XinV.real, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+
+        K_lyr_Im, V_lyr_Im = project(surf.XinK.imag, surf.XinV.imag, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+    
+    else:
+    
+        K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
+
     v = K_lyr - V_lyr
 
     return v
