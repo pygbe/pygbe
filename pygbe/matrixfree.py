@@ -246,21 +246,31 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
-            surf_array[i].XinK = numpy.zeros(N)
+            if type(surf_array[i].E_hat) == complex:
+                surf_array[i].XinK = numpy.zeros(N, complex)
+            else:
+                surf_array[i].XinK = numpy.zeros(N)
             surf_array[i].XinV = X[Naux:Naux + N]
             Naux += N
         elif surf_array[i].surf_type == 'neumann_surface' or surf_array[
-                i].surf_type == 'asc_surface':
+                i].surf_type == 'asc_surface':            
             surf_array[i].XinK = X[Naux:Naux + N]
-            surf_array[i].XinV = numpy.zeros(N)
+            if type(surf_array[i].E_hat) == complex:
+                surf_array[i].XinV = numpy.zeros(N, complex)
+            else:
+                surf_array[i].XinV = numpy.zeros(N)
             Naux += N
         else:
             surf_array[i].XinK = X[Naux:Naux + N]
             surf_array[i].XinV = X[Naux + N:Naux + 2 * N]
             Naux += 2 * N
-
-        surf_array[i].Xout_int = numpy.zeros(N)
-        surf_array[i].Xout_ext = numpy.zeros(N)
+        
+        if type(surf_array[i].E_hat) == complex:
+            surf_array[i].Xout_int = numpy.zeros(N, complex)
+            surf_array[i].Xout_ext = numpy.zeros(N, complex)
+        else:
+            surf_array[i].Xout_int = numpy.zeros(N)
+            surf_array[i].Xout_ext = numpy.zeros(N)
 
 #   Loop over fields
     for F in range(Nfield):
