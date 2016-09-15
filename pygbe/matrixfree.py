@@ -241,12 +241,18 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     Nfield = len(field_array)
     Nsurf = len(surf_array)
 
+    #   Check if there is a complex dielectric
+    complexDiel = 0
+    for f in field_array:
+        if type(f.E) == complex:
+            complexDiel = 1
+
     #   Place weights on corresponding surfaces and allocate memory
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
-            if type(surf_array[i].E_hat) == complex:
+            if complexDiel == 1:
                 surf_array[i].XinK = numpy.zeros(N, complex)
             else:
                 surf_array[i].XinK = numpy.zeros(N)
@@ -255,7 +261,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
         elif surf_array[i].surf_type == 'neumann_surface' or surf_array[
                 i].surf_type == 'asc_surface':            
             surf_array[i].XinK = X[Naux:Naux + N]
-            if type(surf_array[i].E_hat) == complex:
+            if complexDiel == 1:
                 surf_array[i].XinV = numpy.zeros(N, complex)
             else:
                 surf_array[i].XinV = numpy.zeros(N)
@@ -265,7 +271,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
             surf_array[i].XinV = X[Naux + N:Naux + 2 * N]
             Naux += 2 * N
         
-        if type(surf_array[i].E_hat) == complex:
+        if complexDiel == 1:
             surf_array[i].Xout_int = numpy.zeros(N, complex)
             surf_array[i].Xout_ext = numpy.zeros(N, complex)
         else:
@@ -325,7 +331,10 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                     surf_array[c].Xout_ext += v
 
     #   Gather results into the result vector
-    MV = numpy.zeros(len(X))
+    if complexDiel == 1:
+        MV = numpy.zeros(len(X), complex)
+    else:
+        MV = numpy.zeros(len(X))
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
