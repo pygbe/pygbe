@@ -165,7 +165,7 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     V_diag = 0
     IorE = 1
 
-    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+    if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
         
         K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
                                  LorY, surf[src], surf[tar], K_diag, V_diag,
@@ -219,7 +219,7 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     V_diag = 0
     IorE = 2
 
-    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+    if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
 
         K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
                                     LorY, surf[src], surf[tar], K_diag, V_diag,
