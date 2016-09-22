@@ -76,14 +76,15 @@ def initialize_field(filename, param):
         field_aux = Field(LorY[i], kappa[i], E[i], coulomb[i], pot[i])
 
         if int(charges[i]) == 1:  # if there are charges
-            if qfile[i][-4:] == '.crd':
-                xq, q, Nq = readcrd(qfile[i], param.REAL)  # read charges
-                print('\nReading crd for region {} from {}'.format(i, qfile[i]))
-            if qfile[i][-4:] == '.pqr':
-                xq, q, Nq = readpqr(qfile[i], param.REAL)  # read charges
-                print('\nReading pqr for region {} from {}'.format(i, qfile[i]))
-            field_aux.xq = xq  # charges positions
-            field_aux.q = q  # charges values
+            field_aux.load_charges(qfile[i], param.REAL)
+#            if qfile[i][-4:] == '.crd':
+#                xq, q = readcrd(qfile[i], param.REAL)  # read charges
+#                print('\nReading crd for region {} from {}'.format(i, qfile[i]))
+#            if qfile[i][-4:] == '.pqr':
+#                xq, q = readpqr(qfile[i], param.REAL)  # read charges
+#                print('\nReading pqr for region {} from {}'.format(i, qfile[i]))
+#            field_aux.xq = xq  # charges positions
+#            field_aux.q = q  # charges values
         if int(Nparent[i]) == 1:  # if it is an enclosed region
             field_aux.parent.append(
                 int(parent[i])

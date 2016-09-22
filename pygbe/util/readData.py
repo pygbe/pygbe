@@ -222,8 +222,7 @@ def readpqr(filename, REAL):
 
     pos = numpy.array(pos)
     q = numpy.array(q)
-    Nq = len(q)
-    return pos, q, Nq
+    return pos, q
 
 
 def readcrd(filename, REAL):
@@ -260,8 +259,7 @@ def readcrd(filename, REAL):
 
     pos = numpy.array(pos)
     q = numpy.array(q)
-    Nq = len(q)
-    return pos, q, Nq
+    return pos, q
 
 
 def readParameters(param, filename):

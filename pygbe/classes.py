@@ -22,6 +22,7 @@ class Event():
         pass
 
 
+from pygbe.util.readData import readcrd, readpqr
 
 class Field():
     """
@@ -65,6 +66,12 @@ class Field():
         self.yq_gpu = []    # y position of charges on gpu
         self.zq_gpu = []    # z position of charges on gpu
         self.q_gpu  = []    # value of charges on gpu
+
+    def load_charges(self, qfile, REAL):
+        if qfile.endswith('.crd'):
+            self.xq, self.q = readcrd(qfile, REAL)
+        elif qfile.endswith('.pqr'):
+            self.xq, self.q = readpqr(qfile, REAL)
 
 
 class Timing():
