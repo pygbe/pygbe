@@ -77,24 +77,14 @@ def initialize_field(filename, param):
 
         if int(charges[i]) == 1:  # if there are charges
             field_aux.load_charges(qfile[i], param.REAL)
-#            if qfile[i][-4:] == '.crd':
-#                xq, q = readcrd(qfile[i], param.REAL)  # read charges
-#                print('\nReading crd for region {} from {}'.format(i, qfile[i]))
-#            if qfile[i][-4:] == '.pqr':
-#                xq, q = readpqr(qfile[i], param.REAL)  # read charges
-#                print('\nReading pqr for region {} from {}'.format(i, qfile[i]))
-#            field_aux.xq = xq  # charges positions
-#            field_aux.q = q  # charges values
         if int(Nparent[i]) == 1:  # if it is an enclosed region
-            field_aux.parent.append(
-                int(parent[i])
-            )  # pointer to parent surface (enclosing surface)
+            field_aux.parent.append(int(parent[i]))
+            # pointer to parent surface (enclosing surface)
         if int(Nchild[i]) > 0:  # if there are enclosed regions inside
             for j in range(int(Nchild[i])):
                 field_aux.child.append(int(child[Nchild_aux + j])
                                        )  # Loop over children to get pointers
-            Nchild_aux += int(Nchild[i]) - 1  # Point to child for next surface
-            Nchild_aux += 1
+            Nchild_aux += int(Nchild[i])  # Point to child for next surface
 
         field_array.append(field_aux)
     return field_array
