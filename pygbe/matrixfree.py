@@ -1052,7 +1052,6 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
     REAL = param.REAL
 
-    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
@@ -1070,78 +1069,79 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     E_solv = []
 
     ff = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+    for f in field_array:
+        if f.pot == 1:
+            parent_type = surf_array[f.parent[0]].surf_type
+            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
 
-            E_solv_aux = 0
-            ff += 1
-            print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
-                f, ff))
+                E_solv_aux = 0
+                ff += 1
+                print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
+                    f, ff))
 
-            AI_int = 0
-            Naux = 0
-            phi_reac = numpy.zeros(len(field_array[f].q))
+                AI_int = 0
+                Naux = 0
+                phi_reac = numpy.zeros(len(f.q))
 
-            #           First look at CHILD surfaces
-            #           Need to account for normals pointing outwards
-            #           and E_hat coefficient (as region is outside and
-            #           dphi_dn is defined inside)
-            for i in field_array[f].child:
-                s = surf_array[i]
-                s.xk, s.wk = GQ_1D(par_reac.Nk)
-                s.xk = REAL(s.xk)
-                s.wk = REAL(s.wk)
-                for C in range(len(s.tree)):
-                    s.tree[C].M = numpy.zeros(par_reac.Nm)
-                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
+                #           First look at CHILD surfaces
+                #           Need to account for normals pointing outwards
+                #           and E_hat coefficient (as region is outside and
+                #           dphi_dn is defined inside)
+                for i in f.child:
+                    s = surf_array[i]
+                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk = REAL(s.xk)
+                    s.wk = REAL(s.wk)
+                    for C in range(len(s.tree)):
+                        s.tree[C].M = numpy.zeros(par_reac.Nm)
+                        s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
-                Naux += len(s.triangle)
+                    Naux += len(s.triangle)
 
-                #               Coefficient to account for dphi_dn defined in
-                #               interior but calculation done in exterior
-                C1 = s.E_hat
+                    #               Coefficient to account for dphi_dn defined in
+                    #               interior but calculation done in exterior
+                    C1 = s.E_hat
 
-                if param.GPU == 0:
-                    phi_aux, AI = get_phir(s.phi, C1 * s.dphi, s,
-                                           field_array[f].xq, s.tree, par_reac,
-                                           ind_reac)
-                elif param.GPU == 1:
-                    phi_aux, AI = get_phir_gpu(s.phi, C1 * s.dphi, s,
-                                               field_array[f], par_reac,
-                                               kernel)
+                    if param.GPU == 0:
+                        phi_aux, AI = get_phir(s.phi, C1 * s.dphi, s,
+                                            f.xq, s.tree, par_reac,
+                                            ind_reac)
+                    elif param.GPU == 1:
+                        phi_aux, AI = get_phir_gpu(s.phi, C1 * s.dphi, s,
+                                                f, par_reac,
+                                                kernel)
 
-                AI_int += AI
-                phi_reac -= phi_aux  # Minus sign to account for normal pointing out
+                    AI_int += AI
+                    phi_reac -= phi_aux  # Minus sign to account for normal pointing out
 
-#           Now look at PARENT surface
-            if len(field_array[f].parent) > 0:
-                i = field_array[f].parent[0]
-                s = surf_array[i]
-                s.xk, s.wk = GQ_1D(par_reac.Nk)
-                s.xk = REAL(s.xk)
-                s.wk = REAL(s.wk)
-                for C in range(len(s.tree)):
-                    s.tree[C].M = numpy.zeros(par_reac.Nm)
-                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
+    #           Now look at PARENT surface
+                if len(f.parent) > 0:
+                    i = f.parent[0]
+                    s = surf_array[i]
+                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk = REAL(s.xk)
+                    s.wk = REAL(s.wk)
+                    for C in range(len(s.tree)):
+                        s.tree[C].M = numpy.zeros(par_reac.Nm)
+                        s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
-                Naux += len(s.triangle)
+                    Naux += len(s.triangle)
 
-                if param.GPU == 0:
-                    phi_aux, AI = get_phir(s.phi, s.dphi, s, field_array[f].xq,
-                                           s.tree, par_reac, ind_reac)
-                elif param.GPU == 1:
-                    phi_aux, AI = get_phir_gpu(
-                        s.phi, s.dphi, s, field_array[f], par_reac, kernel)
+                    if param.GPU == 0:
+                        phi_aux, AI = get_phir(s.phi, s.dphi, s, f.xq,
+                                            s.tree, par_reac, ind_reac)
+                    elif param.GPU == 1:
+                        phi_aux, AI = get_phir_gpu(
+                            s.phi, s.dphi, s, f, par_reac, kernel)
 
-                AI_int += AI
-                phi_reac += phi_aux
+                    AI_int += AI
+                    phi_reac += phi_aux
 
-            E_solv_aux += 0.5 * C0 * numpy.sum(field_array[f].q * phi_reac)
-            E_solv.append(E_solv_aux)
+                E_solv_aux += 0.5 * C0 * numpy.sum(f.q * phi_reac)
+                E_solv.append(E_solv_aux)
 
-            print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
-                1. * AI_int / len(field_array[f].xq), Naux, f))
+                print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
+                    1. * AI_int / len(f.xq), Naux, f))
 
     return E_solv
 

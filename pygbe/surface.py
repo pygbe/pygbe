@@ -65,17 +65,15 @@ def initialize_field(filename, param):
     LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(
         filename)
 
-  #  import ipdb; ipdb.set_trace()
     LorY = [int(i) if i != 'NA' else 0 for i in LorY]
     E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0 for i in E]
     kappa = [param.REAL(i) if i != 'NA' else 0 for i in kappa]
+    pot = [int(i) for i in pot]
     Nfield = len(LorY)
     field_array = []
     Nchild_aux = 0
     for i in range(Nfield):
-        if int(pot[i]) == 1:
-            param.E_field.append(i)  # This field is where the energy will be calculated
-        field_aux = Field(LorY[i], kappa[i], E[i], coulomb[i])
+        field_aux = Field(LorY[i], kappa[i], E[i], coulomb[i], pot[i])
 
         if int(charges[i]) == 1:  # if there are charges
             if qfile[i][-4:] == '.crd':

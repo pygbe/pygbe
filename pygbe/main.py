@@ -386,15 +386,16 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     toc = time.time()
     print('Time Esolv: {}s'.format(toc - tic))
     ii = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-            ii += 1
-            print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(f,
-                                                                      E_solv[ii],
-                                                                      E_solv[ii] * 4.184))
-            results_dict['E_solv_kcal'] = E_solv[ii]
-            results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
+    for i, f in enumerate(field_array):
+        if f.pot == 1:
+            parent_type = surf_array[f.parent[0]].surf_type
+            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+                ii += 1
+                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+                                                                        E_solv[ii],
+                                                                        E_solv[ii] * 4.184))
+                results_dict['E_solv_kcal'] = E_solv[ii]
+                results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
     ### Calculate surface energy
     print('\nCalculate Esurf')
