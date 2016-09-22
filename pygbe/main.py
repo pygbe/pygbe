@@ -22,8 +22,8 @@ from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
 from pygbe.surface import initialize_surface, initialize_field, fill_phi
 from pygbe.output import print_summary
-from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
-                        coulombEnergy, calculateEsurf)
+from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
+                        coulomb_energy, calculate_surface_energy)
 
 from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
 from pygbe.util.an_solution import an_P, two_sphere
@@ -382,7 +382,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Calculate solvation energy
     print('Calculate Esolv')
     tic = time.time()
-    E_solv = calculateEsolv(surf_array, field_array, param, kernel)
+    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
     toc = time.time()
     print('Time Esolv: {}s'.format(toc - tic))
     ii = -1
@@ -400,7 +400,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Calculate surface energy
     print('\nCalculate Esurf')
     tic = time.time()
-    E_surf = calculateEsurf(surf_array, field_array, param, kernel)
+    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
     toc = time.time()
     ii = -1
     for f in param.E_field:
@@ -422,7 +422,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         i += 1
         if f.coulomb == 1:
             print('Calculate Coulomb energy for region {}'.format(i))
-            E_coul.append(coulombEnergy(f, param))
+            E_coul.append(coulomb_energy(f, param))
             print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
                 i, E_coul[-1], E_coul[-1] * 4.184))
             results_dict['E_coul_kcal'] = E_coul[-1]

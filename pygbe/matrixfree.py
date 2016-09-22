@@ -1033,7 +1033,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     return F
 
 
-def calculateEsolv(surf_array, field_array, param, kernel):
+def calculate_solvation_energy(surf_array, field_array, param, kernel):
     """
     It calculates the solvation energy.
 
@@ -1146,7 +1146,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     return E_solv
 
 
-def coulombEnergy(f, param):
+def coulomb_energy(f, param):
     """
     It calculates the Coulomb energy .
 
@@ -1171,7 +1171,7 @@ def coulombEnergy(f, param):
     return Ecoul
 
 
-def calculateEsurf(surf_array, field_array, param, kernel):
+def calculate_surface_energy(surf_array, field_array, param, kernel):
     """
     It calculates the surface energy
 
