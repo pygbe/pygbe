@@ -48,15 +48,15 @@ class Field():
     q_gpu : list, value of charges on GPU.
     """
 
-    def __init__(self):
+    def __init__(self, LorY, kappa, E, coulomb):
         self.parent = []    # Pointer to "parent" surface
         self.child  = []    # Pointer to "children" surfaces
-        self.LorY   = []    # 1: Laplace, 2: Yukawa
-        self.kappa  = []    # inverse of Debye length
-        self.E      = []    # dielectric constant
+        self.LorY = LorY   # 1: Laplace, 2: Yukawa
+        self.kappa = kappa # inverse of Debye length
+        self.E      = E     # dielectric constant
         self.xq     = []    # position of charges
         self.q      = []    # value of charges
-        self.coul   = []    # 1: perform Coulomb interaction calculation
+        self.coulomb = coulomb # 1: perform Coulomb interaction calculation
                             # 0: don't do Coulomb calculation
 
         # Device data

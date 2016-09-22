@@ -65,32 +65,18 @@ def initialize_field(filename, param):
     LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(
         filename)
 
+  #  import ipdb; ipdb.set_trace()
+    LorY = [int(i) if i != 'NA' else 0 for i in LorY]
+    E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0 for i in E]
+    kappa = [param.REAL(i) if i != 'NA' else 0 for i in kappa]
     Nfield = len(LorY)
     field_array = []
     Nchild_aux = 0
     for i in range(Nfield):
         if int(pot[i]) == 1:
             param.E_field.append(i)  # This field is where the energy will be calculated
-        field_aux = Field()
+        field_aux = Field(LorY[i], kappa[i], E[i], coulomb[i])
 
-        try:
-            field_aux.LorY = int(LorY[i])  # Laplace of Yukawa
-        except ValueError:
-            field_aux.LorY = 0
-
-        if 'j' in E[i]:
-            field_aux.E = complex(E[i])
-        else:
-            try:
-                field_aux.E = param.REAL(E[i])  # Dielectric constant
-            except ValueError:
-                field_aux.E = 0
-        try:
-            field_aux.kappa = param.REAL(kappa[i])  # inverse Debye length
-        except ValueError:
-            field_aux.kappa = 0
-
-        field_aux.coulomb = int(coulomb[i])  # do/don't coulomb interaction
         if int(charges[i]) == 1:  # if there are charges
             if qfile[i][-4:] == '.crd':
                 xq, q, Nq = readcrd(qfile[i], param.REAL)  # read charges
