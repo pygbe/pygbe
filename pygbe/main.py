@@ -20,7 +20,7 @@ from pygbe.gmres import gmres_mgs
 from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
-from pygbe.surface import initialize_surface, initialize_field, fill_phi
+from pygbe.surface import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
                         coulomb_energy, calculate_surface_energy)
@@ -377,7 +377,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
 
     # Put result phi in corresponding surfaces
-    fill_phi(phi, surf_array)
+    s_start = 0
+    for surf in surf_array:
+        s_start = surf.fill_phi(phi, s_start)
 
     ### Calculate solvation energy
     print('Calculate Esolv')
