@@ -17,17 +17,13 @@ from argparse import ArgumentParser
 
 # Import self made modules
 from pygbe.gmres import gmres_mgs
-from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
 from pygbe.surface import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                        coulomb_energy, calculate_surface_energy)
-
-from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
-from pygbe.util.an_solution import an_P, two_sphere
-
+                              coulomb_energy, calculate_surface_energy)
+from pygbe.util.readData import readParameters
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
@@ -128,10 +124,6 @@ def find_config_files(cliargs):
     full_path = os.path.abspath(prob_path)
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
-    #use the name of the rightmost folder in path as problem name
-    prob_rel_path = os.path.split(full_path)
-    prob_name = prob_rel_path[1]
-
     if cliargs.config is None:
         cliargs.config = next(glob.iglob(os.path.join(full_path, '*.config')))
     else:
@@ -164,7 +156,7 @@ def resolve_relative_config_file(config_file, full_path):
         return os.path.join(full_path, config_file)
     else:
         sys.exit('Did not find expected config files\n'
-                    'Could not find {}'.format(config_file))
+                 'Could not find {}'.format(config_file))
 
 
 def check_for_nvcc():
@@ -213,7 +205,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                          The name of the log file containing problem output
     """
 
-
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
@@ -236,7 +227,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         output_dir = os.path.join(full_path, args.output)
     else:
         output_dir = args.output
-    #create output directory if it doesn't already exist
+    # create output directory if it doesn't already exist
     try:
         os.makedirs(output_dir)
     except OSError:
@@ -248,12 +239,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['output_file'] = outputfname
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
-    ### Time stamp
+    # Time stamp
     print('Run started on:')
     print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
-                                timestamp.tm_mday))
+                                    timestamp.tm_mday))
     print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
-                                timestamp.tm_sec))
+                                    timestamp.tm_sec))
     TIC = time.time()
 
     print('Config file: {}'.format(configFile))
@@ -367,7 +358,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Solve')
     phi = numpy.zeros(param.Neq)
     phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
-                       kernel)
+                    kernel)
     toc = time.time()
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
@@ -375,13 +366,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
 
-
     # Put result phi in corresponding surfaces
     s_start = 0
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
 
-    ### Calculate solvation energy
+    # Calculate solvation energy
     print('Calculate Esolv')
     tic = time.time()
     E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
@@ -394,12 +384,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
                 ii += 1
                 print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
-                                                                        E_solv[ii],
-                                                                        E_solv[ii] * 4.184))
+                                                                          E_solv[ii],
+                                                                          E_solv[ii] * 4.184))
                 results_dict['E_solv_kcal'] = E_solv[ii]
                 results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
-    ### Calculate surface energy
+    # Calculate surface energy
     print('\nCalculate Esurf')
     tic = time.time()
     E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)

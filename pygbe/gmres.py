@@ -26,14 +26,10 @@ Guidance code:
 
 import numpy
 import scipy
-import time
-import os
-
-from scipy.linalg         import get_blas_funcs, solve
-from scipy.sparse.sputils import upcast
-from scipy.sparse.linalg  import gmres as scipy_gmres
-
 from warnings import warn
+
+from scipy.linalg import get_blas_funcs
+from scipy.sparse.sputils import upcast
 
 from pygbe.matrixfree import gmres_dot
 
@@ -59,7 +55,6 @@ def apply_givens(Q, v, k):
         v[j:j+2] = scipy.dot(Qloc, v[j:j+2])
 
 
-
 def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     """
     GMRES solver.
@@ -83,11 +78,8 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     X          : array, an updated guess to the solution.
     """
 
-    output_path = os.path.join(
-        os.environ.get('PYGBE_PROBLEM_FOLDER'), 'OUTPUT')
-
-    #Defining xtype as dtype of the problem, to decide which BLAS functions
-    #import.
+    # Defining xtype as dtype of the problem, to decide which BLAS functions
+    # import.
     xtype = upcast(X.dtype, b.dtype)
 
     # Get fast access to underlying BLAS routines
@@ -99,15 +91,14 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     else:
         # real type
         [axpy, dotu, dotc, scal, rotg] =\
-            get_blas_funcs(['axpy', 'dot', 'dot',  'scal', 'rotg'], [X])
+            get_blas_funcs(['axpy', 'dot', 'dot', 'scal', 'rotg'], [X])
 
     # Make full use of direct access to BLAS by defining own norm
     def norm(z):
         return numpy.sqrt(numpy.real(dotc(z, z)))
 
-    #Defining dimension
+    # Defining dimension
     dimen = len(X)
-
 
     max_iter = param.max_iter
     R = param.restart
@@ -139,7 +130,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     iteration = 0
 
-    #Here start the GMRES
+    # Here start the GMRES
     for outer in range(max_outer):
 
         # Preallocate for Givens Rotations, Hessenberg matrix and Krylov Space
@@ -153,14 +144,14 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         # converted to upper triagonal with Givens Rotations
 
         H = numpy.zeros((max_inner+1, max_inner+1), dtype=xtype)
-        V = numpy.zeros((max_inner+1, dimen), dtype=xtype) #Krylov space
+        V = numpy.zeros((max_inner+1, dimen), dtype=xtype)  # Krylov space
 
         # vs store the pointers to each column of V.
         # This saves a considerable amount of time.
         vs = []
 
         # v = r/normr
-        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x
+        V[0, :] = scal(1.0/normr, r)  # scal wrapper of dscal --> x = a*x
         vs.append(V[0, :])
 
         #Saving initial residual to be used to calculate the rel_resid
@@ -177,7 +168,6 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             v[:] = gmres_dot(vs[-1], surf_array, field_array, ind0, param,
  timing, kernel)
             vs.append(v)
-            normv_old = norm(v)
 
             #Modified Gram Schmidt
             for k in range(inner+1):

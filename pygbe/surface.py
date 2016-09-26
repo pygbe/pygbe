@@ -2,17 +2,8 @@
 It contains the necessary functions to set up the surface to be solved.
 """
 
-import time
-import numpy
-from scipy import linalg
-
-from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
-from pygbe.tree.direct import computeDiagonal
-from pygbe.util.semi_analytical import GQ_1D
-from pygbe.quadrature import quadratureRule_fine
-from pygbe.util.readData import (readVertex, readTriangle, readpqr, readcrd,
-                                 readFields, read_surface)
-from pygbe.classes import Field
+from pygbe.util.readData import readFields, read_surface
+from pygbe.classes import Field, Surface
 
 
 def initialize_surface(field_array, filename, param):
@@ -66,7 +57,8 @@ def initialize_field(filename, param):
         filename)
 
     LorY = [int(i) if i != 'NA' else 0 for i in LorY]
-    E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0 for i in E]
+    E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
+         for i in E]
     kappa = [param.REAL(i) if i != 'NA' else 0 for i in kappa]
     pot = [int(i) for i in pot]
     coulomb = [int(i) for i in coulomb]
@@ -89,8 +81,3 @@ def initialize_field(filename, param):
 
         field_array.append(field_aux)
     return field_array
-
-
-
-
-

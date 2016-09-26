@@ -2,7 +2,6 @@
 Matrix free formulation of the matrix vector product in the GMRES.
 """
 
-import time
 import numpy
 from numpy import pi
 
@@ -19,10 +18,10 @@ try:
 except:
     pass
 
-## Note:
-##  Remember ordering of equations:
-##      Same order as defined in config file,
-##      with internal equation first and then the external equation.
+# Note:
+#  Remember ordering of equations:
+#      Same order as defined in config file,
+#      with internal equation first and then the external equation.
 
 
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
@@ -205,8 +204,6 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     """
 
     Kt_diag = -2 * pi * (surf.Eout + surf.Ein) / (surf.Eout - surf.Ein)
-    V_diag = 0
-
     Kt_lyr = project_Kt(surf.XinK, LorY, surf, surf, Kt_diag, src, param, ind0,
                         timing, kernel)
 
@@ -392,9 +389,10 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                       dz_pq)
 
                     if surf_array[s].surf_type == 'asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
+                        aux -= (field_array[j].q[i]/(R_pq*R_pq*R_pq) *
+                                (dx_pq*surf_array[s].normal[:,0] +
+                                dy_pq*surf_array[s].normal[:,1] +
+                                dz_pq*surf_array[s].normal[:,2]))
                     else:
                         aux += field_array[j].q[i] / (field_array[j].E * R_pq)
 
@@ -445,9 +443,10 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                       dz_pq)
 
                     if surf_array[s].surf_type == 'asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
+                        aux -= (field_array[j].q[i]/(R_pq*R_pq*R_pq) *
+                                (dx_pq*surf_array[s].normal[:,0] +
+                                 dy_pq*surf_array[s].normal[:,1] +
+                                 dz_pq*surf_array[s].normal[:,2]))
                     else:
                         aux += field_array[j].q[i] / (field_array[j].E * R_pq)
 
@@ -737,9 +736,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    aux = (aux_x[surf_array[s].unsort]*surf_array[s].normal[:, 0] +
+                           aux_y[surf_array[s].unsort]*surf_array[s].normal[:, 1] +
+                           aux_z[surf_array[s].unsort]*surf_array[s].normal[:, 2])
 
 #               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
@@ -838,9 +837,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    aux = (aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] +
+                           aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] +
+                           aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2])
 
 #               For PARENT surface, q contributes to RHS in
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
@@ -1104,12 +1103,12 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
 
                     if param.GPU == 0:
                         phi_aux, AI = get_phir(s.phi, C1 * s.dphi, s,
-                                            f.xq, s.tree, par_reac,
-                                            ind_reac)
+                                               f.xq, s.tree, par_reac,
+                                               ind_reac)
                     elif param.GPU == 1:
                         phi_aux, AI = get_phir_gpu(s.phi, C1 * s.dphi, s,
-                                                f, par_reac,
-                                                kernel)
+                                                   f, par_reac,
+                                                   kernel)
 
                     AI_int += AI
                     phi_reac -= phi_aux  # Minus sign to account for normal pointing out
@@ -1129,7 +1128,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
 
                     if param.GPU == 0:
                         phi_aux, AI = get_phir(s.phi, s.dphi, s, f.xq,
-                                            s.tree, par_reac, ind_reac)
+                                               s.tree, par_reac, ind_reac)
                     elif param.GPU == 1:
                         phi_aux, AI = get_phir_gpu(
                             s.phi, s.dphi, s, f, par_reac, kernel)
@@ -1188,8 +1187,6 @@ def calculate_surface_energy(surf_array, field_array, param, kernel):
     E_surf: float, surface energy.
     """
 
-    REAL = param.REAL
-
     par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
@@ -1224,6 +1221,6 @@ def calculate_surface_energy(surf_array, field_array, param, kernel):
             print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
                 f, ff))
             Esurf_aux = numpy.sum(-parent_surf.Eout * parent_surf.dphi *
-                                   parent_surf.phi * parent_surf.area)
+                                  parent_surf.phi * parent_surf.area)
             E_surf.append(0.5 * C0 * Esurf_aux)
     return E_surf

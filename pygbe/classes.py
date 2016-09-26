@@ -1,10 +1,11 @@
 import time
 import numpy
+from scipy import linalg
 
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.tree.direct import computeDiagonal
 from pygbe.quadrature import quadratureRule_fine
-from pygbe.util.readData import readcrd, readpqr
+from pygbe.util.readData import readcrd, readpqr, readVertex, readTriangle
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
 
 
@@ -15,10 +16,13 @@ class Event():
 
     def __init__(self):
         self.t = 0
+
     def record(self):
-        t = time.time()*1e3
-    def time_till(self,toc):
-        return toc.t-self.t
+        self.t = time.time() * 1e3
+
+    def time_till(self, toc):
+        return toc.t - self.t
+
     def synchronize(self):
         pass
 
@@ -141,7 +145,6 @@ class Surface():
         if surf_type in ['dirichlet_surface', 'neumann_surface']:
             self.phi0 = numpy.loadtxt(phi0_file)
 
-
     def define_surface(self, files, param):
         """Load the vertices and triangles that define the molecule surface"""
         tic = time.time()
@@ -153,7 +156,6 @@ class Surface():
         area_null = self.zero_areas(triangle_raw, area_null)
         self.triangle = numpy.delete(triangle_raw, area_null, 0)
         print('Removed areas=0: {}'.format(len(area_null)))
-
 
     def define_regions(self, field_array, i):
         # Look for regions inside/outside
@@ -173,7 +175,6 @@ class Surface():
             self.E_hat = self.Ein / self.Eout
         else:
             self.E_hat = 1
-
 
     def fill_surface(self, param):
         """
@@ -222,16 +223,13 @@ class Surface():
 
         return time_sort
 
-
     def calc_centers(self):
         """Calculate the centers of each element of the surface"""
         self.xi = numpy.average(self.vertex[self.triangle[:], 0], axis=1)
         self.yi = numpy.average(self.vertex[self.triangle[:], 1], axis=1)
         self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
 
-
     def calc_norms(self):
-
         L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
         L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
 
@@ -240,9 +238,7 @@ class Surface():
         self.area = numpy.sqrt(numpy.sum(self.normal**2, axis=1)) / 2
         self.normal /= (2 * self.area[:, numpy.newaxis])
 
-
     def calc_distance(self, param):
-
         self.x_center = numpy.average(numpy.vstack((self.xi,
                                                    self.yi,
                                                    self.zi)), axis=1).astype(param.REAL)
@@ -250,7 +246,6 @@ class Surface():
                           (self.yi - self.x_center[1])**2 +
                           (self.zi - self.x_center[2])**2)
         self.R_C0 = max(dist)
-
 
     def get_gauss_points(self, n):
         """
@@ -269,19 +264,18 @@ class Surface():
         xi[:,2] : position of the gauss point in the z axis.
         """
 
-        #N  = len(triangle) # Number of triangles
-        gauss_array = numpy.zeros((self.N*n,3))
-        if n==1:
+        gauss_array = numpy.zeros((self.N*n, 3))
+        if n == 1:
             gauss_array = numpy.average(self.vertex[self.triangle], axis=1)
 
-        elif n==3:
+        elif n == 3:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
                 gauss_array[n*i, :] = numpy.dot(M.T, numpy.array([0.5, 0.5, 0.]))
                 gauss_array[n*i+1, :] = numpy.dot(M.T, numpy.array([0., 0.5, 0.5]))
                 gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([0.5, 0., 0.5]))
 
-        elif n==4:
+        elif n == 4:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
                 gauss_array[n*i, :] = numpy.dot(M.T, numpy.array([1/3., 1/3., 1/3.]))
@@ -289,23 +283,23 @@ class Surface():
                 gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([1/5., 3/5., 1/5.]))
                 gauss_array[n*i+3, :] = numpy.dot(M.T, numpy.array([1/5., 1/5., 3/5.]))
 
-        elif n==7:
+        elif n == 7:
             for i in range(self.N):
                 M = self.vertex[self.triangle[i]]
-                gauss_array[n*i+0, :] = numpy.dot(M.T, numpy.array([1/3.,1/3.,1/3.]))
-                gauss_array[n*i+1, :] = numpy.dot(M.T, numpy.array([.797426985353087, .101286507323456, .101286507323456]))
-                gauss_array[n*i+2, :] = numpy.dot(M.T, numpy.array([.101286507323456, .797426985353087, .101286507323456]))
-                gauss_array[n*i+3, :] = numpy.dot(M.T, numpy.array([.101286507323456, .101286507323456, .797426985353087]))
-                gauss_array[n*i+4, :] = numpy.dot(M.T, numpy.array([.059715871789770, .470142064105115, .470142064105115]))
-                gauss_array[n*i+5, :] = numpy.dot(M.T, numpy.array([.470142064105115, .059715871789770, .470142064105115]))
-                gauss_array[n*i+6, :] = numpy.dot(M.T, numpy.array([.470142064105115, .470142064105115, .059715871789770]))
+                gauss_array[n * i + 0, :] = numpy.dot(M.T, numpy.array([1/3., 1/3., 1/3.]))
+                gauss_array[n * i + 1, :] = numpy.dot(M.T, numpy.array([.797426985353087, .101286507323456, .101286507323456]))
+                gauss_array[n * i + 2, :] = numpy.dot(M.T, numpy.array([.101286507323456, .797426985353087, .101286507323456]))
+                gauss_array[n * i + 3, :] = numpy.dot(M.T, numpy.array([.101286507323456, .101286507323456, .797426985353087]))
+                gauss_array[n * i + 4, :] = numpy.dot(M.T, numpy.array([.059715871789770, .470142064105115, .470142064105115]))
+                gauss_array[n * i + 5, :] = numpy.dot(M.T, numpy.array([.470142064105115, .059715871789770, .470142064105115]))
+                gauss_array[n * i + 6, :] = numpy.dot(M.T, numpy.array([.470142064105115, .470142064105115, .059715871789770]))
 
         self.xj, self.yj, self.zj = gauss_array.T
 
-
     def generate_preconditioner(self):
-        # Generate preconditioner
-        # Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
+        """ Generate preconditioner
+        Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
+        """
         # If we have complex dielectric constants we need to initialize Precon with
         # complex type else it'll be float.
         if type(self.E_hat) == complex:
@@ -352,7 +346,7 @@ class Surface():
             dX22 = self.E_hat * VY
             self.sglInt_ext = VY  # Array for singular integral of V through exterior
         else:
-            self.sglInt_ext = numpy.zeros(N)
+            self.sglInt_ext = numpy.zeros(self.N)
 
         if self.surf_type != 'dirichlet_surface' and self.surf_type != 'neumann_surface':
             d_aux = 1 / (dX22 - dX21 * dX12 / dX11)
@@ -453,13 +447,13 @@ class Field():
         self.parent = []    # Pointer to "parent" surface
         self.child  = []    # Pointer to "children" surfaces
         self.LorY = LorY   # 1: Laplace, 2: Yukawa
-        self.kappa = kappa # inverse of Debye length
+        self.kappa = kappa  # inverse of Debye length
         self.E      = E     # dielectric constant
         self.xq     = []    # position of charges
         self.q      = []    # value of charges
-        self.pot = pot # whether to do energy calc on this field or not
-        self.coulomb = coulomb # 1: perform Coulomb interaction calculation
-                            # 0: don't do Coulomb calculation
+        self.pot = pot  # whether to do energy calc on this field or not
+        self.coulomb = coulomb  # 1: perform Coulomb interaction calculation
+                                # 0: don't do Coulomb calculation
 
         # Device data
         self.xq_gpu = []    # x position of charges on gpu
