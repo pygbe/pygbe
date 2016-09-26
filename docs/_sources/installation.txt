@@ -7,7 +7,7 @@ Run the corresponding commands in your flavor of Linux to install.
 Dependencies (last tested)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  Python 2.7.12
+-  Python 3.4+
 -  Numpy 1.11.1
 -  SciPy 0.17.1
 -  SWIG 3.0.8
@@ -30,7 +30,7 @@ the following:
 
 ::
 
-    conda create -n pygbe python=2.7 numpy scipy swig matplotlib
+    conda create -n pygbe python=3.5 numpy scipy swig matplotlib
     source activate pygbe
 
 and then proceed with the rest of the installation instructions

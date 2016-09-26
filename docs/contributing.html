@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Developer’s Guide &mdash; PyGBe 0.2.1 documentation</title>
+    <title>Developer’s Guide &#8212; PyGBe 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -29,6 +29,7 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
@@ -46,10 +47,10 @@
 information that does not belong in a regular userguide.</p>
 <div class="section" id="contributing-to-pygbe">
 <h2>Contributing to PyGBe<a class="headerlink" href="#contributing-to-pygbe" title="Permalink to this headline">¶</a></h2>
-<p>All code must go through the pull request review procedure.
-If you want to add something to PyGBe, first fork the repository. Make
-your changes on your fork of the repository and then open a pull request
-with your changes against the main PyGBe repository.</p>
+<p>All code must go through the pull request review procedure. If you want
+to add something to PyGBe, first fork the repository. Make your changes
+on your fork of the repository and then open a pull request with your
+changes against the main PyGBe repository.</p>
 <p>New features should follow the following rules: 1. PEP8 style guide
 should be followed 2. New features should include unit tests 3. All
 functions should have NumPy style doctrings. See
@@ -58,21 +59,54 @@ for reference)</p>
 </div>
 <div class="section" id="running-the-tests">
 <h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Permalink to this headline">¶</a></h2>
-<p>PyGBe currently only has regression tests.
-Once everything is installed, you can navigate to
-<code class="docutils literal"><span class="pre">pygbe/tests/regression_tests</span></code>.
-To run any of the regression tests individually, just run the
-corresponding script.</p>
+<div class="section" id="regression-tests">
+<h3>Regression tests<a class="headerlink" href="#regression-tests" title="Permalink to this headline">¶</a></h3>
+<p>Once everything is installed, you can use <code class="docutils literal"><span class="pre">py.test</span></code> to run the
+regression tests, located in <code class="docutils literal"><span class="pre">pygbe/tests</span></code></p>
+<p>To run any of the regression tests individually, you can pass the test
+name to <code class="docutils literal"><span class="pre">pytest</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span> <span class="n">test_lysozome</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>or to run all of the tests just run <code class="docutils literal"><span class="pre">py.test</span></code> within the PyGBe
+directory</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="convergence-tests">
+<h3>Convergence tests<a class="headerlink" href="#convergence-tests" title="Permalink to this headline">¶</a></h3>
+<p>There is a more robust set of tests located in
+<code class="docutils literal"><span class="pre">pygbe/tests/convergence_tests</span></code>. These include comparisons to
+analytical solutions and checks to ensure convergence over a series of
+finer meshes.</p>
+<p>Note that these tests take a few hours to run. To run them, navigate to
+the convergence test folder and run</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Any individual set of convergence tests can be run by specifying a given
+test file, e.g.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>or to run all of the tests, use the helper script</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_all_regression_tests</span><span class="o">.</span><span class="n">py</span>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">sphere_dirichlet</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="generating-documentation">
 <h2>Generating documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
+<p>PyGBe uses <code class="docutils literal"><span class="pre">`doctr</span></code> &lt;<a class="reference external" href="https://github.com/gforsyth/doctr">https://github.com/gforsyth/doctr</a>&gt;`_ to
+automatically generate documentation using Travis CI. If you have made a
+number of changes to the docs, it is best to first manually check them
+to make sure everything if working as expected. Otherwise, don&#8217;t worry
+about it. Any changes to the docs will be automatically compiled using
+Sphinx and then pushed to <code class="docutils literal"><span class="pre">gh-pages</span></code> when a PR is merged into
+<code class="docutils literal"><span class="pre">master</span></code>.</p>
+<div class="section" id="manually-generating-documentation">
+<h3>Manually generating documentation<a class="headerlink" href="#manually-generating-documentation" title="Permalink to this headline">¶</a></h3>
 <p>Ensure <code class="docutils literal"><span class="pre">sphinx</span></code> is installed.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ pip install sphinx
 $ conda install sphinx
@@ -108,6 +142,7 @@ changes to the documentation will be automatically built and pushed by
 Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></code> branch.</p>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -137,9 +172,7 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html#run-pygbe">Run PyGBe</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer&#8217;s Guide</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer&#8217;s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
@@ -156,8 +189,8 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
@@ -171,8 +204,8 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

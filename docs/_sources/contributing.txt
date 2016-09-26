@@ -7,10 +7,10 @@ information that does not belong in a regular userguide.
 Contributing to PyGBe
 ---------------------
 
-All code must go through the pull request review procedure.
-If you want to add something to PyGBe, first fork the repository. Make
-your changes on your fork of the repository and then open a pull request
-with your changes against the main PyGBe repository.
+All code must go through the pull request review procedure. If you want
+to add something to PyGBe, first fork the repository. Make your changes
+on your fork of the repository and then open a pull request with your
+changes against the main PyGBe repository.
 
 New features should follow the following rules: 1. PEP8 style guide
 should be followed 2. New features should include unit tests 3. All
@@ -21,24 +21,67 @@ for reference)
 Running the tests
 -----------------
 
-PyGBe currently only has regression tests.
-Once everything is installed, you can navigate to
-``pygbe/tests/regression_tests``.
-To run any of the regression tests individually, just run the
-corresponding script.
+Regression tests
+~~~~~~~~~~~~~~~~
+
+Once everything is installed, you can use ``py.test`` to run the
+regression tests, located in ``pygbe/tests``
+
+To run any of the regression tests individually, you can pass the test
+name to ``pytest``
+
+::
+
+    py.test test_lysozome.py
+
+or to run all of the tests just run ``py.test`` within the PyGBe
+directory
+
+::
+
+    py.test
+
+Convergence tests
+~~~~~~~~~~~~~~~~~
+
+There is a more robust set of tests located in
+``pygbe/tests/convergence_tests``. These include comparisons to
+analytical solutions and checks to ensure convergence over a series of
+finer meshes.
+
+Note that these tests take a few hours to run. To run them, navigate to
+the convergence test folder and run
+
+::
+
+    python run_convergence_tests.py
+
+Any individual set of convergence tests can be run by specifying a given
+test file, e.g.
 
 ::
 
     python lysozyme.py
 
-or to run all of the tests, use the helper script
+or
 
 ::
 
-    python run_all_regression_tests.py
+    python sphere_dirichlet.py
 
 Generating documentation
 ------------------------
+
+PyGBe uses ```doctr`` <https://github.com/gforsyth/doctr>`_ to
+automatically generate documentation using Travis CI. If you have made a
+number of changes to the docs, it is best to first manually check them
+to make sure everything if working as expected. Otherwise, don't worry
+about it. Any changes to the docs will be automatically compiled using
+Sphinx and then pushed to ``gh-pages`` when a PR is merged into
+``master``.
+
+Manually generating documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Ensure ``sphinx`` is installed.
 
