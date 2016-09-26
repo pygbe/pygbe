@@ -1069,7 +1069,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
     E_solv = []
 
     ff = -1
-    for f in field_array:
+    for region, f in enumerate(field_array):
         if f.pot == 1:
             parent_type = surf_array[f.parent[0]].surf_type
             if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
@@ -1077,7 +1077,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
                 E_solv_aux = 0
                 ff += 1
                 print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
-                    f, ff))
+                    region, ff))
 
                 AI_int = 0
                 Naux = 0
@@ -1141,7 +1141,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
                 E_solv.append(E_solv_aux)
 
                 print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
-                    1. * AI_int / len(f.xq), Naux, f))
+                    1. * AI_int / len(f.xq), Naux, region))
 
     return E_solv
 

@@ -69,6 +69,7 @@ def initialize_field(filename, param):
     E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0 for i in E]
     kappa = [param.REAL(i) if i != 'NA' else 0 for i in kappa]
     pot = [int(i) for i in pot]
+    coulomb = [int(i) for i in coulomb]
     Nfield = len(LorY)
     field_array = []
     Nchild_aux = 0
