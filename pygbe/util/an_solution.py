@@ -404,9 +404,9 @@ def constant_potential_twosphere(phi01, phi02, r1, r2, R, kappa, epsilon):
                            (kappa * r2) / numpy.sinh(kappa * r2) - pi * b0 /
                            (2 * i2))
 
-    print 'U1: %f' % U1
-    print 'U2: %f' % U2
-    print 'E: %f' % (U1 + U2)
+    print('U1: {}'.format(U1))
+    print('U2: {}'.format(U2))
+    print('E: {}'.format(U1 + U2))
     C1 = C0 * C0 * epsilon / kappa
     u1 = U1 * C1
     u2 = U2 * C1
@@ -1084,7 +1084,6 @@ def constant_potential_twosphere_identical(phi01, phi02, r1, r2, R, kappa,
     U = 4 * pi * (-pi / 2 * a0 / phi01 * 1 / numpy.sinh(kappa * r1) + kappa *
                   r1 + kappa * r1 / numpy.tanh(kappa * r1))
 
-    #    print 'E: %f'%U
     C0 = qe**2 * Na * 1e-3 * 1e10 / (cal2J * E_0)
     C1 = r1 * epsilon * phi01 * phi01
     E_inter = U * C1 * C0

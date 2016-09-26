@@ -74,15 +74,15 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     X_Vc = numpy.zeros(Ns * K)
 
     NsK = numpy.arange(Ns * K)
-    X_V[:] = XV[NsK / K] * w[NsK % K] * surfSrc.Area[NsK / K]
-    X_Kx[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 0]
-    X_Ky[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 1]
-    X_Kz[:] = XK[NsK / K] * w[NsK % K] * surfSrc.Area[
-        NsK / K] * surfSrc.normal[NsK / K, 2]
-    X_Kc[:] = XK[NsK / K]
-    X_Vc[:] = XV[NsK / K]
+    X_V[:] = XV[NsK // K] * w[NsK % K] * surfSrc.Area[NsK // K]
+    X_Kx[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 0]
+    X_Ky[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 1]
+    X_Kz[:] = XK[NsK // K] * w[NsK % K] * surfSrc.Area[
+        NsK // K] * surfSrc.normal[NsK // K, 2]
+    X_Kc[:] = XK[NsK // K]
+    X_Vc[:] = XV[NsK // K]
 
     toc.record()
     toc.synchronize()
@@ -206,8 +206,8 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     X_Ktc = numpy.zeros(Ns * K)
 
     NsK = numpy.arange(Ns * K)
-    X_Kt[:] = XKt[NsK / K] * w[NsK % K] * surfSrc.Area[NsK / K]
-    X_Ktc[:] = XKt[NsK / K]
+    X_Kt[:] = XKt[NsK // K] * w[NsK % K] * surfSrc.Area[NsK // K]
+    X_Ktc[:] = XKt[NsK // K]
 
     toc.record()
     toc.synchronize()
@@ -337,15 +337,15 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     X_Vc = numpy.zeros(N * K)
 
     for i in range(N * K):
-        X_V[i] = XV[i / K] * w[i % K] * surface.Area[i / K]
-        X_Kx[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 0]
-        X_Ky[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 1]
-        X_Kz[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 2]
-        X_Kc[i] = XK[i / K]
-        X_Vc[i] = XV[i / K]
+        X_V[i] = XV[i // K] * w[i % K] * surface.Area[i // K]
+        X_Kx[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 0]
+        X_Ky[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 1]
+        X_Kz[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 2]
+        X_Kc[i] = XK[i // K]
+        X_Vc[i] = XV[i // K]
 
     toc = time.time()
     time_set = toc - tic
@@ -431,15 +431,15 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     X_Vc = numpy.zeros(N * K)
 
     for i in range(N * K):
-        X_V[i] = XV[i / K] * w[i % K] * surface.Area[i / K]
-        X_Kx[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 0]
-        X_Ky[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 1]
-        X_Kz[i] = XK[i / K] * w[i % K] * surface.Area[
-            i / K] * surface.normal[i / K, 2]
-        X_Kc[i] = XK[i / K]
-        X_Vc[i] = XV[i / K]
+        X_V[i] = XV[i // K] * w[i % K] * surface.Area[i // K]
+        X_Kx[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 0]
+        X_Ky[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 1]
+        X_Kz[i] = XK[i // K] * w[i % K] * surface.Area[
+            i // K] * surface.normal[i // K, 2]
+        X_Kc[i] = XK[i // K]
+        X_Vc[i] = XV[i // K]
 
     toc = time.time()
     time_set = toc - tic

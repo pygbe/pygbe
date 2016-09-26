@@ -9,7 +9,7 @@ import pickle
 try:
     import pycuda
 except ImportError:
-    ans = raw_input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
     if ans in ['Y', 'y']:
         pass
     else:
@@ -30,7 +30,7 @@ lysozome_mesh = ['1','2','4','8']
 
 def picklesave(test_outputs):
     with open('tests','w') as f:
-        pickle.dump(test_outputs, f)
+        pickle.dump(test_outputs, f, 2)
 
 def pickleload():
     with open('tests', 'r') as f:
@@ -68,7 +68,7 @@ def scanOutput(filename):
 
 def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction'):
     """
-    Prints out information for the regression tests.
+    Prints out information for the convergence tests.
 
     Inputs:
     -------
@@ -108,9 +108,9 @@ def report_results(error, N, iterations, E, analytical, total_time, energy_type=
 
 
 
-def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
+def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
     """
-    Runs regression tests over a series of mesh sizes
+    Runs convergence tests over a series of mesh sizes
 
     Inputs:
     ------
@@ -127,7 +127,7 @@ def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
         Ecoul: array of coulomb energy
         Time: time to solution (wall-time)
     """
-    print 'Runs for molecule + set phi/dphi surface'
+    print('Runs for molecule + set phi/dphi surface')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
     Esolv = numpy.zeros(len(mesh))
@@ -136,7 +136,7 @@ def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
     Time = numpy.zeros(len(mesh))
     for i in range(len(mesh)):
         try:
-            print 'Start run for mesh '+mesh[i]
+            print('Start run for mesh '+mesh[i])
             outfile = pygbe(['',
                             '-p', '{}'.format(param),
                             '-c', '{}_{}.config'.format(test_name, mesh[i]),
@@ -144,7 +144,7 @@ def run_regression(mesh, test_name, problem_folder, param, delete_output=True):
                             '-g', './',
                             '{}'.format(problem_folder),], return_output_fname=True)
 
-            print 'Scan output file'
+            print('Scan output file')
             outfolder = os.path.join('{}'.format(problem_folder),
                                     'output_{}_{}'.format(test_name, mesh[i]))
             outfile = os.path.join(outfolder, outfile)

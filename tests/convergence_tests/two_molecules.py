@@ -1,11 +1,8 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import (scanOutput, run_regression, picklesave, pickleload,
+from convergence import (scanOutput, run_convergence, picklesave, pickleload,
                         report_results, mesh)
 
 
@@ -13,7 +10,7 @@ def main():
     print('{:-^60}'.format('Running two_molecules test'))
     try:
         test_outputs = pickleload()
-    except IOError:
+    except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'
@@ -23,7 +20,7 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'twosphere'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name,
             problem_folder,
             param, delete_output=False)
@@ -36,7 +33,7 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name,
             problem_folder,
             param, delete_output=False)

@@ -1,11 +1,8 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 import numpy
 import pickle
 
 from pygbe.util import an_solution
-from regression import (scanOutput, run_regression, picklesave, pickleload,
+from convergence import (scanOutput, run_convergence, picklesave, pickleload,
                         report_results, mesh)
 
 
@@ -14,7 +11,7 @@ def main():
 
     try:
         test_outputs = pickleload()
-    except IOError:
+    except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'
@@ -24,7 +21,7 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'molecule_neumann'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
@@ -35,7 +32,7 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
@@ -46,7 +43,7 @@ def main():
     param = 'sphere_fine.param'
     test_name = 'neumann_surface'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 

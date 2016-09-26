@@ -51,7 +51,6 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
             interior interaction.
     """
 
-    #    print 'SELF INTERIOR, surface: %i'%s
     K_diag = 2 * pi
     V_diag = 0
     IorE = 1
@@ -91,7 +90,6 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     V_lyr : array, self exterior single layer potential.
     """
 
-    #    print 'SELF EXTERIOR, surface: %i, E_hat: %f'%(s, surf.E_hat)
     K_diag = -2 * pi
     V_diag = 0.
     IorE = 2
@@ -133,7 +131,6 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                    non-self exterior interaction.
     """
 
-    #    print 'NONSELF EXTERIOR, source: %i, target: %i, E_hat: %f'%(src,tar, surf[src].E_hat)
     K_diag = 0
     V_diag = 0
     IorE = 1
@@ -172,7 +169,6 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
                    non-self interior interaction.
     """
 
-    #    print 'NONSELF INTERIOR, source: %i, target: %i'%(src,tar)
     K_diag = 0
     V_diag = 0
     IorE = 2
@@ -283,10 +279,6 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
         if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface' and parent_type != 'asc_surface':
             LorY = field_array[F].LorY
             param.kappa = field_array[F].kappa
-            #           print '\n---------------------'
-            #           print 'REGION %i, LorY: %i, kappa: %f'%(F,LorY,param.kappa)
-
-            #           if parent surface -> self interior operator
             if len(field_array[F].parent) > 0:
                 p = field_array[F].parent[0]
                 v = selfInterior(surf_array[p], p, LorY, param, ind0, timing,
@@ -1065,7 +1057,7 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     par_reac.threshold = 0.05
     par_reac.P = 7
     par_reac.theta = 0.0
-    par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) / 6
+    par_reac.Nm = (par_reac.P + 1) * (par_reac.P + 2) * (par_reac.P + 3) // 6
 
     ind_reac = IndexConstant()
     computeIndices(par_reac.P, ind_reac)
@@ -1084,8 +1076,8 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
             E_solv_aux = 0
             ff += 1
-            print 'Calculating solvation energy for region %i, stored in E_solv[%i]' % (
-                f, ff)
+            print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
+                f, ff))
 
             AI_int = 0
             Naux = 0
@@ -1148,8 +1140,8 @@ def calculateEsolv(surf_array, field_array, param, kernel):
             E_solv_aux += 0.5 * C0 * numpy.sum(field_array[f].q * phi_reac)
             E_solv.append(E_solv_aux)
 
-            print '%i of %i analytical integrals for phi_reac calculation in region %i' % (
-                AI_int / len(field_array[f].xq), Naux, f)
+            print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
+                1. * AI_int / len(field_array[f].xq), Naux, f))
 
     return E_solv
 
@@ -1219,20 +1211,19 @@ def calculateEsurf(surf_array, field_array, param, kernel):
     for f in param.E_field:
         parent_surf = surf_array[field_array[f].parent[0]]
 
-        if parent_surf.surf_type == 'dirichlet_surface':
+        if parent_surf.surf_type in ['dirichlet_surface']:
             ff += 1
-            print 'Calculating surface energy around region %i, stored in E_surf[%i]' % (
-                f, ff)
+            print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
+                f, ff))
             Esurf_aux = -numpy.sum(-parent_surf.Eout * parent_surf.dphi *
                                    parent_surf.phi * parent_surf.Area)
             E_surf.append(0.5 * C0 * Esurf_aux)
 
-        elif parent_surf.surf_type == 'neumann_surface':
+        if parent_surf.surf_type in ['neumann_surface']:
             ff += 1
-            print 'Calculating surface energy around region %i, stored in E_surf[%i]' % (
-                f, ff)
+            print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
+                f, ff))
             Esurf_aux = numpy.sum(-parent_surf.Eout * parent_surf.dphi *
-                                  parent_surf.phi * parent_surf.Area)
+                                   parent_surf.phi * parent_surf.Area)
             E_surf.append(0.5 * C0 * Esurf_aux)
-
     return E_surf

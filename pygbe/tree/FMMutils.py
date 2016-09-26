@@ -383,10 +383,10 @@ def sortPoints(surface, Cells, twig, param):
     surface.xjSort = surface.xj[surface.sortSource]
     surface.yjSort = surface.yj[surface.sortSource]
     surface.zjSort = surface.zj[surface.sortSource]
-    surface.AreaSort = surface.Area[surface.sortSource / param.K]
-    surface.sglInt_intSort = surface.sglInt_int[surface.sortSource / param.K]
-    surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource / param.K]
-    surface.triangleSort = surface.triangle[surface.sortSource / param.K]
+    surface.AreaSort = surface.Area[surface.sortSource // param.K]
+    surface.sglInt_intSort = surface.sglInt_int[surface.sortSource // param.K]
+    surface.sglInt_extSort = surface.sglInt_ext[surface.sortSource // param.K]
+    surface.triangleSort = surface.triangle[surface.sortSource // param.K]
 
 
 def computeIndices(P, ind0):
@@ -859,12 +859,8 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
         MSort[i * param.Nm:i * param.Nm + param.Nm] = surfSrc.tree[C].M
         MdSort[i * param.Nm:i * param.Nm + param.Nm] = surfSrc.tree[C].Md
 
-#    (free, total) = cuda.mem_get_info()
-#    print 'Global memory occupancy: %f%% free'%(free*100/total)
     MDev = cuda.to_device(MSort.astype(REAL))
     MdDev = cuda.to_device(MdSort.astype(REAL))
-    #    (free, total) = cuda.mem_get_info()
-    #    print 'Global memory occupancy: %f%% free'%(free*100/total)
 
     # GPU arrays are flattened, need to point to first element
     ptr_offset = surf * len(surfTar.offsetTwigs[surf]
@@ -958,11 +954,7 @@ def M2PKt_gpu(surfSrc, surfTar, Ktx_gpu, Kty_gpu, Ktz_gpu, surf, ind0, param,
         i += 1
         MSort[i * param.Nm:i * param.Nm + param.Nm] = surfSrc.tree[C].M
 
-#    (free, total) = cuda.mem_get_info()
-#    print 'Global memory occupancy: %f%% free'%(free*100/total)
     MDev = cuda.to_device(MSort.astype(REAL))
-    #    (free, total) = cuda.mem_get_info()
-    #    print 'Global memory occupancy: %f%% free'%(free*100/total)
 
     # GPU arrays are flattened, need to point to first element
     ptr_offset = surf * len(surfTar.offsetTwigs[surf]

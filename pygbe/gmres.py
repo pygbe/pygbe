@@ -230,10 +230,10 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
                     break
 
             if iteration%1==0:
-                print ('Iteration: %i, relative residual: %s'%(iteration,rel_resid))
+                print('Iteration: {}, relative residual: {}'.format(iteration,rel_resid))
 
             if (inner + 1 == R):
-                print('Residual: %f. Restart...' % rel_resid)
+                print('Residual: {}. Restart...'.format(rel_resid))
 
         # end inner loop, back to outer loop
 
@@ -249,16 +249,16 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
         # test for convergence
         if rel_resid < tol:
-            print 'GMRES solve'
+            print('GMRES solve')
             print('Converged after %i iterations to a residual of %s'%(iteration,rel_resid))
-            print 'Time weight vector: %f'%timing.time_mass
-            print 'Time sort         : %f'%timing.time_sort
-            print 'Time data transfer: %f'%timing.time_trans
-            print 'Time P2M          : %f'%timing.time_P2M
-            print 'Time M2M          : %f'%timing.time_M2M
-            print 'Time M2P          : %f'%timing.time_M2P
-            print 'Time P2P          : %f'%timing.time_P2P
-            print '\tTime analy: %f'%timing.time_an
+            print('Time weight vector: {}'.format(timing.time_mass))
+            print('Time sort         : {}'.format(timing.time_sort))
+            print('Time data transfer: {}'.format(timing.time_trans))
+            print('Time P2M          : {}'.format(timing.time_P2M))
+            print('Time M2M          : {}'.format(timing.time_M2M))
+            print('Time M2P          : {}'.format(timing.time_M2P))
+            print('Time P2P          : {}'.format(timing.time_P2P))
+            print('\tTime analy: {}'.format(timing.time_an))
 
             return X
 

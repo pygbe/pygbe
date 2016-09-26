@@ -6,7 +6,7 @@ both types.
 """
 
 import numpy
-from semi_analyticalwrap import SA_wrap_arr
+from pygbe.util.semi_analyticalwrap import SA_wrap_arr
 
 
 def GQ_1D(K):
@@ -233,32 +233,3 @@ def SA_arr(y, x, kappa, same, xk, wk):
             dphi_L[i] = -2 * pi
 
     return phi_Y, dphi_Y, phi_L, dphi_L
-
-
-"""
-y = array([[-0.38268343, 0.,-0.92387953],[ 0.,-0.38268343, -0.92387953],[0., 0., -1.]])
-#y = array([[-sqrt(2)/2.,-sqrt(2)/2.,0.],[0.,-sqrt(2)/2.,sqrt(2)/2.],[0.,-1.,0.]])
-#x = array([7/6.,7/6.,17/12.])
-#x = array([4/3.,4/3.,4/3.])
-x = array([[-0.544331053952, -0.544331053952, -0.544331053952],[average(y[:,0]), average(y[:,1]), average(y[:,2])]])
-#x = array([-0.235702, -0.333333, -0.235702])
-same = array([0,1], dtype=int32)
-eps = 1e-16
-kappa=1.5
-xk,wk = GQ_1D(5)
-
-
-IY,dIY,IL,dIL = SA_arr(y,x,kappa,same,xk,wk)
-
-WY = zeros(2)
-dWY = zeros(2)
-WL = zeros(2)
-dWL = zeros(2)
-y1D = ravel(y)
-x1D = ravel(x)
-SA_wrap_arr(y1D,x1D,WY,dWY,WL,dWL,kappa,same,xk,wk)
-print IY, WY
-print dIY, dWY
-print IL, WL
-print dIL, dWL
-"""
