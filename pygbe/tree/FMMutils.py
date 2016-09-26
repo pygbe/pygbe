@@ -3,7 +3,7 @@ It contains the functions to build the tree and compute all the interactions.
 """
 import time
 import numpy
-from scipy.misc import factorial, comb
+from scipy.misc import comb
 
 # Wrapped code
 from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
@@ -136,7 +136,6 @@ def split_cell(x, y, z, Cells, C, NCRIT, Nm, Ncell):
     Ncell: int, number of cells in the tree.
     """
 
-
     for l in Cells[C].target:
         octant = int(x[l] > Cells[C].xc) + int(y[l] > Cells[C].yc) * 2 + int(z[
             l] > Cells[C].zc) * 4
@@ -252,7 +251,7 @@ def addSources(Cells, twig, K):
         Cells[C].nsource = K * Cells[C].ntarget
         for j in range(K):
             Cells[C].source = numpy.append(Cells[C].source,
-                                       K * Cells[C].target + j)
+                                           K * Cells[C].target + j)
 
 
 def addSources2(x, y, z, j, Cells, C, NCRIT):
@@ -329,13 +328,12 @@ def addSources3(x, y, z, Cells, twig):
         j += 1
     r = numpy.sqrt(dx * dx + dy * dy + dz * dz)
 
-    close_twig = argmin(r, axis=0)
+    close_twig = numpy.argmin(r, axis=0)
 
     for j in range(len(close_twig)):
         Cells[twig[close_twig[j]]].nsource += 1
         Cells[twig[close_twig[j]]].source = numpy.append(
             Cells[twig[close_twig[j]]].source, j)
-
 
 
 def sortPoints(surface, Cells, twig, param):
@@ -362,7 +360,6 @@ def sortPoints(surface, Cells, twig, param):
     surface.offsetSource = numpy.zeros(len(twig) + 1, dtype=numpy.int32)
     surface.offsetTarget = numpy.zeros(len(twig), dtype=numpy.int32)
     surface.sizeTarget = numpy.zeros(len(twig), dtype=numpy.int32)
-    offTar = 0
     offSrc = 0
     i = 0
     for C in twig:
@@ -502,7 +499,6 @@ def interactionList(surfSrc, surfTar, CJ, CI, theta, NCRIT, offTwg, offMlt,
                         surfSrc, surfTar, CC, CI, theta, NCRIT, offTwg, offMlt,
                         s_src)
                 else:
-                    I = surfTar.tree[CI].M2P_size[s_src]
                     surfTar.M2P_list[s_src, offMlt] = CC
                     offMlt += 1
     else:
@@ -792,7 +788,6 @@ def M2PKt_sort(surfSrc, surfTar, Ktx_aux, Kty_aux, Ktz_aux, surf, index, param,
     tic = time.time()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
     MSort = numpy.zeros(param.Nm * M2P_size)
-    MdSort = numpy.zeros(param.Nm * M2P_size)
 
     i = -1
     for C in surfTar.M2P_list[surf, 0:M2P_size]:
@@ -1136,7 +1131,6 @@ def P2PKt_sort(surfSrc, surfTar, m, mKc, Ktx_aux, Kty_aux, Ktz_aux, surf, LorY,
     yt = surfTar.yiSort
     zt = surfTar.ziSort
 
-    tri = surfSrc.sortSource / param.K  # Triangle
     k = surfSrc.sortSource % param.K  # Gauss point
 
     aux = numpy.zeros(2)
@@ -1559,7 +1553,6 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
     xq_arr = numpy.array([xq[0]])
     yq_arr = numpy.array([xq[1]])
     zq_arr = numpy.array([xq[2]])
-    target = numpy.array([-1], dtype=numpy.int32)
 
     aux = numpy.zeros(2)
     K_diag = 0
