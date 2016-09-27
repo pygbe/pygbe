@@ -31,10 +31,10 @@ class Event():
 class Surface():
     """
     Surface class.
-    It contains information about the solvent excluded surface.
+    Information about the solvent excluded surface.
 
     Attributes
-    -----------
+    ----------
 
     triangle      : list, indices to triangle vertices.
     vertex        : list, position of vertices.
@@ -159,7 +159,7 @@ class Surface():
         print('Removed areas=0: {}'.format(len(area_null)))
 
     def define_regions(self, field_array, i):
-        # Look for regions inside/outside
+        """Look for regions inside/outside"""
         for j in range(self.Nsurf + 1):
             if len(field_array[j].parent) > 0:
                 if field_array[j].parent[0] == i:  # Inside region
@@ -187,7 +187,7 @@ class Surface():
         -Compute the diagonal integral for internal and external equations.
 
         Arguments
-        ----------
+        ---------
         param    : class, parameters related to the surface we are studying.
 
         """
@@ -231,6 +231,7 @@ class Surface():
         self.zi = numpy.average(self.vertex[self.triangle[:], 2], axis=1)
 
     def calc_norms(self):
+        """Calculate the surface normal vector"""
         L0 = self.vertex[self.triangle[:, 1]] - self.vertex[self.triangle[:, 0]]
         L2 = self.vertex[self.triangle[:, 0]] - self.vertex[self.triangle[:, 2]]
 
@@ -240,6 +241,7 @@ class Surface():
         self.normal /= (2 * self.area[:, numpy.newaxis])
 
     def calc_distance(self, param):
+        """Calculate the radius spanned by the points on the surface"""
         self.x_center = numpy.average(numpy.vstack((self.xi,
                                                    self.yi,
                                                    self.zi)), axis=1).astype(param.REAL)
@@ -250,19 +252,11 @@ class Surface():
 
     def get_gauss_points(self, n):
         """
-        It gets the Gauss points for far away integrals.
+        Get the Gauss points for far away integrals.
 
         Arguments
-        ----------
-        y       : list, vertices of the triangles.
-        triangle: list, indices for the corresponding triangles.
+        ---------
         n       : int (1,3,4,7), desired Gauss points per element.
-
-        Returns
-        --------
-        xi[:,0] : position of the gauss point in the x axis.
-        xi[:,1] : position of the gauss point in the y axis.
-        xi[:,2] : position of the gauss point in the z axis.
         """
 
         gauss_array = numpy.zeros((self.N*n, 3))
@@ -298,8 +292,16 @@ class Surface():
         self.xj, self.yj, self.zj = gauss_array.T
 
     def generate_preconditioner(self):
-        """ Generate preconditioner
-        Will use block-diagonal preconditioner (AltmanBardhanWhiteTidor2008)
+        """Generate preconditioner
+
+        Notes
+        -----
+        Uses block-diagonal preconditioner [1]_
+
+        .. [1] Altman, M. D., Bardhan, J. P., White, J. K., & Tidor, B. (2009).
+           Accurate solution of multi‐region continuum biomolecule electrostatic
+           problems using the linearized Poisson–Boltzmann equation with curved
+           boundary elements. Journal of computational chemistry, 30(1), 132-153.
         """
         # If we have complex dielectric constants we need to initialize Precon with
         # complex type else it'll be float.
@@ -389,13 +391,12 @@ class Surface():
     def fill_phi(self, phi, s_start=0):
 
         """
-        It places the result vector on surface structure.
+        Place the result vector on surface structure.
 
         Arguments
-        ----------
+        ---------
         phi        : array, result vector.
-        surf_array : array, contains the surface classes of each region on the
-                            surface.
+        s_start    : int, offset to grab the corresponding section of phi
         """
 
         s_size = len(self.xi)
@@ -422,10 +423,10 @@ class Surface():
 class Field():
     """
     Field class.
-    It contains the information about each region in the molecule.
+    Information about each region in the molecule.
 
     Attributes
-    -----------
+    ----------
 
     parent: list, Pointer to "parent" surface.
     child : list, Pointer to "children" surfaces.
@@ -434,7 +435,8 @@ class Field():
     E     : float, dielectric constant.
     xq    : list, position of charges.
     q     : list, value of charges.
-    coul  : int, 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
+    pot   : int, 1: calculate energy on this field 0: ignore
+    coulomb  : int, 1: perform Coulomb interaction calculation, 0: don't do Coulomb.
 
     # Device data
 
@@ -445,22 +447,22 @@ class Field():
     """
 
     def __init__(self, LorY, kappa, E, coulomb, pot):
-        self.parent = []    # Pointer to "parent" surface
-        self.child  = []    # Pointer to "children" surfaces
-        self.LorY = LorY   # 1: Laplace, 2: Yukawa
-        self.kappa = kappa  # inverse of Debye length
-        self.E      = E     # dielectric constant
-        self.xq     = []    # position of charges
-        self.q      = []    # value of charges
-        self.pot = pot  # whether to do energy calc on this field or not
-        self.coulomb = coulomb  # 1: perform Coulomb interaction calculation
-                                # 0: don't do Coulomb calculation
+        self.parent = []
+        self.child  = []
+        self.LorY = LorY
+        self.kappa = kappa
+        self.E      = E
+        self.xq     = []
+        self.q      = []
+        self.pot = pot
+        self.coulomb = coulomb
+
 
         # Device data
-        self.xq_gpu = []    # x position of charges on gpu
-        self.yq_gpu = []    # y position of charges on gpu
-        self.zq_gpu = []    # z position of charges on gpu
-        self.q_gpu  = []    # value of charges on gpu
+        self.xq_gpu = []
+        self.yq_gpu = []
+        self.zq_gpu = []
+        self.q_gpu  = []
 
     def load_charges(self, qfile, REAL):
         if qfile.endswith('.crd'):
@@ -472,10 +474,10 @@ class Field():
 class Timing():
     """
     Timing class.
-    It contains timing information for different parts of the code.
+    Timing information for different parts of the code.
 
     Attributes
-    -----------
+    ----------
     time_an   : float, time spent in compute the near singular integrals.
     time_P2P  : float, time spent in compute the P2P part of the treecode.
     time_P2M  : float, time spent in compute the P2M part of the treecode.
@@ -505,7 +507,7 @@ class Parameters():
     It contains the information of the parameters needed to run the code.
 
     Attributes
-    -----------
+    ----------
 
     kappa        :  float, inverse of Debye length.
     restart      :  int, Restart of GMRES.
@@ -562,10 +564,10 @@ class Parameters():
 
 class IndexConstant():
     """
-    It contains the precompute indices required for the treecode computation.
+    Precompute indices required for the treecode computation.
 
     Attributes
-    -----------
+    ----------
 
     II         : list, multipole order in the x-direction for the treecode.
     JJ         : list, multipole order in the y-direction for the treecode.
