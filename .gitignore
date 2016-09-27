@@ -26,3 +26,6 @@ pygbe/tree/multipole.py
 pygbe/tree/multipole_wrap.cpp
 pygbe/util/semi_analyticalwrap.py
 pygbe/util/semi_analyticalwrap_wrap.cpp
+
+# large examples
+examples/big_sphere/
