@@ -17,7 +17,7 @@ import numpy
 import scipy
 from warnings import warn
 
-from scipy.linalg import get_blas_funcs
+from scipy.linalg import get_blas_funcs, get_lapack_funcs
 from scipy.sparse.sputils import upcast
 
 from pygbe.matrixfree import gmres_dot
@@ -81,13 +81,14 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     # Get fast access to underlying BLAS routines
     # dotc is the conjugate dot, dotu does no conjugation
 
+    [lartg] = get_lapack_funcs(['lartg'], [X] )
     if numpy.iscomplexobj(numpy.zeros((1,), dtype=xtype)):
-        [axpy, dotu, dotc, scal, rotg] =\
-            get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal', 'rotg'], [X])
+        [axpy, dotu, dotc, scal] =\
+            get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal'], [X])
     else:
         # real type
-        [axpy, dotu, dotc, scal, rotg] =\
-            get_blas_funcs(['axpy', 'dot', 'dot', 'scal', 'rotg'], [X])
+        [axpy, dotu, dotc, scal] =\
+            get_blas_funcs(['axpy', 'dot', 'dot', 'scal'], [X])
 
     # Make full use of direct access to BLAS by defining own norm
     def norm(z):
@@ -192,9 +193,9 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
             if inner != dimen - 1:
                 if H[inner, inner+1] != 0:
-                    #rotg is a blas function that computes the parameters
+                    #lartg is a lapack function that computes the parameters
                     #for a Givens rotation
-                    [c, s] = rotg(H[inner, inner], H[inner, inner+1])
+                    [c, s, _] = lartg(H[inner, inner], H[inner, inner+1])
                     Qblock = numpy.array([[c, s], [-numpy.conjugate(s),c]], dtype=xtype)
                     Q.append(Qblock)
 
