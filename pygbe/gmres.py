@@ -7,17 +7,6 @@ This implementation was based mainly on the gmres_mgs from PyAMG, where
 modified Gram-Schmidt is used to orthogonalize the Krylov Space and
 Givens Rotations are used to provide the residual norm each iteration.
 
-Reading references:
-
- - For Arnoldi-Modified Gram-Schmidt:
-    Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
-    (pg. 148).
- - For Givens Rotations implementation:
-    Iterative methods for linear and non-linear equations - C.T Kelley - (1995).
-    (pg. 43-45).
- - For RESTART version:
-    Saad's book (pg. 167)
-
 Guidance code:
 
  - PyAMG library:
@@ -76,6 +65,13 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     Returns
     --------
     X          : array, an updated guess to the solution.
+
+    References
+    ----------
+    .. [1] Yousef Saad, "Iterative Methods for Sparse Linear Systems,
+       Second Edition", SIAM, pp. 151-172, pp. 272-275, 2003
+       http://www-users.cs.umn.edu/~saad/books.html
+    .. [2] C. T. Kelley, http://www4.ncsu.edu/~ctk/matlab_roots.html
     """
 
     # Defining xtype as dtype of the problem, to decide which BLAS functions
