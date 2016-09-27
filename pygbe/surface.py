@@ -11,13 +11,13 @@ def initialize_surface(field_array, filename, param):
     Initialize the surface of the molecule.
 
     Arguments
-    ----------
+    ---------
     field_array: array, contains the Field classes of each region on the surface.
     filename   : name of the file that contains the surface information.
     param      : class, parameters related to the surface.
 
     Returns
-    --------
+    -------
     surf_array : array, contains the surface classes of each region on the
                         surface.
     """
@@ -44,12 +44,12 @@ def initialize_field(filename, param):
     Initialize all the regions in the surface to be solved.
 
     Arguments
-    ----------
+    ---------
     filename   : name of the file that contains the surface information.
     param      : class, parameters related to the surface.
 
     Returns
-    --------
+    -------
     field_array: array, contains the Field classes of each region on the surface.
     """
 
