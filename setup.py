@@ -51,7 +51,7 @@ def main():
             license='MIT',
             version='0.2',
             url='https://github.com/barbagroup/pygbe',
-            classifiers=['Programming Language :: Python :: 2'],
+            classifiers=['Programming Language :: Python :: 3'],
             packages = find_packages(),
             #tell setuptools to use the custom build and install classes
             cmdclass={'build': CustomBuild, 'install': CustomInstall},
