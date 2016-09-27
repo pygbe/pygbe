@@ -1,6 +1,7 @@
 import time
 import numpy
 from scipy import linalg
+import scipy.constants
 
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.tree.direct import computeDiagonal
@@ -551,9 +552,9 @@ class Parameters():
         self.BlocksPerTwig = 0               # Number of CUDA blocks that fit per tree twig
         self.N             = 0               # Total number of elements
         self.Neq           = 0               # Total number of equations
-        self.qe            = 1.60217646e-19  # Charge of an electron
-        self.Na            = 6.0221415e23    # Avogadro's number
-        self.E_0           = 8.854187818e-12 # Vacuum dielectric constant
+        self.qe            = scipy.constants.e
+        self.Na            = scipy.constants.Avogadro
+        self.E_0           = scipy.constants.epsilon_0
         self.REAL          = 0               # Data type
         self.E_field       = []              # Regions where energy will be calculated
         self.GPU           = -1              # =1: with GPU, =0: no GPU
