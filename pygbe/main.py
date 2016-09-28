@@ -19,7 +19,7 @@ from argparse import ArgumentParser
 from pygbe.gmres import gmres_mgs
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
-from pygbe.surface import initialize_surface, initialize_field
+from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
                               coulomb_energy, calculate_surface_energy)
