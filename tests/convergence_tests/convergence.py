@@ -29,11 +29,11 @@ mesh = ['500', '2K', '8K', '32K']
 lysozome_mesh = ['1','2','4','8']
 
 def picklesave(test_outputs):
-    with open('tests','w') as f:
+    with open('tests','wb') as f:
         pickle.dump(test_outputs, f, 2)
 
 def pickleload():
-    with open('tests', 'r') as f:
+    with open('tests', 'rb') as f:
         test_outputs = pickle.load(f)
 
     return test_outputs
