@@ -25,7 +25,10 @@ def test_PGB_mut_sensor(key):
     with open('pgbmut.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
-    assert abs(base_results[key] - results[key]) / base_results[key] < 1e-12
+    if base_results[key] > 0:
+        assert abs(base_results[key] - results[key]) / base_results[key] < 1e-12
+    else:
+        assert base_results[key] == results[key]
 
 def test_pgbmut_iterations():
     results = get_results()
