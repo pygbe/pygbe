@@ -12,7 +12,7 @@ def main():
 
     try:
         test_outputs = pickleload()
-   except FileNotFoundError:
+    except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'
