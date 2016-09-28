@@ -443,7 +443,16 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     F          : array, RHS.
     """
 
-    F = numpy.zeros(param.Neq)
+    complexDiel = 0
+    for f in field_array:
+        if type(f.E) == complex:
+            complexDiel = 1
+
+    # Initializing F dtype according to the problem we are solving. 
+    if complexDiel == 1:
+        F = numpy.zeros(param.Neq, complex)
+    else:
+        F = numpy.zeros(param.Neq)
 
     #   Point charge contribution to RHS
     for j in range(len(field_array)):
