@@ -357,9 +357,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Solve
     print('Solve')
     phi = numpy.zeros(param.Neq)
-    phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
-                    kernel)
+    phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
+                               timing, kernel)
     toc = time.time()
+    results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())

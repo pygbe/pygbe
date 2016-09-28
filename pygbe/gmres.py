@@ -65,6 +65,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     Returns
     --------
     X          : array, an updated guess to the solution.
+    iteration  : int, number of outer iterations for convergence
 
     References
     ----------
@@ -247,8 +248,8 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             print('Time P2P          : {}'.format(timing.time_P2P))
             print('\tTime analy: {}'.format(timing.time_an))
 
-            return X
+            return X, iteration
 
     #end outer loop
 
-    return X
+    return X, iteration
