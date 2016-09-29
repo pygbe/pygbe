@@ -1,9 +1,6 @@
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -15,7 +12,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #dirichlet_surface
+    # dirichlet_surface
     param = 'sphere_fine.param'
     test_name = 'dirichlet_surface'
     if test_name not in test_outputs.keys():
@@ -25,7 +22,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #load data for analysis
+    # load data for analysis
     Esolv, Esurf, Ecoul = test_outputs['dirichlet_surface'][2:5]
     Time = test_outputs['dirichlet_surface'][-1]
     N, iterations = test_outputs['dirichlet_surface'][:2]

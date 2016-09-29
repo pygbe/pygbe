@@ -1,9 +1,6 @@
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -15,7 +12,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #twosphere
+    # twosphere
     print('Runs for two molecules')
     param = 'sphere_fine.param'
     test_name = 'twosphere'
@@ -28,7 +25,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #molecule_single_center
+    # molecule_single_center
     print('Runs for isolated molecule')
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
@@ -41,7 +38,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #load results for analysis
+    # load results for analysis
     Esolv, Esurf, Ecoul = test_outputs['twosphere'][2:5]
     Esolv_single, Esurf_single, Ecoul_single = test_outputs[
         'molecule_single_center'][2:5]
@@ -49,7 +46,6 @@ def main():
     Time_single = test_outputs['molecule_single_center'][-1]
     N, iterations = test_outputs['twosphere'][:2]
 
-    Etotal = Esolv + Esurf + Ecoul
     total_time = Time
     Esolv_single *= 2  # Same molecule twice
 

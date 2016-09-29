@@ -1,9 +1,6 @@
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -15,7 +12,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #neumann_surface
+    # neumann_surface
     param = 'sphere_fine.param'
     test_name = 'neumann_surface'
     if test_name not in test_outputs.keys():
@@ -25,7 +22,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #load results for analysis
+    # load results for analysis
     Esolv, Esurf, Ecoul = test_outputs['neumann_surface'][2:5]
     Time = test_outputs['neumann_surface'][-1]
     N, iterations = test_outputs['neumann_surface'][:2]
