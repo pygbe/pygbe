@@ -1,6 +1,7 @@
 # PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics
 
-[![DOI](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
+[![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
+[![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](http://www.doi2bib.org/#/doi/10.21105/joss.00043)
 
 PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics
 calculations in a continuum model.
@@ -128,6 +129,30 @@ To plug in your own protein data, download the corresponding `.pdb` file from th
 then get its `.pqr` file using any PDB to PQR converter (there are online tools available for this).
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
+
+### Citing PyGBe
+
+If PyGBe contributes to a project that leads to a scientific publication, please cite the the project.
+You can use this citation or the BibTeX entry below.
+
+```console
+Cooper, C. D., Clementi, N. C., Forsyth, G., & Barba, L. A. (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics. The Journal of Open Source Software.
+```
+
+```console
+@article{DCooper2016,
+  doi = {10.21105/joss.00043},
+  url = {http://dx.doi.org/10.21105/joss.00043},
+  year  = {2016},
+  month = {aug},
+  publisher = {The Open Journal},
+  volume = {1},
+  number = {4},
+  author = {Christopher D. Cooper and Natalia C. Clementi and Gilbert Forsyth and Lorena A. Barba},
+  title = {{PyGBe}: Python,  {GPUs} and Boundary elements for biomolecular electrostatics},
+  journal = {{JOSS}}
+}
+```
 
 ### Developer Documentation
 

@@ -6,7 +6,7 @@ with open('../README.md', 'r') as f:
 
 #remove DOI badge from readme before conversion to RST
 for line in readme:
-    if '[DOI]' in line:
+    if 'doi' in line or 'bib' in line:
         readme.remove(line)
 
 with open('../README.md', 'w') as f:
