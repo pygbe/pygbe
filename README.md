@@ -135,9 +135,7 @@ Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 If PyGBe contributes to a project that leads to a scientific publication, please cite the the project.
 You can use this citation or the BibTeX entry below.
 
-```console
-Cooper, C. D., Clementi, N. C., Forsyth, G., & Barba, L. A. (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics. The Journal of Open Source Software.
-```
+> Cooper, C. D., Clementi, N. C., Forsyth, G., & Barba, L. A. (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics. The Journal of Open Source Software.
 
 ```console
 @article{DCooper2016,
