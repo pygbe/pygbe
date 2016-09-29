@@ -78,7 +78,7 @@ Test the installation by running the following:
 
 PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc < 4.10).
 
-### Installing PyGBe
+## Installing PyGBe
 
 Create a clone of the repository on your machine:
 
@@ -130,7 +130,7 @@ then get its `.pqr` file using any PDB to PQR converter (there are online tools 
 Our code interfaces with meshes generated using [MSMS (Michel Sanner's
 Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
-### Citing PyGBe
+## Citing PyGBe
 
 If PyGBe contributes to a project that leads to a scientific publication, please cite the the project.
 You can use this citation or the BibTeX entry below.
