@@ -78,7 +78,7 @@ Test the installation by running the following:
 
 PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc < 4.10).
 
-## Installing PyGBe
+### Installing PyGBe
 
 Create a clone of the repository on your machine:
 
