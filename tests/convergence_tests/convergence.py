@@ -17,14 +17,6 @@ except ImportError:
 
 from pygbe.main import main as pygbe
 
-
-ITER_REGEX = re.compile('Converged after (\d*) iterations')
-N_REGEX = re.compile('Total elements : (\d*)')
-ESOLV_REGEX = re.compile('[^: ]Esolv = (\-*\d*\.\d*)\ kcal\/mol')
-ESURF_REGEX = re.compile('[^: ]Esurf = (\-*\d*\.\d*)\ kcal\/mol')
-ECOUL_REGEX = re.compile('[^: ]Ecoul = (\-*\d*\.\d*)\ kcal\/mol')
-TIME_REGEX = re.compile('Time = (\-*\d*\.\d*)\ s')
-
 mesh = ['500', '2K', '8K', '32K']
 lysozome_mesh = ['1','2','4','8']
 
@@ -37,34 +29,6 @@ def pickleload():
         test_outputs = pickle.load(f)
 
     return test_outputs
-
-def scanOutput(filename):
-
-    with open(filename, 'r') as f:
-        txt = f.read()
-
-        N= re.search(N_REGEX, txt)
-        if N:
-            N = int(N.group(1))
-        iterations = re.search(ITER_REGEX, txt)
-        if iterations:
-            iterations = int(iterations.group(1))
-        Esolv = re.search(ESOLV_REGEX, txt)
-        if Esolv:
-            Esolv = float(Esolv.group(1))
-        Esurf = re.search(ESURF_REGEX, txt)
-        if Esurf:
-            Esurf = float(Esurf.group(1))
-        Ecoul = re.search(ECOUL_REGEX, txt)
-        if Ecoul:
-            Ecoul = float(Ecoul.group(1))
-        Time = re.search(TIME_REGEX, txt)
-        if Time:
-            Time = float(Time.group(1))
-
-
-    return N, iterations, Esolv, Esurf, Ecoul, Time
-
 
 def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction'):
     """
@@ -137,20 +101,19 @@ def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
     for i in range(len(mesh)):
         try:
             print('Start run for mesh '+mesh[i])
-            outfile = pygbe(['',
+            results = pygbe(['',
                             '-p', '{}'.format(param),
                             '-c', '{}_{}.config'.format(test_name, mesh[i]),
                             '-o', 'output_{}_{}'.format(test_name, mesh[i]),
                             '-g', './',
-                            '{}'.format(problem_folder),], return_output_fname=True)
+                            '{}'.format(problem_folder),], return_results_dict=True)
 
-            print('Scan output file')
-            outfolder = os.path.join('{}'.format(problem_folder),
-                                    'output_{}_{}'.format(test_name, mesh[i]))
-            outfile = os.path.join(outfolder, outfile)
-            N[i],iterations[i],Esolv[i],Esurf[i],Ecoul[i],Time[i] = scanOutput(outfile)
-            if delete_output:
-                shutil.rmtree(outfolder)
+            N[i] = results['total_elements']
+            iterations[i] = results['iterations']
+            Esolv[i] = results.get('E_solv_kJ', 0)
+            Esurf[i] = results.get('E_surf_kJ', 0)
+            Ecoul[i] = results.get('E_coul_kJ', 0)
+            Time[i] = results['total_time']
 
         except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
             print('Mesh {} failed due to insufficient memory.'
