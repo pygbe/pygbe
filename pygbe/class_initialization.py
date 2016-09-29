@@ -78,6 +78,8 @@ def initialize_field(filename, param):
                 field_aux.child.append(int(child[Nchild_aux + j])
                                        )  # Loop over children to get pointers
             Nchild_aux += int(Nchild[i])  # Point to child for next surface
+        if pot[i] == 1:
+            param.E_field.append(i)  # Field where surface energy is calculated
 
         field_array.append(field_aux)
     return field_array
