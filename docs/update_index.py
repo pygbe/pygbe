@@ -1,24 +1,22 @@
 import os
 import subprocess
 
-with open('../README.md', 'r') as f:
-    readme = f.readlines()
-
-#remove DOI badge from readme before conversion to RST
-for line in readme:
-    if 'doi' in line or 'bib' in line:
-        readme.remove(line)
-
-with open('../README.md', 'w') as f:
-    f.writelines(readme)
-
 #convert README to rst
 for file in ['README', 'README_input_format', 'CONTRIBUTING']:
     subprocess.call(['pandoc', '../{}.md'.format(file),
                      '--from', 'markdown', '--to', 'rst',
                      '-s', '-o', '{}.rst'.format(file.lower())])
 
-subprocess.call(['git', 'checkout', '--', '../README.md'])
+with open('readme.rst', 'r') as f:
+    readme = f.readlines()
+
+#remove DOI badge from readme before conversion to RST
+for line in readme:
+    if 'DOI' in line:
+        readme.remove(line)
+
+with open('readme.rst', 'w') as f:
+    f.writelines(readme)
 
 os.rename('readme_input_format.rst', 'input_format.rst')
 
