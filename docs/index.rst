@@ -4,10 +4,13 @@
    :titlesonly:
    :maxdepth: 2
 
-   readme
+   installation
+   run
+   cite
    contributing
    input_format
    references
+   othersoftware
 
 
 
