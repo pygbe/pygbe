@@ -4,7 +4,7 @@
    :titlesonly:
    :maxdepth: 2
 
-   installation
+   readme
    contributing
    input_format
    references
