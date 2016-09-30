@@ -1,11 +1,11 @@
 Developer's Guide
-=================
+-----------------
 
 Welcome to PyGBe's developer's guide! This is a place to keep track of
 information that does not belong in a regular userguide.
 
 Contributing to PyGBe
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 All code must go through the pull request review procedure. If you want
 to add something to PyGBe, first fork the repository. Make your changes
@@ -19,10 +19,10 @@ functions should have NumPy style doctrings. See
 for reference)
 
 Running the tests
------------------
+~~~~~~~~~~~~~~~~~
 
 Regression tests
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 Once everything is installed, you can use ``py.test`` to run the
 regression tests, located in ``pygbe/tests``
@@ -42,7 +42,7 @@ directory
     py.test
 
 Convergence tests
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 There is a more robust set of tests located in
 ``pygbe/tests/convergence_tests``. These include comparisons to
@@ -70,7 +70,7 @@ or
     python sphere_dirichlet.py
 
 Generating documentation
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 PyGBe uses ```doctr`` <https://github.com/gforsyth/doctr>`__ to
 automatically generate documentation using Travis CI. If you have made a
