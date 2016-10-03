@@ -18,18 +18,16 @@ before_install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - pip install doctr
   - conda config --set always_yes yes --set changeps1 no
-  - conda create -q -n pygbe python=2.7 numpy scipy swig sphinx
+  - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx
   - source activate pygbe
+  - pip install doctr
 
 script:
   - python setup.py install
   - sphinx-apidoc -f -o docs/source pygbe
   - cd docs
-  - python update_index.py
   - make html
   - cd ..
-  - source deactivate
   - python -m doctr deploy
 
