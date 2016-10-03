@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="PyGBe 0.2.1 documentation" href="index.html" />
     <link rel="next" title="Input File Format" href="input_format.html" />
-    <link rel="prev" title="Installation" href="installation.html" />
+    <link rel="prev" title="Citing PyGBe" href="cite.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -65,12 +65,12 @@ for reference)</p>
 regression tests, located in <code class="docutils literal"><span class="pre">pygbe/tests</span></code></p>
 <p>To run any of the regression tests individually, you can pass the test
 name to <code class="docutils literal"><span class="pre">pytest</span></code></p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span> <span class="n">test_lysozome</span><span class="o">.</span><span class="n">py</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span> <span class="n">test_lysozome</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>or to run all of the tests just run <code class="docutils literal"><span class="pre">py.test</span></code> within the PyGBe
 directory</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">py</span><span class="o">.</span><span class="n">test</span>
 </pre></div>
 </div>
 </div>
@@ -82,57 +82,58 @@ analytical solutions and checks to ensure convergence over a series of
 finer meshes.</p>
 <p>Note that these tests take a few hours to run. To run them, navigate to
 the convergence test folder and run</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests</span><span class="o">.</span><span class="n">py</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>Any individual set of convergence tests can be run by specifying a given
 test file, e.g.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">sphere_dirichlet</span><span class="o">.</span><span class="n">py</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">sphere_dirichlet</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="generating-documentation">
 <h2>Generating documentation<a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
-<p>PyGBe uses <code class="docutils literal"><span class="pre">`doctr</span></code> &lt;<a class="reference external" href="https://github.com/gforsyth/doctr">https://github.com/gforsyth/doctr</a>&gt;`_ to
+<p>PyGBe uses <code class="docutils literal"><span class="pre">`doctr</span></code> &lt;<a class="reference external" href="https://github.com/gforsyth/doctr">https://github.com/gforsyth/doctr</a>&gt;`__ to
 automatically generate documentation using Travis CI. If you have made a
 number of changes to the docs, it is best to first manually check them
 to make sure everything if working as expected. Otherwise, don&#8217;t worry
 about it. Any changes to the docs will be automatically compiled using
 Sphinx and then pushed to <code class="docutils literal"><span class="pre">gh-pages</span></code> when a PR is merged into
 <code class="docutils literal"><span class="pre">master</span></code>.</p>
+</div>
 <div class="section" id="manually-generating-documentation">
-<h3>Manually generating documentation<a class="headerlink" href="#manually-generating-documentation" title="Permalink to this headline">¶</a></h3>
+<h2>Manually generating documentation<a class="headerlink" href="#manually-generating-documentation" title="Permalink to this headline">¶</a></h2>
 <p>Ensure <code class="docutils literal"><span class="pre">sphinx</span></code> is installed.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ pip install sphinx
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ pip install sphinx
 $ conda install sphinx
 </pre></div>
 </div>
 <p>Once you have added docstrings to some new functions, first reinstall
 PyGBe using either</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ python setup.py install
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ python setup.py install
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ python setup.py develop
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ python setup.py develop
 </pre></div>
 </div>
 <p>In the root of <code class="docutils literal"><span class="pre">pygbe</span></code> run</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ sphinx-apidoc -f -o docs/source pygbe
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ sphinx-apidoc -f -o docs/source pygbe
 </pre></div>
 </div>
 <p>Then enter the docs folder and run <code class="docutils literal"><span class="pre">make</span></code></p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ cd docs
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>$ cd docs
 $ make html
 </pre></div>
 </div>
 <p>Ensure that the docs have built correctly and that formatting, etc, is
 functional by opening the local docs in your browser</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">firefox</span> <span class="n">_build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="n">firefox</span> <span class="n">_build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
 </pre></div>
 </div>
 <p>If there are any errors in the build (or warnings), then fix them. If
@@ -140,7 +141,6 @@ there are no errors and the docs look good on your local build, then
 you&#8217;re done! Open a PR with your changes and when it is merged, the
 changes to the documentation will be automatically built and pushed by
 Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></code> branch.</p>
-</div>
 </div>
 </div>
 
@@ -168,20 +168,24 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
 
 
 
-<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a><h3>Navigation</h3>
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#run-pygbe">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer&#8217;s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+      <li>Previous: <a href="cite.html" title="previous chapter">Citing PyGBe</a></li>
       <li>Next: <a href="input_format.html" title="next chapter">Input File Format</a></li>
   </ul></li>
 </ul>

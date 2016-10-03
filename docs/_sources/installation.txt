@@ -22,13 +22,13 @@ Python and Numpy
 ^^^^^^^^^^^^^^^^
 
 To install the specific version of these packages we recommend using
-either `conda <http://conda.pydata.org/docs/get-started.html>`_ or
-`pip <http://python-packaging-user-guide.readthedocs.org/en/latest/installing/>`_.
+either `conda <http://conda.pydata.org/docs/get-started.html>`__ or
+`pip <http://python-packaging-user-guide.readthedocs.org/en/latest/installing/>`__.
 
 To create a new environment for using PyGBe with ``conda`` you can do
 the following:
 
-::
+.. code:: console
 
     conda create -n pygbe python=3.5 numpy scipy swig matplotlib
     source activate pygbe
@@ -41,19 +41,19 @@ SWIG
 
 To install SWIG we recommend using either ``conda``, your distribution
 package manager or `SWIG's
-website <http://www.swig.org/download.html>`_.
+website <http://www.swig.org/download.html>`__.
 
 NVCC
 ^^^^
 
-`Download and install <https://developer.nvidia.com/cuda-downloads>`_
+`Download and install <https://developer.nvidia.com/cuda-downloads>`__
 the CUDA Toolkit.
 
 PyCUDA
 ^^^^^^
 
 PyCUDA must be installed from source. Follow the
-`instructions <http://wiki.tiker.net/PyCuda/Installation>`_ on the
+`instructions <http://wiki.tiker.net/PyCuda/Installation>`__ on the
 PyCUDA website. We summarize the commands to install PyCUDA on Ubuntu
 here:
 
@@ -106,82 +106,3 @@ systemwide), then use ``sudo`` on the install command
 ::
 
     > sudo python setup.py install clean
-
-Run PyGBe
----------
-
-PyGBe cases are divided up into individual folders. We have included a
-few example problems in ``examples``.
-
-Test the PyGBe installation by running the Lysozyme (``lys``) example in
-the folder ``examples``. The structure of the folder is as follows:
-
-::
-
-    lys
-      ˫ lys.param
-      ˫ lys.config
-      ˫ built_parse.pqr
-      ˫ geometry/Lys1.face
-      ˫ geometry/Lys1.vert
-      ˫ output/
-
-To run this case, you can use
-
-::
-
-    > pygbe examples/lys
-
-To run any PyGBe case, you can pass ``pygbe`` a relative or an absolute
-path to the problem folder.
-
-Note that PyGBe will grab the first ``param`` and ``config`` files that
-it finds in the problem folder (they don't have to share a name with the
-folder, but it's helpful for organization). If you want to explicitly
-pass in a different/specific ``param`` or ``config`` file, you can use
-the ``-p`` and ``-c`` flags, respectively.
-
-If you have a centralized ``geometry`` folder, or want to reuse existing
-files without copying them, you can also pass the ``-g`` flag to
-``pygbe`` to point to the custom location. Note that this path should
-point to a folder which contains a folder called ``geometry``, not to
-the ``geometry`` folder itself.
-
-For more information on PyGBe's command line interface, run
-
-::
-
-    > pygbe -h
-
-Mesh
-~~~~
-
-In the ``examples`` folder, we provide meshes and ``.pqr`` files for a
-few example problems. To plug in your own protein data, download the
-corresponding ``.pdb`` file from the Protein Data Bank, then get its
-``.pqr`` file using any PDB to PQR converter (there are online tools
-available for this). Our code interfaces with meshes generated using
-`MSMS (Michel Sanner's Molecular Surface
-code) <http://mgltools.scripps.edu/packages/MSMS>`_.
-
-Developer Documentation
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Developer documentation is available on
-http://barbagroup.github.io/pygbe/docs
-
-Performance:
-~~~~~~~~~~~~
-
-`PyGBe
-Performance <https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb>`_
-
-Tests
-~~~~~
-
-To run the regression tests, go to the folder ``tests/regression_tests``
-and run the script ``run_all_regression_tests.py``, it will prompt you
-for permission, then automatically download the meshes needed. The
-meshes are hosted on
-`zenodo <https://zenodo.org/record/55349?ln=en#.V5EWsu35RhE>`_.
-

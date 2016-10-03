@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="PyGBe 0.2.1 documentation" href="index.html" />
-    <link rel="next" title="Developer’s Guide" href="contributing.html" />
+    <link rel="next" title="Run PyGBe" href="run.html" />
     <link rel="prev" title="PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -66,7 +66,7 @@ either <a class="reference external" href="http://conda.pydata.org/docs/get-star
 <a class="reference external" href="http://python-packaging-user-guide.readthedocs.org/en/latest/installing/">pip</a>.</p>
 <p>To create a new environment for using PyGBe with <code class="docutils literal"><span class="pre">conda</span></code> you can do
 the following:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pygbe</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.5</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">swig</span> <span class="n">matplotlib</span>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pygbe</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.5</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">swig</span> <span class="n">matplotlib</span>
 <span class="n">source</span> <span class="n">activate</span> <span class="n">pygbe</span>
 </pre></div>
 </div>
@@ -132,70 +132,6 @@ systemwide), then use <code class="docutils literal"><span class="pre">sudo</spa
 </div>
 </div>
 </div>
-<div class="section" id="run-pygbe">
-<h1>Run PyGBe<a class="headerlink" href="#run-pygbe" title="Permalink to this headline">¶</a></h1>
-<p>PyGBe cases are divided up into individual folders. We have included a
-few example problems in <code class="docutils literal"><span class="pre">examples</span></code>.</p>
-<p>Test the PyGBe installation by running the Lysozyme (<code class="docutils literal"><span class="pre">lys</span></code>) example in
-the folder <code class="docutils literal"><span class="pre">examples</span></code>. The structure of the folder is as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>lys
-  ˫ lys.param
-  ˫ lys.config
-  ˫ built_parse.pqr
-  ˫ geometry/Lys1.face
-  ˫ geometry/Lys1.vert
-  ˫ output/
-</pre></div>
-</div>
-<p>To run this case, you can use</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="n">examples</span><span class="o">/</span><span class="n">lys</span>
-</pre></div>
-</div>
-<p>To run any PyGBe case, you can pass <code class="docutils literal"><span class="pre">pygbe</span></code> a relative or an absolute
-path to the problem folder.</p>
-<p>Note that PyGBe will grab the first <code class="docutils literal"><span class="pre">param</span></code> and <code class="docutils literal"><span class="pre">config</span></code> files that
-it finds in the problem folder (they don&#8217;t have to share a name with the
-folder, but it&#8217;s helpful for organization). If you want to explicitly
-pass in a different/specific <code class="docutils literal"><span class="pre">param</span></code> or <code class="docutils literal"><span class="pre">config</span></code> file, you can use
-the <code class="docutils literal"><span class="pre">-p</span></code> and <code class="docutils literal"><span class="pre">-c</span></code> flags, respectively.</p>
-<p>If you have a centralized <code class="docutils literal"><span class="pre">geometry</span></code> folder, or want to reuse existing
-files without copying them, you can also pass the <code class="docutils literal"><span class="pre">-g</span></code> flag to
-<code class="docutils literal"><span class="pre">pygbe</span></code> to point to the custom location. Note that this path should
-point to a folder which contains a folder called <code class="docutils literal"><span class="pre">geometry</span></code>, not to
-the <code class="docutils literal"><span class="pre">geometry</span></code> folder itself.</p>
-<p>For more information on PyGBe&#8217;s command line interface, run</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="o">-</span><span class="n">h</span>
-</pre></div>
-</div>
-<div class="section" id="mesh">
-<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
-<p>In the <code class="docutils literal"><span class="pre">examples</span></code> folder, we provide meshes and <code class="docutils literal"><span class="pre">.pqr</span></code> files for a
-few example problems. To plug in your own protein data, download the
-corresponding <code class="docutils literal"><span class="pre">.pdb</span></code> file from the Protein Data Bank, then get its
-<code class="docutils literal"><span class="pre">.pqr</span></code> file using any PDB to PQR converter (there are online tools
-available for this). Our code interfaces with meshes generated using
-<a class="reference external" href="http://mgltools.scripps.edu/packages/MSMS">MSMS (Michel Sanner&#8217;s Molecular Surface
-code)</a>.</p>
-</div>
-<div class="section" id="developer-documentation">
-<h2>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h2>
-<p>Developer documentation is available on
-<a class="reference external" href="http://barbagroup.github.io/pygbe/docs">http://barbagroup.github.io/pygbe/docs</a></p>
-</div>
-<div class="section" id="performance">
-<h2>Performance:<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb">PyGBe
-Performance</a></p>
-</div>
-<div class="section" id="tests">
-<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
-<p>To run the regression tests, go to the folder <code class="docutils literal"><span class="pre">tests/regression_tests</span></code>
-and run the script <code class="docutils literal"><span class="pre">run_all_regression_tests.py</span></code>, it will prompt you
-for permission, then automatically download the meshes needed. The
-meshes are hosted on
-<a class="reference external" href="https://zenodo.org/record/55349?ln=en#.V5EWsu35RhE">zenodo</a>.</p>
-</div>
-</div>
 
 
           </div>
@@ -221,13 +157,17 @@ meshes are hosted on
 
 
 
-<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a><h3>Navigation</h3>
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#run-pygbe">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer&#8217;s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
 </ul>
 
 <div class="relations">
@@ -235,7 +175,7 @@ meshes are hosted on
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics</a></li>
-      <li>Next: <a href="contributing.html" title="next chapter">Developer&#8217;s Guide</a></li>
+      <li>Next: <a href="run.html" title="next chapter">Run PyGBe</a></li>
   </ul></li>
 </ul>
 </div>
