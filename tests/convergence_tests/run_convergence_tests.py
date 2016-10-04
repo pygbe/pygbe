@@ -1,5 +1,7 @@
-import subprocess
 import os
+import time
+import subprocess
+import datetime
 
 from check_for_meshes import check_mesh
 
@@ -17,11 +19,12 @@ ENV['CUDA_DEVICE'] = CUDA_DEVICE
 
 check_mesh()
 
+tic = time.time()
+
 for test in tests:
     subprocess.call(['python', '{}'.format(test)])
 
-# remove test result cache
-try:
-    os.remove('tests')
-except IOError:
-    pass
+toc = time.time()
+
+print("Total runtime for convergence tests: ")
+print(str(datetime.timedelta(seconds=(toc - tic))))

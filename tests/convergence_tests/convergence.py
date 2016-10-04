@@ -110,9 +110,9 @@ def run_convergence(mesh, test_name, problem_folder, param, delete_output=True):
 
             N[i] = results['total_elements']
             iterations[i] = results['iterations']
-            Esolv[i] = results.get('E_solv_kJ', 0)
-            Esurf[i] = results.get('E_surf_kJ', 0)
-            Ecoul[i] = results.get('E_coul_kJ', 0)
+            Esolv[i] = results.get('E_solv_kcal', 0)
+            Esurf[i] = results.get('E_surf_kcal', 0)
+            Ecoul[i] = results.get('E_coul_kcal', 0)
             Time[i] = results['total_time']
 
         except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
