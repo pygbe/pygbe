@@ -387,8 +387,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                 print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
                                                                           E_solv[ii],
                                                                           E_solv[ii] * 4.184))
-                results_dict['E_solv_kcal'] = E_solv[ii]
-                results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
 
     # Calculate surface energy
     print('\nCalculate Esurf')
@@ -402,8 +400,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             ii += 1
             print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
                 f, E_surf[ii], E_surf[ii] * 4.184))
-            results_dict['E_surf_kcal'] = E_surf[ii]
-            results_dict['E_surf_kJ'] = E_surf[ii] * 4.184
     print('Time Esurf: {}s'.format(toc - tic))
 
     ### Calculate Coulombic interaction
@@ -418,8 +414,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             E_coul.append(coulomb_energy(f, param))
             print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
                 i, E_coul[-1], E_coul[-1] * 4.184))
-            results_dict['E_coul_kcal'] = E_coul[-1]
-            results_dict['E_coul_kJ'] = E_coul[-1] * 4.184
     toc = time.time()
     print('Time Ecoul: {}s'.format(toc - tic))
 
@@ -431,6 +425,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
     print('\nTime = {} s'.format(toc - TIC))
     results_dict['total_time'] = (toc - TIC)
+    results_dict['E_solv_kcal'] = sum(E_solv)
+    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
+    results_dict['E_surf_kcal'] = sum(E_surf)
+    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
+    results_dict['E_coul_kcal'] = sum(E_coul)
+    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
 
     output_pickle = outputfname.split('-')
     output_pickle.pop(-1)
