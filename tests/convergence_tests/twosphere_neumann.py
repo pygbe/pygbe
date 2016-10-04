@@ -49,7 +49,8 @@ def main():
 
     error = abs(Einter - analytical) / abs(analytical)
 
-    report_results(error, N, iterations, Einter, analytical, total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time,
+                   test_name='twosphere neumann')
 
 
 if __name__ == '__main__':

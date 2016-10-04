@@ -1,4 +1,5 @@
 import numpy
+import datetime
 
 from convergence import run_convergence, picklesave, pickleload
 from convergence import lysozome_mesh as mesh
@@ -75,55 +76,63 @@ def main():
 
     flag = 0
     thresh = 1e-2
-    for i in range(len(error_single)):
-        if error_single[i] > thresh:
-            flag = 1
-            print('Solvation energy not agreeing for single surface simulation,'
-                  'mesh {} by {}'.format(i, error_single[i]))
+    with open('convergence_test_results', 'a') as f:
+        print('-' * 60, file=f)
+        print('{:-^60}'.format('Running lysozyme test'), file=f)
+        print('-' * 60, file=f)
+        print(datetime.datetime.now(), file=f)
+        for i in range(len(error_single)):
+            if error_single[i] > thresh:
+                flag = 1
+                print('Solvation energy not agreeing for single surface simulation,'
+                      'mesh {} by {}'.format(i, error_single[i]), file=f)
 
-        if error_full[i] > thresh:
-            flag = 1
-            print('Solvation energy not agreeing for full surface simulation,'
-                  'mesh {} by {}'.format(i, error_full[i]))
+            if error_full[i] > thresh:
+                flag = 1
+                print('Solvation energy not agreeing for full surface simulation,'
+                    'mesh {} by {}'.format(i, error_full[i]), file=f)
 
-        if error_FFTSVD[i] > thresh:
-            flag = 1
-            print('Solvation energy not agreeing with FFTSVD, mesh {} by'
-                  '{}'.format(i, error_FFTSVD[i]))
+            if error_FFTSVD[i] > thresh:
+                flag = 1
+                print('Solvation energy not agreeing with FFTSVD, mesh {} by'
+                    '{}'.format(i, error_FFTSVD[i]), file=f)
 
-    if flag == 0:
-        print('\nPassed Esolv test!')
-    else:
-        print('\nFAILED Esolv test')
+        if flag == 0:
+            print('\nPassed Esolv test!', file=f)
+        else:
+            print('\nFAILED Esolv test', file=f)
 
-    flag = 0
-    thresh = 3
-    for i in range(len(iter_diff_single)):
-        if abs(iter_diff_single[i]) > thresh:
-            flag = 1
-            print('Solvation energy not agreeing for single surface simulation,'
-                  'mesh {} by {}'.format(i, iter_diff_single[i]))
+        flag = 0
+        thresh = 3
+        for i in range(len(iter_diff_single)):
+            if abs(iter_diff_single[i]) > thresh:
+                flag = 1
+                print('Solvation energy not agreeing for single surface simulation,'
+                    'mesh {} by {}'.format(i, iter_diff_single[i]), file=f)
 
-        if abs(iter_diff_full[i]) > thresh:
-            flag = 1
-            print('Solvation energy not agreeing for full surface simulation, '
-                  'mesh {} by {}'.format(i, iter_diff_full[i]))
+            if abs(iter_diff_full[i]) > thresh:
+                flag = 1
+                print('Solvation energy not agreeing for full surface simulation, '
+                    'mesh {} by {}'.format(i, iter_diff_full[i]), file=f)
 
-        if abs(iter_diff_FFTSVD[i]) > thresh:
-            flag = 1
-            print('Solvation energy not agreeing with FFTSVD,'
-                  'mesh {} by {}'.format(i, iter_diff_FFTSVD[i]))
+            if abs(iter_diff_FFTSVD[i]) > thresh:
+                flag = 1
+                print('Solvation energy not agreeing with FFTSVD,'
+                    'mesh {} by {}'.format(i, iter_diff_FFTSVD[i]), file=f)
 
-    if flag == 0:
-        print('\nPassed iterations test! They are all within {} iterations of '
-              'reference'.format(thresh))
-    else:
-        print('\nFAILED iterations test')
+        if flag == 0:
+            print('\nPassed iterations test! They are all within {} iterations of '
+                'reference'.format(thresh), file=f)
+        else:
+            print('\nFAILED iterations test', file=f)
 
-    print('Summary:')
-    print('Single: Esolv: '+str(Esolv_single)+', iterations: '+str(iterations_single))
-    print('Full  : Esolv: '+str(Esolv_full)+', iterations: '+str(iterations_full))
-    print('k=0   : Esolv: '+str(Esolv_k0)+', iterations: '+str(iterations_k0))
+        print('Summary:', file=f)
+        print('Single: Esolv: ', str(Esolv_single),', iterations: ',
+              str(iterations_single), file=f)
+        print('Full  : Esolv: ', str(Esolv_full), ', iterations: ',
+              str(iterations_full), file=f)
+        print('k=0   : Esolv: ', str(Esolv_k0), ', iterations: ',
+              str(iterations_k0), file=f)
 
 if __name__ == "__main__":
     from check_for_meshes import check_mesh

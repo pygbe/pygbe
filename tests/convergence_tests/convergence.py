@@ -5,6 +5,7 @@ import time
 import numpy
 import shutil
 import pickle
+import datetime
 
 try:
     import pycuda
@@ -30,7 +31,7 @@ def pickleload():
 
     return test_outputs
 
-def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction'):
+def report_results(error, N, iterations, E, analytical, total_time, energy_type='Interaction', test_name=None):
     """
     Prints out information for the convergence tests.
 
@@ -51,24 +52,28 @@ def report_results(error, N, iterations, E, analytical, total_time, energy_type=
         energy_type: str
             Label for energy (default 'Interaction')
     """
+    with open('convergence_test_results', 'a') as f:
+        print('-' * 60, file=f)
+        print('{:-^60}'.format('Running: ' + test_name), file=f)
+        print('-' * 60, file=f)
+        print(datetime.datetime.now(), file=f)
+        flag = 0
+        for i in range(len(error)-1):
+            rate = error[i]/error[i+1]
+            if abs(rate-4)>0.6:
+                flag = 1
+                print('Bad convergence for mesh {} to {}, with rate {}'.
+                      format(i, i+1, rate), file=f)
 
-    flag = 0
-    for i in range(len(error)-1):
-        rate = error[i]/error[i+1]
-        if abs(rate-4)>0.6:
-            flag = 1
-            print('Bad convergence for mesh {} to {}, with rate {}'.
-                  format(i, i+1, rate))
+        if flag==0:
+            print('Passed convergence test!', file=f)
 
-    if flag==0:
-        print('Passed convergence test!')
-
-    print('\nNumber of elements : {}'.format(N))
-    print('Number of iteration: {}'.format(iterations))
-    print('{} energy : {}'.format(energy_type, E))
-    print('Analytical solution: {} kcal/mol'.format(analytical))
-    print('Error              : {}'.format(error))
-    print('Total time         : {}'.format(total_time))
+        print('\nNumber of elements : {}'.format(N), file=f)
+        print('Number of iteration: {}'.format(iterations), file=f)
+        print('{} energy : {}'.format(energy_type, E), file=f)
+        print('Analytical solution: {} kcal/mol'.format(analytical), file=f)
+        print('Error              : {}'.format(error), file=f)
+        print('Total time         : {}'.format(total_time), file=f)
 
 
 

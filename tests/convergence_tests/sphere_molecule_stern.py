@@ -43,7 +43,8 @@ def main():
                    Esolv,
                    analytical,
                    total_time,
-                   energy_type='Total')
+                   energy_type='Total',
+                   test_name='sphere molecule stern')
 
 
 if __name__ == "__main__":

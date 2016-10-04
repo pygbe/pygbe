@@ -40,7 +40,8 @@ def main():
                    Etotal,
                    analytical,
                    total_time,
-                   energy_type='Total')
+                   energy_type='Total',
+                   test_name='sphere_dirichlet')
 
 
 if __name__ == "__main__":
