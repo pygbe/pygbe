@@ -1,9 +1,6 @@
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -16,7 +13,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #molecule_neumann
+    # molecule_neumann
     print('Runs for molecule + set phi/dphi surface')
     param = 'sphere_fine.param'
     test_name = 'molecule_neumann'
@@ -27,7 +24,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #molecule_single_center
+    # molecule_single_center
     print('Runs for isolated molecule')
     param = 'sphere_fine.param'
     test_name = 'molecule_single_center'
@@ -38,7 +35,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #neumann_surface
+    # neumann_surface
     print('Runs for isolated surface')
     param = 'sphere_fine.param'
     test_name = 'neumann_surface'
@@ -49,7 +46,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #Load results for analysis
+    # Load results for analysis
     Esolv, Esurf, Ecoul = test_outputs['molecule_neumann'][2:5]
     Esolv_mol, Esurf_mol, Ecoul_mol = test_outputs['molecule_single_center'][2:
                                                                              5]
@@ -59,7 +56,8 @@ def main():
     Time_surf = test_outputs['neumann_surface'][-1]
     N, iterations = test_outputs['molecule_neumann'][:2]
 
-    Einter = Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol - Esolv_mol - Esurf_surf - Ecoul_surf
+    Einter = (Esolv + Esurf + Ecoul - Esolv_surf - Esurf_mol - Ecoul_mol -
+              Esolv_mol - Esurf_surf - Ecoul_surf)
     total_time = Time + Time_mol + Time_surf
 
     analytical = an_solution.molecule_constant_charge(1., -80 * 1., 5., 4.,
@@ -67,7 +65,8 @@ def main():
 
     error = abs(Einter - analytical) / abs(analytical)
 
-    report_results(error, N, iterations, Einter, analytical, total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time,
+                   test_name='molecule neumann')
 
 
 if __name__ == "__main__":

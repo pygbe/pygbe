@@ -11,14 +11,20 @@
 ### Changed
 
 * Old regression test suite renamed to `convergence_tests`
+* All surface related functions are now methods of the surface class
+* All field related functions are now methods of the field class
+* Use scipy.constants instead of hardcoded values
+* Docstrings use proper references now (looks better on Sphinx)
 
 ### Fixed
 
 * Py3 syntax for generator iteration
+* Switched from `blas.rotg` to `lapack.lartg` since that apparently works correctly
 
 ### Removed
 
 * All commented out code
+* Unused imports and unused variables removed.
 
 ## 0.2.1
 ---

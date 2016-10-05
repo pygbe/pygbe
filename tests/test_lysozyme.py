@@ -25,9 +25,19 @@ def test_lysozyme(key):
     with open('lysozyme.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
-    assert base_results[key] == results[key]
+    if base_results[key] > 0:
+        assert abs(base_results[key] - results[key]) / base_results[key] < 1e-12
+    else:
+        assert base_results[key] == results[key]
 
-@functools.lru_cache(5)
+def test_lysozyme_iterations():
+    results = get_results()
+    with open('lysozyme.pickle', 'rb') as f:
+        base_results = pickle.load(f)
+
+    assert base_results['iterations'] == results['iterations']
+
+@functools.lru_cache(6)
 def get_results():
     print('Generating results for lysozyme example...')
     if os.getcwd().rsplit('/', 1)[1] == 'tests':

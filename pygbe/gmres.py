@@ -7,17 +7,6 @@ This implementation was based mainly on the gmres_mgs from PyAMG, where
 modified Gram-Schmidt is used to orthogonalize the Krylov Space and
 Givens Rotations are used to provide the residual norm each iteration.
 
-Reading references:
-
- - For Arnoldi-Modified Gram-Schmidt:
-    Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
-    (pg. 148).
- - For Givens Rotations implementation:
-    Iterative methods for linear and non-linear equations - C.T Kelley - (1995).
-    (pg. 43-45).
- - For RESTART version:
-    Saad's book (pg. 167)
-
 Guidance code:
 
  - PyAMG library:
@@ -26,14 +15,10 @@ Guidance code:
 
 import numpy
 import scipy
-import time
-import os
-
-from scipy.linalg         import get_blas_funcs, solve
-from scipy.sparse.sputils import upcast
-from scipy.sparse.linalg  import gmres as scipy_gmres
-
 from warnings import warn
+
+from scipy.linalg import get_blas_funcs, get_lapack_funcs
+from scipy.sparse.sputils import upcast
 
 from pygbe.matrixfree import gmres_dot
 
@@ -59,7 +44,6 @@ def apply_givens(Q, v, k):
         v[j:j+2] = scipy.dot(Qloc, v[j:j+2])
 
 
-
 def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     """
     GMRES solver.
@@ -81,33 +65,38 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     Returns
     --------
     X          : array, an updated guess to the solution.
+    iteration  : int, number of outer iterations for convergence
+
+    References
+    ----------
+    .. [1] Yousef Saad, "Iterative Methods for Sparse Linear Systems,
+       Second Edition", SIAM, pp. 151-172, pp. 272-275, 2003
+       http://www-users.cs.umn.edu/~saad/books.html
+    .. [2] C. T. Kelley, http://www4.ncsu.edu/~ctk/matlab_roots.html
     """
 
-    output_path = os.path.join(
-        os.environ.get('PYGBE_PROBLEM_FOLDER'), 'OUTPUT')
-
-    #Defining xtype as dtype of the problem, to decide which BLAS functions
-    #import.
+    # Defining xtype as dtype of the problem, to decide which BLAS functions
+    # import.
     xtype = upcast(X.dtype, b.dtype)
 
     # Get fast access to underlying BLAS routines
     # dotc is the conjugate dot, dotu does no conjugation
 
+    [lartg] = get_lapack_funcs(['lartg'], [X] )
     if numpy.iscomplexobj(numpy.zeros((1,), dtype=xtype)):
-        [axpy, dotu, dotc, scal, rotg] =\
-            get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal', 'rotg'], [X])
+        [axpy, dotu, dotc, scal] =\
+            get_blas_funcs(['axpy', 'dotu', 'dotc', 'scal'], [X])
     else:
         # real type
-        [axpy, dotu, dotc, scal, rotg] =\
-            get_blas_funcs(['axpy', 'dot', 'dot',  'scal', 'rotg'], [X])
+        [axpy, dotu, dotc, scal] =\
+            get_blas_funcs(['axpy', 'dot', 'dot', 'scal'], [X])
 
     # Make full use of direct access to BLAS by defining own norm
     def norm(z):
         return numpy.sqrt(numpy.real(dotc(z, z)))
 
-    #Defining dimension
+    # Defining dimension
     dimen = len(X)
-
 
     max_iter = param.max_iter
     R = param.restart
@@ -139,7 +128,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
     iteration = 0
 
-    #Here start the GMRES
+    # Here start the GMRES
     for outer in range(max_outer):
 
         # Preallocate for Givens Rotations, Hessenberg matrix and Krylov Space
@@ -153,14 +142,14 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         # converted to upper triagonal with Givens Rotations
 
         H = numpy.zeros((max_inner+1, max_inner+1), dtype=xtype)
-        V = numpy.zeros((max_inner+1, dimen), dtype=xtype) #Krylov space
+        V = numpy.zeros((max_inner+1, dimen), dtype=xtype)  # Krylov space
 
         # vs store the pointers to each column of V.
         # This saves a considerable amount of time.
         vs = []
 
         # v = r/normr
-        V[0, :] = scal(1.0/normr, r) # scal wrapper of dscal --> x = a*x
+        V[0, :] = scal(1.0/normr, r)  # scal wrapper of dscal --> x = a*x
         vs.append(V[0, :])
 
         #Saving initial residual to be used to calculate the rel_resid
@@ -177,7 +166,6 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             v[:] = gmres_dot(vs[-1], surf_array, field_array, ind0, param,
  timing, kernel)
             vs.append(v)
-            normv_old = norm(v)
 
             #Modified Gram Schmidt
             for k in range(inner+1):
@@ -206,9 +194,9 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
             if inner != dimen - 1:
                 if H[inner, inner+1] != 0:
-                    #rotg is a blas function that computes the parameters
+                    #lartg is a lapack function that computes the parameters
                     #for a Givens rotation
-                    [c, s] = rotg(H[inner, inner], H[inner, inner+1])
+                    [c, s, _] = lartg(H[inner, inner], H[inner, inner+1])
                     Qblock = numpy.array([[c, s], [-numpy.conjugate(s),c]], dtype=xtype)
                     Q.append(Qblock)
 
@@ -260,8 +248,8 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             print('Time P2P          : {}'.format(timing.time_P2P))
             print('\tTime analy: {}'.format(timing.time_an))
 
-            return X
+            return X, iteration
 
     #end outer loop
 
-    return X
+    return X, iteration

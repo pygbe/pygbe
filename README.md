@@ -3,15 +3,21 @@
 [![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
 [![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](http://www.doi2bib.org/#/doi/10.21105/joss.00043)
 
-PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics
-calculations in a continuum model.
-It computes solvation energies for proteins modeled with any number of dielectric regions.
-The mathematical formulation follows Yoon and Lenhoff (1990) for solving the Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model in integral form.
+PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method
+for molecular-electrostatics calculations in a continuum model. It computes
+solvation energies for proteins modeled with any number of dielectric regions.
+The mathematical formulation follows Yoon and Lenhoff (1990) for solving the
+Poisson-Boltzmann equation of
+the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model
+in integral form.
 
-PyGBe achieves both algorithmic and hardware acceleration.
-The solution algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns.
-It exploits NVIDIA GPU hardware on the most computationally intensive parts of the code using CUDA kernels in the treecode, interfacing with PyCUDA.
-Some parts of the code are written in C++, wrapped using SWIG.
+PyGBe achieves both algorithmic and hardware acceleration. The solution
+algorithm uses
+a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to
+accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. It
+exploits NVIDIA GPU hardware on the most computationally intensive parts of the
+code using CUDA kernels in the treecode, interfacing with PyCUDA. Some parts of
+the code are written in C++, wrapped using SWIG.
 
 Detailed documentation is available at http://barbagroup.github.io/pygbe/docs/
 
@@ -32,29 +38,36 @@ corresponding commands in your flavor of Linux to install.
 
 #### Python and Numpy
 
-To install the specific version of these packages we recommend using either [conda](http://conda.pydata.org/docs/get-started.html) or [pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
+To install the specific version of these packages we recommend using either
+[conda](http://conda.pydata.org/docs/get-started.html) or
+[pip](http://python-packaging-user-guide.readthedocs.org/en/latest/installing/).
 
-To create a new environment for using PyGBe with `conda` you can do the following:
+To create a new environment for using PyGBe with `conda` you can do the
+following:
 
 ```console
 conda create -n pygbe python=3.5 numpy scipy swig matplotlib
 source activate pygbe
 ```
 
-and then proceed with the rest of the installation instructions (although note that if you do this, `swig` is already installed.
+and then proceed with the rest of the installation instructions (although note
+that if you do this, `swig` is already installed.
 
 
 #### SWIG
 
-To install SWIG we recommend using either `conda`, your distribution package manager or [SWIG's website](http://www.swig.org/download.html).
+To install SWIG we recommend using either `conda`, your distribution package
+manager or [SWIG's website](http://www.swig.org/download.html).
 
 #### NVCC
 
-[Download and install](https://developer.nvidia.com/cuda-downloads) the CUDA Toolkit.
+[Download and install](https://developer.nvidia.com/cuda-downloads) the CUDA
+Toolkit.
 
 #### PyCUDA
 
-PyCUDA must be installed from source. Follow the [instructions](http://wiki.tiker.net/PyCuda/Installation) on the PyCUDA website.
+PyCUDA must be installed from source. Follow the
+[instructions](http://wiki.tiker.net/PyCuda/Installation) on the PyCUDA website.
 We summarize the commands to install PyCUDA on Ubuntu here:
 
     > cd $HOME
@@ -67,7 +80,8 @@ We summarize the commands to install PyCUDA on Ubuntu here:
     > make
     > sudo make install
 
-If you are not installing PyCUDA systemwide, do not use `sudo` to install and simply run
+If you are not installing PyCUDA systemwide, do not use `sudo` to install and
+simply run
 
     > make install
 
@@ -78,7 +92,8 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc < 4.10).
+PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc
+< 4.10).
 
 ### Installing PyGBe
 
@@ -89,16 +104,18 @@ Create a clone of the repository on your machine:
     > cd pygbe
     > python setup.py install clean
 
-If you are installing PyGBe systemwide (if you installed PyCUDA systemwide), then use `sudo` on the install command
+If you are installing PyGBe systemwide (if you installed PyCUDA systemwide),
+then use `sudo` on the install command
 
     > sudo python setup.py install clean
 
 ## Run PyGBe
 
-PyGBe cases are divided up into individual folders.  We have included a few example problems in `examples`.
+PyGBe cases are divided up into individual folders. We have included a few
+example problems in `examples`.
 
-Test the PyGBe installation by running the Lysozyme (`lys`) example in the folder `examples`.
-The structure of the folder is as follows:
+Test the PyGBe installation by running the Lysozyme (`lys`) example in the
+folder `examples`. The structure of the folder is as follows:
 
 ```
 lys
@@ -114,23 +131,32 @@ To run this case, you can use
 
     > pygbe examples/lys
 
-To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to the problem folder.
+To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to
+the problem folder.
 
-Note that PyGBe will grab the first `param` and `config` files that it finds in the problem folder (they don't have to share a name with the folder, but it's helpful for organization).
-If you want to explicitly pass in a different/specific `param` or `config` file, you can use the `-p` and `-c` flags, respectively.
+Note that PyGBe will grab the first `param` and `config` files that it finds in
+the problem folder (they don't have to share a name with the folder, but it's
+helpful for organization). If you want to explicitly pass in a
+different/specific `param` or `config` file, you can use the `-p` and `-c`
+flags, respectively.
 
-If you have a centralized `geometry` folder, or want to reuse existing files without copying them, you can also pass the `-g` flag to `pygbe` to point to the custom location.  Note that this path should point to a folder which contains a folder called `geometry`, not to the `geometry` folder itself.
+If you have a centralized `geometry` folder, or want to reuse existing files
+without copying them, you can also pass the `-g` flag to `pygbe` to point to the
+custom location. Note that this path should point to a folder which contains a
+folder called `geometry`, not to the `geometry` folder itself.
 
 For more information on PyGBe's command line interface, run
 
     > pygbe -h
 
 ### Mesh
-In the `examples` folder, we provide meshes and `.pqr` files for a few example problems.
-To plug in your own protein data, download the corresponding `.pdb` file from the Protein Data Bank,
-then get its `.pqr` file using any PDB to PQR converter (there are online tools available for this).
-Our code interfaces with meshes generated using [MSMS (Michel Sanner's
-Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
+
+In the `examples` folder, we provide meshes and `.pqr` files for a few example
+problems. To plug in your own protein data, download the corresponding `.pdb`
+file from the Protein Data Bank, then get its `.pqr` file using any PDB to PQR
+converter (there are online tools available for this). Our code interfaces with
+meshes generated using
+[MSMS (Michel Sanner's Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
 ## Citing PyGBe
 
@@ -172,7 +198,8 @@ You can use this citation or the BibTeX entry below.
 
 ### Other software
 
-A few other open-source packages exist for solving implicit-solvent models of the Poisson-Boltzmann equation.
+A few other open-source packages exist for solving implicit-solvent models of
+the Poisson-Boltzmann equation.
 
 #### Volumetric-based solvers
 
