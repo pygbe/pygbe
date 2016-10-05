@@ -13,7 +13,7 @@ def download_zip_with_progress_bar(url):
     path = url.rsplit('/', 1)[-1]
     with open(path, 'wb') as f:
         total_length = int(r.headers.get('content-length'))
-        for chunk in clint.textui.progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1): 
+        for chunk in clint.textui.progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
             if chunk:
                 f.write(chunk)
                 f.flush()

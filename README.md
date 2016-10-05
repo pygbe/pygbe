@@ -1,20 +1,25 @@
 # PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics
 
+[![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
+[![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](http://www.doi2bib.org/#/doi/10.21105/joss.00043)
+
 PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method
 for molecular-electrostatics calculations in a continuum model. It computes
 solvation energies for proteins modeled with any number of dielectric regions.
 The mathematical formulation follows Yoon and Lenhoff (1990) for solving the
-Poisson-Boltzmann equation of the
-[implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model in
-integral form.
+Poisson-Boltzmann equation of
+the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model
+in integral form.
 
 PyGBe achieves both algorithmic and hardware acceleration. The solution
-algorithm uses a
-[Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to
+algorithm uses
+a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode to
 accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. It
 exploits NVIDIA GPU hardware on the most computationally intensive parts of the
 code using CUDA kernels in the treecode, interfacing with PyCUDA. Some parts of
 the code are written in C++, wrapped using SWIG.
+
+Detailed documentation is available at http://barbagroup.github.io/pygbe/docs/
 
 ## Installation
 
@@ -153,60 +158,31 @@ converter (there are online tools available for this). Our code interfaces with
 meshes generated using
 [MSMS (Michel Sanner's Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
-### Developer Documentation
+## Citing PyGBe
 
-Developer documentation is available on http://barbagroup.github.io/pygbe/docs
+If PyGBe contributes to a project that leads to a scientific publication, please cite the the project.
+You can use this citation or the BibTeX entry below.
+
+> Cooper, C. D., Clementi, N. C., Forsyth, G., & Barba, L. A. (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics. The Journal of Open Source Software.
+
+```console
+@article{DCooper2016,
+  doi = {10.21105/joss.00043},
+  url = {http://dx.doi.org/10.21105/joss.00043},
+  year  = {2016},
+  month = {aug},
+  publisher = {The Open Journal},
+  volume = {1},
+  number = {4},
+  author = {Christopher D. Cooper and Natalia C. Clementi and Gilbert Forsyth and Lorena A. Barba},
+  title = {{PyGBe}: Python,  {GPUs} and Boundary elements for biomolecular electrostatics},
+  journal = {{JOSS}}
+}
+```
 
 ### Performance:
 
 [PyGBe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb)
-
-### Regression tests
-
-Once everything is installed, you can use `py.test` to run the regression tests,
-located in `pygbe/tests`
-
-To run any of the regression tests individually, you can pass the test name to
-`pytest`
-
-```python
-py.test test_lysozome.py
-```
-
-or to run all of the tests just run `py.test` within the PyGBe directory
-
-```python
-py.test
-```
-
-### Convergence tests
-
-There is a more robust set of tests located in `pygbe/tests/convergence_tests`.
-These include comparisons to analytical solutions and checks to ensure
-convergence over a series of finer meshes.
-
-Note that these tests take a few hours to run. To run them, navigate to the
-convergence test folder and run
-
-```python
-python run_convergence_tests.py
-```
-
-Any individual set of convergence tests can be run by specifying a given test
-file, e.g.
-
-```python
-python lysozyme.py
-```
-
-or
-
-```python
-python sphere_dirichlet.py
-```
-
-The meshes are hosted on
-[zenodo](https://zenodo.org/record/55349?ln=en#.V5EWsu35RhE).
 
 ## References
 
