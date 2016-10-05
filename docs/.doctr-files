@@ -1,4 +1,5 @@
 docs/_modules/index.html
+docs/_modules/pygbe/class_initialization.html
 docs/_modules/pygbe/classes.html
 docs/_modules/pygbe/gmres.html
 docs/_modules/pygbe/gpuio.html
@@ -7,7 +8,6 @@ docs/_modules/pygbe/matrixfree.html
 docs/_modules/pygbe/output.html
 docs/_modules/pygbe/projection.html
 docs/_modules/pygbe/quadrature.html
-docs/_modules/pygbe/surface.html
 docs/_modules/pygbe/tree/FMMutils.html
 docs/_modules/pygbe/tree/cuda_kernels.html
 docs/_modules/pygbe/util/an_solution.html

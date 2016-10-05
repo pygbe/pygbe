@@ -23,6 +23,8 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="top" title="PyGBe 0.2.1 documentation" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -70,6 +72,59 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-pygbe.class_initialization">
+<span id="pygbe-class-initialization-module"></span><h2>pygbe.class_initialization module<a class="headerlink" href="#module-pygbe.class_initialization" title="Permalink to this headline">¶</a></h2>
+<p>It contains the necessary functions to set up the surface to be solved.</p>
+<dl class="function">
+<dt id="pygbe.class_initialization.initialize_field">
+<code class="descclassname">pygbe.class_initialization.</code><code class="descname">initialize_field</code><span class="sig-paren">(</span><em>filename</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/class_initialization.html#initialize_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.class_initialization.initialize_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize all the regions in the surface to be solved.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>field_array</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, contains the Field classes of each region on the surface.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.class_initialization.initialize_surface">
+<code class="descclassname">pygbe.class_initialization.</code><code class="descname">initialize_surface</code><span class="sig-paren">(</span><em>field_array</em>, <em>filename</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/class_initialization.html#initialize_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.class_initialization.initialize_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the surface of the molecule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>surf_array</strong> &#8211; surface.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, contains the surface classes of each region on the</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-pygbe.classes">
 <span id="pygbe-classes-module"></span><h2>pygbe.classes module<a class="headerlink" href="#module-pygbe.classes" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -96,10 +151,10 @@
 
 <dl class="class">
 <dt id="pygbe.classes.Field">
-<em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">Field</code><a class="reference internal" href="../_modules/pygbe/classes.html#Field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Field" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">Field</code><span class="sig-paren">(</span><em>LorY</em>, <em>kappa</em>, <em>E</em>, <em>coulomb</em>, <em>pot</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Field" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Field class.
-It contains the information about each region in the molecule.</p>
+Information about each region in the molecule.</p>
 <dl class="attribute">
 <dt id="pygbe.classes.Field.parent">
 <code class="descname">parent</code><a class="headerlink" href="#pygbe.classes.Field.parent" title="Permalink to this definition">¶</a></dt>
@@ -143,8 +198,14 @@ It contains the information about each region in the molecule.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pygbe.classes.Field.coul">
-<code class="descname">coul</code><a class="headerlink" href="#pygbe.classes.Field.coul" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.classes.Field.pot">
+<code class="descname">pot</code><a class="headerlink" href="#pygbe.classes.Field.pot" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int, 1: calculate energy on this field 0: ignore</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pygbe.classes.Field.coulomb">
+<code class="descname">coulomb</code><a class="headerlink" href="#pygbe.classes.Field.coulomb" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>int, 1: perform Coulomb interaction calculation, 0: don&#8217;t do Coulomb.</em></p>
 </dd></dl>
 
@@ -177,13 +238,18 @@ It contains the information about each region in the molecule.</p>
 <dd><p><em>list, value of charges on GPU.</em></p>
 </dd></dl>
 
+<dl class="method">
+<dt id="pygbe.classes.Field.load_charges">
+<code class="descname">load_charges</code><span class="sig-paren">(</span><em>qfile</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Field.load_charges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Field.load_charges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="pygbe.classes.IndexConstant">
 <em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">IndexConstant</code><a class="reference internal" href="../_modules/pygbe/classes.html#IndexConstant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.IndexConstant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>It contains the precompute indices required for the treecode computation.</p>
+<p>Precompute indices required for the treecode computation.</p>
 <dl class="attribute">
 <dt id="pygbe.classes.IndexConstant.II">
 <code class="descname">II</code><a class="headerlink" href="#pygbe.classes.IndexConstant.II" title="Permalink to this definition">¶</a></dt>
@@ -433,10 +499,10 @@ It contains the information of the parameters needed to run the code.</p>
 
 <dl class="class">
 <dt id="pygbe.classes.Surface">
-<em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">Surface</code><a class="reference internal" href="../_modules/pygbe/classes.html#Surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">Surface</code><span class="sig-paren">(</span><em>Nsurf</em>, <em>surf_type</em>, <em>phi0_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Surface class.
-It contains information about the solvent excluded surface.</p>
+Information about the solvent excluded surface.</p>
 <dl class="attribute">
 <dt id="pygbe.classes.Surface.triangle">
 <code class="descname">triangle</code><a class="headerlink" href="#pygbe.classes.Surface.triangle" title="Permalink to this definition">¶</a></dt>
@@ -510,8 +576,8 @@ It contains information about the solvent excluded surface.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pygbe.classes.Surface.Area">
-<code class="descname">Area</code><a class="headerlink" href="#pygbe.classes.Surface.Area" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.classes.Surface.area">
+<code class="descname">area</code><a class="headerlink" href="#pygbe.classes.Surface.area" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>list, areas of triangles.</em></p>
 </dd></dl>
 
@@ -624,8 +690,8 @@ It contains information about the solvent excluded surface.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pygbe.classes.Surface.AreaSort">
-<code class="descname">AreaSort</code><a class="headerlink" href="#pygbe.classes.Surface.AreaSort" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.classes.Surface.areaSort">
+<code class="descname">areaSort</code><a class="headerlink" href="#pygbe.classes.Surface.areaSort" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>list, sorted array of areas.</em></p>
 </dd></dl>
 
@@ -839,8 +905,8 @@ It contains information about the solvent excluded surface.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="pygbe.classes.Surface.AreaDev">
-<code class="descname">AreaDev</code><a class="headerlink" href="#pygbe.classes.Surface.AreaDev" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.classes.Surface.areaDev">
+<code class="descname">areaDev</code><a class="headerlink" href="#pygbe.classes.Surface.areaDev" title="Permalink to this definition">¶</a></dt>
 <dd><p><em>list, areas of triangles (on the GPU).</em></p>
 </dd></dl>
 
@@ -928,6 +994,129 @@ It contains information about the solvent excluded surface.</p>
 <dd><p><em>list, quadrature number of each quadrature point, in order.</em> &#8211; (on the GPU)</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="pygbe.classes.Surface.calc_centers">
+<code class="descname">calc_centers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.calc_centers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.calc_centers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the centers of each element of the surface</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.calc_distance">
+<code class="descname">calc_distance</code><span class="sig-paren">(</span><em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.calc_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.calc_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the radius spanned by the points on the surface</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.calc_norms">
+<code class="descname">calc_norms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.calc_norms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.calc_norms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the surface normal vector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.define_regions">
+<code class="descname">define_regions</code><span class="sig-paren">(</span><em>field_array</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.define_regions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.define_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look for regions inside/outside</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.define_surface">
+<code class="descname">define_surface</code><span class="sig-paren">(</span><em>files</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.define_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.define_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the vertices and triangles that define the molecule surface</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.fill_phi">
+<code class="descname">fill_phi</code><span class="sig-paren">(</span><em>phi</em>, <em>s_start=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.fill_phi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.fill_phi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Place the result vector on surface structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>phi</strong> (<em>array, result vector.</em>) &#8211; </li>
+<li><strong>s_start</strong> (<em>int, offset to grab the corresponding section of phi</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.fill_surface">
+<code class="descname">fill_surface</code><span class="sig-paren">(</span><em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.fill_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.fill_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill the surface with all the necessary information to solve it.</p>
+<p>-Set the Gauss points.
+-Generate tree, compute the indices and precompute terms for M2M.
+-Generate preconditioner.
+-Compute the diagonal integral for internal and external equations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>param</strong> (<em>class, parameters related to the surface we are studying.</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.generate_preconditioner">
+<code class="descname">generate_preconditioner</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.generate_preconditioner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.generate_preconditioner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate preconditioner</p>
+<p class="rubric">Notes</p>
+<p>Uses block-diagonal preconditioner <a href="#id5"><span class="problematic" id="id6"><span id="id1"></span>[1]_</span></a></p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Altman, M. D., Bardhan, J. P., White, J. K., &amp; Tidor, B. (2009).
+Accurate solution of multi‐region continuum biomolecule electrostatic
+problems using the linearized Poisson–Boltzmann equation with curved
+boundary elements. Journal of computational chemistry, 30(1), 132-153.</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.get_gauss_points">
+<code class="descname">get_gauss_points</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.get_gauss_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.get_gauss_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Gauss points for far away integrals.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int (1,3,4,7), desired Gauss points per element.</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.classes.Surface.zero_areas">
+<code class="descname">zero_areas</code><span class="sig-paren">(</span><em>triangle_raw</em>, <em>area_null</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.zero_areas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.zero_areas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks for &#8220;zero-areas&#8221;, areas that are really small, almost zero. It appends
+them to area_null list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>class, surface where we whan to look for zero areas.</em>) &#8211; </li>
+<li><strong>triangle_raw</strong> (<em>list, triangles of the surface.</em>) &#8211; </li>
+<li><strong>area_null</strong> (<em>list, contains the zero areas.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>area_null</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list, indices of the triangles with zero-areas.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -935,7 +1124,7 @@ It contains information about the solvent excluded surface.</p>
 <em class="property">class </em><code class="descclassname">pygbe.classes.</code><code class="descname">Timing</code><a class="reference internal" href="../_modules/pygbe/classes.html#Timing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Timing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Timing class.
-It contains timing information for different parts of the code.</p>
+Timing information for different parts of the code.</p>
 <dl class="attribute">
 <dt id="pygbe.classes.Timing.time_an">
 <code class="descname">time_an</code><a class="headerlink" href="#pygbe.classes.Timing.time_an" title="Permalink to this definition">¶</a></dt>
@@ -1000,31 +1189,6 @@ It contains timing information for different parts of the code.</p>
 <p>This implementation was based mainly on the gmres_mgs from PyAMG, where
 modified Gram-Schmidt is used to orthogonalize the Krylov Space and
 Givens Rotations are used to provide the residual norm each iteration.</p>
-<p>Reading references:</p>
-<blockquote>
-<div><ul>
-<li><dl class="first docutils">
-<dt>For Arnoldi-Modified Gram-Schmidt:</dt>
-<dd><p class="first last">Iterative methods for sparse linear systems - Yousef Saad - 2nd ed. (2000).
-(pg. 148).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>For Givens Rotations implementation:</dt>
-<dd><p class="first last">Iterative methods for linear and non-linear equations - C.T Kelley - (1995).
-(pg. 43-45).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>For RESTART version:</dt>
-<dd><p class="first last">Saad&#8217;s book (pg. 167)</p>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
 <p>Guidance code:</p>
 <blockquote>
 <div><ul>
@@ -1081,12 +1245,34 @@ Givens Rotations are used to provide the residual norm each iteration.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>X</strong></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>X</strong> (<em>array, an updated guess to the solution.</em>)</li>
+<li><strong>iteration</strong> (<em>int, number of outer iterations for convergence</em>)</li>
+</ul>
+</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, an updated guess to the solution.</p>
-</td>
-</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Yousef Saad, &#8220;Iterative Methods for Sparse Linear Systems,
+Second Edition&#8221;, SIAM, pp. 151-172, pp. 272-275, 2003
+<a class="reference external" href="http://www-users.cs.umn.edu/~saad/books.html">http://www-users.cs.umn.edu/~saad/books.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td><ol class="first last upperalpha simple" start="3">
+<li><ol class="first upperalpha" start="20">
+<li>Kelley, <a class="reference external" href="http://www4.ncsu.edu/~ctk/matlab_roots.html">http://www4.ncsu.edu/~ctk/matlab_roots.html</a></li>
+</ol>
+</li>
+</ol>
+</td></tr>
 </tbody>
 </table>
 </dd></dl>
@@ -1243,8 +1429,8 @@ problem folder resembles the following structure</p>
 <span id="pygbe-matrixfree-module"></span><h2>pygbe.matrixfree module<a class="headerlink" href="#module-pygbe.matrixfree" title="Permalink to this headline">¶</a></h2>
 <p>Matrix free formulation of the matrix vector product in the GMRES.</p>
 <dl class="function">
-<dt id="pygbe.matrixfree.calculateEsolv">
-<code class="descclassname">pygbe.matrixfree.</code><code class="descname">calculateEsolv</code><span class="sig-paren">(</span><em>surf_array</em>, <em>field_array</em>, <em>param</em>, <em>kernel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calculateEsolv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calculateEsolv" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.matrixfree.calculate_solvation_energy">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">calculate_solvation_energy</code><span class="sig-paren">(</span><em>surf_array</em>, <em>field_array</em>, <em>param</em>, <em>kernel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calculate_solvation_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calculate_solvation_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>It calculates the solvation energy.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1269,8 +1455,8 @@ problem folder resembles the following structure</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.matrixfree.calculateEsurf">
-<code class="descclassname">pygbe.matrixfree.</code><code class="descname">calculateEsurf</code><span class="sig-paren">(</span><em>surf_array</em>, <em>field_array</em>, <em>param</em>, <em>kernel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calculateEsurf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calculateEsurf" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.matrixfree.calculate_surface_energy">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">calculate_surface_energy</code><span class="sig-paren">(</span><em>surf_array</em>, <em>field_array</em>, <em>param</em>, <em>kernel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calculate_surface_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calculate_surface_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>It calculates the surface energy</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1295,8 +1481,8 @@ problem folder resembles the following structure</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.matrixfree.coulombEnergy">
-<code class="descclassname">pygbe.matrixfree.</code><code class="descname">coulombEnergy</code><span class="sig-paren">(</span><em>f</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#coulombEnergy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.coulombEnergy" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.matrixfree.coulomb_energy">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">coulomb_energy</code><span class="sig-paren">(</span><em>f</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#coulomb_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.coulomb_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>It calculates the Coulomb energy .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1735,33 +1921,6 @@ to the cpu.</p>
 <p>It contains the functions to compute the fine Gaussian quadrature and the
 wights and gauss points for the regular Gauss quadrature.</p>
 <dl class="function">
-<dt id="pygbe.quadrature.getGaussPoints">
-<code class="descclassname">pygbe.quadrature.</code><code class="descname">getGaussPoints</code><span class="sig-paren">(</span><em>y</em>, <em>triangle</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/quadrature.html#getGaussPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.quadrature.getGaussPoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>It gets the Gauss points for far away integrals.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>y</strong> (<em>list, vertices of the triangles.</em>) &#8211; </li>
-<li><strong>triangle</strong> (<em>list, indices for the corresponding triangles.</em>) &#8211; </li>
-<li><strong>n</strong> (<em>int (1,3,4,7), desired Gauss points per element.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>xi[</strong> (<em>,0] : position of the gauss point in the x axis.</em>)</li>
-<li><strong>xi[</strong> (<em>,1] : position of the gauss point in the y axis.</em>)</li>
-<li><strong>xi[</strong> (<em>,2] : position of the gauss point in the z axis.</em>)</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="pygbe.quadrature.getWeights">
 <code class="descclassname">pygbe.quadrature.</code><code class="descname">getWeights</code><span class="sig-paren">(</span><em>K</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/quadrature.html#getWeights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.quadrature.getWeights" title="Permalink to this definition">¶</a></dt>
 <dd><p>It gets the weights of the Gauss points.</p>
@@ -1793,131 +1952,6 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <li><strong>X</strong> (<em>array, position of the gauss quadrature points.</em>)</li>
 <li><strong>W</strong> (<em>array, gauss quadrature weights.</em>)</li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="module-pygbe.surface">
-<span id="pygbe-surface-module"></span><h2>pygbe.surface module<a class="headerlink" href="#module-pygbe.surface" title="Permalink to this headline">¶</a></h2>
-<p>It contains the necessary functions to set up the surface to be solved.</p>
-<dl class="function">
-<dt id="pygbe.surface.fill_phi">
-<code class="descclassname">pygbe.surface.</code><code class="descname">fill_phi</code><span class="sig-paren">(</span><em>phi</em>, <em>surf_array</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/surface.html#fill_phi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.surface.fill_phi" title="Permalink to this definition">¶</a></dt>
-<dd><p>It places the result vector on surface structure.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>phi</strong> (<em>array, result vector.</em>) &#8211; </li>
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.surface.fill_surface">
-<code class="descclassname">pygbe.surface.</code><code class="descname">fill_surface</code><span class="sig-paren">(</span><em>surf</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/surface.html#fill_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.surface.fill_surface" title="Permalink to this definition">¶</a></dt>
-<dd><p>It fills the surface with all the necessary information to solve it.</p>
-<p>-It sets the Gauss points.
--It generates tree, computes the indices and precompute terms for M2M.
--It generates preconditioner.
--It computes the diagonal integral for internal and external equations.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>class, surface that we are studying.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface we are studying.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>time_sort</strong></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, time spent in sorting the data needed for the treecode.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.surface.initializeField">
-<code class="descclassname">pygbe.surface.</code><code class="descname">initializeField</code><span class="sig-paren">(</span><em>filename</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/surface.html#initializeField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.surface.initializeField" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize all the regions in the surface to be solved.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>field_array</strong></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, contains the Field classes of each region on the surface.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.surface.initializeSurf">
-<code class="descclassname">pygbe.surface.</code><code class="descname">initializeSurf</code><span class="sig-paren">(</span><em>field_array</em>, <em>filename</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/surface.html#initializeSurf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.surface.initializeSurf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the surface of the molecule.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>surf_array</strong> &#8211; surface.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, contains the surface classes of each region on the</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.surface.zeroAreas">
-<code class="descclassname">pygbe.surface.</code><code class="descname">zeroAreas</code><span class="sig-paren">(</span><em>s</em>, <em>triangle_raw</em>, <em>Area_null</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/surface.html#zeroAreas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.surface.zeroAreas" title="Permalink to this definition">¶</a></dt>
-<dd><p>Looks for &#8220;zero-areas&#8221;, areas that are really small, almost zero. It appends
-them to Area_null list.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>s</strong> (<em>class, surface where we whan to look for zero areas.</em>) &#8211; </li>
-<li><strong>triangle_raw</strong> (<em>list, triangles of the surface.</em>) &#8211; </li>
-<li><strong>Area_null</strong> (<em>list, contains the zero areas.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Area_null</strong></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list, indices of the triangles with zero-areas.</p>
 </td>
 </tr>
 </tbody>
@@ -1992,7 +2026,7 @@ them to Area_null list.</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

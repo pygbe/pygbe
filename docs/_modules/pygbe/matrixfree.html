@@ -23,6 +23,8 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="top" title="PyGBe 0.2.1 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
@@ -45,7 +47,6 @@
 <span class="sd">Matrix free formulation of the matrix vector product in the GMRES.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">pi</span>
 
@@ -62,10 +63,10 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
 
-<span class="c1">## Note:</span>
-<span class="c1">##  Remember ordering of equations:</span>
-<span class="c1">##      Same order as defined in config file,</span>
-<span class="c1">##      with internal equation first and then the external equation.</span>
+<span class="c1"># Note:</span>
+<span class="c1">#  Remember ordering of equations:</span>
+<span class="c1">#      Same order as defined in config file,</span>
+<span class="c1">#      with internal equation first and then the external equation.</span>
 
 
 <div class="viewcode-block" id="selfInterior"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.selfInterior">[docs]</a><span class="k">def</span> <span class="nf">selfInterior</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
@@ -248,8 +249,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Kt_diag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">+</span> <span class="n">surf</span><span class="o">.</span><span class="n">Ein</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">-</span> <span class="n">surf</span><span class="o">.</span><span class="n">Ein</span><span class="p">)</span>
-    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="n">Kt_lyr</span> <span class="o">=</span> <span class="n">project_Kt</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">Kt_diag</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
                         <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
 
@@ -435,9 +434,10 @@
                                       <span class="n">dz_pq</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
-                        <span class="n">aux</span> <span class="o">-=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> \
-                                                                    <span class="o">+</span> <span class="n">dy_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> \
-                                                                    <span class="o">+</span> <span class="n">dz_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">aux</span> <span class="o">-=</span> <span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="p">)</span> <span class="o">*</span>
+                                <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                                <span class="n">dy_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                                <span class="n">dz_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span> <span class="o">+=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">E</span> <span class="o">*</span> <span class="n">R_pq</span><span class="p">)</span>
 
@@ -488,9 +488,10 @@
                                       <span class="n">dz_pq</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
-                        <span class="n">aux</span> <span class="o">-=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> \
-                                                                    <span class="o">+</span> <span class="n">dy_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> \
-                                                                    <span class="o">+</span> <span class="n">dz_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">aux</span> <span class="o">-=</span> <span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="p">)</span> <span class="o">*</span>
+                                <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                                 <span class="n">dy_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                                 <span class="n">dz_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">aux</span> <span class="o">+=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">E</span> <span class="o">*</span> <span class="n">R_pq</span><span class="p">)</span>
 
@@ -780,9 +781,9 @@
                     <span class="n">Fy_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_y</span><span class="p">)</span>
                     <span class="n">Fz_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_z</span><span class="p">)</span>
 
-                    <span class="n">aux</span> <span class="o">=</span> <span class="n">aux_x</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
-                          <span class="n">aux_y</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                          <span class="n">aux_z</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">aux</span> <span class="o">=</span> <span class="p">(</span><span class="n">aux_x</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_y</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_z</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
 
 <span class="c1">#               For CHILD surfaces, q contributes to RHS in</span>
 <span class="c1">#               EXTERIOR equation (hence Precond[1,:] and [3,:])</span>
@@ -881,9 +882,9 @@
                     <span class="n">Fy_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_y</span><span class="p">)</span>
                     <span class="n">Fz_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_z</span><span class="p">)</span>
 
-                    <span class="n">aux</span> <span class="o">=</span> <span class="n">aux_x</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
-                          <span class="n">aux_y</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
-                          <span class="n">aux_z</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">aux</span> <span class="o">=</span> <span class="p">(</span><span class="n">aux_x</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_y</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_z</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
 
 <span class="c1">#               For PARENT surface, q contributes to RHS in</span>
 <span class="c1">#               INTERIOR equation (hence Precond[0,:] and [2,:])</span>
@@ -1076,7 +1077,7 @@
     <span class="k">return</span> <span class="n">F</span></div>
 
 
-<div class="viewcode-block" id="calculateEsolv"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculateEsolv">[docs]</a><span class="k">def</span> <span class="nf">calculateEsolv</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_solvation_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculate_solvation_energy">[docs]</a><span class="k">def</span> <span class="nf">calculate_solvation_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It calculates the solvation energy.</span>
 
@@ -1095,7 +1096,6 @@
 
     <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
 
-    <span class="n">par_reac</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
     <span class="n">par_reac</span> <span class="o">=</span> <span class="n">param</span>
     <span class="n">par_reac</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.05</span>
     <span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="mi">7</span>
@@ -1113,83 +1113,84 @@
     <span class="n">E_solv</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">ff</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="p">:</span>
-        <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
-        <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">region</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">pot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+            <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
 
-            <span class="n">E_solv_aux</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">ff</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating solvation energy for region </span><span class="si">{}</span><span class="s1">, stored in E_solv[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">f</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
+                <span class="n">E_solv_aux</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">ff</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating solvation energy for region </span><span class="si">{}</span><span class="s1">, stored in E_solv[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">region</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
 
-            <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">phi_reac</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
+                <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">phi_reac</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
 
-            <span class="c1">#           First look at CHILD surfaces</span>
-            <span class="c1">#           Need to account for normals pointing outwards</span>
-            <span class="c1">#           and E_hat coefficient (as region is outside and</span>
-            <span class="c1">#           dphi_dn is defined inside)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
-                    <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
-                    <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+                <span class="c1">#           First look at CHILD surfaces</span>
+                <span class="c1">#           Need to account for normals pointing outwards</span>
+                <span class="c1">#           and E_hat coefficient (as region is outside and</span>
+                <span class="c1">#           dphi_dn is defined inside)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
 
-                <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+                    <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
 
-                <span class="c1">#               Coefficient to account for dphi_dn defined in</span>
-                <span class="c1">#               interior but calculation done in exterior</span>
-                <span class="n">C1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">E_hat</span>
+                    <span class="c1">#               Coefficient to account for dphi_dn defined in</span>
+                    <span class="c1">#               interior but calculation done in exterior</span>
+                    <span class="n">C1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">E_hat</span>
 
-                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
-                                           <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span>
-                                           <span class="n">ind_reac</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
-                                               <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">par_reac</span><span class="p">,</span>
-                                               <span class="n">kernel</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
+                                               <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span>
+                                               <span class="n">ind_reac</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
+                                                   <span class="n">f</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span>
+                                                   <span class="n">kernel</span><span class="p">)</span>
 
-                <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
-                <span class="n">phi_reac</span> <span class="o">-=</span> <span class="n">phi_aux</span>  <span class="c1"># Minus sign to account for normal pointing out</span>
+                    <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
+                    <span class="n">phi_reac</span> <span class="o">-=</span> <span class="n">phi_aux</span>  <span class="c1"># Minus sign to account for normal pointing out</span>
 
-<span class="c1">#           Now look at PARENT surface</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
-                <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
-                    <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
-                    <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+    <span class="c1">#           Now look at PARENT surface</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
 
-                <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+                    <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span>
-                                           <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span>
-                        <span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span>
+                                               <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span>
+                            <span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
 
-                <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
-                <span class="n">phi_reac</span> <span class="o">+=</span> <span class="n">phi_aux</span>
+                    <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
+                    <span class="n">phi_reac</span> <span class="o">+=</span> <span class="n">phi_aux</span>
 
-            <span class="n">E_solv_aux</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">q</span> <span class="o">*</span> <span class="n">phi_reac</span><span class="p">)</span>
-            <span class="n">E_solv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_solv_aux</span><span class="p">)</span>
+                <span class="n">E_solv_aux</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span> <span class="o">*</span> <span class="n">phi_reac</span><span class="p">)</span>
+                <span class="n">E_solv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_solv_aux</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> of </span><span class="si">{}</span><span class="s1"> analytical integrals for phi_reac calculation in region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="mf">1.</span> <span class="o">*</span> <span class="n">AI_int</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">),</span> <span class="n">Naux</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> of </span><span class="si">{}</span><span class="s1"> analytical integrals for phi_reac calculation in region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="mf">1.</span> <span class="o">*</span> <span class="n">AI_int</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">),</span> <span class="n">Naux</span><span class="p">,</span> <span class="n">region</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">E_solv</span></div>
 
 
-<div class="viewcode-block" id="coulombEnergy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.coulombEnergy">[docs]</a><span class="k">def</span> <span class="nf">coulombEnergy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+<div class="viewcode-block" id="coulomb_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.coulomb_energy">[docs]</a><span class="k">def</span> <span class="nf">coulomb_energy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It calculates the Coulomb energy .</span>
 
@@ -1214,7 +1215,7 @@
     <span class="k">return</span> <span class="n">Ecoul</span></div>
 
 
-<div class="viewcode-block" id="calculateEsurf"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculateEsurf">[docs]</a><span class="k">def</span> <span class="nf">calculateEsurf</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_surface_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculate_surface_energy">[docs]</a><span class="k">def</span> <span class="nf">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It calculates the surface energy</span>
 
@@ -1230,8 +1231,6 @@
 <span class="sd">    --------</span>
 <span class="sd">    E_surf: float, surface energy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
 
     <span class="n">par_reac</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
     <span class="n">par_reac</span> <span class="o">=</span> <span class="n">param</span>
@@ -1259,7 +1258,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating surface energy around region </span><span class="si">{}</span><span class="s1">, stored in E_surf[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">f</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
             <span class="n">Esurf_aux</span> <span class="o">=</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="n">parent_surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">dphi</span> <span class="o">*</span>
-                                   <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">Area</span><span class="p">)</span>
+                                   <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
             <span class="n">E_surf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Esurf_aux</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
@@ -1267,7 +1266,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating surface energy around region </span><span class="si">{}</span><span class="s1">, stored in E_surf[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">f</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
             <span class="n">Esurf_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="n">parent_surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">dphi</span> <span class="o">*</span>
-                                   <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">Area</span><span class="p">)</span>
+                                  <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
             <span class="n">E_surf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Esurf_aux</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">E_surf</span></div>
 </pre></div>
@@ -1335,7 +1334,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

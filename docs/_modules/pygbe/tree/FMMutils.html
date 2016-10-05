@@ -23,6 +23,8 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
     <link rel="top" title="PyGBe 0.2.1 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
@@ -46,7 +48,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="k">import</span> <span class="n">factorial</span><span class="p">,</span> <span class="n">comb</span>
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="k">import</span> <span class="n">comb</span>
 
 <span class="c1"># Wrapped code</span>
 <span class="kn">from</span> <span class="nn">pygbe.tree.multipole</span> <span class="k">import</span> <span class="n">multipole_c</span><span class="p">,</span> <span class="n">setIndex</span><span class="p">,</span> <span class="n">getIndex_arr</span><span class="p">,</span> <span class="n">multipole_sort</span><span class="p">,</span> <span class="n">multipoleKt_sort</span>
@@ -179,7 +181,6 @@
 <span class="sd">    Ncell: int, number of cells in the tree.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
         <span class="n">octant</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">xc</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">yc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">z</span><span class="p">[</span>
             <span class="n">l</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">zc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span>
@@ -295,7 +296,7 @@
         <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">nsource</span> <span class="o">=</span> <span class="n">K</span> <span class="o">*</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">ntarget</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
             <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
-                                       <span class="n">K</span> <span class="o">*</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span></div>
+                                           <span class="n">K</span> <span class="o">*</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="addSources2"><a class="viewcode-back" href="../../../source/pygbe.tree.html#pygbe.tree.FMMutils.addSources2">[docs]</a><span class="k">def</span> <span class="nf">addSources2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">Cells</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">NCRIT</span><span class="p">):</span>
@@ -372,13 +373,12 @@
         <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">dz</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span>
 
-    <span class="n">close_twig</span> <span class="o">=</span> <span class="n">argmin</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">close_twig</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">close_twig</span><span class="p">)):</span>
         <span class="n">Cells</span><span class="p">[</span><span class="n">twig</span><span class="p">[</span><span class="n">close_twig</span><span class="p">[</span><span class="n">j</span><span class="p">]]]</span><span class="o">.</span><span class="n">nsource</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">Cells</span><span class="p">[</span><span class="n">twig</span><span class="p">[</span><span class="n">close_twig</span><span class="p">[</span><span class="n">j</span><span class="p">]]]</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">Cells</span><span class="p">[</span><span class="n">twig</span><span class="p">[</span><span class="n">close_twig</span><span class="p">[</span><span class="n">j</span><span class="p">]]]</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="sortPoints"><a class="viewcode-back" href="../../../source/pygbe.tree.html#pygbe.tree.FMMutils.sortPoints">[docs]</a><span class="k">def</span> <span class="nf">sortPoints</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">Cells</span><span class="p">,</span> <span class="n">twig</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
@@ -405,7 +405,6 @@
     <span class="n">surface</span><span class="o">.</span><span class="n">offsetSource</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">twig</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">offsetTarget</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">twig</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">sizeTarget</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">twig</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-    <span class="n">offTar</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">offSrc</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="n">twig</span><span class="p">:</span>
@@ -426,7 +425,7 @@
     <span class="n">surface</span><span class="o">.</span><span class="n">xjSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">xj</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">yjSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">yj</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">zjSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">zj</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
-    <span class="n">surface</span><span class="o">.</span><span class="n">AreaSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">Area</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">//</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">]</span>
+    <span class="n">surface</span><span class="o">.</span><span class="n">AreaSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">//</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">]</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_intSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_int</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">//</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">]</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_extSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_ext</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">//</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">]</span>
     <span class="n">surface</span><span class="o">.</span><span class="n">triangleSort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">triangle</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">//</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">]</span></div>
@@ -545,7 +544,6 @@
                         <span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">CC</span><span class="p">,</span> <span class="n">CI</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">NCRIT</span><span class="p">,</span> <span class="n">offTwg</span><span class="p">,</span> <span class="n">offMlt</span><span class="p">,</span>
                         <span class="n">s_src</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">I</span> <span class="o">=</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">CI</span><span class="p">]</span><span class="o">.</span><span class="n">M2P_size</span><span class="p">[</span><span class="n">s_src</span><span class="p">]</span>
                     <span class="n">surfTar</span><span class="o">.</span><span class="n">M2P_list</span><span class="p">[</span><span class="n">s_src</span><span class="p">,</span> <span class="n">offMlt</span><span class="p">]</span> <span class="o">=</span> <span class="n">CC</span>
                     <span class="n">offMlt</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
@@ -835,7 +833,6 @@
     <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">M2P_size</span> <span class="o">=</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">offsetMlt</span><span class="p">[</span><span class="n">surf</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)]</span>
     <span class="n">MSort</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nm</span> <span class="o">*</span> <span class="n">M2P_size</span><span class="p">)</span>
-    <span class="n">MdSort</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nm</span> <span class="o">*</span> <span class="n">M2P_size</span><span class="p">)</span>
 
     <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">M2P_list</span><span class="p">[</span><span class="n">surf</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">M2P_size</span><span class="p">]:</span>
@@ -1179,7 +1176,6 @@
     <span class="n">yt</span> <span class="o">=</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">yiSort</span>
     <span class="n">zt</span> <span class="o">=</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">ziSort</span>
 
-    <span class="n">tri</span> <span class="o">=</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span>  <span class="c1"># Triangle</span>
     <span class="n">k</span> <span class="o">=</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">%</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span>  <span class="c1"># Gauss point</span>
 
     <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -1602,7 +1598,6 @@
     <span class="n">xq_arr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xq</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
     <span class="n">yq_arr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xq</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
     <span class="n">zq_arr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xq</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
-    <span class="n">target</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1633,7 +1628,7 @@
              <span class="n">s_mVc</span><span class="p">,</span>
              <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                  <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
-             <span class="n">surface</span><span class="o">.</span><span class="n">Area</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
              <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_int</span><span class="p">,</span>
              <span class="n">surface</span><span class="o">.</span><span class="n">sglInt_ext</span><span class="p">,</span>
              <span class="n">surface</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span>
@@ -1719,7 +1714,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

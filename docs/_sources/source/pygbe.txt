@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+pygbe.class_initialization module
+---------------------------------
+
+.. automodule:: pygbe.class_initialization
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pygbe.classes module
 --------------------
 
@@ -72,14 +80,6 @@ pygbe.quadrature module
 -----------------------
 
 .. automodule:: pygbe.quadrature
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pygbe.surface module
---------------------
-
-.. automodule:: pygbe.surface
     :members:
     :undoc-members:
     :show-inheritance:
