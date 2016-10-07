@@ -993,6 +993,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                           aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
                           aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
 
+
 #               For PARENT surface, q contributes to RHS in
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
 
@@ -1007,6 +1008,50 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                         s].unsort] * surf_array[s].Precond[0, :]
                     F[s_start + s_size:s_start + 2 * s_size] += aux[surf_array[
                         s].unsort] * surf_array[s].Precond[2, :]
+
+        # Effect of an incomming electric field (only on outmost region)
+        # Assuming field comes in z direction
+        LorY = field_array[j].LorY
+
+        if len(field_array[j].parent) == 0 and abs(ElectricField) > 1e-12:
+
+             for s in field_array[j].child:  # Loop over child surfaces
+                #Locate position of surface s in RHS
+                s_start = 0
+                for ss in range(s):
+                    if surf_array[
+                            ss].surf_type == 'dirichlet_surface' or surf_array[
+                                ss].surf_type == 'neumann_surface' or surf_array[
+                                    ss].surf_type == 'asc_surface':
+                        print('Surface definition error:')
+                        print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
+                        
+                    else:
+                        s_start += 2 * len(surf_array[ss].xi)
+
+                s_size = len(surf_array[s].xi) 
+                
+                tar = surf_array[s]
+                if tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
+                   or tar.surf_type=='asc_surface':
+                    print('LSPR problems required different surface definition')
+                    print('Check the input files to correct this') 
+                    pass
+                
+                else:
+                    #Assuming field comes in z direction then                    
+                    phi_field = ElectricField*tar.normal[:,2]
+                    #The contribution is in the exterior equation
+                    K_diag = -2 * pi
+                    V_diag = 0
+                    IorE   = 2                   
+
+                    K_lyr, V_lyr = project(numpy.zeros(len(phi_field)), 
+                                            phi_field, LorY, tar, tar,
+                                            K_diag, V_diag, IorE, s, param,
+                                            ind0, timing, kernel)
+
+                    F[s_start+s_size:s_start+2*s_size] += (1/tar.Ehat-1) * V_lyr * tar.Precond[3,:]     
 
 #   Dirichlet/Neumann contribution to RHS
     for j in range(len(field_array)):
