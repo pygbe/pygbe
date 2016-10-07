@@ -847,7 +847,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    surf_array[s].ziDev,
                                    surf_array[s].sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field_array[j].E),
+                                   1.,
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -855,6 +855,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
+                    aux *= 1./(field_array[j].E) #We do this to because if E is 
+                    #complex, and compute_RHS doesn't accept complex numbers. 
+                    #so we multiply outside.          
 
                 else:
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)
@@ -948,7 +951,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    surf_array[s].ziDev,
                                    surf_array[s].sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field_array[j].E),
+                                   1.,
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -956,6 +959,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
+                    aux *= 1./(field_array[j].E)
 
                 else:
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)
