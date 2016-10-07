@@ -553,9 +553,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                     F[s_start + s_size:s_start + 2 *
                       s_size] += aux * surf_array[s].Precond[2, :]
 
-        ## Here (when # start) and we need to add the definition of s_start and s_size like
-        ## 462-474, to define form where to whe the slicing goes in F.
-
+ 
         # Effect of an incomming electric field (only on outmost region)
         # Assuming field comes in z direction
         LorY = field_array[j].LorY
