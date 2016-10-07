@@ -798,7 +798,17 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     F          : array, RHS suitable for the GPU.
     """
 
-    F = numpy.zeros(param.Neq)
+    complexDiel = 0
+    for f in field_array:
+        if type(f.E) == complex:
+            complexDiel = 1
+
+    # Initializing F dtype according to the problem we are solving. 
+    if complexDiel == 1:
+        F = numpy.zeros(param.Neq, complex)
+    else:
+        F = numpy.zeros(param.Neq)
+
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
