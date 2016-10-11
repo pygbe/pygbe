@@ -284,7 +284,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     surf_array = initialize_surface(field_array, configFile, param)
 
     ### Read electric field and its wavelength.
-    electricField, wavelength = readElectricField(param, configFile) 
+    electricField, wavelength = readElectricField(param, configFile)
 
     ### Fill surface class
     time_sort = 0.
@@ -341,10 +341,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricField)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0)
+                            ind0, electricField)
     toc = time.time()
     rhs_time = toc - tic
 
