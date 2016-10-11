@@ -2,13 +2,52 @@
 ----
 ## Current development
 ---
+
 ### Added
+
+* Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but who cares.
+* Better regression tests (faster, anyway) using pytest
 
 ### Changed
 
-* Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but it is probably possible to maintain it for the time being.
+* Old regression test suite renamed to `convergence_tests`
+* All surface related functions are now methods of the surface class
+* All field related functions are now methods of the field class
+* Use scipy.constants instead of hardcoded values
+* Docstrings use proper references now (looks better on Sphinx)
 
 ### Fixed
+
+* Py3 syntax for generator iteration
+* Switched from `blas.rotg` to `lapack.lartg` since that apparently works correctly
+
+### Removed
+
+* All commented out code
+* Unused imports and unused variables removed.
+
+## 0.2.1
+---
+### Added
+
+* All documentation is available on github pages
+* Support for Cuda 7.5
+* One liner for setting up Py2.7 environment (sans PyCUDA)
+* Use Doctr to automatically generate documentation using Travis
+
+### Changed
+* `config` and `param` files are now globbed for so they can have a name different
+  than the folder which contains them.  
+* Updated license with new contributors
+* Layout of sphinx documentationt toolbars (home button added, more verbose layout)
+
+
+### Fixed
+
+* Uncaught exception when pygbe doesnt run correctly
+* Wrong error type in regression test master script
+* Performance runs work on non-X backends
+* Uncaught out-of-memory exceptions in regression tests
 
 ### Removed
 

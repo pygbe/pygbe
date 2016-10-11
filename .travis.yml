@@ -1,0 +1,33 @@
+language: python
+python:
+  - "3.5"
+env:
+  global:
+    - secure: "bLP+5HW9seXOSi1Kyjf1XyOiLBOWf/hDKIW5f+/TCi5afFGdxlQp4BNcxwG9ZQ61Er2dcD5kuQ3Lop+AA3GSpt43a3cPhCZ/LX37b17QKeEAr8IhzgrAoH+hlQheWnbgzGxvOYjhywUwIU+bsotRoZLRrrwBYZXqOWLshFCeReM="
+
+
+sudo: false
+addons:
+  apt:
+    packages:
+      - pandoc
+# install miniconda and create env for pygbe
+# also use pip to install doctr py3.5
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx
+  - source activate pygbe
+  - pip install doctr
+
+script:
+  - python setup.py install
+  - sphinx-apidoc -f -o docs/source pygbe
+  - cd docs
+  - make html
+  - cd ..
+  - python -m doctr deploy
+

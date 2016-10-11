@@ -1,42 +1,38 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 import numpy
-import pickle
 
 from pygbe.util import an_solution
-from regression import (scanOutput, run_regression, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
-    print('{:-^60}'.format('Running sphere_molecule_single test'))
+    print('{:-^60}'.format('Running sphere_molecule_stern test'))
     try:
         test_outputs = pickleload()
-    except IOError:
+    except FileNotFoundError:
         test_outputs = {}
 
     problem_folder = 'input_files'
 
-    #molecule_single
+    # molecule_stern
     param = 'sphere_fine.param'
-    test_name = 'molecule_single'
+    test_name = 'molecule_stern'
     if test_name not in test_outputs.keys():
-        N, iterations, Esolv, Esurf, Ecoul, Time = run_regression(
+        N, iterations, Esolv, Esurf, Ecoul, Time = run_convergence(
             mesh, test_name, problem_folder, param)
         test_outputs[test_name] = [N, iterations, Esolv, Esurf, Ecoul, Time]
 
     picklesave(test_outputs)
 
-    #load results for analysis
-    Esolv, Esurf, Ecoul = test_outputs['molecule_single'][2:5]
-    Time = test_outputs['molecule_single'][-1]
-    N, iterations = test_outputs['molecule_single'][:2]
-
+    # load results for analysis
+    Esolv, Esurf, Ecoul = test_outputs['molecule_stern'][2:5]
+    Time = test_outputs['molecule_stern'][-1]
+    N = test_outputs['molecule_stern'][0]
+    iterations = test_outputs['molecule_stern'][1]
     total_time = Time
 
     analytical = an_solution.an_P(
-        numpy.array([1.]), numpy.array([[1., 1., 1.41421356]]), 4., 80., 5.,
+        numpy.array([1.]), numpy.array([[1., 1., 1.41421356]]), 4., 80., 4.,
         0.125, 5., 20)
 
     error = abs(Esolv - analytical) / abs(analytical)
@@ -47,7 +43,8 @@ def main():
                    Esolv,
                    analytical,
                    total_time,
-                   energy_type='Total')
+                   energy_type='Total',
+                   test_name='sphere molecule stern')
 
 
 if __name__ == "__main__":
