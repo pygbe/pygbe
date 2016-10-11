@@ -580,7 +580,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
                    or tar.surf_type=='asc_surface'):
                     print('LSPR problems required different surface definition')
                     print('Check the input files to correct this')
-                    pass
+                    continue
 
                 else:
                     #Assuming field comes in z direction then
@@ -1033,7 +1033,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
                    or tar.surf_type=='asc_surface'):
                     print('LSPR problems required different surface definition')
                     print('Check the input files to correct this')
-                    pass
+                    continue
 
                 else:
                     #Assuming field comes in z direction then
