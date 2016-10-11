@@ -22,7 +22,8 @@ from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy)
+                              coulomb_energy, calculate_surface_energy, dipoleMoment, 
+                              extCrossSection)
 from pygbe.util.readData import readParameters, readElectricField
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
