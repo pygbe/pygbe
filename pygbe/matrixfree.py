@@ -1037,7 +1037,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
                 else:
                     #Assuming field comes in z direction then
-                    phi_field = ElectricField*tar.normal[:,2]
+                    phi_field = electricField*tar.normal[:,2]
                     #The contribution is in the exterior equation
                     K_diag = -2 * pi
                     V_diag = 0
