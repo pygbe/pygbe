@@ -1441,8 +1441,8 @@ def dipoleMoment(surf_array, electricField):
         #Changing dphi to outer side of surfaces
         dphi = s.dphi * s.E_hat - (1 - s.E_hat) * electricField * s.normal[:,2]
 
-        I1 = numpy.sum(xc * dphi * s.Area, axis=1)
-        I2 = numpy.sum(numpy.transpose(s.normal) * s.phi * s.Area, axis=1)
+        I1 = numpy.sum(xc * dphi * s.area, axis=1)
+        I2 = numpy.sum(numpy.transpose(s.normal) * s.phi * s.area, axis=1)
 
         s.dipole = s.Eout * (I1-I2)
 
