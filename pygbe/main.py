@@ -388,82 +388,96 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
 
-    # Calculate solvation energy
-    print('Calculate Esolv')
-    tic = time.time()
-    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    print('Time Esolv: {}s'.format(toc - tic))
-    ii = -1
-    for i, f in enumerate(field_array):
-        if f.pot == 1:
-            parent_type = surf_array[f.parent[0]].surf_type
-            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-                ii += 1
-                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+    #Calculate extinction cross section for lspr problems
+    if abs(electricField) > 1e-12:
+        print('Calculate extinction cross section')
+        tic = time.time()
+        Cext, surf_Cext = extCrossSection(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), 
+                           wavelength, electricField)
+        toc = time.time()
+        print('Time Cext: {}s'.format(toc - tic))
+        
+        print('\nCext:')
+        for i in range(len(Cext)):
+            print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
+
+    else:
+        # Calculate solvation energy
+        print('Calculate Esolv')
+        tic = time.time()
+        E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
+        toc = time.time()
+        print('Time Esolv: {}s'.format(toc - tic))
+        ii = -1
+        for i, f in enumerate(field_array):
+            if f.pot == 1:
+                parent_type = surf_array[f.parent[0]].surf_type
+                if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+                    ii += 1
+                    print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
                                                                           E_solv[ii],
                                                                           E_solv[ii] * 4.184))
 
-    # Calculate surface energy
-    print('\nCalculate Esurf')
-    tic = time.time()
-    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    ii = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
-            ii += 1
-            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
-                f, E_surf[ii], E_surf[ii] * 4.184))
-    print('Time Esurf: {}s'.format(toc - tic))
+        # Calculate surface energy
+        print('\nCalculate Esurf')
+        tic = time.time()
+        E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
+        toc = time.time()
+        ii = -1
+        for f in param.E_field:
+            parent_type = surf_array[field_array[f].parent[0]].surf_type
+            if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
+                ii += 1
+                print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+                    f, E_surf[ii], E_surf[ii] * 4.184))
+        print('Time Esurf: {}s'.format(toc - tic))
 
-    ### Calculate Coulombic interaction
-    print('\nCalculate Ecoul')
-    tic = time.time()
-    i = -1
-    E_coul = []
-    for f in field_array:
-        i += 1
-        if f.coulomb == 1:
-            print('Calculate Coulomb energy for region {}'.format(i))
-            E_coul.append(coulomb_energy(f, param))
-            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
-                i, E_coul[-1], E_coul[-1] * 4.184))
-    toc = time.time()
-    print('Time Ecoul: {}s'.format(toc - tic))
+        ### Calculate Coulombic interaction
+        print('\nCalculate Ecoul')
+        tic = time.time()
+        i = -1
+        E_coul = []
+        for f in field_array:
+            i += 1
+            if f.coulomb == 1:
+                print('Calculate Coulomb energy for region {}'.format(i))
+                E_coul.append(coulomb_energy(f, param))
+                print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+                    i, E_coul[-1], E_coul[-1] * 4.184))
+        toc = time.time()
+        print('Time Ecoul: {}s'.format(toc - tic))
 
-    ### Output summary
-    print('\n'+'-'*30)
-    print('Totals:')
-    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
-    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
-    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
-    print('\nTime = {} s'.format(toc - TIC))
-    results_dict['total_time'] = (toc - TIC)
-    results_dict['E_solv_kcal'] = sum(E_solv)
-    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
-    results_dict['E_surf_kcal'] = sum(E_surf)
-    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
-    results_dict['E_coul_kcal'] = sum(E_coul)
-    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+        ### Output summary
+        print('\n'+'-'*30)
+        print('Totals:')
+        print('Esolv = {} kcal/mol'.format(sum(E_solv)))
+        print('Esurf = {} kcal/mol'.format(sum(E_surf)))
+        print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+        print('\nTime = {} s'.format(toc - TIC))
+        results_dict['total_time'] = (toc - TIC)
+        results_dict['E_solv_kcal'] = sum(E_solv)
+        results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
+        results_dict['E_surf_kcal'] = sum(E_surf)
+        results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
+        results_dict['E_coul_kcal'] = sum(E_coul)
+        results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
 
-    output_pickle = outputfname.split('-')
-    output_pickle.pop(-1)
-    output_pickle.append('resultspickle')
-    output_pickle = '-'.join(output_pickle)
-    with open(os.path.join(output_dir, output_pickle), 'wb') as f:
-        pickle.dump(results_dict, f, 2)
+        output_pickle = outputfname.split('-')
+        output_pickle.pop(-1)
+        output_pickle.append('resultspickle')
+        output_pickle = '-'.join(output_pickle)
+        with open(os.path.join(output_dir, output_pickle), 'wb') as f:
+            pickle.dump(results_dict, f, 2)
 
-    #reset stdout so regression tests, etc, don't get logged into the output
-    #file that they themselves are trying to read
-    sys.stdout = sys.__stdout__
+        #reset stdout so regression tests, etc, don't get logged into the output
+        #file that they themselves are trying to read
+        sys.stdout = sys.__stdout__
 
-    if return_results_dict:
-        return results_dict
+        if return_results_dict:
+            return results_dict
 
-    if return_output_fname and log_output:
-        return outputfname
+        if return_output_fname and log_output:
+            return outputfname
 
 
 if __name__ == "__main__":
