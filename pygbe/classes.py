@@ -143,6 +143,7 @@ class Surface():
         self.twig = []
         self.surf_type = surf_type
         self.Nsurf = Nsurf
+        self.dipole = []
 
         if surf_type in ['dirichlet_surface', 'neumann_surface']:
             self.phi0 = numpy.loadtxt(phi0_file)
