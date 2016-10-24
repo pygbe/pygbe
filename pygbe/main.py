@@ -287,6 +287,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Read electric field and its wavelength.
     electricField, wavelength = readElectricField(param, configFile)
 
+
     ### Fill surface class
     time_sort = 0.
     for i in range(len(surf_array)):
@@ -388,8 +389,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
 
+    ###Calculating the dipole moment
+    dipoleMoment(surf_array, electricField)
+    
     #Calculate extinction cross section for lspr problems
     if abs(electricField) > 1e-12:
+        
         print('Calculate extinction cross section')
         tic = time.time()
         Cext, surf_Cext = extCrossSection(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), 
