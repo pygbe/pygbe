@@ -1464,7 +1464,7 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
     Returns:
     --------
     Cext         : list, contains the extinction cross section of surfaces.
-    surf_Cext    : list, indeces of the surface where Cext is being calculated.
+    surf_Cext    : list, indices of the surface where Cext is being calculated.
     """
 
     Cext = []
