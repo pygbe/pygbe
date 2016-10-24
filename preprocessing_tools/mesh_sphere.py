@@ -82,9 +82,9 @@ x_test = numpy.average(vertex[:,0])
 y_test = numpy.average(vertex[:,1])
 z_test = numpy.average(vertex[:,2])
 if abs(x_test-x0)>1e-12 or abs(y_test-y0)>1e-12 or abs(z_test-z0)>1e-12:
-    print 'Center is not right!'
+    print ('Center is not right!')
 
 numpy.savetxt(filename+'.vert', vertex, fmt='%.4f')
 numpy.savetxt(filename+'.face', index_format, fmt='%i')
 
-print 'Sphere with %i faces, radius %f and centered at %f,%f,%f was saved to the file '%(len(index), r, x0, y0, z0)+filename
+print('Sphere with %i faces, radius %f and centered at %f,%f,%f was saved to the file '%(len(index), r, x0, y0, z0)+filename)
