@@ -557,7 +557,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
         # Assuming field comes in z direction
         LorY = field_array[j].LorY
 
-        if len(field_array[j].parent) == 0 and abs(ElectricField) > 1e-12:
+        if len(field_array[j].parent) == 0 and abs(electricField) > 1e-12:
 
              for s in field_array[j].child:  # Loop over child surfaces
                 #Locate position of surface s in RHS
@@ -584,7 +584,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
 
                 else:
                     #Assuming field comes in z direction then
-                    phi_field = ElectricField*tar.normal[:,2]
+                    phi_field = electricField*tar.normal[:,2]
                     #The contribution is in the exterior equation
                     K_diag = -2 * pi
                     V_diag = 0
