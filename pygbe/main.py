@@ -349,6 +349,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                             ind0, electricField)
     toc = time.time()
     rhs_time = toc - tic
+    #saving rhs for debug lspr 
+    numpy.savetxt('RHS.txt',F)
 
     setup_time = toc - TIC
     print('List time          : {}s'.format(list_time))
@@ -377,6 +379,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
                             timing, kernel)
     toc = time.time()
+    #saving phi to debug lspr
+    numpy.savetxt('phi.txt',phi)
+
     results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
