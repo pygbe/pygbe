@@ -48,6 +48,10 @@ class Logger(object):
         self.terminal.write(message)
         self.log.write(message)
 
+    def flush(self):
+        """Required for Python 3"""
+        pass
+
 
 def read_inputs(args):
     """
