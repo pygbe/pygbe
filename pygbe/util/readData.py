@@ -200,24 +200,26 @@ def readpqr(filename, REAL):
     with open(filename, 'r') as f:
         lines = f.readlines()
         for line in lines:
-            line = numpy.array(line.split())
+            line = line.split()
 
-            line_aux = []
+#            line_aux = []
 
             if line[0] == 'ATOM':
-                for l in range(len(line) - 6):
-                    aux = line[5 + len(line_aux)]
-                    if len(aux) > 14:
-                        X = readCheck(aux, REAL)
-                        for i in range(len(X)):
-                            line_aux.append(X[i])
-                    else:
-                        line_aux.append(REAL(line[5 + len(line_aux)]))
+                #  grab coordinates and charge from columns
+                x, y, z, q0 = [REAL(i) for i in line[5:-1]]
+                #for l in range(len(line) - 6):
+                    #aux = line[5 + len(line_aux)]
+                    #if len(aux) > 14:
+                        #X = readCheck(aux, REAL)
+                        #for i in range(len(X)):
+                            #line_aux.append(X[i])
+                    #else:
+                        #line_aux.append(REAL(line[5 + len(line_aux)]))
 
-                x = line_aux[0]
-                y = line_aux[1]
-                z = line_aux[2]
-                q.append(line_aux[3])
+#                x = line_aux[0]
+#                y = line_aux[1]
+#                z = line_aux[2]
+                q.append(q0)
                 pos.append([x, y, z])
 
     pos = numpy.array(pos)
