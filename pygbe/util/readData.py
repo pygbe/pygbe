@@ -180,7 +180,7 @@ def readCheck(aux, REAL):
 
 def readpqr(filename, REAL):
     """
-    It reads the pqr file, file that contains the charges information.
+    Read charge information from pqr file
 
     Arguments
     ----------
@@ -192,35 +192,21 @@ def readpqr(filename, REAL):
     -------
     pos     : (Nqx3) array, positions of the charges.
     q       : (Nqx1) array, value of the charges.
-    Nq      : int, number of charges.
     """
+
+    with open(filename, 'r') as f:
+        lines = f.readlines()
 
     pos = []
     q = []
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split()
+    for line in lines:
+        line = line.split()
 
-#            line_aux = []
-
-            if line[0] == 'ATOM':
-                #  grab coordinates and charge from columns
-                x, y, z, q0 = [REAL(i) for i in line[5:-1]]
-                #for l in range(len(line) - 6):
-                    #aux = line[5 + len(line_aux)]
-                    #if len(aux) > 14:
-                        #X = readCheck(aux, REAL)
-                        #for i in range(len(X)):
-                            #line_aux.append(X[i])
-                    #else:
-                        #line_aux.append(REAL(line[5 + len(line_aux)]))
-
-#                x = line_aux[0]
-#                y = line_aux[1]
-#                z = line_aux[2]
-                q.append(q0)
-                pos.append([x, y, z])
+        if line[0] == 'ATOM':
+            #  grab coordinates and charge from columns
+            x, y, z, q0 = [REAL(i) for i in line[5:-1]]
+            q.append(q0)
+            pos.append([x, y, z])
 
     pos = numpy.array(pos)
     q = numpy.array(q)
