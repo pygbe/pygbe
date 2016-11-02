@@ -391,25 +391,25 @@ def read_surface(filename):
     phi0_file: list, it contains the constant potential/surface charge for the
                      cases where it applies. (dirichlet or neumann surfaces)
     """
-
+    surfaces_req_phi0= ['dirichlet_surface',
+                        'neumann_surface',
+                        'neumann_surface_hyper']
     files = []
     surf_type = []
     phi0_file = []
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'FILE':
-                    files.append(line[1])
-                    surf_type.append(line[2])
-                    if (line[2] == 'dirichlet_surface' or
-                            line[2] == 'neumann_surface' or
-                            line[2] == 'neumann_surface_hyper'):
-                        phi0_file.append(os.path.join(
-                            os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
-                    else:
-                        phi0_file.append('no_file')
+    for line in lines:
+        line = line.split()
+        if line:
+            if line[0] == 'FILE':
+                files.append(line[1])
+                surf_type.append(line[2])
+                if line[2] in surfaces_req_phi0:
+                    phi0_file.append(os.path.join(
+                        os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
+                else:
+                    phi0_file.append('no_file')
 
     return files, surf_type, phi0_file
 
