@@ -296,9 +296,9 @@ class Surface():
 
         Notes
         -----
-        Uses block-diagonal preconditioner [1]_
+        Uses block-diagonal preconditioner [3]_
 
-        .. [1] Altman, M. D., Bardhan, J. P., White, J. K., & Tidor, B. (2009).
+        .. [3] Altman, M. D., Bardhan, J. P., White, J. K., & Tidor, B. (2009).
            Accurate solution of multi‐region continuum biomolecule electrostatic
            problems using the linearized Poisson–Boltzmann equation with curved
            boundary elements. Journal of computational chemistry, 30(1), 132-153.
