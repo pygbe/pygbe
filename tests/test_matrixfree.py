@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from pygbe.matrixfree import calc_s_start
+from pygbe.matrixfree import locate_s_in_RHS
 
 Surface = patch('pygbe.classes.Surface')
 s_starts = [
@@ -14,9 +14,9 @@ s_starts = [
 ]
 
 @pytest.mark.parametrize("surface, surf_type, surf_index, expected", s_starts)
-def test_calc_s_start(surface, surf_type, surf_index, expected):
+def test_locate_s_in_RHS(surface, surf_type, surf_index, expected):
     surface.xi = list(range(10))
     surface.surf_type = surf_type
     surf_array = [surface, surface, surface]
 
-    assert calc_s_start(surf_index, surf_array) == expected
+    assert locate_s_in_RHS(surf_index, surf_array) == expected
