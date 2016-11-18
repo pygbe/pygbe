@@ -339,6 +339,23 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     return MV
 
 def locate_s_in_RHS(surf_index, surf_array):
+    """Find starting index for current surface on RHS
+
+    This is assembling the RHS of the block matrix. Needs to go through all the
+    previous surfaces to find out where on the RHS vector it belongs. If any
+    previous surfaces were dirichlet, neumann or asc, then they take up half
+    the number of spots in the RHS, so we act accordingly.
+
+    Arguments
+    ---------
+    surf_index: int, index of surface in question
+    surf_array: list, list of all surfaces in problem
+
+    Returns
+    -------
+    s_start: int, index to insert values on RHS
+
+    """
     s_start = 0
     for surfs in range(surf_index):
         if surf_array[surfs].surf_type in ['dirichlet_surface',
@@ -351,6 +368,17 @@ def locate_s_in_RHS(surf_index, surf_array):
     return s_start
 
 def calc_aux(field, surface):
+    """Helper function to calculate aux
+
+    Arguments
+    ---------
+    field: Field object, current field being evaluated
+    surface: Surface object, current surface being evaluated
+
+    Returns
+    -------
+    aux: numpy array
+    """
     aux = numpy.zeros_like(surface.xi)
     for i, q in enumerate(field.q):
         dx_pq = surface.xi - field.xq[i, 0]
