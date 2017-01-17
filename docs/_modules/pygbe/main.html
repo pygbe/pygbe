@@ -211,25 +211,12 @@
     <span class="sd">&quot;&quot;&quot;Check system PATH for nvcc, exit if not found&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s1">&#39;which&#39;</span><span class="p">,</span> <span class="s1">&#39;nvcc&#39;</span><span class="p">])</span>
-        <span class="n">check_nvcc_version</span><span class="p">()</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
-
-
-<div class="viewcode-block" id="check_nvcc_version"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.check_nvcc_version">[docs]</a><span class="k">def</span> <span class="nf">check_nvcc_version</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Check that version of nvcc &lt;= 7.5&quot;&quot;&quot;</span>
-    <span class="n">verstr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s1">&#39;nvcc&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-    <span class="n">cuda_ver</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;release (\d\.\d)&#39;</span><span class="p">)</span>
-    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">cuda_ver</span><span class="p">,</span> <span class="n">verstr</span><span class="p">)</span>
-    <span class="n">version</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">version</span> <span class="o">&gt;</span> <span class="mf">7.5</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;PyGBe only supports CUDA &lt;= 7.5</span><span class="se">\n</span><span class="s1">&#39;</span>
-                 <span class="s1">&#39;Please install an earlier version of the CUDA toolkit</span><span class="se">\n</span><span class="s1">&#39;</span>
-                 <span class="s1">&#39;or remove `nvcc` from your PATH to use CPU only.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
