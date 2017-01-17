@@ -220,8 +220,8 @@ def readParameters(param, filename):
 
 def readFields(filename):
     """
-    It reads the physical parameters from the configuration file for each region
-    in the surface and it appends them on the corresponding list.
+    Read the physical parameters from the configuration file for each region
+    in the surface
 
     Arguments
     ----------
@@ -230,6 +230,7 @@ def readFields(filename):
 
     Returns
     -------
+    Dictionary containing:
     LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
                     corresponding to each region.
     pot     : list, it contains integers indicating to calculate (1) or not (2)
@@ -255,39 +256,40 @@ def readFields(filename):
                      surface in the FILE section.
     """
 
-    LorY = []
-    pot = []
-    E = []
-    kappa = []
-    charges = []
-    coulomb = []
-    qfile = []
-    Nparent = []
-    parent = []
-    Nchild = []
-    child = []
+    field = dict()
+    field['LorY'] = []
+    field['pot'] = []
+    field['E'] = []
+    field['kappa'] = []
+    field['charges'] = []
+    field['coulomb'] = []
+    field['qfile'] = []
+    field['Nparent'] = []
+    field['parent'] = []
+    field['Nchild'] = []
+    field['child'] = []
 
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'FIELD':
-                    LorY.append(line[1])
-                    pot.append(line[2])
-                    E.append(line[3])
-                    kappa.append(line[4])
-                    charges.append(line[5])
-                    coulomb.append(line[6])
-                    qfile.append(line[7] if line[7] == 'NA' else
-                        os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
-                    Nparent.append(line[8])
-                    parent.append(line[9])
-                    Nchild.append(line[10])
-                    for i in range(int(Nchild[-1])):
-                        child.append(line[11 + i])
+    for line in lines:
+        line = line.split()
+        if len(line) > 0:
+            if line[0] == 'FIELD':
+                field['LorY'].append(line[1])
+                field['pot'].append(line[2])
+                field['E'].append(line[3])
+                field['kappa'].append(line[4])
+                field['charges'].append(line[5])
+                field['coulomb'].append(line[6])
+                field['qfile'].append(line[7] if line[7] == 'NA' else
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                field['Nparent'].append(line[8])
+                field['parent'].append(line[9])
+                field['Nchild'].append(line[10])
+                for i in range(int(field['Nchild'][-1])):
+                    field['child'].append(line[11 + i])
 
-    return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
+    return field
 
 
 def read_surface(filename):

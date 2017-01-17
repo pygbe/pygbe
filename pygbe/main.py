@@ -48,6 +48,10 @@ class Logger(object):
         self.terminal.write(message)
         self.log.write(message)
 
+    def flush(self):
+        """Required for Python 3"""
+        pass
+
 
 def read_inputs(args):
     """
@@ -172,19 +176,25 @@ def check_for_nvcc():
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False):
+         return_results_dict=False, field=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
 
     Arguments
     ----------
-    log_output         : Bool, default True.
-                         If False, output is written only to STDOUT and not
-                         to a log file.
+    log_output : Bool, default True.
+        If False, output is written only to STDOUT and not to a log file.
     return_output_fname: Bool, default False.
-                         If True, function main() returns the name of the
-                         output log file. This is used for the regression tests.
+        If True, function main() returns the name of the
+        output log file. This is used for the regression tests.
+    return_results_dict: Bool, default False.
+        If True, function main() returns the results of the run
+        packed in a dictionary.  Used in testing and programmatic
+        use of PyGBe
+    field : Dictionary, defaults to None.
+         If passed, this dictionary will supercede any config file found, useful in
+         programmatically stepping through slight changes in a problem
 
     Returns
     --------
@@ -265,7 +275,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         param.GPU = 0
 
     ### Generate array of fields
-    field_array = initialize_field(configFile, param)
+    if field:
+        field_array = initialize_field(configFile, param, field)
+    else:
+        field_array = initialize_field(configFile, param)
+
 
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
