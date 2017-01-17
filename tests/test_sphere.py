@@ -25,10 +25,7 @@ def test_sphere(key):
     with open('sphere.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
-    if base_results[key] > 0:
-        assert abs(base_results[key] - results[key]) / base_results[key] < 1e-12
-    else:
-        assert base_results[key] == results[key]
+    assert abs(base_results[key] - results[key]) / abs(base_results[key]) < 1e-12
 
 def test_sphere_iterations():
     results = get_results()
