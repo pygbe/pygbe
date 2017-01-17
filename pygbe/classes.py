@@ -6,7 +6,7 @@ import scipy.constants
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.tree.direct import computeDiagonal
 from pygbe.quadrature import quadratureRule_fine
-from pygbe.util.readData import readcrd, readpqr, readVertex, readTriangle
+from pygbe.util.read_data import readcrd, readpqr, read_vertex, read_triangle
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
 
 
@@ -149,8 +149,8 @@ class Surface():
     def define_surface(self, files, param):
         """Load the vertices and triangles that define the molecule surface"""
         tic = time.time()
-        self.vertex = readVertex(files + '.vert', param.REAL)
-        triangle_raw = readTriangle(files + '.face', self.surf_type)
+        self.vertex = read_vertex(files + '.vert', param.REAL)
+        triangle_raw = read_triangle(files + '.face', self.surf_type)
         toc = time.time()
         print('Time load mesh: {}'.format(toc - tic))
         area_null = []
