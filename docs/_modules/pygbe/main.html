@@ -17,7 +17,8 @@
         VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
@@ -25,8 +26,6 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="PyGBe 0.2.1 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -91,7 +90,11 @@
 
 <div class="viewcode-block" id="Logger.write"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">terminal</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Logger.flush"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Required for Python 3&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
 
 
 <div class="viewcode-block" id="read_inputs"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.read_inputs">[docs]</a><span class="k">def</span> <span class="nf">read_inputs</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -230,19 +233,25 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a PyGBe problem, write outputs to STDOUT and to log file in</span>
 <span class="sd">    problem directory</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ----------</span>
-<span class="sd">    log_output         : Bool, default True.</span>
-<span class="sd">                         If False, output is written only to STDOUT and not</span>
-<span class="sd">                         to a log file.</span>
+<span class="sd">    log_output : Bool, default True.</span>
+<span class="sd">        If False, output is written only to STDOUT and not to a log file.</span>
 <span class="sd">    return_output_fname: Bool, default False.</span>
-<span class="sd">                         If True, function main() returns the name of the</span>
-<span class="sd">                         output log file. This is used for the regression tests.</span>
+<span class="sd">        If True, function main() returns the name of the</span>
+<span class="sd">        output log file. This is used for the regression tests.</span>
+<span class="sd">    return_results_dict: Bool, default False.</span>
+<span class="sd">        If True, function main() returns the results of the run</span>
+<span class="sd">        packed in a dictionary.  Used in testing and programmatic</span>
+<span class="sd">        use of PyGBe</span>
+<span class="sd">    field : Dictionary, defaults to None.</span>
+<span class="sd">         If passed, this dictionary will supercede any config file found, useful in</span>
+<span class="sd">         programmatically stepping through slight changes in a problem</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
@@ -323,7 +332,11 @@
         <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1">### Generate array of fields</span>
-    <span class="n">field_array</span> <span class="o">=</span> <span class="n">initialize_field</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">field</span><span class="p">:</span>
+        <span class="n">field_array</span> <span class="o">=</span> <span class="n">initialize_field</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">field_array</span> <span class="o">=</span> <span class="n">initialize_field</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
 
     <span class="c1">### Generate array of surfaces and read in elements</span>
     <span class="n">surf_array</span> <span class="o">=</span> <span class="n">initialize_surface</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
@@ -533,6 +546,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
 </ul>
 
 <div class="relations">
@@ -562,7 +576,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

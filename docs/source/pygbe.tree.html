@@ -17,7 +17,8 @@
         VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
@@ -25,7 +26,6 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="PyGBe 0.2.1 documentation" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -174,16 +174,16 @@ using the sorted data, on the GPU.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>Ktx_gpu</strong> (<em>array, x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Kty_gpu</strong> (<em>array, y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Ktz_gpu</strong> (<em>array, z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>Ktx_gpu</strong> (<em>array</em><em>, </em><em>x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Kty_gpu</strong> (<em>array</em><em>, </em><em>y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Ktz_gpu</strong> (<em>array</em><em>, </em><em>z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -210,16 +210,16 @@ using the sorted data.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>Ktx_aux</strong> (<em>array, x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Kty_aux</strong> (<em>array, y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Ktz_aux</strong> (<em>array, z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>index</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>Ktx_aux</strong> (<em>array</em><em>, </em><em>x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Kty_aux</strong> (<em>array</em><em>, </em><em>y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Ktz_aux</strong> (<em>array</em><em>, </em><em>z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>index</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 </ul>
 </td>
 </tr>
@@ -245,14 +245,14 @@ potential using the sorted data, on the GPU.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>K_gpu</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>V_gpu</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>int, Laplace (1) or Yukawa (2).</strong> (<a class="reference internal" href="pygbe.html#pygbe.classes.Field.LorY" title="pygbe.classes.Field.LorY"><em>LorY</em></a>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>K_gpu</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>V_gpu</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>int</strong><strong>, </strong><strong>Laplace</strong><strong> (</strong><strong>1</strong><strong>) or </strong><strong>Yukawa</strong><strong> (</strong><strong>2</strong><strong>)</strong><strong></strong> (<a class="reference internal" href="pygbe.html#pygbe.classes.Field.LorY" title="pygbe.classes.Field.LorY"><em>LorY</em></a>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -281,15 +281,15 @@ targets are the point-charges location.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>CJ</strong> (<em>int, index of the source cell.</em>) &#8211; </li>
-<li><strong>xq</strong> (<em>array, postion of the point charges.</em>) &#8211; </li>
-<li><strong>Kval</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>Vval</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>index</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>par_reac</strong> (<em>class, fine parameters related to the surface.</em>) &#8211; </li>
-<li><strong>source</strong> (<em>list, P2P interaction list, which is a list of the cells that</em>) &#8211; each charge-point interacts by P2P.</li>
-<li><strong>time_M2P</strong> (<em>real, timed consumed in compute M2P_nonvec function.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>CJ</strong> (<em>int</em><em>, </em><em>index of the source cell.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>postion of the point charges.</em>) &#8211; </li>
+<li><strong>Kval</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>Vval</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>index</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>par_reac</strong> (<em>class</em><em>, </em><em>fine parameters related to the surface.</em>) &#8211; </li>
+<li><strong>source</strong> (<em>list</em><em>, </em><em>P2P interaction list</em><em>, </em><em>which is a list of the cells that</em>) &#8211; each charge-point interacts by P2P.</li>
+<li><strong>time_M2P</strong> (<em>real</em><em>, </em><em>timed consumed in compute M2P_nonvec function.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -316,15 +316,15 @@ potential using the sorted data.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>K_aux</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>V_aux</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>index</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>K_aux</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>V_aux</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>index</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 </ul>
 </td>
 </tr>
@@ -358,18 +358,18 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>m</strong> (<em>array, mass of the source particle for the adjoint double layer</em>) &#8211; potential calculation.</li>
-<li><strong>mKc</strong> (<em>array, mass-clean of the source particle for the adjoint double</em>) &#8211; layer potential calculation.</li>
-<li><strong>Ktx_gpu</strong> (<em>array, x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Kty_gpu</strong> (<em>array, y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Ktz_gpu</strong> (<em>array, z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>w</strong> (<em>array, gauss points.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>m</strong> (<em>array</em><em>, </em><em>mass of the source particle for the adjoint double layer</em>) &#8211; potential calculation.</li>
+<li><strong>mKc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the adjoint double</em>) &#8211; layer potential calculation.</li>
+<li><strong>Ktx_gpu</strong> (<em>array</em><em>, </em><em>x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Kty_gpu</strong> (<em>array</em><em>, </em><em>y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Ktz_gpu</strong> (<em>array</em><em>, </em><em>z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>w</strong> (<em>array</em><em>, </em><em>gauss points.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -406,18 +406,18 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>m</strong> (<em>array, mass of the source particle for the adjoint double layer</em>) &#8211; potential calculation.</li>
-<li><strong>mKc</strong> (<em>array, mass-clean of the source particle for the adjoint double</em>) &#8211; layer potential calculation.</li>
-<li><strong>Ktx_aux</strong> (<em>array, x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Kty_aux</strong> (<em>array, y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>Ktz_aux</strong> (<em>array, z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>w</strong> (<em>array, gauss points.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>m</strong> (<em>array</em><em>, </em><em>mass of the source particle for the adjoint double layer</em>) &#8211; potential calculation.</li>
+<li><strong>mKc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the adjoint double</em>) &#8211; layer potential calculation.</li>
+<li><strong>Ktx_aux</strong> (<em>array</em><em>, </em><em>x component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Kty_aux</strong> (<em>array</em><em>, </em><em>y component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>Ktz_aux</strong> (<em>array</em><em>, </em><em>z component of the far field contribution to the adjoint</em>) &#8211; double layer potential.</li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>w</strong> (<em>array</em><em>, </em><em>gauss points.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 </ul>
 </td>
 </tr>
@@ -453,23 +453,23 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>m</strong> (<em>array, mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
-<li><strong>mx</strong> (<em>array, mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>my</strong> (<em>array, mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mz</strong> (<em>array, mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mKc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>mVc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>K_gpu</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>V_gpu</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>K_diag</strong> (<em>array, diagonal elements of the double layer integral operator.</em>) &#8211; </li>
-<li><strong>IorE</strong> (<em>int, internal (1) or external (2).</em>) &#8211; </li>
-<li><strong>L</strong> (<em>float, representative distance of the triangles. (sqrt{2*Area})</em>) &#8211; </li>
-<li><strong>w</strong> (<em>array, gauss points.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>m</strong> (<em>array</em><em>, </em><em>mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
+<li><strong>mx</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>my</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mz</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mKc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>mVc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>K_gpu</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>V_gpu</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>K_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the double layer integral operator.</em>) &#8211; </li>
+<li><strong>IorE</strong> (<em>int</em><em>, </em><em>internal</em><em> (</em><em>1</em><em>) or </em><em>external</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>L</strong> (<em>float</em><em>, </em><em>representative distance of the triangles.</em><em> (</em><em>sqrt{2*Area}</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>w</strong> (<em>array</em><em>, </em><em>gauss points.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -499,23 +499,23 @@ targets are the point-charges location.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>surface</strong> (<em>class, surface where we are computing the P2P_nonvec.</em>) &#8211; </li>
-<li><strong>m</strong> (<em>array, mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
-<li><strong>mx</strong> (<em>array, mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>my</strong> (<em>array, mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mz</strong> (<em>array, mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mKc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>mVc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>xq</strong> (<em>array, postion of the point charges.</em>) &#8211; </li>
-<li><strong>Kval</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>Vval</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>IorE</strong> (<em>int, internal (1) or external (2).</em>) &#8211; </li>
-<li><strong>par_reac</strong> (<em>class, fine parameters related to the surface.</em>) &#8211; </li>
-<li><strong>w</strong> (<em>array, gauss points.</em>) &#8211; </li>
-<li><strong>source</strong> (<em>list, P2P interaction list, which is a list of the cells that</em>) &#8211; each charge-point interacts.</li>
-<li><strong>AI_int</strong> (<em>int, counter of the amount of near singular integrals solved.</em>) &#8211; </li>
-<li><strong>time_P2P</strong> (<em>real, timed consumed in compute P2P_nonvec function.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>surface</strong> (<em>class</em><em>, </em><em>surface where we are computing the P2P_nonvec.</em>) &#8211; </li>
+<li><strong>m</strong> (<em>array</em><em>, </em><em>mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
+<li><strong>mx</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>my</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mz</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mKc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>mVc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>postion of the point charges.</em>) &#8211; </li>
+<li><strong>Kval</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>Vval</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>IorE</strong> (<em>int</em><em>, </em><em>internal</em><em> (</em><em>1</em><em>) or </em><em>external</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>par_reac</strong> (<em>class</em><em>, </em><em>fine parameters related to the surface.</em>) &#8211; </li>
+<li><strong>w</strong> (<em>array</em><em>, </em><em>gauss points.</em>) &#8211; </li>
+<li><strong>source</strong> (<em>list</em><em>, </em><em>P2P interaction list</em><em>, </em><em>which is a list of the cells that</em>) &#8211; each charge-point interacts.</li>
+<li><strong>AI_int</strong> (<em>int</em><em>, </em><em>counter of the amount of near singular integrals solved.</em>) &#8211; </li>
+<li><strong>time_P2P</strong> (<em>real</em><em>, </em><em>timed consumed in compute P2P_nonvec function.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -552,24 +552,24 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>m</strong> (<em>array, mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
-<li><strong>mx</strong> (<em>array, mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>my</strong> (<em>array, mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mz</strong> (<em>array, mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mKc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>mVc</strong> (<em>array, mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
-<li><strong>K_aux</strong> (<em>array, far field contribution to the double layer potential.</em>) &#8211; </li>
-<li><strong>V_aux</strong> (<em>array, far field contribution to the single layer potential.</em>) &#8211; </li>
-<li><strong>surf</strong> (<em>int, position of the source surface in the surface array.</em>) &#8211; </li>
-<li><strong>K_diag</strong> (<em>array, diagonal elements of the double layer integral operator.</em>) &#8211; </li>
-<li><strong>V_diag</strong> (<em>array, diagonal elements of the single layer integral operator.</em>) &#8211; </li>
-<li><strong>IorE</strong> (<em>int, internal (1) or external (2).</em>) &#8211; </li>
-<li><strong>L</strong> (<em>float, representative distance of the triangles. (sqrt{2*Area})</em>) &#8211; </li>
-<li><strong>w</strong> (<em>array, gauss points.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>m</strong> (<em>array</em><em>, </em><em>mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
+<li><strong>mx</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>my</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mz</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mKc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>mVc</strong> (<em>array</em><em>, </em><em>mass-clean of the source particle for the double layer</em>) &#8211; potential calculation.</li>
+<li><strong>K_aux</strong> (<em>array</em><em>, </em><em>far field contribution to the double layer potential.</em>) &#8211; </li>
+<li><strong>V_aux</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) &#8211; </li>
+<li><strong>surf</strong> (<em>int</em><em>, </em><em>position of the source surface in the surface array.</em>) &#8211; </li>
+<li><strong>K_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the double layer integral operator.</em>) &#8211; </li>
+<li><strong>V_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the single layer integral operator.</em>) &#8211; </li>
+<li><strong>IorE</strong> (<em>int</em><em>, </em><em>internal</em><em> (</em><em>1</em><em>) or </em><em>external</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>L</strong> (<em>float</em><em>, </em><em>representative distance of the triangles.</em><em> (</em><em>sqrt{2*Area}</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>w</strong> (<em>array</em><em>, </em><em>gauss points.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 </ul>
 </td>
 </tr>
@@ -596,9 +596,9 @@ This version works fast when used with sorted arrays.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>twig</strong> (<em>array, indices of twigs in Cells array.</em>) &#8211; </li>
-<li><strong>K</strong> (<em>int, number of Gauss points per element.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>twig</strong> (<em>array</em><em>, </em><em>indices of twigs in Cells array.</em>) &#8211; </li>
+<li><strong>K</strong> (<em>int</em><em>, </em><em>number of Gauss points per element.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -619,13 +619,13 @@ twigs and sets the sources one it finds a twig.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> (<em>array, x coordinate of the sources.</em>) &#8211; </li>
-<li><strong>y</strong> (<em>array, y coordinate of the sources.</em>) &#8211; </li>
-<li><strong>z</strong> (<em>array, z coordinate of the sources.</em>) &#8211; </li>
-<li><strong>j</strong> (<em>int, index of the source in the source array.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>C</strong> (<em>int, index of cell in the Cells array.</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>x coordinate of the sources.</em>) &#8211; </li>
+<li><strong>y</strong> (<em>array</em><em>, </em><em>y coordinate of the sources.</em>) &#8211; </li>
+<li><strong>z</strong> (<em>array</em><em>, </em><em>z coordinate of the sources.</em>) &#8211; </li>
+<li><strong>j</strong> (<em>int</em><em>, </em><em>index of the source in the source array.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>C</strong> (<em>int</em><em>, </em><em>index of cell in the Cells array.</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
 </ul>
 </td>
 </tr>
@@ -646,12 +646,12 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> (<em>array, x coordinate of the sources.</em>) &#8211; </li>
-<li><strong>y</strong> (<em>array, y coordinate of the sources.</em>) &#8211; </li>
-<li><strong>z</strong> (<em>array, z coordinate of the sources.</em>) &#8211; </li>
-<li><strong>j</strong> (<em>int, index of the source in the source array.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>twig</strong> (<em>array, indices of twigs in Cells array.</em>) &#8211; </li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>x coordinate of the sources.</em>) &#8211; </li>
+<li><strong>y</strong> (<em>array</em><em>, </em><em>y coordinate of the sources.</em>) &#8211; </li>
+<li><strong>z</strong> (<em>array</em><em>, </em><em>z coordinate of the sources.</em>) &#8211; </li>
+<li><strong>j</strong> (<em>int</em><em>, </em><em>index of the source in the source array.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>twig</strong> (<em>array</em><em>, </em><em>indices of twigs in Cells array.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -668,12 +668,12 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>octant</strong> (<em>int, octant of the child cell.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, it contains the cells information.</em>) &#8211; </li>
-<li><strong>i</strong> (<em>int, index of parent cell in Cells array.</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
-<li><strong>Nm</strong> (<em>int, number of multipole coefficients.</em>) &#8211; </li>
-<li><strong>Ncell</strong> (<em>int, number of cells in the tree.</em>) &#8211; </li>
+<li><strong>octant</strong> (<em>int</em><em>, </em><em>octant of the child cell.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>it contains the cells information.</em>) &#8211; </li>
+<li><strong>i</strong> (<em>int</em><em>, </em><em>index of parent cell in Cells array.</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>Nm</strong> (<em>int</em><em>, </em><em>number of multipole coefficients.</em>) &#8211; </li>
+<li><strong>Ncell</strong> (<em>int</em><em>, </em><em>number of cells in the tree.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -696,8 +696,8 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>P</strong> (<em>int, order of the Taylor expansion.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>P</strong> (<em>int</em><em>, </em><em>order of the Taylor expansion.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -714,10 +714,10 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>C</strong> (<em>int, index of cell in the Cells array.</em>) &#8211; </li>
-<li><strong>twig</strong> (<em>array, indices of twigs in Cells array.</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>C</strong> (<em>int</em><em>, </em><em>index of cell in the Cells array.</em>) &#8211; </li>
+<li><strong>twig</strong> (<em>array</em><em>, </em><em>indices of twigs in Cells array.</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
 </ul>
 </td>
 </tr>
@@ -740,9 +740,9 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -759,13 +759,13 @@ the location in the cells array of the twig cells.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xi</strong> (<em>array, x position of the targets, i.e collocation points.</em>) &#8211; </li>
-<li><strong>yi</strong> (<em>array, y position of the targets, i.e collocation points.</em>) &#8211; </li>
-<li><strong>zi</strong> (<em>array, z position of the targets, i.e collocation points.</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
-<li><strong>Nm</strong> (<em>int, number of multipole coefficients.</em>) &#8211; </li>
-<li><strong>r</strong> (<em>float, cell radius, i.e half length.</em>) &#8211; </li>
-<li><strong>x_center</strong> (<em>array, center of the root cell.</em>) &#8211; </li>
+<li><strong>xi</strong> (<em>array</em><em>, </em><em>x position of the targets</em><em>, </em><em>i.e collocation points.</em>) &#8211; </li>
+<li><strong>yi</strong> (<em>array</em><em>, </em><em>y position of the targets</em><em>, </em><em>i.e collocation points.</em>) &#8211; </li>
+<li><strong>zi</strong> (<em>array</em><em>, </em><em>z position of the targets</em><em>, </em><em>i.e collocation points.</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>Nm</strong> (<em>int</em><em>, </em><em>number of multipole coefficients.</em>) &#8211; </li>
+<li><strong>r</strong> (<em>float</em><em>, </em><em>cell radius</em><em>, </em><em>i.e half length.</em>) &#8211; </li>
+<li><strong>x_center</strong> (<em>array</em><em>, </em><em>center of the root cell.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -797,18 +797,18 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>Cells</strong> (<em>array, it contains the cells information.</em>) &#8211; </li>
-<li><strong>C</strong> (<em>int, index of the cell in the Cells array.</em>) &#8211; </li>
-<li><strong>x</strong> (<em>array, x coordinate of the sources.</em>) &#8211; </li>
-<li><strong>y</strong> (<em>array, y coordinate of the sources.</em>) &#8211; </li>
-<li><strong>z</strong> (<em>array, z coordinate of the sources.</em>) &#8211; </li>
-<li><strong>mV</strong> (<em>array, mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
-<li><strong>mKx</strong> (<em>array, mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mKy</strong> (<em>array, mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>mKz</strong> (<em>array, mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>P</strong> (<em>int, order of the Taylor expansion.</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>it contains the cells information.</em>) &#8211; </li>
+<li><strong>C</strong> (<em>int</em><em>, </em><em>index of the cell in the Cells array.</em>) &#8211; </li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>x coordinate of the sources.</em>) &#8211; </li>
+<li><strong>y</strong> (<em>array</em><em>, </em><em>y coordinate of the sources.</em>) &#8211; </li>
+<li><strong>z</strong> (<em>array</em><em>, </em><em>z coordinate of the sources.</em>) &#8211; </li>
+<li><strong>mV</strong> (<em>array</em><em>, </em><em>mass of the source particle for the single layer potential</em>) &#8211; calculation.</li>
+<li><strong>mKx</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'x' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mKy</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'y' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>mKz</strong> (<em>array</em><em>, </em><em>mass of the source particle times  the 'z' component of the</em>) &#8211; normal vector, for the double layer potential calculation.</li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>P</strong> (<em>int</em><em>, </em><em>order of the Taylor expansion.</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
 </ul>
 </td>
 </tr>
@@ -825,15 +825,15 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>CJ</strong> (<em>int, index of source cell.</em>) &#8211; </li>
-<li><strong>CI</strong> (<em>int, index of target cell.</em>) &#8211; </li>
-<li><strong>theta</strong> (<em>float, Multipole-acceptance criterion (MAC).</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
-<li><strong>offTwg</strong> (<em>array, pointer to the first element in the array P2P_list which</em>) &#8211; contains the P2P interaction list for each twig cell.</li>
-<li><strong>offMlt</strong> (<em>array, pointer to the first element in the array M2P_list which</em>) &#8211; contains the M2P interaction list for each twig cell.</li>
-<li><strong>s_src</strong> (<em>int, position (index) in the surface-array of the surface that</em>) &#8211; contains the sources.</li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>CJ</strong> (<em>int</em><em>, </em><em>index of source cell.</em>) &#8211; </li>
+<li><strong>CI</strong> (<em>int</em><em>, </em><em>index of target cell.</em>) &#8211; </li>
+<li><strong>theta</strong> (<em>float</em><em>, </em><em>Multipole-acceptance criterion</em><em> (</em><em>MAC</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>offTwg</strong> (<em>array</em><em>, </em><em>pointer to the first element in the array P2P_list which</em>) &#8211; contains the P2P interaction list for each twig cell.</li>
+<li><strong>offMlt</strong> (<em>array</em><em>, </em><em>pointer to the first element in the array M2P_list which</em>) &#8211; contains the M2P interaction list for each twig cell.</li>
+<li><strong>s_src</strong> (<em>int</em><em>, </em><em>position</em><em> (</em><a class="reference internal" href="pygbe.html#pygbe.classes.IndexConstant.index" title="pygbe.classes.IndexConstant.index"><em>index</em></a><em>) </em><em>in the surface-array of the surface that</em>) &#8211; contains the sources.</li>
 </ul>
 </td>
 </tr>
@@ -857,8 +857,8 @@ the GMRES.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>P</strong> (<em>int, order of the Taylor expansion.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>P</strong> (<em>int</em><em>, </em><em>order of the Taylor expansion.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -878,10 +878,10 @@ computed.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>surface</strong> (<em>class, surface that we are analysing.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, cells of the tree.</em>) &#8211; </li>
-<li><strong>twig</strong> (<em>array, indices of twigs in Cells array.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surface</strong> (<em>class</em><em>, </em><em>surface that we are analysing.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>cells of the tree.</em>) &#8211; </li>
+<li><strong>twig</strong> (<em>array</em><em>, </em><em>indices of twigs in Cells array.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -899,14 +899,14 @@ Particles in this context means boundary elements.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>array, x position of the particles.</em>) &#8211; </li>
-<li><strong>y</strong> (<em>array, y position of the particles.</em>) &#8211; </li>
-<li><strong>z</strong> (<em>array, z position of the particles.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, it contains the cells information.</em>) &#8211; </li>
-<li><strong>C</strong> (<em>int, index in the Cells array of the cell to be splitted .</em>) &#8211; </li>
-<li><strong>NCRIT</strong> (<em>int, maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
-<li><strong>Nm</strong> (<em>int, number of multipole coefficients.</em>) &#8211; </li>
-<li><strong>Ncell</strong> (<em>int, number of cells in the tree.</em>) &#8211; </li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>x position of the particles.</em>) &#8211; </li>
+<li><strong>y</strong> (<em>array</em><em>, </em><em>y position of the particles.</em>) &#8211; </li>
+<li><strong>z</strong> (<em>array</em><em>, </em><em>z position of the particles.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>it contains the cells information.</em>) &#8211; </li>
+<li><strong>C</strong> (<em>int</em><em>, </em><em>index in the Cells array of the cell to be splitted .</em>) &#8211; </li>
+<li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) &#8211; structure.</li>
+<li><strong>Nm</strong> (<em>int</em><em>, </em><em>number of multipole coefficients.</em>) &#8211; </li>
+<li><strong>Ncell</strong> (<em>int</em><em>, </em><em>number of cells in the tree.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -929,24 +929,24 @@ Particles in this context means boundary elements.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>Cells</strong> (<em>array, it contains the cells information.</em>) &#8211; </li>
-<li><strong>CC</strong> (<em>int, index of the child cell in the Cells array .</em>) &#8211; </li>
-<li><strong>PC</strong> (<em>int, index of the parent cell in the Cells array</em>) &#8211; </li>
-<li><strong>P</strong> (<em>int, order of the Taylor expansion.</em>) &#8211; </li>
-<li><strong>II</strong> (<em>list, multipole order in the x-direction for the treecode.</em>) &#8211; </li>
-<li><strong>JJ</strong> (<em>list, multipole order in the y-direction for the treecode.</em>) &#8211; </li>
-<li><strong>KK</strong> (<em>list, multipole order in the z-direction for the treecode.</em>) &#8211; </li>
-<li><strong>index</strong> (<em>list, pointers to the location of the mulipole of order i,j,k</em>) &#8211; in the multipole array.</li>
-<li><strong>combII</strong> (<em>array, combinatory of (I, i) where I is the maximum i multipole.</em>) &#8211; </li>
-<li><strong>combJJ</strong> (<em>array, combinatory of (J, j) where J is the maximum j multipole.</em>) &#8211; </li>
-<li><strong>combKK</strong> (<em>array, combinatory of (K, k) where K is the maximum k multipole.</em>) &#8211; </li>
-<li><strong>IImii</strong> (<em>array, I-i where I is the maximum i multipole.</em>) &#8211; </li>
-<li><strong>JJmjj</strong> (<em>array, J-j where J is the maximum j multipole.</em>) &#8211; </li>
-<li><strong>KKmkk</strong> (<em>array, K-k where K is the maximum k multipole.</em>) &#8211; </li>
-<li><strong>index_small</strong> (<em>list, pointers to the position of multipole order i, j, k</em>) &#8211; in the multipole array, organized in a 1D array which is
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>it contains the cells information.</em>) &#8211; </li>
+<li><strong>CC</strong> (<em>int</em><em>, </em><em>index of the child cell in the Cells array .</em>) &#8211; </li>
+<li><strong>PC</strong> (<em>int</em><em>, </em><em>index of the parent cell in the Cells array</em>) &#8211; </li>
+<li><strong>P</strong> (<em>int</em><em>, </em><em>order of the Taylor expansion.</em>) &#8211; </li>
+<li><strong>II</strong> (<em>list</em><em>, </em><em>multipole order in the x-direction for the treecode.</em>) &#8211; </li>
+<li><strong>JJ</strong> (<em>list</em><em>, </em><em>multipole order in the y-direction for the treecode.</em>) &#8211; </li>
+<li><strong>KK</strong> (<em>list</em><em>, </em><em>multipole order in the z-direction for the treecode.</em>) &#8211; </li>
+<li><strong>index</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) &#8211; in the multipole array.</li>
+<li><strong>combII</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><em>I</em><em>, </em><em>i</em><em>) </em><em>where I is the maximum i multipole.</em>) &#8211; </li>
+<li><strong>combJJ</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><em>J</em><em>, </em><em>j</em><em>) </em><em>where J is the maximum j multipole.</em>) &#8211; </li>
+<li><strong>combKK</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><a class="reference internal" href="pygbe.html#pygbe.classes.Parameters.K" title="pygbe.classes.Parameters.K"><em>K</em></a><em>, </em><em>k</em><em>) </em><em>where K is the maximum k multipole.</em>) &#8211; </li>
+<li><strong>IImii</strong> (<em>array</em><em>, </em><em>I-i where I is the maximum i multipole.</em>) &#8211; </li>
+<li><strong>JJmjj</strong> (<em>array</em><em>, </em><em>J-j where J is the maximum j multipole.</em>) &#8211; </li>
+<li><strong>KKmkk</strong> (<em>array</em><em>, </em><em>K-k where K is the maximum k multipole.</em>) &#8211; </li>
+<li><strong>index_small</strong> (<em>list</em><em>, </em><em>pointers to the position of multipole order i</em><em>, </em><em>j</em><em>, </em><em>k</em>) &#8211; in the multipole array, organized in a 1D array which is
 compressed with respect to index_large (does not consider
 combinations of i,j,k which do not have a multipole).</li>
-<li><strong>index_ptr</strong> (<em>list, pointer to index_small. Data in index_small is organized</em>) &#8211; in a i-major fashion (i,j,k), and index_ptr points at the
+<li><strong>index_ptr</strong> (<em>list</em><em>, </em><em>pointer to index_small. Data in index_small is organized</em>) &#8211; in a i-major fashion (i,j,k), and index_ptr points at the
 position in index_small where the order i changes.</li>
 </ul>
 </td>
@@ -1013,6 +1013,7 @@ position in index_small where the order i changes.</li>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmatic.html">Programmatic use of PyGBe</a></li>
 </ul>
 
 <div class="relations">
@@ -1040,7 +1041,7 @@ position in index_small where the order i changes.</li>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

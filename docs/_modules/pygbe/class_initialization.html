@@ -17,7 +17,8 @@
         VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
@@ -25,8 +26,6 @@
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="top" title="PyGBe 0.2.1 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -84,7 +83,7 @@
     <span class="k">return</span> <span class="n">surf_array</span></div>
 
 
-<div class="viewcode-block" id="initialize_field"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.class_initialization.initialize_field">[docs]</a><span class="k">def</span> <span class="nf">initialize_field</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+<div class="viewcode-block" id="initialize_field"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.class_initialization.initialize_field">[docs]</a><span class="k">def</span> <span class="nf">initialize_field</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize all the regions in the surface to be solved.</span>
 
@@ -92,38 +91,41 @@
 <span class="sd">    ---------</span>
 <span class="sd">    filename   : name of the file that contains the surface information.</span>
 <span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    field      : dictionary with preloaded field values for programmatic</span>
+<span class="sd">                 interaction with PyGBe</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">LorY</span><span class="p">,</span> <span class="n">pot</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">coulomb</span><span class="p">,</span> <span class="n">qfile</span><span class="p">,</span> <span class="n">Nparent</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">Nchild</span><span class="p">,</span> <span class="n">child</span> <span class="o">=</span> <span class="n">readFields</span><span class="p">(</span>
-        <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="p">:</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">readFields</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="n">LorY</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">LorY</span><span class="p">]</span>
-    <span class="n">E</span> <span class="o">=</span> <span class="p">[</span><span class="nb">complex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;j&#39;</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span>
-         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">E</span><span class="p">]</span>
-    <span class="n">kappa</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">kappa</span><span class="p">]</span>
-    <span class="n">pot</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">pot</span><span class="p">]</span>
-    <span class="n">coulomb</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">coulomb</span><span class="p">]</span>
-    <span class="n">Nfield</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">LorY</span><span class="p">)</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">complex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;j&#39;</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;coulomb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;coulomb&#39;</span><span class="p">]]</span>
+    <span class="n">Nfield</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">])</span>
     <span class="n">field_array</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">Nchild_aux</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nfield</span><span class="p">):</span>
-        <span class="n">field_aux</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">LorY</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">kappa</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">coulomb</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">pot</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">field_aux</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">field</span><span class="p">[</span><span class="s1">&#39;coulomb&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">charges</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># if there are charges</span>
-            <span class="n">field_aux</span><span class="o">.</span><span class="n">load_charges</span><span class="p">(</span><span class="n">qfile</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">Nparent</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># if it is an enclosed region</span>
-            <span class="n">field_aux</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;charges&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># if there are charges</span>
+            <span class="n">field_aux</span><span class="o">.</span><span class="n">load_charges</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;qfile&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nparent&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># if it is an enclosed region</span>
+            <span class="n">field_aux</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]))</span>
             <span class="c1"># pointer to parent surface (enclosing surface)</span>
-        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">Nchild</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if there are enclosed regions inside</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">Nchild</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
-                <span class="n">field_aux</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">child</span><span class="p">[</span><span class="n">Nchild_aux</span> <span class="o">+</span> <span class="n">j</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if there are enclosed regions inside</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">field_aux</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;child&#39;</span><span class="p">][</span><span class="n">Nchild_aux</span> <span class="o">+</span> <span class="n">j</span><span class="p">])</span>
                                        <span class="p">)</span>  <span class="c1"># Loop over children to get pointers</span>
-            <span class="n">Nchild_aux</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Nchild</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>  <span class="c1"># Point to child for next surface</span>
-        <span class="k">if</span> <span class="n">pot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">Nchild_aux</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>  <span class="c1"># Point to child for next surface</span>
+        <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>  <span class="c1"># Field where surface energy is calculated</span>
 
         <span class="n">field_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_aux</span><span class="p">)</span>
@@ -164,6 +166,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
 </ul>
 
 <div class="relations">
@@ -193,7 +196,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>

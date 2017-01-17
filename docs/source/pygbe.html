@@ -17,7 +17,8 @@
         VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
@@ -25,7 +26,6 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="PyGBe 0.2.1 documentation" href="../index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -77,7 +77,7 @@
 <p>It contains the necessary functions to set up the surface to be solved.</p>
 <dl class="function">
 <dt id="pygbe.class_initialization.initialize_field">
-<code class="descclassname">pygbe.class_initialization.</code><code class="descname">initialize_field</code><span class="sig-paren">(</span><em>filename</em>, <em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/class_initialization.html#initialize_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.class_initialization.initialize_field" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.class_initialization.</code><code class="descname">initialize_field</code><span class="sig-paren">(</span><em>filename</em>, <em>param</em>, <em>field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/class_initialization.html#initialize_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.class_initialization.initialize_field" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize all the regions in the surface to be solved.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -85,7 +85,8 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>field</strong> (<em>dictionary with preloaded field values for programmatic</em>) &#8211; interaction with PyGBe</li>
 </ul>
 </td>
 </tr>
@@ -108,9 +109,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
 <li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1033,8 +1034,8 @@ Information about the solvent excluded surface.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>phi</strong> (<em>array, result vector.</em>) &#8211; </li>
-<li><strong>s_start</strong> (<em>int, offset to grab the corresponding section of phi</em>) &#8211; </li>
+<li><strong>phi</strong> (<em>array</em><em>, </em><em>result vector.</em>) &#8211; </li>
+<li><strong>s_start</strong> (<em>int</em><em>, </em><em>offset to grab the corresponding section of phi</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1054,7 +1055,7 @@ Information about the solvent excluded surface.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>param</strong> (<em>class, parameters related to the surface we are studying.</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface we are studying.</em>) &#8211; </td>
 </tr>
 </tbody>
 </table>
@@ -1065,11 +1066,11 @@ Information about the solvent excluded surface.</p>
 <code class="descname">generate_preconditioner</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/classes.html#Surface.generate_preconditioner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.classes.Surface.generate_preconditioner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate preconditioner</p>
 <p class="rubric">Notes</p>
-<p>Uses block-diagonal preconditioner <a href="#id5"><span class="problematic" id="id6"><span id="id1"></span>[1]_</span></a></p>
+<p>Uses block-diagonal preconditioner <a class="footnote-reference" href="#id2" id="id1">[3]</a></p>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Altman, M. D., Bardhan, J. P., White, J. K., &amp; Tidor, B. (2009).
+<tr><td class="label"><a class="fn-backref" href="#id1">[3]</a></td><td>Altman, M. D., Bardhan, J. P., White, J. K., &amp; Tidor, B. (2009).
 Accurate solution of multi‐region continuum biomolecule electrostatic
 problems using the linearized Poisson–Boltzmann equation with curved
 boundary elements. Journal of computational chemistry, 30(1), 132-153.</td></tr>
@@ -1085,7 +1086,7 @@ boundary elements. Journal of computational chemistry, 30(1), 132-153.</td></tr>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int (1,3,4,7), desired Gauss points per element.</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int</em><em> (</em><em>1</em><em>,</em><em>3</em><em>,</em><em>4</em><em>,</em><em>7</em><em>)</em><em></em><em>, </em><em>desired Gauss points per element.</em>) &#8211; </td>
 </tr>
 </tbody>
 </table>
@@ -1101,9 +1102,9 @@ them to area_null list.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>s</strong> (<em>class, surface where we whan to look for zero areas.</em>) &#8211; </li>
-<li><strong>triangle_raw</strong> (<em>list, triangles of the surface.</em>) &#8211; </li>
-<li><strong>area_null</strong> (<em>list, contains the zero areas.</em>) &#8211; </li>
+<li><strong>s</strong> (<em>class</em><em>, </em><em>surface where we whan to look for zero areas.</em>) &#8211; </li>
+<li><strong>triangle_raw</strong> (<em>list</em><em>, </em><em>triangles of the surface.</em>) &#8211; </li>
+<li><strong>area_null</strong> (<em>list</em><em>, </em><em>contains the zero areas.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1191,11 +1192,10 @@ modified Gram-Schmidt is used to orthogonalize the Krylov Space and
 Givens Rotations are used to provide the residual norm each iteration.</p>
 <p>Guidance code:</p>
 <blockquote>
-<div><ul>
+<div><ul class="simple">
 <li><dl class="first docutils">
 <dt>PyAMG library:</dt>
-<dd><p class="first last"><a class="reference external" href="https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py">https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py</a></p>
-</dd>
+<dd><a class="reference external" href="https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py">https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py</a></dd>
 </dl>
 </li>
 </ul>
@@ -1209,9 +1209,9 @@ Givens Rotations are used to provide the residual norm each iteration.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Q</strong> (<em>list, list of consecutive 2x2 Givens rotations</em>) &#8211; </li>
-<li><strong>v</strong> (<em>array, vector to apply the rotations to</em>) &#8211; </li>
-<li><strong>k</strong> (<em>int, number of rotations to apply</em>) &#8211; </li>
+<li><strong>Q</strong> (<em>list</em><em>, </em><em>list of consecutive 2x2 Givens rotations</em>) &#8211; </li>
+<li><strong>v</strong> (<em>array</em><em>, </em><em>vector to apply the rotations to</em>) &#8211; </li>
+<li><strong>k</strong> (<em>int</em><em>, </em><em>number of rotations to apply</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1234,13 +1234,13 @@ Givens Rotations are used to provide the residual norm each iteration.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>X</strong> (<em>array, initial guess.</em>) &#8211; </li>
-<li><strong>b</strong> (<em>array, right hand side.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode</em>) &#8211; computation.</li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>X</strong> (<em>array</em><em>, </em><em>initial guess.</em>) &#8211; </li>
+<li><strong>b</strong> (<em>array</em><em>, </em><em>right hand side.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode</em>) &#8211; computation.</li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1290,10 +1290,10 @@ Second Edition&#8221;, SIAM, pp. 151-172, pp. 272-275, 2003
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>ind</strong> (<em>class, it contains the indices related to the treecode</em>) &#8211; computation.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>ind</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode</em>) &#8211; computation.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1316,6 +1316,12 @@ proteins modeled with any number of dielectric regions.</p>
 <p>Allow writing both to STDOUT on screen and sending text to file
 in conjunction with the command
 <cite>sys.stdout = Logger(&#8220;desired_log_file.txt&#8221;)</cite></p>
+<dl class="method">
+<dt id="pygbe.main.Logger.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#Logger.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.Logger.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required for Python 3</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pygbe.main.Logger.write">
 <code class="descname">write</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#Logger.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.Logger.write" title="Permalink to this definition">¶</a></dt>
@@ -1366,7 +1372,7 @@ param files</p>
 
 <dl class="function">
 <dt id="pygbe.main.main">
-<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=['/home/travis/miniconda/envs/pygbe/bin/sphinx-build', '-b', 'html', '-d', '_build/doctrees', '.', '_build/html'], log_output=True, return_output_fname=False, return_results_dict=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=['/home/travis/miniconda/envs/pygbe/bin/sphinx-build', '-b', 'html', '-d', '_build/doctrees', '.', '_build/html'], log_output=True, return_output_fname=False, return_results_dict=False, field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
 problem directory</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1374,10 +1380,14 @@ problem directory</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>log_output</strong> (<em>Bool, default True.</em>) &#8211; If False, output is written only to STDOUT and not
-to a log file.</li>
-<li><strong>return_output_fname</strong> (<em>Bool, default False.</em>) &#8211; If True, function main() returns the name of the
+<li><strong>log_output</strong> (<em>Bool</em><em>, </em><em>default True.</em>) &#8211; If False, output is written only to STDOUT and not to a log file.</li>
+<li><strong>return_output_fname</strong> (<em>Bool</em><em>, </em><em>default False.</em>) &#8211; If True, function main() returns the name of the
 output log file. This is used for the regression tests.</li>
+<li><strong>return_results_dict</strong> (<em>Bool</em><em>, </em><em>default False.</em>) &#8211; If True, function main() returns the results of the run
+packed in a dictionary.  Used in testing and programmatic
+use of PyGBe</li>
+<li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) &#8211; If passed, this dictionary will supercede any config file found, useful in
+programmatically stepping through slight changes in a problem</li>
 </ul>
 </td>
 </tr>
@@ -1437,9 +1447,9 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1463,9 +1473,9 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1489,8 +1499,8 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>f</strong> (<em>class, region in the field array where we desire to calculate the</em>) &#8211; coloumb energy.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>f</strong> (<em>class</em><em>, </em><em>region in the field array where we desire to calculate the</em>) &#8211; coloumb energy.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1513,12 +1523,12 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1541,12 +1551,12 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode</em>) &#8211; computation.</li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode</em>) &#8211; computation.</li>
 </ul>
 </td>
 </tr>
@@ -1569,12 +1579,12 @@ problem folder resembles the following structure</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>X</strong> (<em>array, initial vector guess.</em>) &#8211; </li>
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode</em>) &#8211; computation.</li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of</em>) &#8211; the code.</li>
+<li><strong>X</strong> (<em>array</em><em>, </em><em>initial vector guess.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode</em>) &#8211; computation.</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) &#8211; the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1603,13 +1613,13 @@ we add the result to internal equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>array, contains all the classes of the surface.</em>) &#8211; </li>
-<li><strong>src</strong> (<em>int, position in the array of the source surface (surface that</em>) &#8211; contains the gauss points).</li>
-<li><strong>tar</strong> (<em>int, position in the array of the target surface (surface that</em>) &#8211; contains the collocation points).</li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>surf</strong> (<em>array</em><em>, </em><em>contains all the classes of the surface.</em>) &#8211; </li>
+<li><strong>src</strong> (<em>int</em><em>, </em><em>position in the array of the source surface</em><em> (</em><em>surface that</em>) &#8211; contains the gauss points).</li>
+<li><strong>tar</strong> (<em>int</em><em>, </em><em>position in the array of the target surface</em><em> (</em><em>surface that</em>) &#8211; contains the collocation points).</li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1636,13 +1646,13 @@ potentials, and the result has to be added to the exterior equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>array, contains all the classes of the surface.</em>) &#8211; </li>
-<li><strong>src</strong> (<em>int, position in the array of the source surface (surface that</em>) &#8211; contains the gauss points).</li>
-<li><strong>tar</strong> (<em>int, position in the array of the target surface (surface that</em>) &#8211; contains the collocation points).</li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>surf</strong> (<em>array</em><em>, </em><em>contains all the classes of the surface.</em>) &#8211; </li>
+<li><strong>src</strong> (<em>int</em><em>, </em><em>position in the array of the source surface</em><em> (</em><em>surface that</em>) &#8211; contains the gauss points).</li>
+<li><strong>tar</strong> (<em>int</em><em>, </em><em>position in the array of the target surface</em><em> (</em><em>surface that</em>) &#8211; contains the collocation points).</li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1666,13 +1676,13 @@ potentials, and the result has to be added to the exterior equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>array, contains all the classes of the surface.</em>) &#8211; </li>
-<li><strong>src</strong> (<em>int, position in the array of the source surface (surface that</em>) &#8211; contains the gauss points).</li>
-<li><strong>tar</strong> (<em>int, position in the array of the target surface (surface that</em>) &#8211; contains the collocation points).</li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>surf</strong> (<em>array</em><em>, </em><em>contains all the classes of the surface.</em>) &#8211; </li>
+<li><strong>src</strong> (<em>int</em><em>, </em><em>position in the array of the source surface</em><em> (</em><em>surface that</em>) &#8211; contains the gauss points).</li>
+<li><strong>tar</strong> (<em>int</em><em>, </em><em>position in the array of the target surface</em><em> (</em><em>surface that</em>) &#8211; contains the collocation points).</li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1700,12 +1710,12 @@ the exterior equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>array, contains all the classes of the surface.</em>) &#8211; </li>
-<li><strong>s</strong> (<em>int, position of the surface in the surface array.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>surf</strong> (<em>array</em><em>, </em><em>contains all the classes of the surface.</em>) &#8211; </li>
+<li><strong>s</strong> (<em>int</em><em>, </em><em>position of the surface in the surface array.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1735,12 +1745,12 @@ interior equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>surf</strong> (<em>array, contains all the classes of the surface.</em>) &#8211; </li>
-<li><strong>s</strong> (<em>int, position of the surface in the surface array.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>class, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>surf</strong> (<em>array</em><em>, </em><em>contains all the classes of the surface.</em>) &#8211; </li>
+<li><strong>s</strong> (<em>int</em><em>, </em><em>position of the surface in the surface array.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>class</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1768,9 +1778,9 @@ interior equation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>surf_array</strong> (<em>array, contains the surface classes of each region on the</em>) &#8211; surface.</li>
-<li><strong>field_array</strong> (<em>array, contains the Field classes of each region on the surface.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) &#8211; surface.</li>
+<li><strong>field_array</strong> (<em>array</em><em>, </em><em>contains the Field classes of each region on the surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1797,13 +1807,13 @@ array of indices (ind_reac) than ind0.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>XK</strong> (<em>array, input for the double layer potential.</em>) &#8211; </li>
-<li><strong>XV</strong> (<em>array, input for the single layer potential.</em>) &#8211; </li>
-<li><strong>surface</strong> (<em>class, surface where we are computing the reaction potential.</em>) &#8211; </li>
-<li><strong>xq</strong> (<em>array, it contains the position of the charges.</em>) &#8211; </li>
-<li><strong>Cells</strong> (<em>array, it contains the tree cells.</em>) &#8211; </li>
-<li><strong>par_reac</strong> (<em>class, fine parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind_reac</strong> (<em>array, it contains the indices related to the treecode</em>) &#8211; computation.</li>
+<li><strong>XK</strong> (<em>array</em><em>, </em><em>input for the double layer potential.</em>) &#8211; </li>
+<li><strong>XV</strong> (<em>array</em><em>, </em><em>input for the single layer potential.</em>) &#8211; </li>
+<li><strong>surface</strong> (<em>class</em><em>, </em><em>surface where we are computing the reaction potential.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>it contains the position of the charges.</em>) &#8211; </li>
+<li><strong>Cells</strong> (<em>array</em><em>, </em><em>it contains the tree cells.</em>) &#8211; </li>
+<li><strong>par_reac</strong> (<em>class</em><em>, </em><em>fine parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind_reac</strong> (<em>array</em><em>, </em><em>it contains the indices related to the treecode</em>) &#8211; computation.</li>
 </ul>
 </td>
 </tr>
@@ -1828,11 +1838,11 @@ to the cpu.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>XK</strong> (<em>array, input for the double layer potential.</em>) &#8211; </li>
-<li><strong>XV</strong> (<em>array, input for the single layer potential.</em>) &#8211; </li>
-<li><strong>surface</strong> (<em>class, surface where we are computing the reaction potential.</em>) &#8211; </li>
-<li><strong>field</strong> (<em>class, information about the different regions in the molecule.</em>) &#8211; </li>
-<li><strong>par_reac</strong> (<em>class, fine parameters related to the surface.</em>) &#8211; </li>
+<li><strong>XK</strong> (<em>array</em><em>, </em><em>input for the double layer potential.</em>) &#8211; </li>
+<li><strong>XV</strong> (<em>array</em><em>, </em><em>input for the single layer potential.</em>) &#8211; </li>
+<li><strong>surface</strong> (<em>class</em><em>, </em><em>surface where we are computing the reaction potential.</em>) &#8211; </li>
+<li><strong>field</strong> (<em>class</em><em>, </em><em>information about the different regions in the molecule.</em>) &#8211; </li>
+<li><strong>par_reac</strong> (<em>class</em><em>, </em><em>fine parameters related to the surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -1856,18 +1866,18 @@ to the cpu.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>XK</strong> (<em>array, input for the double layer potential.</em>) &#8211; </li>
-<li><strong>XV</strong> (<em>array, input for the single layer potential.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation</em>) &#8211; points.</li>
-<li><strong>K_diag</strong> (<em>array, diagonal elements of the double layer integral operator.</em>) &#8211; </li>
-<li><strong>V_diag</strong> (<em>array, diagonal elements of the single layer integral operator.</em>) &#8211; </li>
-<li><strong>IorE</strong> (<em>int, internal (1) or external (2).</em>) &#8211; </li>
-<li><strong>self</strong> (<em>int, position in the surface array of the source surface.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>array, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>XK</strong> (<em>array</em><em>, </em><em>input for the double layer potential.</em>) &#8211; </li>
+<li><strong>XV</strong> (<em>array</em><em>, </em><em>input for the single layer potential.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation</em>) &#8211; points.</li>
+<li><strong>K_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the double layer integral operator.</em>) &#8211; </li>
+<li><strong>V_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the single layer integral operator.</em>) &#8211; </li>
+<li><strong>IorE</strong> (<em>int</em><em>, </em><em>internal</em><em> (</em><em>1</em><em>) or </em><em>external</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>self</strong> (<em>int</em><em>, </em><em>position in the surface array of the source surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>array</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1892,15 +1902,15 @@ to the cpu.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>XKt</strong> (<em>array, input for the adjoint double layer potential.</em>) &#8211; </li>
-<li><strong>LorY</strong> (<em>int, Laplace (1) or Yukawa (2).</em>) &#8211; </li>
-<li><strong>surfSrc</strong> (<em>class, source surface, the one that contains the gauss points.</em>) &#8211; </li>
-<li><strong>surfTar</strong> (<em>class, target surface, the one that contains the collocation points.</em>) &#8211; </li>
-<li><strong>Kt_diag</strong> (<em>array, diagonal elements of the adjoint double layer integral</em>) &#8211; operator.</li>
-<li><strong>self</strong> (<em>int, position in the surface array of the source surface.</em>) &#8211; </li>
-<li><strong>param</strong> (<em>class, parameters related to the surface.</em>) &#8211; </li>
-<li><strong>ind0</strong> (<em>array, it contains the indices related to the treecode computation.</em>) &#8211; </li>
-<li><strong>timing</strong> (<em>class, it contains timing information for different parts of the</em>) &#8211; code.</li>
+<li><strong>XKt</strong> (<em>array</em><em>, </em><em>input for the adjoint double layer potential.</em>) &#8211; </li>
+<li><strong>LorY</strong> (<em>int</em><em>, </em><em>Laplace</em><em> (</em><em>1</em><em>) or </em><em>Yukawa</em><em> (</em><em>2</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>surfSrc</strong> (<em>class</em><em>, </em><em>source surface</em><em>, </em><em>the one that contains the gauss points.</em>) &#8211; </li>
+<li><strong>surfTar</strong> (<em>class</em><em>, </em><em>target surface</em><em>, </em><em>the one that contains the collocation points.</em>) &#8211; </li>
+<li><strong>Kt_diag</strong> (<em>array</em><em>, </em><em>diagonal elements of the adjoint double layer integral</em>) &#8211; operator.</li>
+<li><strong>self</strong> (<em>int</em><em>, </em><em>position in the surface array of the source surface.</em>) &#8211; </li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>ind0</strong> (<em>array</em><em>, </em><em>it contains the indices related to the treecode computation.</em>) &#8211; </li>
+<li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of the</em>) &#8211; code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) &#8211; </li>
 </ul>
 </td>
@@ -1928,7 +1938,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int, number of Gauss points per element. (1, 3, 4, and 7 are supported)</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>number of Gauss points per element.</em><em> (</em><em>1</em><em>, </em><em>3</em><em>, </em><em>4</em><em>, </em><em>and 7 are supported</em><em>)</em><em></em>) &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>w</strong></td>
 </tr>
@@ -1946,7 +1956,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int (1, 7, 13, 17, 19, 25, 37, 48, 52, 61, 79), number of Gauss points</em>) &#8211; per element.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em> (</em><em>1</em><em>, </em><em>7</em><em>, </em><em>13</em><em>, </em><em>17</em><em>, </em><em>19</em><em>, </em><em>25</em><em>, </em><em>37</em><em>, </em><em>48</em><em>, </em><em>52</em><em>, </em><em>61</em><em>, </em><em>79</em><em>)</em><em></em><em>, </em><em>number of Gauss points</em>) &#8211; per element.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
 <li><strong>X</strong> (<em>array, position of the gauss quadrature points.</em>)</li>
@@ -1999,6 +2009,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmatic.html">Programmatic use of PyGBe</a></li>
 </ul>
 
 <div class="relations">
@@ -2026,7 +2037,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
