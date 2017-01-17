@@ -22,7 +22,7 @@ dphi/dn = - (0.05 x (1x10^-10)^2)/ (80 x 1.602x10^-19) = -4x10^-5
 import numpy 
 import sys
 import os
-from pygbe.util.readData import readTriangle, readVertex
+from pygbe.util.readData import read_triangle, read_vertex
 from argparse import ArgumentParser
 
 def zeroAreas(vertex, triangle_raw, Area_null):
@@ -104,8 +104,8 @@ full_path = os.path.normpath(full_path)
 os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
 
-vertex = readVertex(meshFile+'.vert', float)
-triangle_raw = readTriangle(meshFile+'.face', 'neumann_surface')
+vertex = read_vertex(meshFile+'.vert', float)
+triangle_raw = read_triangle(meshFile+'.face', 'neumann_surface')
 
 Area_null = []
 Area_null = zeroAreas(vertex, triangle_raw, Area_null)
