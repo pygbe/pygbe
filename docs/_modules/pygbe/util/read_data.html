@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pygbe.util.readData &#8212; PyGBe 0.2.1 documentation</title>
+    <title>pygbe.util.read_data &#8212; PyGBe 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -41,7 +41,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for pygbe.util.readData</h1><div class="highlight"><pre>
+  <h1>Source code for pygbe.util.read_data</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">It contains the functions to read the all the data from the meshes files, its</span>
 <span class="sd">parameters and charges files.</span>
@@ -50,7 +50,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span>
 
 
-<div class="viewcode-block" id="readVertex"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readVertex">[docs]</a><span class="k">def</span> <span class="nf">readVertex</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+<div class="viewcode-block" id="read_vertex"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_vertex">[docs]</a><span class="k">def</span> <span class="nf">read_vertex</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It reads the vertex of the triangles from the mesh file and it stores</span>
 <span class="sd">    them on an array.</span>
@@ -76,49 +76,7 @@
     <span class="k">return</span> <span class="n">vertex</span></div>
 
 
-<div class="viewcode-block" id="readVertex2"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readVertex2">[docs]</a><span class="k">def</span> <span class="nf">readVertex2</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    It reads the vertex of the triangles from the mesh file and it stores</span>
-<span class="sd">    them on an array.</span>
-<span class="sd">    It reads the file line by line.</span>
-
-<span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    filename: name of the file that contains the surface information.</span>
-<span class="sd">              (filename.vert)</span>
-<span class="sd">    REAL    : data type.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    vertex: array, vertices of the triangles.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="n">x0</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">y0</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">z0</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">REAL</span><span class="p">(</span><span class="n">x0</span><span class="p">))</span>
-            <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">REAL</span><span class="p">(</span><span class="n">y0</span><span class="p">))</span>
-            <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">REAL</span><span class="p">(</span><span class="n">z0</span><span class="p">))</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
-    <span class="n">vertex</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
-    <span class="n">vertex</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-    <span class="n">vertex</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
-    <span class="n">vertex</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
-
-    <span class="k">return</span> <span class="n">vertex</span></div>
-
-
-<div class="viewcode-block" id="readTriangle"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readTriangle">[docs]</a><span class="k">def</span> <span class="nf">readTriangle</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">):</span>
+<div class="viewcode-block" id="read_triangle"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_triangle">[docs]</a><span class="k">def</span> <span class="nf">read_triangle</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It reads the triangles from the mesh file and it stores them on an</span>
 <span class="sd">    array.</span>
@@ -139,59 +97,18 @@
     <span class="k">if</span> <span class="n">geo_path</span><span class="p">:</span>
         <span class="n">full_path</span> <span class="o">=</span> <span class="n">geo_path</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="n">triangle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="c1">#    if surf_type&lt;=10:</span>
     <span class="k">if</span> <span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;internal_cavity&#39;</span><span class="p">:</span>
-        <span class="n">triangle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">triangle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">triangle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">triangle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">triangle</span><span class="p">[:,</span>
-                 <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">2</span>
-                        <span class="p">]</span>  <span class="c1"># v2 and v3 are flipped to match my sign convention!</span>
-        <span class="n">triangle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># v2 and v3 are flipped to match my sign convention!</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="n">triangle</span> <span class="o">-=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">triangle</span></div>
 
 
-<div class="viewcode-block" id="readTriangle2"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readTriangle2">[docs]</a><span class="k">def</span> <span class="nf">readTriangle2</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    It reads the triangles from the mesh file and it stores them on an</span>
-<span class="sd">    array.</span>
-<span class="sd">    It reads the file line by line.</span>
-
-<span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    filename : name of the file that contains the surface information.</span>
-<span class="sd">               (filename.faces)</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    triangle: array, triangles indices.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">triangle</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="n">v1</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">v2</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># v2 and v3 are flipped to match my sign convention!</span>
-            <span class="n">v3</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">triangle</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">v3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="c1"># -1-&gt; python starts from 0, matlab from 1</span>
-
-    <span class="n">triangle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">triangle</span></div>
-
-
-
-<div class="viewcode-block" id="readCheck"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readCheck">[docs]</a><span class="k">def</span> <span class="nf">readCheck</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+<div class="viewcode-block" id="readCheck"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readCheck">[docs]</a><span class="k">def</span> <span class="nf">readCheck</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It checks if it is not reading more than one term.</span>
 <span class="sd">    We use this function to check we are not missing &#39;-&#39; signs in the .pqr</span>
@@ -222,9 +139,9 @@
     <span class="k">return</span> <span class="n">X</span></div>
 
 
-<div class="viewcode-block" id="readpqr"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readpqr">[docs]</a><span class="k">def</span> <span class="nf">readpqr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+<div class="viewcode-block" id="readpqr"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readpqr">[docs]</a><span class="k">def</span> <span class="nf">readpqr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    It reads the pqr file, file that contains the charges information.</span>
+<span class="sd">    Read charge information from pqr file</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ----------</span>
@@ -236,42 +153,28 @@
 <span class="sd">    -------</span>
 <span class="sd">    pos     : (Nqx3) array, positions of the charges.</span>
 <span class="sd">    q       : (Nqx1) array, value of the charges.</span>
-<span class="sd">    Nq      : int, number of charges.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 
     <span class="n">pos</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">q</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
 
-<span class="c1">#            line_aux = []</span>
-
-            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM&#39;</span><span class="p">:</span>
-                <span class="c1">#  grab coordinates and charge from columns</span>
-                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">q0</span> <span class="o">=</span> <span class="p">[</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-                <span class="c1">#for l in range(len(line) - 6):</span>
-                    <span class="c1">#aux = line[5 + len(line_aux)]</span>
-                    <span class="c1">#if len(aux) &gt; 14:</span>
-                        <span class="c1">#X = readCheck(aux, REAL)</span>
-                        <span class="c1">#for i in range(len(X)):</span>
-                            <span class="c1">#line_aux.append(X[i])</span>
-                    <span class="c1">#else:</span>
-                        <span class="c1">#line_aux.append(REAL(line[5 + len(line_aux)]))</span>
-
-<span class="c1">#                x = line_aux[0]</span>
-<span class="c1">#                y = line_aux[1]</span>
-<span class="c1">#                z = line_aux[2]</span>
-                <span class="n">q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
-                <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM&#39;</span><span class="p">:</span>
+            <span class="c1">#  grab coordinates and charge from columns</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">q0</span> <span class="o">=</span> <span class="p">[</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
 
     <span class="n">pos</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">q</span></div>
 
 
-<div class="viewcode-block" id="readcrd"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readcrd">[docs]</a><span class="k">def</span> <span class="nf">readcrd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+<div class="viewcode-block" id="readcrd"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readcrd">[docs]</a><span class="k">def</span> <span class="nf">readcrd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It reads the crd file, file that contains the charges information.</span>
 
@@ -308,7 +211,7 @@
     <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">q</span></div>
 
 
-<div class="viewcode-block" id="readParameters"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readParameters">[docs]</a><span class="k">def</span> <span class="nf">readParameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="readParameters"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readParameters">[docs]</a><span class="k">def</span> <span class="nf">readParameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It populates the attributes from the Parameters class with the information</span>
 <span class="sd">    read from the .param file.</span>
@@ -359,7 +262,7 @@
     <span class="k">return</span> <span class="n">dataType</span></div>
 
 
-<div class="viewcode-block" id="readFields"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readFields">[docs]</a><span class="k">def</span> <span class="nf">readFields</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="readFields"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readFields">[docs]</a><span class="k">def</span> <span class="nf">readFields</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the physical parameters from the configuration file for each region</span>
 <span class="sd">    in the surface</span>
@@ -433,7 +336,7 @@
     <span class="k">return</span> <span class="n">field</span></div>
 
 
-<div class="viewcode-block" id="read_surface"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.read_surface">[docs]</a><span class="k">def</span> <span class="nf">read_surface</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="read_surface"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_surface">[docs]</a><span class="k">def</span> <span class="nf">read_surface</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It reads the type of surface of each region on the surface from the</span>
 <span class="sd">    configuration file.</span>
@@ -451,29 +354,29 @@
 <span class="sd">    phi0_file: list, it contains the constant potential/surface charge for the</span>
 <span class="sd">                     cases where it applies. (dirichlet or neumann surfaces)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="n">surfaces_req_phi0</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;neumann_surface_hyper&#39;</span><span class="p">]</span>
     <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">surf_type</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">phi0_file</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FILE&#39;</span><span class="p">:</span>
-                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">surf_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span>
-                            <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span>
-                            <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface_hyper&#39;</span><span class="p">):</span>
-                        <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">),</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;no_file&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FILE&#39;</span><span class="p">:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">surf_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">surfaces_req_phi0</span><span class="p">:</span>
+                    <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">),</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;no_file&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">files</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">,</span> <span class="n">phi0_file</span></div>
 
-<div class="viewcode-block" id="readElectricField"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.readData.readElectricField">[docs]</a><span class="k">def</span> <span class="nf">readElectricField</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="readElectricField"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readElectricField">[docs]</a><span class="k">def</span> <span class="nf">readElectricField</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It reads the information about the incident electric field.</span>
 

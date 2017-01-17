@@ -12,10 +12,10 @@ pygbe.util.an_solution module
     :undoc-members:
     :show-inheritance:
 
-pygbe.util.readData module
---------------------------
+pygbe.util.read_data module
+---------------------------
 
-.. automodule:: pygbe.util.readData
+.. automodule:: pygbe.util.read_data
     :members:
     :undoc-members:
     :show-inheritance:

@@ -11,7 +11,7 @@ docs/_modules/pygbe/quadrature.html
 docs/_modules/pygbe/tree/FMMutils.html
 docs/_modules/pygbe/tree/cuda_kernels.html
 docs/_modules/pygbe/util/an_solution.html
-docs/_modules/pygbe/util/readData.html
+docs/_modules/pygbe/util/read_data.html
 docs/_modules/pygbe/util/semi_analytical.html
 docs/_sources/cite.rst.txt
 docs/_sources/contributing.rst.txt

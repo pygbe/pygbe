@@ -581,13 +581,13 @@ Follows Cooper&amp;Barba 2016</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pygbe.util.readData">
-<span id="pygbe-util-readdata-module"></span><h2>pygbe.util.readData module<a class="headerlink" href="#module-pygbe.util.readData" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pygbe.util.read_data">
+<span id="pygbe-util-read-data-module"></span><h2>pygbe.util.read_data module<a class="headerlink" href="#module-pygbe.util.read_data" title="Permalink to this headline">¶</a></h2>
 <p>It contains the functions to read the all the data from the meshes files, its
 parameters and charges files.</p>
 <dl class="function">
-<dt id="pygbe.util.readData.readCheck">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readCheck</code><span class="sig-paren">(</span><em>aux</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readCheck" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readCheck">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readCheck</code><span class="sig-paren">(</span><em>aux</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readCheck" title="Permalink to this definition">¶</a></dt>
 <dd><p>It checks if it is not reading more than one term.
 We use this function to check we are not missing &#8216;-&#8216; signs in the .pqr
 files, when we read the lines.</p>
@@ -612,8 +612,8 @@ files, when we read the lines.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readElectricField">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readElectricField</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readElectricField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readElectricField" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readElectricField">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readElectricField</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readElectricField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readElectricField" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the information about the incident electric field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -637,8 +637,8 @@ files, when we read the lines.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readFields">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readFields</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readFields" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readFields">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readFields</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readFields" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the physical parameters from the configuration file for each region
 in the surface</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -670,8 +670,8 @@ the FILE section, parent=2)</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readParameters">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readParameters" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readParameters">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>It populates the attributes from the Parameters class with the information
 read from the .param file.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -695,8 +695,30 @@ read from the .param file.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readTriangle">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readTriangle</code><span class="sig-paren">(</span><em>filename</em>, <em>surf_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readTriangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readTriangle" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.read_surface">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_surface</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the type of surface of each region on the surface from the
+configuration file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface type of each region.</em>) &#8211; (filename.config).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>files</strong> (<em>list, it contains the files corresponding to each region in the</em>) &#8211; surface.</li>
+<li><strong>surf_type</strong> (<em>list, it contains the type of surface of each region.</em>)</li>
+<li><strong>phi0_file</strong> (<em>list, it contains the constant potential/surface charge for the</em>) &#8211; cases where it applies. (dirichlet or neumann surfaces)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_triangle">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_triangle</code><span class="sig-paren">(</span><em>filename</em>, <em>surf_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_triangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_triangle" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the triangles from the mesh file and it stores them on an
 array.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -720,28 +742,8 @@ array.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readTriangle2">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readTriangle2</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readTriangle2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readTriangle2" title="Permalink to this definition">¶</a></dt>
-<dd><p>It reads the triangles from the mesh file and it stores them on an
-array.
-It reads the file line by line.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.faces)</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>triangle</strong></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array, triangles indices.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.readData.readVertex">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readVertex</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readVertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readVertex" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.read_vertex">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_vertex</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_vertex" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the vertex of the triangles from the mesh file and it stores
 them on an array.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -765,56 +767,8 @@ them on an array.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readVertex2">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readVertex2</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readVertex2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readVertex2" title="Permalink to this definition">¶</a></dt>
-<dd><p>It reads the vertex of the triangles from the mesh file and it stores
-them on an array.
-It reads the file line by line.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.vert)</li>
-<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>vertex</strong></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, vertices of the triangles.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.readData.read_surface">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">read_surface</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#read_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.read_surface" title="Permalink to this definition">¶</a></dt>
-<dd><p>It reads the type of surface of each region on the surface from the
-configuration file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface type of each region.</em>) &#8211; (filename.config).</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><strong>files</strong> (<em>list, it contains the files corresponding to each region in the</em>) &#8211; surface.</li>
-<li><strong>surf_type</strong> (<em>list, it contains the type of surface of each region.</em>)</li>
-<li><strong>phi0_file</strong> (<em>list, it contains the constant potential/surface charge for the</em>) &#8211; cases where it applies. (dirichlet or neumann surfaces)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.readData.readcrd">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readcrd</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readcrd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readcrd" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readcrd">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readcrd</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readcrd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readcrd" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the crd file, file that contains the charges information.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -839,9 +793,9 @@ configuration file.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.readData.readpqr">
-<code class="descclassname">pygbe.util.readData.</code><code class="descname">readpqr</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/readData.html#readpqr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.readData.readpqr" title="Permalink to this definition">¶</a></dt>
-<dd><p>It reads the pqr file, file that contains the charges information.</p>
+<dt id="pygbe.util.read_data.readpqr">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readpqr</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readpqr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readpqr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read charge information from pqr file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -855,7 +809,6 @@ configuration file.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
 <li><strong>pos</strong> (<em>(Nqx3) array, positions of the charges.</em>)</li>
 <li><strong>q</strong> (<em>(Nqx1) array, value of the charges.</em>)</li>
-<li><strong>Nq</strong> (<em>int, number of charges.</em>)</li>
 </ul>
 </p>
 </td>
