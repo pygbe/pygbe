@@ -368,23 +368,23 @@ def readFields(filename):
 
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'FIELD':
-                    field['LorY'].append(line[1])
-                    field['pot'].append(line[2])
-                    field['E'].append(line[3])
-                    field['kappa'].append(line[4])
-                    field['charges'].append(line[5])
-                    field['coulomb'].append(line[6])
-                    field['qfile'].append(line[7] if line[7] == 'NA' else
-                        os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
-                    field['Nparent'].append(line[8])
-                    field['parent'].append(line[9])
-                    field['Nchild'].append(line[10])
-                    for i in range(int(field['Nchild'][-1])):
-                        field['child'].append(line[11 + i])
+    for line in lines:
+        line = line.split()
+        if len(line) > 0:
+            if line[0] == 'FIELD':
+                field['LorY'].append(line[1])
+                field['pot'].append(line[2])
+                field['E'].append(line[3])
+                field['kappa'].append(line[4])
+                field['charges'].append(line[5])
+                field['coulomb'].append(line[6])
+                field['qfile'].append(line[7] if line[7] == 'NA' else
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                field['Nparent'].append(line[8])
+                field['parent'].append(line[9])
+                field['Nchild'].append(line[10])
+                for i in range(int(field['Nchild'][-1])):
+                    field['child'].append(line[11 + i])
 
     return field
 
