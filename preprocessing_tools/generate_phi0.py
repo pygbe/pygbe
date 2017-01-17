@@ -22,7 +22,7 @@ dphi/dn = - (0.05 x (1x10^-10)^2)/ (80 x 1.602x10^-19) = -4x10^-5
 import numpy 
 import sys
 import os
-from pygbe.util.readData import read_triangle, read_vertex
+from pygbe.util.read_data import read_triangle, read_vertex
 from argparse import ArgumentParser
 
 def zeroAreas(vertex, triangle_raw, Area_null):

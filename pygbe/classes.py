@@ -6,7 +6,7 @@ import scipy.constants
 from pygbe.util.semi_analytical import GQ_1D
 from pygbe.tree.direct import computeDiagonal
 from pygbe.quadrature import quadratureRule_fine
-from pygbe.util.readData import readcrd, readpqr, read_vertex, read_triangle
+from pygbe.util.read_data import readcrd, readpqr, read_vertex, read_triangle
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
 
 

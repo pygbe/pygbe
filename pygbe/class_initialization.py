@@ -2,7 +2,7 @@
 It contains the necessary functions to set up the surface to be solved.
 """
 
-from pygbe.util.readData import readFields, read_surface
+from pygbe.util.read_data import readFields, read_surface
 from pygbe.classes import Field, Surface
 
 
