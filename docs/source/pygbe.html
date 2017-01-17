@@ -1439,6 +1439,30 @@ problem folder resembles the following structure</p>
 <span id="pygbe-matrixfree-module"></span><h2>pygbe.matrixfree module<a class="headerlink" href="#module-pygbe.matrixfree" title="Permalink to this headline">¶</a></h2>
 <p>Matrix free formulation of the matrix vector product in the GMRES.</p>
 <dl class="function">
+<dt id="pygbe.matrixfree.calc_aux">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">calc_aux</code><span class="sig-paren">(</span><em>field</em>, <em>surface</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calc_aux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calc_aux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to calculate aux</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<em>Field object</em><em>, </em><em>current field being evaluated</em>) &#8211; </li>
+<li><strong>surface</strong> (<em>Surface object</em><em>, </em><em>current surface being evaluated</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aux</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="pygbe.matrixfree.calculate_solvation_energy">
 <code class="descclassname">pygbe.matrixfree.</code><code class="descname">calculate_solvation_energy</code><span class="sig-paren">(</span><em>surf_array</em>, <em>field_array</em>, <em>param</em>, <em>kernel</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#calculate_solvation_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.calculate_solvation_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>It calculates the solvation energy.</p>
@@ -1593,6 +1617,34 @@ problem folder resembles the following structure</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, resulting matrix-vector multiplication.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.matrixfree.locate_s_in_RHS">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">locate_s_in_RHS</code><span class="sig-paren">(</span><em>surf_index</em>, <em>surf_array</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#locate_s_in_RHS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.locate_s_in_RHS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find starting index for current surface on RHS</p>
+<p>This is assembling the RHS of the block matrix. Needs to go through all the
+previous surfaces to find out where on the RHS vector it belongs. If any
+previous surfaces were dirichlet, neumann or asc, then they take up half
+the number of spots in the RHS, so we act accordingly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>surf_index</strong> (<em>int</em><em>, </em><em>index of surface in question</em>) &#8211; </li>
+<li><strong>surf_array</strong> (<em>list</em><em>, </em><em>list of all surfaces in problem</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>s_start</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int, index to insert values on RHS</p>
 </td>
 </tr>
 </tbody>
