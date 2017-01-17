@@ -163,25 +163,12 @@ def check_for_nvcc():
     """Check system PATH for nvcc, exit if not found"""
     try:
         subprocess.check_output(['which', 'nvcc'])
-        check_nvcc_version()
         return True
     except subprocess.CalledProcessError:
         print(
             "Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH"
         )
         return False
-
-
-def check_nvcc_version():
-    """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version']).decode('utf-8')
-    cuda_ver = re.compile('release (\d\.\d)')
-    match = re.search(cuda_ver, verstr)
-    version = float(match.group(1))
-    if version > 7.5:
-        sys.exit('PyGBe only supports CUDA <= 7.5\n'
-                 'Please install an earlier version of the CUDA toolkit\n'
-                 'or remove `nvcc` from your PATH to use CPU only.')
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
