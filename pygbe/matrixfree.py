@@ -617,7 +617,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
                                             K_diag, V_diag, IorE, s, param,
                                             ind0, timing, kernel)
 
-                    F[s_start+s_size:s_start+2*s_size] += (1/tar.E_hat-1) * V_lyr * tar.Precond[3,:]
+                    F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
+
+                    F[s_start+s_size:s_start+2*s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
 #    for field in field_array:
@@ -995,11 +997,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
         # Effect of an incomming electric field (only on outmost region)
         # Assuming field comes in z direction
-        LorY = field_array[j].LorY
+        LorY = field.LorY
 
-        if len(field_array[j].parent) == 0 and abs(electricField) > 1e-12:
+        if len(field.parent) == 0 and abs(electricField) > 1e-12:
 
-             for s in field_array[j].child:  # Loop over child surfaces
+             for s in field.child:  # Loop over child surfaces
                 #Locate position of surface s in RHS
                 s_start = 0
                 for ss in range(s):
@@ -1035,6 +1037,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
                                             K_diag, V_diag, IorE, s, param,
                                             ind0, timing, kernel)
 
+                    F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
                     F[s_start+s_size:s_start+2*s_size] += (1/tar.E_hat-1) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
