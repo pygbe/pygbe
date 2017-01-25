@@ -22,7 +22,7 @@ from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy, dipoleMoment, 
+                              coulomb_energy, calculate_surface_energy, dipoleMoment,
                               extCrossSection)
 from pygbe.util.readData import readParameters, readElectricField
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
@@ -48,6 +48,10 @@ class Logger(object):
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
+
+    def flush(self):
+        """Required for Python 3"""
+        pass
 
 
 def read_inputs(args):
@@ -164,7 +168,6 @@ def check_for_nvcc():
     """Check system PATH for nvcc, exit if not found"""
     try:
         subprocess.check_output(['which', 'nvcc'])
-        check_nvcc_version()
         return True
     except subprocess.CalledProcessError:
         print(
@@ -173,32 +176,26 @@ def check_for_nvcc():
         return False
 
 
-def check_nvcc_version():
-    """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version']).decode('utf-8')
-    cuda_ver = re.compile('release (\d\.\d)')
-    match = re.search(cuda_ver, verstr)
-    version = float(match.group(1))
-    if version > 7.5:
-        sys.exit('PyGBe only supports CUDA <= 7.5\n'
-                 'Please install an earlier version of the CUDA toolkit\n'
-                 'or remove `nvcc` from your PATH to use CPU only.')
-
-
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False):
+         return_results_dict=False, field=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
 
     Arguments
     ----------
-    log_output         : Bool, default True.
-                         If False, output is written only to STDOUT and not
-                         to a log file.
+    log_output : Bool, default True.
+        If False, output is written only to STDOUT and not to a log file.
     return_output_fname: Bool, default False.
-                         If True, function main() returns the name of the
-                         output log file. This is used for the regression tests.
+        If True, function main() returns the name of the
+        output log file. This is used for the regression tests.
+    return_results_dict: Bool, default False.
+        If True, function main() returns the results of the run
+        packed in a dictionary.  Used in testing and programmatic
+        use of PyGBe
+    field : Dictionary, defaults to None.
+         If passed, this dictionary will supercede any config file found, useful in
+         programmatically stepping through slight changes in a problem
 
     Returns
     --------
@@ -279,7 +276,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         param.GPU = 0
 
     ### Generate array of fields
-    field_array = initialize_field(configFile, param)
+    if field:
+        field_array = initialize_field(configFile, param, field)
+    else:
+        field_array = initialize_field(configFile, param)
+
 
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)

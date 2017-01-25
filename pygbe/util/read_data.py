@@ -6,7 +6,7 @@ import os
 import numpy
 
 
-def readVertex(filename, REAL):
+def read_vertex(filename, REAL):
     """
     It reads the vertex of the triangles from the mesh file and it stores
     them on an array.
@@ -32,49 +32,7 @@ def readVertex(filename, REAL):
     return vertex
 
 
-def readVertex2(filename, REAL):
-    """
-    It reads the vertex of the triangles from the mesh file and it stores
-    them on an array.
-    It reads the file line by line.
-
-    Arguments
-    ----------
-    filename: name of the file that contains the surface information.
-              (filename.vert)
-    REAL    : data type.
-
-    Returns
-    -------
-    vertex: array, vertices of the triangles.
-    """
-
-    x = []
-    y = []
-    z = []
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            x0 = line[0]
-            y0 = line[1]
-            z0 = line[2]
-            x.append(REAL(x0))
-            y.append(REAL(y0))
-            z.append(REAL(z0))
-
-    x = numpy.array(x)
-    y = numpy.array(y)
-    z = numpy.array(z)
-    vertex = numpy.zeros((len(x), 3))
-    vertex[:, 0] = x
-    vertex[:, 1] = y
-    vertex[:, 2] = z
-
-    return vertex
-
-
-def readTriangle(filename, surf_type):
+def read_triangle(filename, surf_type):
     """
     It reads the triangles from the mesh file and it stores them on an
     array.
@@ -95,56 +53,15 @@ def readTriangle(filename, surf_type):
     if geo_path:
         full_path = geo_path
     X = numpy.loadtxt(os.path.join(full_path, filename), dtype=int)
-    triangle = numpy.zeros((len(X), 3), dtype=int)
-    #    if surf_type<=10:
     if surf_type == 'internal_cavity':
-        triangle[:, 0] = X[:, 0]
-        triangle[:, 1] = X[:, 1]
-        triangle[:, 2] = X[:, 2]
+        triangle = X[:, :3]
     else:
-        triangle[:, 0] = X[:, 0]
-        triangle[:,
-                 1] = X[:, 2
-                        ]  # v2 and v3 are flipped to match my sign convention!
-        triangle[:, 2] = X[:, 1]
+        # v2 and v3 are flipped to match my sign convention!
+        triangle = X[:, (0, 2, 1)]
 
     triangle -= 1
 
     return triangle
-
-
-def readTriangle2(filename):
-    """
-    It reads the triangles from the mesh file and it stores them on an
-    array.
-    It reads the file line by line.
-
-    Arguments
-    ----------
-    filename : name of the file that contains the surface information.
-               (filename.faces)
-
-    Returns
-    -------
-    triangle: array, triangles indices.
-    """
-
-    triangle = []
-
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            v1 = line[0]
-            v2 = line[2]  # v2 and v3 are flipped to match my sign convention!
-            v3 = line[1]
-            triangle.append([int(v1) - 1, int(v2) - 1, int(v3) - 1])
-            # -1-> python starts from 0, matlab from 1
-
-    triangle = numpy.array(triangle)
-
-    return triangle
-
 
 
 def readCheck(aux, REAL):
@@ -180,7 +97,7 @@ def readCheck(aux, REAL):
 
 def readpqr(filename, REAL):
     """
-    It reads the pqr file, file that contains the charges information.
+    Read charge information from pqr file
 
     Arguments
     ----------
@@ -192,33 +109,21 @@ def readpqr(filename, REAL):
     -------
     pos     : (Nqx3) array, positions of the charges.
     q       : (Nqx1) array, value of the charges.
-    Nq      : int, number of charges.
     """
+
+    with open(filename, 'r') as f:
+        lines = f.readlines()
 
     pos = []
     q = []
-    with open(filename, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            line = numpy.array(line.split())
+    for line in lines:
+        line = line.split()
 
-            line_aux = []
-
-            if line[0] == 'ATOM':
-                for l in range(len(line) - 6):
-                    aux = line[5 + len(line_aux)]
-                    if len(aux) > 14:
-                        X = readCheck(aux, REAL)
-                        for i in range(len(X)):
-                            line_aux.append(X[i])
-                    else:
-                        line_aux.append(REAL(line[5 + len(line_aux)]))
-
-                x = line_aux[0]
-                y = line_aux[1]
-                z = line_aux[2]
-                q.append(line_aux[3])
-                pos.append([x, y, z])
+        if line[0] == 'ATOM':
+            #  grab coordinates and charge from columns
+            x, y, z, q0 = [REAL(i) for i in line[5:-1]]
+            q.append(q0)
+            pos.append([x, y, z])
 
     pos = numpy.array(pos)
     q = numpy.array(q)
@@ -315,8 +220,8 @@ def readParameters(param, filename):
 
 def readFields(filename):
     """
-    It reads the physical parameters from the configuration file for each region
-    in the surface and it appends them on the corresponding list.
+    Read the physical parameters from the configuration file for each region
+    in the surface
 
     Arguments
     ----------
@@ -325,6 +230,7 @@ def readFields(filename):
 
     Returns
     -------
+    Dictionary containing:
     LorY    : list, it contains integers, Laplace (1) or Yukawa (2),
                     corresponding to each region.
     pot     : list, it contains integers indicating to calculate (1) or not (2)
@@ -350,39 +256,40 @@ def readFields(filename):
                      surface in the FILE section.
     """
 
-    LorY = []
-    pot = []
-    E = []
-    kappa = []
-    charges = []
-    coulomb = []
-    qfile = []
-    Nparent = []
-    parent = []
-    Nchild = []
-    child = []
+    field = dict()
+    field['LorY'] = []
+    field['pot'] = []
+    field['E'] = []
+    field['kappa'] = []
+    field['charges'] = []
+    field['coulomb'] = []
+    field['qfile'] = []
+    field['Nparent'] = []
+    field['parent'] = []
+    field['Nchild'] = []
+    field['child'] = []
 
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'FIELD':
-                    LorY.append(line[1])
-                    pot.append(line[2])
-                    E.append(line[3])
-                    kappa.append(line[4])
-                    charges.append(line[5])
-                    coulomb.append(line[6])
-                    qfile.append(line[7] if line[7] == 'NA' else
-                        os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
-                    Nparent.append(line[8])
-                    parent.append(line[9])
-                    Nchild.append(line[10])
-                    for i in range(int(Nchild[-1])):
-                        child.append(line[11 + i])
+    for line in lines:
+        line = line.split()
+        if len(line) > 0:
+            if line[0] == 'FIELD':
+                field['LorY'].append(line[1])
+                field['pot'].append(line[2])
+                field['E'].append(line[3])
+                field['kappa'].append(line[4])
+                field['charges'].append(line[5])
+                field['coulomb'].append(line[6])
+                field['qfile'].append(line[7] if line[7] == 'NA' else
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                field['Nparent'].append(line[8])
+                field['parent'].append(line[9])
+                field['Nchild'].append(line[10])
+                for i in range(int(field['Nchild'][-1])):
+                    field['child'].append(line[11 + i])
 
-    return LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child
+    return field
 
 
 def read_surface(filename):
@@ -403,25 +310,25 @@ def read_surface(filename):
     phi0_file: list, it contains the constant potential/surface charge for the
                      cases where it applies. (dirichlet or neumann surfaces)
     """
-
+    surfaces_req_phi0= ['dirichlet_surface',
+                        'neumann_surface',
+                        'neumann_surface_hyper']
     files = []
     surf_type = []
     phi0_file = []
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'FILE':
-                    files.append(line[1])
-                    surf_type.append(line[2])
-                    if (line[2] == 'dirichlet_surface' or
-                            line[2] == 'neumann_surface' or
-                            line[2] == 'neumann_surface_hyper'):
-                        phi0_file.append(os.path.join(
-                            os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
-                    else:
-                        phi0_file.append('no_file')
+    for line in lines:
+        line = line.split()
+        if line:
+            if line[0] == 'FILE':
+                files.append(line[1])
+                surf_type.append(line[2])
+                if line[2] in surfaces_req_phi0:
+                    phi0_file.append(os.path.join(
+                        os.environ.get('PYGBE_PROBLEM_FOLDER'), line[3]))
+                else:
+                    phi0_file.append('no_file')
 
     return files, surf_type, phi0_file
 

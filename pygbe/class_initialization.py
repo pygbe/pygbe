@@ -2,7 +2,7 @@
 It contains the necessary functions to set up the surface to be solved.
 """
 
-from pygbe.util.readData import readFields, read_surface
+from pygbe.util.read_data import readFields, read_surface
 from pygbe.classes import Field, Surface
 
 
@@ -39,7 +39,7 @@ def initialize_surface(field_array, filename, param):
     return surf_array
 
 
-def initialize_field(filename, param):
+def initialize_field(filename, param, field=None):
     """
     Initialize all the regions in the surface to be solved.
 
@@ -47,38 +47,41 @@ def initialize_field(filename, param):
     ---------
     filename   : name of the file that contains the surface information.
     param      : class, parameters related to the surface.
+    field      : dictionary with preloaded field values for programmatic
+                 interaction with PyGBe
 
     Returns
     -------
     field_array: array, contains the Field classes of each region on the surface.
     """
 
-    LorY, pot, E, kappa, charges, coulomb, qfile, Nparent, parent, Nchild, child = readFields(
-        filename)
+    if not field:
+        field = readFields(filename)
 
-    LorY = [int(i) if i != 'NA' else 0 for i in LorY]
-    E = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
-         for i in E]
-    kappa = [param.REAL(i) if i != 'NA' else 0 for i in kappa]
-    pot = [int(i) for i in pot]
-    coulomb = [int(i) for i in coulomb]
-    Nfield = len(LorY)
+    field['LorY'] = [int(i) if i != 'NA' else 0 for i in field['LorY']]
+    field['E'] = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
+         for i in field['E']]
+    field['kappa'] = [param.REAL(i) if i != 'NA' else 0 for i in field['kappa']]
+    field['pot'] = [int(i) for i in field['pot']]
+    field['coulomb'] = [int(i) for i in field['coulomb']]
+    Nfield = len(field['LorY'])
     field_array = []
     Nchild_aux = 0
     for i in range(Nfield):
-        field_aux = Field(LorY[i], kappa[i], E[i], coulomb[i], pot[i])
+        field_aux = Field(field['LorY'][i], field['kappa'][i], field['E'][i],
+                          field['coulomb'][i], field['pot'][i])
 
-        if int(charges[i]) == 1:  # if there are charges
-            field_aux.load_charges(qfile[i], param.REAL)
-        if int(Nparent[i]) == 1:  # if it is an enclosed region
-            field_aux.parent.append(int(parent[i]))
+        if int(field['charges'][i]) == 1:  # if there are charges
+            field_aux.load_charges(field['qfile'][i], param.REAL)
+        if int(field['Nparent'][i]) == 1:  # if it is an enclosed region
+            field_aux.parent.append(int(field['parent'][i]))
             # pointer to parent surface (enclosing surface)
-        if int(Nchild[i]) > 0:  # if there are enclosed regions inside
-            for j in range(int(Nchild[i])):
-                field_aux.child.append(int(child[Nchild_aux + j])
+        if int(field['Nchild'][i]) > 0:  # if there are enclosed regions inside
+            for j in range(int(field['Nchild'][i])):
+                field_aux.child.append(int(field['child'][Nchild_aux + j])
                                        )  # Loop over children to get pointers
-            Nchild_aux += int(Nchild[i])  # Point to child for next surface
-        if pot[i] == 1:
+            Nchild_aux += int(field['Nchild'][i])  # Point to child for next surface
+        if field['pot'][i] == 1:
             param.E_field.append(i)  # Field where surface energy is calculated
 
         field_array.append(field_aux)

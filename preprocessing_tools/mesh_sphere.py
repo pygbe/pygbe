@@ -10,7 +10,7 @@ x0  : float, x center of sphere.
 y0  : float, y center of sphere.
 z0  : float, z center of sphere.
 name: str, output file name.
- 
+
 Returns
 -----
 File with vertices ".vert"
@@ -31,7 +31,7 @@ def read_inputs():
     -x0  : float, x coordinate of the center of sphere.
     -y0  : float, y coordinate of the center of sphere.
     -z0  : float, z coordinate of the center of sphere.
-    -name: str, output file name.    
+    -name: str, output file name.
     """
 
     parser = ArgumentParser(description='Manage mesh_sphere command line arguments')
@@ -82,7 +82,7 @@ x_test = numpy.average(vertex[:,0])
 y_test = numpy.average(vertex[:,1])
 z_test = numpy.average(vertex[:,2])
 if abs(x_test-x0)>1e-12 or abs(y_test-y0)>1e-12 or abs(z_test-z0)>1e-12:
-    print ('Center is not right!')
+    print('Center is not right!')
 
 numpy.savetxt(filename+'.vert', vertex, fmt='%.4f')
 numpy.savetxt(filename+'.face', index_format, fmt='%i')
