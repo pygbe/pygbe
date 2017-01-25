@@ -477,7 +477,7 @@ def calc_aux(field, surface):
 
     return aux
 
-def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricField=0):
+def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field=0):
     """
     It generate the right hand side (RHS) for the GMRES.
 
@@ -579,7 +579,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
         # Assuming field comes in z direction
         LorY = field_array[j].LorY
 
-        if len(field_array[j].parent) == 0 and abs(electricField) > 1e-12:
+        if len(field_array[j].parent) == 0 and abs(electric_field) > 1e-12:
 
              for s in field_array[j].child:  # Loop over child surfaces
                 #Locate position of surface s in RHS
@@ -606,7 +606,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
 
                 else:
                     #Assuming field comes in z direction then
-                    phi_field = electricField*tar.normal[:,2]
+                    phi_field = electric_field*tar.normal[:,2]
                     #The contribution is in the exterior equation
                     K_diag = -2 * pi
                     V_diag = 0
@@ -798,7 +798,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricFi
     return F
 
 
-def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electricField=0):
+def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electric_field=0):
     """
     It generate the right hand side (RHS) for the GMRES suitable for the GPU.
 
@@ -999,7 +999,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
         # Assuming field comes in z direction
         LorY = field.LorY
 
-        if len(field.parent) == 0 and abs(electricField) > 1e-12:
+        if len(field.parent) == 0 and abs(electric_field) > 1e-12:
 
              for s in field.child:  # Loop over child surfaces
                 #Locate position of surface s in RHS
@@ -1026,7 +1026,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
                 else:
                     #Assuming field comes in z direction then
-                    phi_field = electricField*tar.normal[:,2]
+                    phi_field = electric_field*tar.normal[:,2]
                     #The contribution is in the exterior equation
                     K_diag = -2 * pi
                     V_diag = 0
@@ -1364,7 +1364,7 @@ def calculate_surface_energy(surf_array, field_array, param, kernel):
             E_surf.append(0.5 * C0 * Esurf_aux)
     return E_surf
 
-def dipoleMoment(surf_array, electricField):
+def dipole_moment(surf_array, electric_field):
     """
     It calculates the dipole moment on a surface and stores it in the 'dipole'
     attribute of the surface class. The dipole is expressed as a boundary
@@ -1374,7 +1374,7 @@ def dipoleMoment(surf_array, electricField):
     ----------
     surf_array   : array, contains the surface classes of each region on the
                           surface.
-    electricField: float, electric field intensity, it is in the 'z'
+    electric_field: float, electric field intensity, it is in the 'z'
                           direction, '-' indicates '-z'.
     """
 
@@ -1384,7 +1384,7 @@ def dipoleMoment(surf_array, electricField):
         xc = numpy.array([s.xi, s.yi, s.zi])
 
         #Changing dphi to outer side of surfaces
-        dphi = s.dphi * s.E_hat - (1 - s.E_hat) * electricField * s.normal[:,2]
+        dphi = s.dphi * s.E_hat - (1 - s.E_hat) * electric_field * s.normal[:,2]
 
         I1 = numpy.sum(xc * dphi * s.area, axis=1)
         I2 = numpy.sum(numpy.transpose(s.normal) * s.phi * s.area, axis=1)
@@ -1392,7 +1392,7 @@ def dipoleMoment(surf_array, electricField):
         s.dipole = s.Eout * (I1-I2)
 
 
-def extCrossSection(surf_array, k, n, wavelength, electricField):
+def extinction_cross_section(surf_array, k, n, wavelength, electric_field):
     """
     It computes the extinction cross section (Acording to Mischenko2007).
 
@@ -1403,7 +1403,7 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
     k            : array, unit vector in direction of wave propagation.
     n            : array, unit vector in direction of electric field.
     wavelength   : float, wavelength of the incident electric field.
-    electricField: float, electric field intensity, it is in the 'z'
+    electric_field: float, electric field intensity, it is in the 'z'
                           direction, '-' indicates '-z'.
 
     Returns:
@@ -1425,7 +1425,7 @@ def extCrossSection(surf_array, k, n, wavelength, electricField):
         v1 = numpy.cross(k, s.dipole)
         v2 = numpy.cross(v1, k)
 
-        C1 = numpy.dot(n, v2) * waveNumber**2 / (s.Eout * electricField)
+        C1 = numpy.dot(n, v2) * waveNumber**2 / (s.Eout * electric_field)
 
         Cext.append(1 / waveNumber.real * C1.imag)
         surf_Cext.append(i)

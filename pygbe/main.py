@@ -22,9 +22,9 @@ from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy, dipoleMoment,
-                              extCrossSection)
-from pygbe.util.readData import readParameters, readElectricField
+                              coulomb_energy, calculate_surface_energy, dipole_moment,
+                              extinction_cross_section)
+from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
@@ -256,7 +256,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ### Read parameters
     param = Parameters()
-    precision = readParameters(param, paramfile)
+    precision = read_parameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
         param.P + 3) // 6  # Number of terms in Taylor expansion
@@ -286,7 +286,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     surf_array = initialize_surface(field_array, configFile, param)
 
     ### Read electric field and its wavelength.
-    electricField, wavelength = readElectricField(param, configFile)
+    electric_field, wavelength = read_electric_field(param, configFile)
 
 
     ### Fill surface class
@@ -344,10 +344,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electricField)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0, electricField)
+                            ind0, electric_field)
     toc = time.time()
     rhs_time = toc - tic
     #saving rhs for debug lspr 
@@ -396,15 +396,15 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         s_start = surf.fill_phi(phi, s_start)
 
     ###Calculating the dipole moment
-    dipoleMoment(surf_array, electricField)
+    dipole_moment(surf_array, electric_field)
     
     #Calculate extinction cross section for lspr problems
-    if abs(electricField) > 1e-12:
+    if abs(electric_field) > 1e-12:
         
         print('Calculate extinction cross section')
         tic = time.time()
-        Cext, surf_Cext = extCrossSection(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), 
-                           wavelength, electricField)
+        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), 
+                           wavelength, electric_field)
         toc = time.time()
         print('Time Cext: {}s'.format(toc - tic))
         
