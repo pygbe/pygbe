@@ -353,12 +353,12 @@ def read_electric_field(param, filename):
     wavelength = 0
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
+    for line in lines:
+        line = line.split()
 
-            if len(line)>0:
-                if line[0] == 'WAVE':
-                    electric_field = param.REAL((line[1]))
-                    wavelength    = param.REAL((line[2]))
+        if len(line)>0:
+            if line[0] == 'WAVE':
+                electric_field = param.REAL((line[1]))
+                wavelength    = param.REAL((line[2]))
 
     return electric_field, wavelength
