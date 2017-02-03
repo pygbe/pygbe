@@ -1038,7 +1038,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
                                             ind0, timing, kernel)
 
                     F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
-                    F[s_start+s_size:s_start+2*s_size] += (1/tar.E_hat-1) * V_lyr * tar.Precond[3,:]
+                    F[s_start+s_size:s_start+2*s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
     for field in field_array:
