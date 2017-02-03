@@ -16,6 +16,7 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 # Import self made modules
+import pygbe
 from pygbe.gmres import gmres_mgs
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
@@ -242,6 +243,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                                     timestamp.tm_mday))
     print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
                                     timestamp.tm_sec))
+    print('\tPyGBe version: {}'.format(pygbe.__version__))
     TIC = time.time()
 
     print('Config file: {}'.format(configFile))
@@ -432,6 +434,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
     results_dict['E_coul_kcal'] = sum(E_coul)
     results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+
+    results_dict['version'] = pygbe.__version__
 
     output_pickle = outputfname.split('-')
     output_pickle.pop(-1)
