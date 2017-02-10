@@ -420,6 +420,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         for i in range(len(Cext)):
             print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
 
+        results_dict['time_Cext'] = toc - tic
+        results_dict['surf_Cext'] = surf_Cext
+        results_dict['Cext'] = Cext
+
+
     else:
         # Calculate solvation energy
         print('Calculate Esolv')
@@ -474,7 +479,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         print('Esurf = {} kcal/mol'.format(sum(E_surf)))
         print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
         print('\nTime = {} s'.format(toc - TIC))
-        results_dict['total_time'] = (toc - TIC)
+
         results_dict['E_solv_kcal'] = sum(E_solv)
         results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
         results_dict['E_surf_kcal'] = sum(E_surf)
@@ -482,24 +487,25 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         results_dict['E_coul_kcal'] = sum(E_coul)
         results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
 
-        results_dict['version'] = pygbe.__version__
+    results_dict['total_time'] = (toc - TIC)
+    results_dict['version'] = pygbe.__version__
 
-        output_pickle = outputfname.split('-')
-        output_pickle.pop(-1)
-        output_pickle.append('resultspickle')
-        output_pickle = '-'.join(output_pickle)
-        with open(os.path.join(output_dir, output_pickle), 'wb') as f:
-            pickle.dump(results_dict, f, 2)
+    output_pickle = outputfname.split('-')
+    output_pickle.pop(-1)
+    output_pickle.append('resultspickle')
+    output_pickle = '-'.join(output_pickle)
+    with open(os.path.join(output_dir, output_pickle), 'wb') as f:
+        pickle.dump(results_dict, f, 2)
 
-        #reset stdout so regression tests, etc, don't get logged into the output
-        #file that they themselves are trying to read
-        sys.stdout = sys.__stdout__
+    #reset stdout so regression tests, etc, don't get logged into the output
+    #file that they themselves are trying to read
+    sys.stdout = sys.__stdout__
 
-        if return_results_dict:
-            return results_dict
+    if return_results_dict:
+        return results_dict
 
-        if return_output_fname and log_output:
-            return outputfname
+    if return_output_fname and log_output:
+        return outputfname
 
 
 if __name__ == "__main__":
