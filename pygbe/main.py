@@ -34,35 +34,8 @@ except:
     pass
 
 
-#courtesy of http://stackoverflow.com/a/5916874
-#class Logger(object):
-#    """
-#    Allow writing both to STDOUT on screen and sending text to file
-#    in conjunction with the command
-#    `sys.stdout = Logger("desired_log_file.txt")`
-#    """
-#
-#    def __init__(self, filename="Default.log"):
-#        self.terminal = sys.stdout
-#        self.log = open(filename, "a")
-#
-#    def write(self, message):
-#        self.terminal.write(message)
-#        self.log.write(message)
-#
-#    def flush(self):
-#        """Required for Python 3"""
-#        pass
-
 logger = logging.getLogger('pygbe')
 logging.basicConfig(level=logging.INFO)
-fh = logging.FileHandler("test.log")
-# create a logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-
-# add handler to logger object
-logger.addHandler(fh)
 
 
 def read_inputs(args):
@@ -216,11 +189,18 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     logger = logging.getLogger(__name__)
 
-    # stream handler to pipe logging to stdout!
-    # make this a kwarg option
+    fh = logging.FileHandler("test.log")
+    # create a logging format
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+
+    # add handler to root logger object # TODO: make this optional
+    logging.getLogger('pygbe').addHandler(fh)
+
+    # stream handler to pipe root (all) logging to stdout! # TODO: make this optional
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
-    logger.addHandler(ch)
+    logging.getLogger('pygbe').addHandler(ch)
 
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
