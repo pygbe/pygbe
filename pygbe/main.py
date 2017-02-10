@@ -11,6 +11,7 @@ import time
 import glob
 import numpy
 import pickle
+import logging
 import subprocess
 from datetime import datetime
 from argparse import ArgumentParser
@@ -34,24 +35,34 @@ except:
 
 
 #courtesy of http://stackoverflow.com/a/5916874
-class Logger(object):
-    """
-    Allow writing both to STDOUT on screen and sending text to file
-    in conjunction with the command
-    `sys.stdout = Logger("desired_log_file.txt")`
-    """
+#class Logger(object):
+#    """
+#    Allow writing both to STDOUT on screen and sending text to file
+#    in conjunction with the command
+#    `sys.stdout = Logger("desired_log_file.txt")`
+#    """
+#
+#    def __init__(self, filename="Default.log"):
+#        self.terminal = sys.stdout
+#        self.log = open(filename, "a")
+#
+#    def write(self, message):
+#        self.terminal.write(message)
+#        self.log.write(message)
+#
+#    def flush(self):
+#        """Required for Python 3"""
+#        pass
 
-    def __init__(self, filename="Default.log"):
-        self.terminal = sys.stdout
-        self.log = open(filename, "a")
+logger = logging.getLogger('pygbe')
+logging.basicConfig(level=logging.INFO)
+fh = logging.FileHandler("test.log")
+# create a logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
-    def flush(self):
-        """Required for Python 3"""
-        pass
+# add handler to logger object
+logger.addHandler(fh)
 
 
 def read_inputs(args):
@@ -203,6 +214,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                          The name of the log file containing problem output
     """
 
+    logger = logging.getLogger(__name__)
+
+    # stream handler to pipe logging to stdout!
+    # make this a kwarg option
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
     full_path = os.environ.get('PYGBE_PROBLEM_FOLDER')
@@ -235,21 +254,23 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     timestamp = time.localtime()
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
     results_dict['output_file'] = outputfname
-    if log_output:
-        sys.stdout = Logger(os.path.join(output_dir, outputfname))
+#    if log_output:
+#        sys.stdout = Logger(os.path.join(output_dir, outputfname))
     # Time stamp
-    print('Run started on:')
-    print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
-                                    timestamp.tm_mday))
-    print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
-                                    timestamp.tm_sec))
-    print('\tPyGBe version: {}'.format(pygbe.__version__))
+    logger.info('Run started')
+#    print('Run started on:')
+#    print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
+#                                    timestamp.tm_mday))
+#    print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
+#                                    timestamp.tm_sec))
+    logger.info('PyGBe version: {}'.format(pygbe.__version__))
+    #print('\tPyGBe version: {}'.format(pygbe.__version__))
     TIC = time.time()
 
-    print('Config file: {}'.format(configFile))
-    print('Parameter file: {}'.format(paramfile))
-    print('Geometry folder: {}'.format(geo_path))
-    print('Running in: {}'.format(full_path))
+    logger.info('Config file: {}'.format(configFile))
+    logger.info('Parameter file: {}'.format(paramfile))
+    logger.info('Geometry folder: {}'.format(geo_path))
+    logger.info('Running in: {}'.format(full_path))
     results_dict['config_file'] = configFile
     results_dict['param_file'] = paramfile
     results_dict['geo_file'] = geo_path
@@ -266,14 +287,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     HAS_GPU = check_for_nvcc()
     if param.GPU == 1 and not HAS_GPU:
-        print('\n\n\n\n')
-        print('{:-^{}}'.format('No GPU DETECTED', 60))
-        print("Your param file has `GPU = 1` but CUDA was not detected.\n"
-              "Continuing using CPU.  If you do not want this, use Ctrl-C\n"
-              "to stop the program and check that your CUDA installation\n"
-              "is on your $PATH")
-        print('{:-^{}}'.format('No GPU DETECTED', 60))
-        print('\n\n\n\n')
+        logger.error('\n\n\n\n')
+        logger.error('{:-^{}}'.format('No GPU DETECTED', 60))
+        logger.error("Your param file has `GPU = 1` but CUDA was not detected.\n"
+                      "Continuing using CPU. If you do not want this, use Ctrl-C\n"
+                      "to stop the program and check that your CUDA installation\n"
+                      "is on your $PATH")
+        logger.error('{:-^{}}'.format('No GPU DETECTED', 60))
+        logger.error('\n\n\n\n')
         param.GPU = 0
 
     ### Generate array of fields
@@ -301,8 +322,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             param.Neq += N_aux
         else:
             param.Neq += 2 * N_aux
-    print('\nTotal elements : {}'.format(param.N))
-    print('Total equations: {}'.format(param.Neq))
+    logger.info('\nTotal elements : {}'.format(param.N))
+    logger.info('Total equations: {}'.format(param.Neq))
 
     results_dict['total_elements'] = param.N
     results_dict['N_equation'] = param.Neq

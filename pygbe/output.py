@@ -2,6 +2,8 @@
 Prints output with the main information.
 """
 import numpy
+import logging
+logger = logging.getLogger(__name__)
 
 # yapf: disable
 def print_summary(surf_array, field_array, param, results_dict):
@@ -17,8 +19,8 @@ def print_summary(surf_array, field_array, param, results_dict):
     """
 
     Nsurf = len(surf_array)
-    print(28 * '-' + '\n')
-    print('{} surfaces:\n'.format(Nsurf))
+    logger = logging.getLogger(__name__)
+    logger.info('{} surfaces:\n'.format(Nsurf))
     for i in range(len(surf_array)):
         N_aux = len(surf_array[i].triangle)
         rr = numpy.zeros(len(surf_array[i].tree))
@@ -26,14 +28,14 @@ def print_summary(surf_array, field_array, param, results_dict):
             rr[ii] = surf_array[i].tree[ii].r
         Levels = int(numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1)
 
-        print('Surface {}:'.format(i))
-        print('\t{} elements'.format(N_aux))
-        print('\tSurface type       : {}'.format(surf_array[i].surf_type))
-        print('\tCells              : {}'.format(len(surf_array[i].tree)))
-        print('\tTwigs              : {}'.format(len(surf_array[i].twig)))
-        print('\tLevels             : {}'.format(Levels))
-        print('\tC0 size            : {}'.format(surf_array[i].tree[0].r))
-        print('\tC0 box center      : {}, {}, {}'.format(surf_array[i].tree[0].xc,
+        logger.info('Surface {}:'.format(i))
+        logger.info('\t{} elements'.format(N_aux))
+        logger.info('\tSurface type       : {}'.format(surf_array[i].surf_type))
+        logger.info('\tCells              : {}'.format(len(surf_array[i].tree)))
+        logger.info('\tTwigs              : {}'.format(len(surf_array[i].twig)))
+        logger.info('\tLevels             : {}'.format(Levels))
+        logger.info('\tC0 size            : {}'.format(surf_array[i].tree[0].r))
+        logger.info('\tC0 box center      : {}, {}, {}'.format(surf_array[i].tree[0].xc,
                                                          surf_array[i].tree[0].yc,
                                                          surf_array[i].tree[0].zc))
         print('\tTwig cell size     : {}'.format(numpy.min(rr)))
