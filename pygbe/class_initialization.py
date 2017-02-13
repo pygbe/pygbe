@@ -60,7 +60,7 @@ def initialize_field(filename, param, field=None):
 
     for key in ['E', 'kappa']:
         for i, e in enumerate(field[key]):
-            if not isinstance(e, complex):
+            if not isinstance(e, complex) and not isinstance(e, str):
                 field[key][i] = param.REAL(field[key][i])
 
     Nfield = len(field['LorY'])
