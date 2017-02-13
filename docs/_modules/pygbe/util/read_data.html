@@ -262,7 +262,7 @@
     <span class="k">return</span> <span class="n">dataType</span></div>
 
 
-<div class="viewcode-block" id="readFields"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readFields">[docs]</a><span class="k">def</span> <span class="nf">readFields</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="read_fields"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_fields">[docs]</a><span class="k">def</span> <span class="nf">read_fields</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the physical parameters from the configuration file for each region</span>
 <span class="sd">    in the surface</span>
@@ -332,6 +332,16 @@
                 <span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
                     <span class="n">field</span><span class="p">[</span><span class="s1">&#39;child&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">11</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">,</span> <span class="s1">&#39;Nparent&#39;</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="s1">&#39;Nchild&#39;</span><span class="p">,</span> <span class="s1">&#39;child&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;pot&#39;</span><span class="p">,</span> <span class="s1">&#39;coulomb&#39;</span><span class="p">,</span> <span class="s1">&#39;charges&#39;</span><span class="p">]:</span>
+        <span class="n">field</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+
+    <span class="c1"># NOTE: We ignore the value of `param.REAL` here but cast down in</span>
+    <span class="c1"># `class_initialization.initialize_field` if necessary</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">complex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;j&#39;</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]]</span>
 
     <span class="k">return</span> <span class="n">field</span></div>
 

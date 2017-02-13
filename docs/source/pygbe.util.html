@@ -637,8 +637,33 @@ files, when we read the lines.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.read_data.readFields">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readFields</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readFields" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readParameters">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>It populates the attributes from the Parameters class with the information
+read from the .param file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_fields">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_fields</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_fields" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the physical parameters from the configuration file for each region
 in the surface</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -663,31 +688,6 @@ the FILE section, parent=2)</li>
 <li><strong>Nchild</strong> (<em>list, it contains integers indicating number of child surfaces</em>) &#8211; (surfaces completely contained in this region).</li>
 <li><strong>child</strong> (<em>list, it contains position of the mesh files for the children</em>) &#8211; surface in the FILE section.</li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.read_data.readParameters">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>It populates the attributes from the Parameters class with the information
-read from the .param file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
-<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
 </td>
 </tr>
 </tbody>
