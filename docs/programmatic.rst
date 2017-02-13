@@ -60,24 +60,19 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
 
 .. code:: python
 
-    lys_field = {'E': ['80', '80', '4', '80', '80', '80'],
-                'LorY': ['2', '1', '1', '1', '1', '1'],
-                'Nchild': ['1', '1', '3', '0', '0', '0'],
-                'Nparent': ['0', '1', '1', '1', '1', '1'],
-                'charges': ['0', '0', '1', '0', '0', '0'],
-                'child': ['0', '1', '2', '3', '4'],
-                'coulomb': ['0', '0', '1', '0', '0', '0'],
-                'kappa': ['0.125', '1e-12', '1e-12', '1e-12', '1e-12', '1e-12'],
-                'parent': ['NA', '0', '1', '2', '3', '4'],
-                'pot': ['0', '0', '1', '0', '0', '0'],
+    lys_field = {'E': [80, 80, 4, 80, 80, 80],
+                'LorY': [2, 1, 1, 1, 1, 1],
+                'Nchild': [1, 1, 3, 0, 0, 0],
+                'Nparent': [0, 1, 1, 1, 1, 1],
+                'charges': [0, 0, 1, 0, 0, 0],
+                'child': [0, 1, 2, 3, 4],
+                'coulomb': [0, 0, 1, 0, 0, 0],
+                'kappa': [0.125, 1e-12, 1e-12, 1e-12, 1e-12, 1e-12],
+                'parent': ['NA', 0, 1, 2, 3, 4],
+                'pot': [0, 0, 1, 0, 0, 0],
                 'qfile': ['NA',
                 'NA',
                 '/home/gil/git/pygbe/examples/lys/lys1_charges.pqr',
                 'NA'
                 'NA',
                 'NA']}
-
-.. note:: Numeric values can be strings or ints or floats -- they will be
-          converted accordingly.
-          
-
