@@ -58,12 +58,12 @@ def initialize_field(filename, param, field=None):
     if not field:
         field = readFields(filename)
 
-    field['LorY'] = [int(i) if i != 'NA' else 0 for i in field['LorY']]
-    field['E'] = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
-         for i in field['E']]
-    field['kappa'] = [param.REAL(i) if i != 'NA' else 0 for i in field['kappa']]
-    field['pot'] = [int(i) for i in field['pot']]
-    field['coulomb'] = [int(i) for i in field['coulomb']]
+        field['LorY'] = [int(i) if i != 'NA' else 0 for i in field['LorY']]
+        field['E'] = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
+            for i in field['E']]
+        field['kappa'] = [param.REAL(i) if i != 'NA' else 0 for i in field['kappa']]
+        field['pot'] = [int(i) for i in field['pot']]
+        field['coulomb'] = [int(i) for i in field['coulomb']]
     Nfield = len(field['LorY'])
     field_array = []
     Nchild_aux = 0
