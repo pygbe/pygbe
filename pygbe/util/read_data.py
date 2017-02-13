@@ -218,7 +218,7 @@ def read_parameters(param, filename):
     return dataType
 
 
-def readFields(filename):
+def read_fields(filename):
     """
     Read the physical parameters from the configuration file for each region
     in the surface
@@ -288,6 +288,16 @@ def readFields(filename):
                 field['Nchild'].append(line[10])
                 for i in range(int(field['Nchild'][-1])):
                     field['child'].append(line[11 + i])
+
+    for key in ['LorY', 'Nparent', 'parent', 'Nchild', 'child',
+                'pot', 'coulomb', 'charges']:
+        field[key] = [int(i) if i != 'NA' else 0 for i in field[key]]
+
+    # NOTE: We ignore the value of `param.REAL` here but cast down in
+    # `class_initialization.initialize_field` if necessary
+    field['E'] = [complex(i) if 'j' in i else float(i) if i != 'NA' else 0
+        for i in field['E']]
+    field['kappa'] = [float(i) if i != 'NA' else 0 for i in field['kappa']]
 
     return field
 
