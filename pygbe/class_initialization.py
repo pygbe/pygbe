@@ -2,7 +2,7 @@
 It contains the necessary functions to set up the surface to be solved.
 """
 
-from pygbe.util.read_data import readFields, read_surface
+from pygbe.util.read_data import read_fields, read_surface
 from pygbe.classes import Field, Surface
 
 
@@ -56,14 +56,13 @@ def initialize_field(filename, param, field=None):
     """
 
     if not field:
-        field = readFields(filename)
+        field = read_fields(filename)
 
-        field['LorY'] = [int(i) if i != 'NA' else 0 for i in field['LorY']]
-        field['E'] = [complex(i) if 'j' in i else param.REAL(i) if i != 'NA' else 0
-            for i in field['E']]
-        field['kappa'] = [param.REAL(i) if i != 'NA' else 0 for i in field['kappa']]
-        field['pot'] = [int(i) for i in field['pot']]
-        field['coulomb'] = [int(i) for i in field['coulomb']]
+    for key in ['E', 'kappa']:
+        for i, e in enumerate(field[key]):
+            if not isinstance(e, complex):
+                field[key][i] = param.REAL(field[key][i])
+
     Nfield = len(field['LorY'])
     field_array = []
     Nchild_aux = 0
