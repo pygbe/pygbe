@@ -240,6 +240,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
     results_dict['output_file'] = outputfname
     if log_output:
+        restore_stdout = sys.stdout
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     # Time stamp
     print('Run started on:')
@@ -358,7 +359,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
                             ind0, electric_field)
     toc = time.time()
     rhs_time = toc - tic
-    #saving rhs for debug lspr 
+    #saving rhs for debug lspr
     numpy.savetxt('RHS.txt',F)
 
     setup_time = toc - TIC
@@ -405,17 +406,17 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ###Calculating the dipole moment
     dipole_moment(surf_array, electric_field)
-    
+
     #Calculate extinction cross section for lspr problems
     if abs(electric_field) > 1e-12:
-        
+
         print('Calculate extinction cross section')
         tic = time.time()
-        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]), 
+        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
                            wavelength, electric_field)
         toc = time.time()
         print('Time Cext: {}s'.format(toc - tic))
-        
+
         print('\nCext:')
         for i in range(len(Cext)):
             print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
@@ -499,7 +500,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
-    sys.stdout = sys.__stdout__
+    if log_output:
+        sys.stdout = restore_stdout
 
     if return_results_dict:
         return results_dict
