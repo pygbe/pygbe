@@ -53,8 +53,9 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = 2 * pi
     V_diag = 0
     IorE = 1
-
-    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+    
+    if numpy.iscomplexobj(surf.XinK) or numpy.iscomplexobj(surf.XinV): 
+    #if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
 
         K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.XinV.real, LorY, surf,
                              surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
@@ -108,7 +109,8 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     V_diag = 0.
     IorE = 2
 
-    if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+    if numpy.iscomplexobj(surf.XinK) or numpy.iscomplexobj(surf.XinV): 
+    #if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
 
         K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.XinV.real, LorY, surf,
                              surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
@@ -164,7 +166,8 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     V_diag = 0
     IorE = 1
 
-    if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
+    if numpy.iscomplexobj(surf[src].XinK) or numpy.iscomplexobj(surf[src].XinV): 
+    #if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
 
         K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
                                  LorY, surf[src], surf[tar], K_diag, V_diag,
@@ -218,7 +221,8 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     V_diag = 0
     IorE = 2
 
-    if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
+    if numpy.iscomplexobj(surf[src].XinK) or numpy.iscomplexobj(surf[src].XinV): 
+    #if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
 
         K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
                                     LorY, surf[src], surf[tar], K_diag, V_diag,
@@ -303,7 +307,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     #   Check if there is a complex dielectric
     complexDiel = 0
     for f in field_array:
-        if type(f.E) == complex:
+        if isinstance(f.E, (complex, numpy.complex128)):
             complexDiel = 1
 
     #   Place weights on corresponding surfaces and allocate memory
@@ -312,7 +316,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
             if complexDiel == 1:
-                surf_array[i].XinK = numpy.zeros(N, complex)
+                surf_array[i].XinK = numpy.zeros(N, type(f.E))
             else:
                 surf_array[i].XinK = numpy.zeros(N)
             surf_array[i].XinV = X[Naux:Naux + N]
@@ -321,7 +325,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                 i].surf_type == 'asc_surface':
             surf_array[i].XinK = X[Naux:Naux + N]
             if complexDiel == 1:
-                surf_array[i].XinV = numpy.zeros(N, complex)
+                surf_array[i].XinV = numpy.zeros(N, type(f.E))
             else:
                 surf_array[i].XinV = numpy.zeros(N)
             Naux += N
@@ -331,8 +335,8 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
             Naux += 2 * N
 
         if complexDiel == 1:
-            surf_array[i].Xout_int = numpy.zeros(N, complex)
-            surf_array[i].Xout_ext = numpy.zeros(N, complex)
+            surf_array[i].Xout_int = numpy.zeros(N, type(f.E))
+            surf_array[i].Xout_ext = numpy.zeros(N, type(f.E))
         else:
             surf_array[i].Xout_int = numpy.zeros(N)
             surf_array[i].Xout_ext = numpy.zeros(N)
@@ -391,7 +395,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
 
     #   Gather results into the result vector
     if complexDiel == 1:
-        MV = numpy.zeros(len(X), complex)
+        MV = numpy.zeros(len(X), type(f.E))
     else:
         MV = numpy.zeros(len(X))
     Naux = 0
@@ -499,12 +503,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
 
     complexDiel = 0
     for f in field_array:
-        if type(f.E) == complex:
+        if isinstance(f.E, (complex, numpy.complex128)):
             complexDiel = 1
 
     # Initializing F dtype according to the problem we are solving.
     if complexDiel == 1:
-        F = numpy.zeros(param.Neq, complex)
+        F = numpy.zeros(param.Neq, type(f.E))
     else:
         F = numpy.zeros(param.Neq)
 
@@ -821,12 +825,12 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
     complexDiel = 0
     for f in field_array:
-        if type(f.E) == complex:
+        if isinstance(f.E, (complex, numpy.complex128)):
             complexDiel = 1
 
     # Initializing F dtype according to the problem we are solving.
     if complexDiel == 1:
-        F = numpy.zeros(param.Neq, complex)
+        F = numpy.zeros(param.Neq, type(f.E))
     else:
         F = numpy.zeros(param.Neq)
 

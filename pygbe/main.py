@@ -373,7 +373,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     #   Check if there is a complex dielectric
     complexDiel = 0
     for f in field_array:
-        if type(f.E) == complex:
+        if isinstance(f.E, (complex, numpy.complex128)):
             complexDiel = 1
 
 
@@ -383,7 +383,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
     if complexDiel == 1:
-        phi = numpy.zeros(param.Neq, complex)
+        phi = numpy.zeros(param.Neq, type(f.E))
     else:
         phi = numpy.zeros(param.Neq)
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,

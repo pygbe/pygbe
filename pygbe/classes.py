@@ -307,8 +307,10 @@ class Surface():
         """
         # If we have complex dielectric constants we need to initialize Precon with
         # complex type else it'll be float.
-        if type(self.E_hat) == complex:
-            self.Precond = numpy.zeros((4, self.N), complex)
+
+        #if type(self.E_hat) == complex:
+        if numpy.iscomplexobj(self.E_hat):
+            self.Precond = numpy.zeros((4, self.N), type(self.E_hat))
         else:
             self.Precond = numpy.zeros((4, self.N))
         # Stores the inverse of the block diagonal (also a tridiag matrix)

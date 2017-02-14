@@ -1,7 +1,7 @@
 """
 It contains the necessary functions to set up the surface to be solved.
 """
-
+import numpy
 from pygbe.util.read_data import read_fields, read_surface
 from pygbe.classes import Field, Surface
 
@@ -60,7 +60,7 @@ def initialize_field(filename, param, field=None):
 
     for key in ['E', 'kappa']:
         for i, e in enumerate(field[key]):
-            if not isinstance(e, complex) and not isinstance(e, str):
+            if not isinstance(e, (complex, numpy.complex128)) and not isinstance(e, str):
                 field[key][i] = param.REAL(field[key][i])
 
     Nfield = len(field['LorY'])
