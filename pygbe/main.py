@@ -371,7 +371,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     #   Check if there is a complex dielectric
     complexDiel = 0
     for f in field_array:
-        if isinstance(f.E, (complex, numpy.complex128)):
+        if numpy.iscomplexobj(f.E):
             complexDiel = 1
 
 
