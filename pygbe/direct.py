@@ -1,6 +1,5 @@
 import numpy
 import numba
-from numba import float64
 
 
 @numba.jit('float64(float64[:])', nopython=True, cache=True)
