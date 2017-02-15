@@ -236,6 +236,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     outputfname = '{:%Y-%m-%d-%H%M%S}-output.log'.format(datetime.now())
     results_dict['output_file'] = outputfname
     if log_output:
+        restore_stdout = sys.stdout
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
     # Time stamp
     print('Run started on:')
@@ -446,7 +447,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
-    sys.stdout = sys.__stdout__
+    if log_output
+        sys.stdout = restore_stdout
 
     if return_results_dict:
         return results_dict
