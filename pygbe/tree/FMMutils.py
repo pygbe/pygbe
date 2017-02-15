@@ -6,7 +6,8 @@ import numpy
 from scipy.misc import comb
 
 # Wrapped code
-from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
+from pygbe.tree.multipole import multipole_c, multipole_sort, multipoleKt_sort
+from pygbe.multipole import setIndex, getIndex_arr
 from pygbe.tree.direct import direct_c, direct_sort, directKt_sort
 from pygbe.tree.calculateMultipoles import P2M, M2M
 
@@ -443,8 +444,9 @@ def precomputeTerms(P, ind0):
         ii, jj, kk = numpy.mgrid[0:ind0.II[i] + 1:1, 0:ind0.JJ[i] + 1:1, 0:
                                  ind0.KK[i] + 1:1].astype(numpy.int32)
         ii, jj, kk = ii.ravel(), jj.ravel(), kk.ravel()
-        index_aux = numpy.zeros(len(ii), numpy.int32)
-        getIndex_arr(P, len(ii), index_aux, ii, jj, kk)
+#        index_aux = numpy.zeros(len(ii), numpy.int32)
+#        getIndex_arr(P, len(ii), index_aux, ii, jj, kk)
+        index_aux = getIndex_arr(P, ii, jj, kk)
         ind0.index_small = numpy.append(ind0.index_small, index_aux)
         ind0.index_ptr[i + 1] = len(index_aux) + ind0.index_ptr[i]
         ind0.combII = numpy.append(ind0.combII, comb(ind0.II[i], ii))
