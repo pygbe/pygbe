@@ -109,3 +109,54 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
         a[I] = (1/(2 * R**2)
                 * ( -kappa * (dx * b[Im1x] + dy * b[Im1y])
                     - (2 * 2 - 1) * (dx * a[Im1x] + dy * a[Im1y]) ))
+
+    I = index[getIndex(P,1,0,1)]
+    Im1x = 1
+    Im1z = I - 1
+
+    if laplace:
+        a[I] = 1 / (2 * R**2) * ( -(2 * 2 - 1) * (dx * a[Im1x] + dz * a[Im1z]) )
+    elif yukawa:
+        b[I] = Cb * (dx * a[Im1x] + dz * a[Im1z])
+        a[I] = (1/(2 * R**2)
+                * ( -kappa * (dx * b[Im1x] + dz * b[Im1z])
+                    - (2 * 2 - 1) * (dx * a[Im1x] + dz * a[Im1z]) ))
+
+    I = index[getIndex(P,0,1,1)]
+    Im1y = I - (P + 2 - 1)
+    Im1z = I - 1
+
+    if laplace:
+        a[I] = 1 / (2 * R**2) * ( -(2 * 2 - 1) * (dy * a[Im1y] + dz * a[Im1z]) )
+    elif yukawa:
+        b[I] = Cb * (dy * a[Im1y] + dz * a[Im1z])
+        a[I] = (1/(2 * R**2)
+                * ( -kappa * (dy * b[Im1y] + dz * b[Im1z])
+                    - (2 * 2 - 1) * (dy * a[Im1y] + dz * a[Im1z]) ))
+
+    # porting from line 176 of multipole.cpp
+    for i in range(2, P):
+        Cb = -kappa / (i + 1)
+        C = 1 / ((1 + i) * R**2)
+
+        I = index[getIndex(P, 1, i, 0)]
+        Im1x = index[getIndex(P, 0, i, 0)]
+        Im1y = I - (P + 2 - i - 1)
+        Im2y = Im1y - (P + 2 - i)
+
+        yukawa_1(b, i, Cb, C, dx, Im1x, dy, Im1y, Im2y, kappa)
+
+
+
+
+@njit
+def yukawa_1(b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
+    b[I] = Cb * (d_1 * a[Im1_1] + d_2 * a[Im1_2] + a[Im2_2])
+    a[I] = C * (-kappa * (d_1 * b[Im1_1] + d_2 * b[Im1_2 + b[Im2_2])
+                          - (2 * (i + 1) - 1)
+                          * (d_1 * a[Im1_1] + d_2 * a[Im1_2])
+                          - (1 + i - 1) * a[Im2_2])
+
+
+
+
