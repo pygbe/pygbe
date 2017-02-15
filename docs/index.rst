@@ -5,9 +5,13 @@
    :maxdepth: 2
 
    installation
+   run
+   cite
    contributing
    input_format
    references
+   othersoftware
+   programmatic
 
 
 

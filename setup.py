@@ -6,6 +6,7 @@ from setuptools.command.install import install
 from setuptools import setup, find_packages, Extension
 import numpy
 import shutil
+import versioneer
 
 class CustomBuild(build):
     """
@@ -45,16 +46,14 @@ def main():
             name='PyGBe',
             description='A boundary element method code that does molecular electrostatics calculations with a continuum approach',
             platforms='Linux',
-            install_requires = [
-                'numpy > 1.8',
-            ],
+            install_requires = ['numpy > 1.8',],
             license='MIT',
-            version='0.2',
+            version=versioneer.get_version(),
+            cmdclass=versioneer.get_cmdclass(cmdclass={'build': CustomBuild, 'install': CustomInstall}),
             url='https://github.com/barbagroup/pygbe',
-            classifiers=['Programming Language :: Python :: 2'],
+            classifiers=['Programming Language :: Python :: 3'],
             packages = find_packages(),
             #tell setuptools to use the custom build and install classes
-            cmdclass={'build': CustomBuild, 'install': CustomInstall},
             #create an entrance point that points to pygbe.main.main
             entry_points={'console_scripts': ['pygbe = pygbe.main:main']},
             #SWIG modules with all compilation options

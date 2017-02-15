@@ -19,15 +19,22 @@ from pygbe.main import main
                                  'E_coul_kcal',
                                  'E_coul_kJ',
                                  'E_solv_kcal'])
-def test_PGB_mut_sensor(key):
+def test_two_sphere(key):
     results = get_results()
 
     with open('two_sphere.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
-    assert base_results[key] == results[key]
+    assert abs(base_results[key] - results[key]) / (abs(base_results[key]) + 1e-16) < 1e-12
 
-@functools.lru_cache(5)
+def test_two_sphere_iterations():
+    results = get_results()
+    with open('two_sphere.pickle', 'rb') as f:
+        base_results = pickle.load(f)
+
+    assert base_results['iterations'] == results['iterations']
+
+@functools.lru_cache(6)
 def get_results():
     print('Generating results for two spheres example...')
     if os.getcwd().rsplit('/', 1)[1] == 'tests':

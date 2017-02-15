@@ -1,12 +1,6 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -19,7 +13,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #twosphere_neumann
+    # twosphere_neumann
     print('Runs for two spherical surfaces with set dphidn')
     param = 'sphere_fine.param'
     test_name = 'twosphere_neumann'
@@ -30,7 +24,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #neumann_surface
+    # neumann_surface
     print('Runs for isolated surface')
     param = 'sphere_fine.param'
     test_name = 'neumann_surface'
@@ -55,7 +49,8 @@ def main():
 
     error = abs(Einter - analytical) / abs(analytical)
 
-    report_results(error, N, iterations, Einter, analytical, total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time,
+                   test_name='twosphere neumann')
 
 
 if __name__ == '__main__':

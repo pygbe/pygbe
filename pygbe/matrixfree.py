@@ -2,7 +2,6 @@
 Matrix free formulation of the matrix vector product in the GMRES.
 """
 
-import time
 import numpy
 from numpy import pi
 
@@ -19,10 +18,10 @@ try:
 except:
     pass
 
-## Note:
-##  Remember ordering of equations:
-##      Same order as defined in config file,
-##      with internal equation first and then the external equation.
+# Note:
+#  Remember ordering of equations:
+#      Same order as defined in config file,
+#      with internal equation first and then the external equation.
 
 
 def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
@@ -205,8 +204,6 @@ def selfASC(surf, src, tar, LorY, param, ind0, timing, kernel):
     """
 
     Kt_diag = -2 * pi * (surf.Eout + surf.Ein) / (surf.Eout - surf.Ein)
-    V_diag = 0
-
     Kt_lyr = project_Kt(surf.XinK, LorY, surf, surf, Kt_diag, src, param, ind0,
                         timing, kernel)
 
@@ -341,6 +338,63 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
 
     return MV
 
+def locate_s_in_RHS(surf_index, surf_array):
+    """Find starting index for current surface on RHS
+
+    This is assembling the RHS of the block matrix. Needs to go through all the
+    previous surfaces to find out where on the RHS vector it belongs. If any
+    previous surfaces were dirichlet, neumann or asc, then they take up half
+    the number of spots in the RHS, so we act accordingly.
+
+    Arguments
+    ---------
+    surf_index: int, index of surface in question
+    surf_array: list, list of all surfaces in problem
+
+    Returns
+    -------
+    s_start: int, index to insert values on RHS
+
+    """
+    s_start = 0
+    for surfs in range(surf_index):
+        if surf_array[surfs].surf_type in ['dirichlet_surface',
+                                           'neumann_surface',
+                                           'asc_surface']:
+            s_start += len(surf_array[surfs].xi)
+        else:
+            s_start += 2 * len(surf_array[surfs].xi)
+
+    return s_start
+
+def calc_aux(field, surface):
+    """Helper function to calculate aux
+
+    Arguments
+    ---------
+    field: Field object, current field being evaluated
+    surface: Surface object, current surface being evaluated
+
+    Returns
+    -------
+    aux: numpy array
+    """
+    aux = numpy.zeros_like(surface.xi)
+    for i, q in enumerate(field.q):
+        dx_pq = surface.xi - field.xq[i, 0]
+        dy_pq = surface.yi - field.xq[i, 1]
+        dz_pq = surface.zi - field.xq[i, 2]
+        R_pq = numpy.sqrt(dx_pq**2 + dy_pq**2 + dz_pq**2)
+
+        if surface.surf_type == 'asc_surface':
+            aux -= (q / (R_pq**3) *
+                    (dx_pq*surface.normal[:,0] +
+                     dy_pq*surface.normal[:,1] +
+                     dz_pq*surface.normal[:,2]))
+        else:
+            aux += q / (field.E * R_pq)
+
+    return aux
 
 def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     """
@@ -365,39 +419,15 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     F = numpy.zeros(param.Neq)
 
     #   Point charge contribution to RHS
-    for j in range(len(field_array)):
-        Nq = len(field_array[j].q)
+    for field in field_array:
+        Nq = len(field.q)
         if Nq > 0:
             #           First look at CHILD surfaces
-            for s in field_array[j].child:  # Loop over surfaces
+            for s in field.child:  # Loop over surfaces
                 #           Locate position of surface s in RHS
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        s_start += len(surf_array[ss].xi)
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
-
+                s_start = locate_s_in_RHS(s, surf_array)
                 s_size = len(surf_array[s].xi)
-
-                aux = numpy.zeros(len(surf_array[s].xi))
-                for i in range(Nq):
-                    dx_pq = surf_array[s].xi - field_array[j].xq[i, 0]
-                    dy_pq = surf_array[s].yi - field_array[j].xq[i, 1]
-                    dz_pq = surf_array[s].zi - field_array[j].xq[i, 2]
-                    R_pq = numpy.sqrt(dx_pq * dx_pq + dy_pq * dy_pq + dz_pq *
-                                      dz_pq)
-
-                    if surf_array[s].surf_type == 'asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
-                    else:
-                        aux += field_array[j].q[i] / (field_array[j].E * R_pq)
-
+                aux = calc_aux(field, surf_array[s])
 #               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
@@ -421,35 +451,26 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                       s_size] += aux * surf_array[s].Precond[3, :]
 
 #           Now look at PARENT surface
-            if len(field_array[j].parent) > 0:
+            if len(field.parent) > 0:
                 #           Locate position of surface s in RHS
-                s = field_array[j].parent[0]
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        s_start += len(surf_array[ss].xi)
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
-
+                s = field.parent[0]
+                s_start = locate_s_in_RHS(s, surf_array)
                 s_size = len(surf_array[s].xi)
 
                 aux = numpy.zeros(len(surf_array[s].xi))
                 for i in range(Nq):
-                    dx_pq = surf_array[s].xi - field_array[j].xq[i, 0]
-                    dy_pq = surf_array[s].yi - field_array[j].xq[i, 1]
-                    dz_pq = surf_array[s].zi - field_array[j].xq[i, 2]
-                    R_pq = numpy.sqrt(dx_pq * dx_pq + dy_pq * dy_pq + dz_pq *
-                                      dz_pq)
+                    dx_pq = surf_array[s].xi - field.xq[i, 0]
+                    dy_pq = surf_array[s].yi - field.xq[i, 1]
+                    dz_pq = surf_array[s].zi - field.xq[i, 2]
+                    R_pq = numpy.sqrt(dx_pq**2 + dy_pq**2 + dz_pq**2)
 
                     if surf_array[s].surf_type == 'asc_surface':
-                        aux -= field_array[j].q[i]/(R_pq*R_pq*R_pq) * (dx_pq*surf_array[s].normal[:,0] \
-                                                                    + dy_pq*surf_array[s].normal[:,1] \
-                                                                    + dz_pq*surf_array[s].normal[:,2])
+                        aux -= (field.q[i]/(R_pq*R_pq*R_pq) *
+                                (dx_pq*surf_array[s].normal[:,0] +
+                                 dy_pq*surf_array[s].normal[:,1] +
+                                 dz_pq*surf_array[s].normal[:,2]))
                     else:
-                        aux += field_array[j].q[i] / (field_array[j].E * R_pq)
+                        aux += field.q[i] / (field.E * R_pq)
 
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
@@ -464,16 +485,16 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                       s_size] += aux * surf_array[s].Precond[2, :]
 
 #   Dirichlet/Neumann contribution to RHS
-    for j in range(len(field_array)):
+#    for field in field_array:
 
         dirichlet = []
         neumann = []
-        LorY = field_array[j].LorY
+        LorY = field.LorY
 
         #       Find Dirichlet and Neumann surfaces in region
         #       Dirichlet/Neumann surfaces can only be child of region,
         #       no point on looking at parent surface
-        for s in field_array[j].child:
+        for s in field.child:
             if surf_array[s].surf_type == 'dirichlet_surface':
                 dirichlet.append(s)
             elif surf_array[s].surf_type == 'neumann_surface':
@@ -482,9 +503,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
         if len(neumann) > 0 or len(dirichlet) > 0:
 
             #           First look at influence on SIBLING surfaces
-            for s in field_array[j].child:
+            for s in field.child:
 
-                param.kappa = field_array[j].kappa
+                param.kappa = field.kappa
 
                 #               Effect of dirichlet surfaces
                 for sd in dirichlet:
@@ -497,7 +518,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                            K_diag, V_diag, IorE, sd, param,
                                            ind0, timing, kernel)
 
-                    #                   Find location of surface s in RHS array
+                    # Find location of surface s in RHS array
                     s_start = 0
                     for ss in range(s):
                         if surf_array[
@@ -510,10 +531,10 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charged surface, the surface has only one equation,
-                    #                   else, s has 2 equations and K_lyr affects the external
-                    #                   equation (SIBLING surfaces), which is placed after the internal
-                    #                   one, hence Precond[1,:] and Precond[3,:].
+                    # if s is a charged surface, the surface has only one equation,
+                    # else, s has 2 equations and K_lyr affects the external
+                    # equation (SIBLING surfaces), which is placed after the internal
+                    # one, hence Precond[1,:] and Precond[3,:].
                     if surf_array[
                             s].surf_type == 'dirichlet_surface' or surf_array[
                                 s].surf_type == 'neumann_surface' or surf_array[
@@ -537,7 +558,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                         surf_array[s], K_diag, V_diag, IorE, sn, param, ind0,
                         timing, kernel)
 
-                    #                   Find location of surface s in RHS array
+                    # Find location of surface s in RHS array
                     s_start = 0
                     for ss in range(s):
                         if surf_array[
@@ -550,10 +571,10 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   if s is a charge surface, the surface has only one equation,
-                    #                   else, s has 2 equations and V_lyr affects the external
-                    #                   equation, which is placed after the internal one, hence
-                    #                   Precond[1,:] and Precond[3,:].
+                    # if s is a charge surface, the surface has only one equation,
+                    # else, s has 2 equations and V_lyr affects the external
+                    # equation, which is placed after the internal one, hence
+                    # Precond[1,:] and Precond[3,:].
                     if surf_array[
                             s].surf_type == 'dirichlet_surface' or surf_array[
                                 s].surf_type == 'neumann_surface' or surf_array[
@@ -571,9 +592,9 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 #           since we are not solving for anything inside them.
 #           Then, in this case we will not look at self interaction,
 #           which is dealt with by the sibling surface section
-            if len(field_array[j].parent) == 1:
+            if len(field.parent) == 1:
 
-                s = field_array[j].parent[0]
+                s = field.parent[0]
 
                 #               Effect of dirichlet surfaces
                 for sd in dirichlet:
@@ -586,7 +607,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                                            K_diag, V_diag, IorE, sd, param,
                                            ind0, timing, kernel)
 
-                    #                   Find location of surface s in RHS array
+                    # Find location of surface s in RHS array
                     s_start = 0
                     for ss in range(s):
                         if surf_array[
@@ -599,8 +620,8 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   Surface s has 2 equations and K_lyr affects the internal
-                    #                   equation, hence Precond[0,:] and Precond[2,:].
+                    # Surface s has 2 equations and K_lyr affects the internal
+                    # equation, hence Precond[0,:] and Precond[2,:].
                     F[s_start:s_start + s_size] += K_lyr * surf_array[
                         s].Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
@@ -617,7 +638,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                         surf_array[s], K_diag, V_diag, IorE, sn, param, ind0,
                         timing, kernel)
 
-                    #                   Find location of surface s in RHS array
+                    # Find location of surface s in RHS array
                     s_start = 0
                     for ss in range(s):
                         if surf_array[
@@ -630,8 +651,8 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
 
                     s_size = len(surf_array[s].xi)
 
-                    #                   Surface s has 2 equations and K_lyr affects the internal
-                    #                   equation, hence Precond[0,:] and Precond[2,:].
+                    # Surface s has 2 equations and K_lyr affects the internal
+                    # equation, hence Precond[0,:] and Precond[2,:].
                     F[s_start:s_start + s_size] += -V_lyr * surf_array[
                         s].Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
@@ -665,42 +686,31 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
-    for j in range(len(field_array)):
-        Nq = len(field_array[j].q)
+    for field in field_array:
+        Nq = len(field.q)
         if Nq > 0:
 
-            #           First for CHILD surfaces
-            for s in field_array[j].child[:]:  # Loop over surfaces
-                #           Locate position of surface s in RHS
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        s_start += len(surf_array[ss].xi)
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
+            for s in field.child:  # Loop over surfaces
+                surface = surf_array[s]
+                s_start = locate_s_in_RHS(s, surf_array)
+                s_size = len(surface.xi)
+                Nround = len(surface.twig) * param.NCRIT
 
-                s_size = len(surf_array[s].xi)
-                Nround = len(surf_array[s].twig) * param.NCRIT
+                GSZ = int(numpy.ceil(float(Nround) / param.NCRIT))  # CUDA grid size
 
-                GSZ = int(numpy.ceil(float(Nround) / param.NCRIT)
-                          )  # CUDA grid size
-
-                if surf_array[s].surf_type != 'asc_surface':
+                if surface.surf_type != 'asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)
                     computeRHS_gpu(F_gpu,
-                                   field_array[j].xq_gpu,
-                                   field_array[j].yq_gpu,
-                                   field_array[j].zq_gpu,
-                                   field_array[j].q_gpu,
-                                   surf_array[s].xiDev,
-                                   surf_array[s].yiDev,
-                                   surf_array[s].ziDev,
-                                   surf_array[s].sizeTarDev,
+                                   field.xq_gpu,
+                                   field.yq_gpu,
+                                   field.zq_gpu,
+                                   field.q_gpu,
+                                   surface.xiDev,
+                                   surface.yiDev,
+                                   surface.ziDev,
+                                   surface.sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field_array[j].E),
+                                   REAL(field.E),
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -716,16 +726,16 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     computeRHSKt_gpu(Fx_gpu,
                                      Fy_gpu,
                                      Fz_gpu,
-                                     field_array[j].xq_gpu,
-                                     field_array[j].yq_gpu,
-                                     field_array[j].zq_gpu,
-                                     field_array[j].q_gpu,
-                                     surf_array[s].xiDev,
-                                     surf_array[s].yiDev,
-                                     surf_array[s].ziDev,
-                                     surf_array[s].sizeTarDev,
+                                     field.xq_gpu,
+                                     field.yq_gpu,
+                                     field.zq_gpu,
+                                     field.q_gpu,
+                                     surface.xiDev,
+                                     surface.yiDev,
+                                     surface.ziDev,
+                                     surface.sizeTarDev,
                                      numpy.int32(Nq),
-                                     REAL(field_array[j].E),
+                                     REAL(field.E),
                                      numpy.int32(param.NCRIT),
                                      numpy.int32(param.BlocksPerTwig),
                                      block=(param.BSZ, 1, 1),
@@ -737,71 +747,49 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    aux = (aux_x[surface.unsort]*surface.normal[:, 0] +
+                           aux_y[surface.unsort]*surface.normal[:, 1] +
+                           aux_z[surface.unsort]*surface.normal[:, 2])
 
 #               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
-#               No preconditioner
-#                F[s_start:s_start+s_size] += aux
-#               With preconditioner
-#                F[s_start:s_start+s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[1,:]
-#               F[s_start+s_size:s_start+2*s_size] += aux[surf_array[s].unsort]*surf_array[s].Precond[3,:]
-
-#               With preconditioner
-#               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
-#               We do this only here (and not in the parent case) because interaction of charges
-#               with dirichlet or neumann surface happens only for the surface as a child surfaces.
-                if surf_array[
-                        s].surf_type == 'dirichlet_surface' or surf_array[
-                            s].surf_type == 'neumann_surface':
-                    F[s_start:s_start + s_size] += aux[surf_array[
-                        s].unsort] * surf_array[s].Precond[0, :]
-                elif surf_array[s].surf_type == 'asc_surface':
-                    F[s_start:s_start + s_size] += aux * surf_array[s].Precond[
-                        0, :]
+# With preconditioner
+# If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
+# We do this only here (and not in the parent case) because interaction of charges
+# with dirichlet or neumann surface happens only for the surface as a child surfaces.
+                if surface.surf_type in ['dirichlet_surface', 'neumann_surface']:
+                    F[s_start:s_start + s_size] += aux[surface.unsort] * surface.Precond[0, :]
+                elif surface.surf_type == 'asc_surface':
+                    F[s_start:s_start + s_size] += aux * surface.Precond[0, :]
                 else:
-                    F[s_start:s_start + s_size] += aux[surf_array[
-                        s].unsort] * surf_array[s].Precond[1, :]
-                    F[s_start + s_size:s_start + 2 * s_size] += aux[surf_array[
-                        s].unsort] * surf_array[s].Precond[3, :]
+                    F[s_start:s_start + s_size] += aux[surface.unsort] * surface.Precond[1, :]
+                    F[s_start + s_size:s_start + 2 * s_size] += aux[surface.unsort] * surface.Precond[3, :]
 
 #           Now for PARENT surface
-            if len(field_array[j].parent) > 0:
-                s = field_array[j].parent[0]
+            if field.parent:
+                s = field.parent[0]
+                surface = surf_array[s]
 
-                #           Locate position of surface s in RHS
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        s_start += len(surf_array[ss].xi)
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
+                s_start = locate_s_in_RHS(s, surf_array)
+                s_size = len(surface.xi)
+                Nround = len(surface.twig) * param.NCRIT
 
-                s_size = len(surf_array[s].xi)
-                Nround = len(surf_array[s].twig) * param.NCRIT
+                GSZ = int(numpy.ceil(float(Nround) / param.NCRIT))  # CUDA grid size
 
-                GSZ = int(numpy.ceil(float(Nround) / param.NCRIT)
-                          )  # CUDA grid size
-
-                if surf_array[s].surf_type != 'asc_surface':
+                if surface.surf_type != 'asc_surface':
                     F_gpu = gpuarray.zeros(Nround, dtype=REAL)
                     computeRHS_gpu(F_gpu,
-                                   field_array[j].xq_gpu,
-                                   field_array[j].yq_gpu,
-                                   field_array[j].zq_gpu,
-                                   field_array[j].q_gpu,
-                                   surf_array[s].xiDev,
-                                   surf_array[s].yiDev,
-                                   surf_array[s].ziDev,
-                                   surf_array[s].sizeTarDev,
+                                   field.xq_gpu,
+                                   field.yq_gpu,
+                                   field.zq_gpu,
+                                   field.q_gpu,
+                                   surface.xiDev,
+                                   surface.yiDev,
+                                   surface.ziDev,
+                                   surface.sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field_array[j].E),
+                                   REAL(field.E),
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -817,16 +805,16 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     computeRHSKt_gpu(Fx_gpu,
                                      Fy_gpu,
                                      Fz_gpu,
-                                     field_array[j].xq_gpu,
-                                     field_array[j].yq_gpu,
-                                     field_array[j].zq_gpu,
-                                     field_array[j].q_gpu,
-                                     surf_array[s].xiDev,
-                                     surf_array[s].yiDev,
-                                     surf_array[s].ziDev,
-                                     surf_array[s].sizeTarDev,
+                                     field.xq_gpu,
+                                     field.yq_gpu,
+                                     field.zq_gpu,
+                                     field.q_gpu,
+                                     surface.xiDev,
+                                     surface.yiDev,
+                                     surface.ziDev,
+                                     surface.sizeTarDev,
                                      numpy.int32(Nq),
-                                     REAL(field_array[j].E),
+                                     REAL(field.E),
                                      numpy.int32(param.NCRIT),
                                      numpy.int32(param.BlocksPerTwig),
                                      block=(param.BSZ, 1, 1),
@@ -838,9 +826,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
 
-                    aux = aux_x[surf_array[s].unsort]*surf_array[s].normal[:,0] + \
-                          aux_y[surf_array[s].unsort]*surf_array[s].normal[:,1] + \
-                          aux_z[surf_array[s].unsort]*surf_array[s].normal[:,2]
+                    aux = (aux_x[surface.unsort]*surface.normal[:,0] +
+                           aux_y[surface.unsort]*surface.normal[:,1] +
+                           aux_z[surface.unsort]*surface.normal[:,2])
 
 #               For PARENT surface, q contributes to RHS in
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
@@ -848,39 +836,37 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
 #               With preconditioner
-                if surf_array[s].surf_type == 'asc_surface':
-                    F[s_start:s_start + s_size] += aux * surf_array[s].Precond[
+                if surface.surf_type == 'asc_surface':
+                    F[s_start:s_start + s_size] += aux * surface.Precond[
                         0, :]
                 else:
-                    F[s_start:s_start + s_size] += aux[surf_array[
-                        s].unsort] * surf_array[s].Precond[0, :]
-                    F[s_start + s_size:s_start + 2 * s_size] += aux[surf_array[
-                        s].unsort] * surf_array[s].Precond[2, :]
+                    F[s_start:s_start + s_size] += aux[surface.unsort] * surface.Precond[0, :]
+                    F[s_start + s_size:s_start + 2 * s_size] += aux[surface.unsort] * surface.Precond[2, :]
 
 #   Dirichlet/Neumann contribution to RHS
-    for j in range(len(field_array)):
+    for field in field_array:
 
         dirichlet = []
         neumann = []
-        LorY = field_array[j].LorY
+        LorY = field.LorY
 
-        #       Find Dirichlet and Neumann surfaces in region
-        #       Dirichlet/Neumann surfaces can only be child of region,
-        #       no point on looking at parent surface
-        for s in field_array[j].child:
+        # Find Dirichlet and Neumann surfaces in region
+        # Dirichlet/Neumann surfaces can only be child of region,
+        # no point on looking at parent surface
+        for s in field.child:
             if surf_array[s].surf_type == 'dirichlet_surface':
                 dirichlet.append(s)
             elif surf_array[s].surf_type == 'neumann_surface':
                 neumann.append(s)
 
-        if len(neumann) > 0 or len(dirichlet) > 0:
+        if neumann or dirichlet:
 
-            #           First look at influence on SIBLING surfaces
-            for s in field_array[j].child:
+            # First look at influence on SIBLING surfaces
+            for s in field.child:
+                surface = surf_array[s]
+                param.kappa = field.kappa
 
-                param.kappa = field_array[j].kappa
-
-                #               Effect of dirichlet surfaces
+                #nEffect of dirichlet surfaces
                 for sd in dirichlet:
                     K_diag = -2 * pi * (sd == s)
                     V_diag = 0
@@ -891,34 +877,21 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                            K_diag, V_diag, IorE, sd, param,
                                            ind0, timing, kernel)
 
-                    #                   Find location of surface s in RHS array
-                    s_start = 0
-                    for ss in range(s):
-                        if surf_array[
-                                ss].surf_type == 'dirichlet_surface' or surf_array[
-                                    ss].surf_type == 'neumann_surface' or surf_array[
-                                        s].surf_type == 'asc_surface':
-                            s_start += len(surf_array[ss].xi)
-                        else:
-                            s_start += 2 * len(surf_array[ss].xi)
+                    # Find location of surface s in RHS array
+                    s_start = locate_s_in_RHS(s, surf_array)
+                    s_size = len(surface.xi)
 
-                    s_size = len(surf_array[s].xi)
-
-                    #                   if s is a charged surface, the surface has only one equation,
-                    #                   else, s has 2 equations and K_lyr affects the external
-                    #                   equation, which is placed after the internal one, hence
-                    #                   Precond[1,:] and Precond[3,:].
-                    if surf_array[
-                            s].surf_type == 'dirichlet_surface' or surf_array[
-                                s].surf_type == 'neumann_surface' or surf_array[
-                                    s].surf_type == 'asc_surface':
-                        F[s_start:s_start + s_size] += K_lyr * surf_array[
-                            s].Precond[0, :]
+                    # if s is a charged surface, the surface has only one equation,
+                    # else, s has 2 equations and K_lyr affects the external
+                    # equation, which is placed after the internal one, hence
+                    # Precond[1,:] and Precond[3,:].
+                    if surface.surf_type in ['dirichlet_surface',
+                                             'neumann_surface',
+                                             'asc_surface']:
+                        F[s_start:s_start + s_size] += K_lyr * surface.Precond[0, :]
                     else:
-                        F[s_start:s_start + s_size] += K_lyr * surf_array[
-                            s].Precond[1, :]
-                        F[s_start + s_size:s_start + 2 *
-                          s_size] += K_lyr * surf_array[s].Precond[3, :]
+                        F[s_start:s_start + s_size] += K_lyr * surface.Precond[1, :]
+                        F[s_start + s_size:s_start + 2 * s_size] += K_lyr * surf_array[s].Precond[3, :]
 
 #               Effect of neumann surfaces
                 for sn in neumann:
@@ -931,42 +904,30 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                         surf_array[s], K_diag, V_diag, IorE, sn, param, ind0,
                         timing, kernel)
 
-                    #                   Find location of surface s in RHS array
-                    s_start = 0
-                    for ss in range(s):
-                        if surf_array[
-                                ss].surf_type == 'dirichlet_surface' or surf_array[
-                                    ss].surf_type == 'neumann_surface' or surf_array[
-                                        s].surf_type == 'asc_surface':
-                            s_start += len(surf_array[ss].xi)
-                        else:
-                            s_start += 2 * len(surf_array[ss].xi)
+                    # Find location of surface s in RHS array
+                    s_start = locate_s_in_RHS(s, surf_array)
+                    s_size = len(surface.xi)
 
-                    s_size = len(surf_array[s].xi)
-
-                    #                   if s is a charged surface, the surface has only one equation,
-                    #                   else, s has 2 equations and V_lyr affects the external
-                    #                   equation, which is placed after the internal one, hence
-                    #                   Precond[1,:] and Precond[3,:].
-                    if surf_array[
-                            s].surf_type == 'dirichlet_surface' or surf_array[
-                                s].surf_type == 'neumann_surface' or surf_array[
-                                    s].surf_type == 'asc_surface':
-                        F[s_start:s_start + s_size] += -V_lyr * surf_array[
-                            s].Precond[0, :]
+                    # if s is a charged surface, the surface has only one equation,
+                    # else, s has 2 equations and V_lyr affects the external
+                    # equation, which is placed after the internal one, hence
+                    # Precond[1,:] and Precond[3,:].
+                    if surface.surf_type in ['dirichlet_surface',
+                                             'neumann_surface',
+                                             'asc_surface']:
+                        F[s_start:s_start + s_size] += -V_lyr * surface.Precond[0, :]
                     else:
-                        F[s_start:s_start + s_size] += -V_lyr * surf_array[
-                            s].Precond[1, :]
+                        F[s_start:s_start + s_size] += -V_lyr * surface.Precond[1, :]
                         F[s_start + s_size:s_start + 2 *
-                          s_size] += -V_lyr * surf_array[s].Precond[3, :]
+                          s_size] += -V_lyr * surface.Precond[3, :]
 
 #           Now look at influence on PARENT surface
 #           The dirichlet/neumann surface will never be the parent,
 #           since we are not solving for anything inside them.
 #           Then, in this case we will not look at self interaction.
-            if len(field_array[j].parent) == 1:
+            if len(field.parent) == 1:
 
-                s = field_array[j].parent[0]
+                s = field.parent[0]
 
                 #               Effect of dirichlet surfaces
                 for sd in dirichlet:
@@ -979,23 +940,13 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                            K_diag, V_diag, IorE, sd, param,
                                            ind0, timing, kernel)
 
-                    #                   Find location of surface s in RHS array
-                    s_start = 0
-                    for ss in range(s):
-                        if surf_array[
-                                ss].surf_type == 'dirichlet_surface' or surf_array[
-                                    ss].surf_type == 'neumann_surface' or surf_array[
-                                        s].surf_type == 'asc_surface':
-                            s_start += len(surf_array[ss].xi)
-                        else:
-                            s_start += 2 * len(surf_array[ss].xi)
+                    # Find location of surface s in RHS array
+                    s_start = locate_s_in_RHS(s, surf_array)
+                    s_size = len(surface.xi)
 
-                    s_size = len(surf_array[s].xi)
-
-                    #                   Surface s has 2 equations and K_lyr affects the internal
-                    #                   equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start + s_size] += K_lyr * surf_array[
-                        s].Precond[0, :]
+                    # Surface s has 2 equations and K_lyr affects the internal
+                    # equation, hence Precond[0,:] and Precond[2,:].
+                    F[s_start:s_start + s_size] += K_lyr * surface.Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
                       s_size] += K_lyr * surf_array[s].Precond[2, :]
 
@@ -1010,30 +961,20 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                         surf_array[s], K_diag, V_diag, IorE, sn, param, ind0,
                         timing, kernel)
 
-                    #                   Find location of surface s in RHS array
-                    s_start = 0
-                    for ss in range(s):
-                        if surf_array[
-                                ss].surf_type == 'dirichlet_surface' or surf_array[
-                                    ss].surf_type == 'neumann_surface' or surf_array[
-                                        s].surf_type == 'asc_surface':
-                            s_start += len(surf_array[ss].xi)
-                        else:
-                            s_start += 2 * len(surf_array[ss].xi)
+                    # Find location of surface s in RHS array
+                    s_start = locate_s_in_RHS(s, surf_array)
+                    s_size = len(surface.xi)
 
-                    s_size = len(surf_array[s].xi)
-
-                    #                   Surface s has 2 equations and K_lyr affects the internal
-                    #                   equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start + s_size] += -V_lyr * surf_array[
-                        s].Precond[0, :]
+                    # Surface s has 2 equations and K_lyr affects the internal
+                    # equation, hence Precond[0,:] and Precond[2,:].
+                    F[s_start:s_start + s_size] += -V_lyr * surface.Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
-                      s_size] += -V_lyr * surf_array[s].Precond[2, :]
+                      s_size] += -V_lyr * surface.Precond[2, :]
 
     return F
 
 
-def calculateEsolv(surf_array, field_array, param, kernel):
+def calculate_solvation_energy(surf_array, field_array, param, kernel):
     """
     It calculates the solvation energy.
 
@@ -1052,7 +993,6 @@ def calculateEsolv(surf_array, field_array, param, kernel):
 
     REAL = param.REAL
 
-    par_reac = Parameters()
     par_reac = param
     par_reac.threshold = 0.05
     par_reac.P = 7
@@ -1070,83 +1010,84 @@ def calculateEsolv(surf_array, field_array, param, kernel):
     E_solv = []
 
     ff = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+    for region, f in enumerate(field_array):
+        if f.pot == 1:
+            parent_type = surf_array[f.parent[0]].surf_type
+            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
 
-            E_solv_aux = 0
-            ff += 1
-            print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
-                f, ff))
+                E_solv_aux = 0
+                ff += 1
+                print('Calculating solvation energy for region {}, stored in E_solv[{}]'.format(
+                    region, ff))
 
-            AI_int = 0
-            Naux = 0
-            phi_reac = numpy.zeros(len(field_array[f].q))
+                AI_int = 0
+                Naux = 0
+                phi_reac = numpy.zeros(len(f.q))
 
-            #           First look at CHILD surfaces
-            #           Need to account for normals pointing outwards
-            #           and E_hat coefficient (as region is outside and
-            #           dphi_dn is defined inside)
-            for i in field_array[f].child:
-                s = surf_array[i]
-                s.xk, s.wk = GQ_1D(par_reac.Nk)
-                s.xk = REAL(s.xk)
-                s.wk = REAL(s.wk)
-                for C in range(len(s.tree)):
-                    s.tree[C].M = numpy.zeros(par_reac.Nm)
-                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
+                #           First look at CHILD surfaces
+                #           Need to account for normals pointing outwards
+                #           and E_hat coefficient (as region is outside and
+                #           dphi_dn is defined inside)
+                for i in f.child:
+                    s = surf_array[i]
+                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk = REAL(s.xk)
+                    s.wk = REAL(s.wk)
+                    for C in range(len(s.tree)):
+                        s.tree[C].M = numpy.zeros(par_reac.Nm)
+                        s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
-                Naux += len(s.triangle)
+                    Naux += len(s.triangle)
 
-                #               Coefficient to account for dphi_dn defined in
-                #               interior but calculation done in exterior
-                C1 = s.E_hat
+                    #               Coefficient to account for dphi_dn defined in
+                    #               interior but calculation done in exterior
+                    C1 = s.E_hat
 
-                if param.GPU == 0:
-                    phi_aux, AI = get_phir(s.phi, C1 * s.dphi, s,
-                                           field_array[f].xq, s.tree, par_reac,
-                                           ind_reac)
-                elif param.GPU == 1:
-                    phi_aux, AI = get_phir_gpu(s.phi, C1 * s.dphi, s,
-                                               field_array[f], par_reac,
-                                               kernel)
+                    if param.GPU == 0:
+                        phi_aux, AI = get_phir(s.phi, C1 * s.dphi, s,
+                                               f.xq, s.tree, par_reac,
+                                               ind_reac)
+                    elif param.GPU == 1:
+                        phi_aux, AI = get_phir_gpu(s.phi, C1 * s.dphi, s,
+                                                   f, par_reac,
+                                                   kernel)
 
-                AI_int += AI
-                phi_reac -= phi_aux  # Minus sign to account for normal pointing out
+                    AI_int += AI
+                    phi_reac -= phi_aux  # Minus sign to account for normal pointing out
 
-#           Now look at PARENT surface
-            if len(field_array[f].parent) > 0:
-                i = field_array[f].parent[0]
-                s = surf_array[i]
-                s.xk, s.wk = GQ_1D(par_reac.Nk)
-                s.xk = REAL(s.xk)
-                s.wk = REAL(s.wk)
-                for C in range(len(s.tree)):
-                    s.tree[C].M = numpy.zeros(par_reac.Nm)
-                    s.tree[C].Md = numpy.zeros(par_reac.Nm)
+    #           Now look at PARENT surface
+                if len(f.parent) > 0:
+                    i = f.parent[0]
+                    s = surf_array[i]
+                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk = REAL(s.xk)
+                    s.wk = REAL(s.wk)
+                    for C in range(len(s.tree)):
+                        s.tree[C].M = numpy.zeros(par_reac.Nm)
+                        s.tree[C].Md = numpy.zeros(par_reac.Nm)
 
-                Naux += len(s.triangle)
+                    Naux += len(s.triangle)
 
-                if param.GPU == 0:
-                    phi_aux, AI = get_phir(s.phi, s.dphi, s, field_array[f].xq,
-                                           s.tree, par_reac, ind_reac)
-                elif param.GPU == 1:
-                    phi_aux, AI = get_phir_gpu(
-                        s.phi, s.dphi, s, field_array[f], par_reac, kernel)
+                    if param.GPU == 0:
+                        phi_aux, AI = get_phir(s.phi, s.dphi, s, f.xq,
+                                               s.tree, par_reac, ind_reac)
+                    elif param.GPU == 1:
+                        phi_aux, AI = get_phir_gpu(
+                            s.phi, s.dphi, s, f, par_reac, kernel)
 
-                AI_int += AI
-                phi_reac += phi_aux
+                    AI_int += AI
+                    phi_reac += phi_aux
 
-            E_solv_aux += 0.5 * C0 * numpy.sum(field_array[f].q * phi_reac)
-            E_solv.append(E_solv_aux)
+                E_solv_aux += 0.5 * C0 * numpy.sum(f.q * phi_reac)
+                E_solv.append(E_solv_aux)
 
-            print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
-                1. * AI_int / len(field_array[f].xq), Naux, f))
+                print('{} of {} analytical integrals for phi_reac calculation in region {}'.format(
+                    1. * AI_int / len(f.xq), Naux, region))
 
     return E_solv
 
 
-def coulombEnergy(f, param):
+def coulomb_energy(f, param):
     """
     It calculates the Coulomb energy .
 
@@ -1171,7 +1112,7 @@ def coulombEnergy(f, param):
     return Ecoul
 
 
-def calculateEsurf(surf_array, field_array, param, kernel):
+def calculate_surface_energy(surf_array, field_array, param, kernel):
     """
     It calculates the surface energy
 
@@ -1187,8 +1128,6 @@ def calculateEsurf(surf_array, field_array, param, kernel):
     --------
     E_surf: float, surface energy.
     """
-
-    REAL = param.REAL
 
     par_reac = Parameters()
     par_reac = param
@@ -1224,6 +1163,6 @@ def calculateEsurf(surf_array, field_array, param, kernel):
             print('Calculating surface energy around region {}, stored in E_surf[{}]'.format(
                 f, ff))
             Esurf_aux = numpy.sum(-parent_surf.Eout * parent_surf.dphi *
-                                   parent_surf.phi * parent_surf.area)
+                                  parent_surf.phi * parent_surf.area)
             E_surf.append(0.5 * C0 * Esurf_aux)
     return E_surf

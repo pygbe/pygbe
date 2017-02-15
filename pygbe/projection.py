@@ -10,8 +10,8 @@ from numpy import pi
 from pygbe.classes import Event
 from pygbe.quadrature import getWeights
 from pygbe.tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
-                           M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
-                           P2PKt_gpu, M2P_nonvec, P2P_nonvec)
+                                 M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
+                                 P2PKt_gpu, M2P_nonvec, P2P_nonvec)
 
 try:
     import pycuda.autoinit
@@ -60,7 +60,6 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
 
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
-    Nt = len(surfTar.triangle)
     L = numpy.sqrt(2 * surfSrc.area)  # Representative length
 
     tic.record()
@@ -121,7 +120,6 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     param.Nround = len(surfTar.twig) * param.NCRIT
     K_aux = numpy.zeros(param.Nround)
     V_aux = numpy.zeros(param.Nround)
-    AI_int = 0
 
     ### CPU code
     if param.GPU == 0:
@@ -196,8 +194,6 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
 
     REAL = param.REAL
     Ns = len(surfSrc.triangle)
-    Nt = len(surfTar.triangle)
-    L = numpy.sqrt(2 * surfSrc.area)  # Representative length
 
     tic.record()
     K = param.K
@@ -244,7 +240,6 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     Ktx_aux = numpy.zeros(param.Nround)
     Kty_aux = numpy.zeros(param.Nround)
     Ktz_aux = numpy.zeros(param.Nround)
-    AI_int = 0
 
     ### CPU code
     if param.GPU == 0:
@@ -319,10 +314,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     AI_int  : int, counter of the amount of near singular integrals solved.
     """
 
-    REAL = par_reac.REAL
     N = len(XK)
-    MV = numpy.zeros(len(XK))
-    L = numpy.sqrt(2 * surface.area)  # Representative length
     AI_int = 0
 
     # Setup vector
@@ -348,7 +340,6 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
         X_Vc[i] = XV[i // K]
 
     toc = time.time()
-    time_set = toc - tic
 
     # P2M
     tic = time.time()
@@ -372,7 +363,7 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
 
     # Evaluation
     IorE = 0  # This evaluation is on charge points, no self-operator
-              # 0 means it doesn't matter if it is internal or external.
+    # 0 means it doesn't matter if it is internal or external.
     AI_int = 0
     phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.
@@ -415,8 +406,6 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     REAL = par_reac.REAL
     Nq = len(field.xq)
     N = len(XK)
-    MV = numpy.zeros(len(XK))
-    L = numpy.sqrt(2 * surface.area)  # Representative length
     AI_int = 0
 
     # Setup vector
@@ -442,7 +431,6 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
         X_Vc[i] = XV[i // K]
 
     toc = time.time()
-    time_set = toc - tic
     sort = surface.sortSource
     phir = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
     m_gpu = cuda.to_device(X_V[sort].astype(REAL))

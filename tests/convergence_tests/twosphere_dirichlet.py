@@ -1,12 +1,6 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import numpy
-import pickle
-
 from pygbe.util import an_solution
-from convergence import (scanOutput, run_convergence, picklesave, pickleload,
-                        report_results, mesh)
+from convergence import (run_convergence, picklesave, pickleload,
+                         report_results, mesh)
 
 
 def main():
@@ -18,7 +12,7 @@ def main():
 
     problem_folder = 'input_files'
 
-    #twosphere_dirichlet
+    # twosphere_dirichlet
     param = 'sphere_fine.param'
     test_name = 'twosphere_dirichlet'
     if test_name not in test_outputs.keys():
@@ -28,7 +22,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #dirichlet_surface
+    # dirichlet_surface
     param = 'sphere_fine.param'
     test_name = 'dirichlet_surface'
     if test_name not in test_outputs.keys():
@@ -38,7 +32,7 @@ def main():
 
     picklesave(test_outputs)
 
-    #load results for analysis
+    # load results for analysis
     Esolv, Esurf, Ecoul = test_outputs['twosphere_dirichlet'][2:5]
     Esolv_surf, Esurf_surf, Ecoul_surf = test_outputs['dirichlet_surface'][2:5]
     Time = test_outputs['twosphere_dirichlet'][-1]
@@ -53,7 +47,8 @@ def main():
 
     error = abs(Einter - analytical) / abs(analytical)
 
-    report_results(error, N, iterations, Einter, analytical, total_time)
+    report_results(error, N, iterations, Einter, analytical, total_time,
+                   test_name='twosphere dirichlet')
 
 
 if __name__ == "__main__":

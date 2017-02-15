@@ -104,7 +104,7 @@ def divide_all( vertices, triangles ):
     
     #Stack the triangles together.
     vert_new  = numpy.hstack( (v0,b,a,  b,v1,c,  a,b,c, a,c,v2) ).reshape((-1,3))
-    triang_new = numpy.arange( len(vertices) ).reshape( (-1,3) )
+    triang_new = numpy.arange( len(vert_new) ).reshape( (-1,3) )
     #Now our vertices are duplicated, and thus our triangle structure
     # are unnecesarry.    
     return vert_new, triang_new

@@ -16,18 +16,15 @@ from datetime import datetime
 from argparse import ArgumentParser
 
 # Import self made modules
+import pygbe
 from pygbe.gmres import gmres_mgs
-from pygbe.projection import get_phir
 from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
-from pygbe.surface import initialize_surface, initialize_field, fill_phi
+from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
-from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculateEsolv,
-                        coulombEnergy, calculateEsurf)
-
-from pygbe.util.readData import readVertex, readTriangle, readpqr, readParameters
-from pygbe.util.an_solution import an_P, two_sphere
-
+from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
+                              coulomb_energy, calculate_surface_energy)
+from pygbe.util.read_data import readParameters
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
@@ -51,6 +48,10 @@ class Logger(object):
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
+
+    def flush(self):
+        """Required for Python 3"""
+        pass
 
 
 def read_inputs(args):
@@ -128,10 +129,6 @@ def find_config_files(cliargs):
     full_path = os.path.abspath(prob_path)
     os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
 
-    #use the name of the rightmost folder in path as problem name
-    prob_rel_path = os.path.split(full_path)
-    prob_name = prob_rel_path[1]
-
     if cliargs.config is None:
         cliargs.config = next(glob.iglob(os.path.join(full_path, '*.config')))
     else:
@@ -164,14 +161,13 @@ def resolve_relative_config_file(config_file, full_path):
         return os.path.join(full_path, config_file)
     else:
         sys.exit('Did not find expected config files\n'
-                    'Could not find {}'.format(config_file))
+                 'Could not find {}'.format(config_file))
 
 
 def check_for_nvcc():
     """Check system PATH for nvcc, exit if not found"""
     try:
         subprocess.check_output(['which', 'nvcc'])
-        check_nvcc_version()
         return True
     except subprocess.CalledProcessError:
         print(
@@ -180,39 +176,32 @@ def check_for_nvcc():
         return False
 
 
-def check_nvcc_version():
-    """Check that version of nvcc <= 7.5"""
-    verstr = subprocess.check_output(['nvcc', '--version']).decode('utf-8')
-    cuda_ver = re.compile('release (\d\.\d)')
-    match = re.search(cuda_ver, verstr)
-    version = float(match.group(1))
-    if version > 7.5:
-        sys.exit('PyGBe only supports CUDA <= 7.5\n'
-                 'Please install an earlier version of the CUDA toolkit\n'
-                 'or remove `nvcc` from your PATH to use CPU only.')
-
-
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False):
+         return_results_dict=False, field=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
 
     Arguments
     ----------
-    log_output         : Bool, default True.
-                         If False, output is written only to STDOUT and not
-                         to a log file.
+    log_output : Bool, default True.
+        If False, output is written only to STDOUT and not to a log file.
     return_output_fname: Bool, default False.
-                         If True, function main() returns the name of the
-                         output log file. This is used for the regression tests.
+        If True, function main() returns the name of the
+        output log file. This is used for the regression tests.
+    return_results_dict: Bool, default False.
+        If True, function main() returns the results of the run
+        packed in a dictionary.  Used in testing and programmatic
+        use of PyGBe
+    field : Dictionary, defaults to None.
+         If passed, this dictionary will supercede any config file found, useful in
+         programmatically stepping through slight changes in a problem
 
     Returns
     --------
     output_fname       : str, if kwarg is True.
                          The name of the log file containing problem output
     """
-
 
     args = read_inputs(argv[1:])
     configFile, paramfile = find_config_files(args)
@@ -236,7 +225,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         output_dir = os.path.join(full_path, args.output)
     else:
         output_dir = args.output
-    #create output directory if it doesn't already exist
+    # create output directory if it doesn't already exist
     try:
         os.makedirs(output_dir)
     except OSError:
@@ -248,12 +237,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['output_file'] = outputfname
     if log_output:
         sys.stdout = Logger(os.path.join(output_dir, outputfname))
-    ### Time stamp
+    # Time stamp
     print('Run started on:')
     print('\tDate: {}/{}/{}'.format(timestamp.tm_year, timestamp.tm_mon,
-                                timestamp.tm_mday))
+                                    timestamp.tm_mday))
     print('\tTime: {}:{}:{}'.format(timestamp.tm_hour, timestamp.tm_min,
-                                timestamp.tm_sec))
+                                    timestamp.tm_sec))
+    print('\tPyGBe version: {}'.format(pygbe.__version__))
     TIC = time.time()
 
     print('Config file: {}'.format(configFile))
@@ -287,7 +277,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         param.GPU = 0
 
     ### Generate array of fields
-    field_array = initialize_field(configFile, param)
+    if field:
+        field_array = initialize_field(configFile, param, field)
+    else:
+        field_array = initialize_field(configFile, param)
+
 
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
@@ -366,40 +360,41 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Solve
     print('Solve')
     phi = numpy.zeros(param.Neq)
-    phi = gmres_mgs(surf_array, field_array, phi, F, param, ind0, timing,
-                       kernel)
+    phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
+                               timing, kernel)
     toc = time.time()
+    results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
 
-
     # Put result phi in corresponding surfaces
-    fill_phi(phi, surf_array)
+    s_start = 0
+    for surf in surf_array:
+        s_start = surf.fill_phi(phi, s_start)
 
-    ### Calculate solvation energy
+    # Calculate solvation energy
     print('Calculate Esolv')
     tic = time.time()
-    E_solv = calculateEsolv(surf_array, field_array, param, kernel)
+    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
     toc = time.time()
     print('Time Esolv: {}s'.format(toc - tic))
     ii = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-            ii += 1
-            print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(f,
-                                                                      E_solv[ii],
-                                                                      E_solv[ii] * 4.184))
-            results_dict['E_solv_kcal'] = E_solv[ii]
-            results_dict['E_solv_kJ'] = E_solv[ii] * 4.184
+    for i, f in enumerate(field_array):
+        if f.pot == 1:
+            parent_type = surf_array[f.parent[0]].surf_type
+            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+                ii += 1
+                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+                                                                          E_solv[ii],
+                                                                          E_solv[ii] * 4.184))
 
-    ### Calculate surface energy
+    # Calculate surface energy
     print('\nCalculate Esurf')
     tic = time.time()
-    E_surf = calculateEsurf(surf_array, field_array, param, kernel)
+    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
     toc = time.time()
     ii = -1
     for f in param.E_field:
@@ -408,8 +403,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             ii += 1
             print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
                 f, E_surf[ii], E_surf[ii] * 4.184))
-            results_dict['E_surf_kcal'] = E_surf[ii]
-            results_dict['E_surf_kJ'] = E_surf[ii] * 4.184
     print('Time Esurf: {}s'.format(toc - tic))
 
     ### Calculate Coulombic interaction
@@ -421,11 +414,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         i += 1
         if f.coulomb == 1:
             print('Calculate Coulomb energy for region {}'.format(i))
-            E_coul.append(coulombEnergy(f, param))
+            E_coul.append(coulomb_energy(f, param))
             print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
                 i, E_coul[-1], E_coul[-1] * 4.184))
-            results_dict['E_coul_kcal'] = E_coul[-1]
-            results_dict['E_coul_kJ'] = E_coul[-1] * 4.184
     toc = time.time()
     print('Time Ecoul: {}s'.format(toc - tic))
 
@@ -437,6 +428,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
     print('\nTime = {} s'.format(toc - TIC))
     results_dict['total_time'] = (toc - TIC)
+    results_dict['E_solv_kcal'] = sum(E_solv)
+    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
+    results_dict['E_surf_kcal'] = sum(E_surf)
+    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
+    results_dict['E_coul_kcal'] = sum(E_coul)
+    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+
+    results_dict['version'] = pygbe.__version__
 
     output_pickle = outputfname.split('-')
     output_pickle.pop(-1)
