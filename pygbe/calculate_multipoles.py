@@ -1,7 +1,7 @@
 import numpy
 from numba import njit
 
-@njit
+@njit(cache=True)
 def P2M(M, Md, x, y, z, m, mx, my, mz, xc, yc, zc, I, J, K):
 
     for i in range(len(I)):
@@ -18,7 +18,7 @@ def P2M(M, Md, x, y, z, m, mx, my, mz, xc, yc, zc, I, J, K):
             Md[i] -= my[j] * J[i] * constant / dy;
             Md[i] -= mz[j] * K[i] * constant / dz;
 
-@njit
+@njit(cache=True)
 def M2M(MP, MC, dx, dy, dz, I, J, K, cI, cJ, cK, Imi, Jmj, Kmk, index, ptr):
 
     for i in range(len(MP)):
