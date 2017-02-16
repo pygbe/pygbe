@@ -25,7 +25,27 @@ def getIndex_arr(P, ii, jj, kk):
 
 @njit
 def multipole_sort(K_aux, V_aux, offTar, sizeTar, offMlt, M, Md, xi, yi, zi, xc, yc, zc, index, P, kappa, Nm, LorY):
-    NotImplemented
+
+    for CI in range(len(offTar)):
+        CI_begin = offTar[CI]
+        CI_end = offTar[CI] + sizeTar[CI]
+        CJ_begin = offMlt[CI]
+        CJ_end = offMlt[CI + 1]
+
+        for CJ in range(CJ_begin, CJ_end):
+            for i in range(CI_begin, CI_end):
+                for ii in range(Nm):
+                    a[ii] = 0
+
+                dx = xi[i] - xc[CJ]
+                dy = yi[i] - yc[CJ]
+                dz = zi[i] - zc[CJ]
+
+                getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY)
+
+                for j in range(Nm):
+                    V_aux[i] += a[j] * M[CJ * Nm + j]
+                    K_aux[i] += a[j] * Md[CJ * Nm + j]
 
 @njit
 def getIndex(P, i, j, k):
@@ -149,37 +169,37 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
             Im1x = index[getIndex(P, 0, i, 0)]
             Im1y = I - (P + 2 - i - 1)
             Im2y = Im1y - (P + 2 - i)
-            coef(I, b, i, Cb, C, dx, Im1x, dy, Im1y, Im2y, kappa)
+            coef(I, a, b, i, Cb, C, dx, Im1x, dy, Im1y, Im2y, kappa)
 
             I = index[getIndex(P, 1, 0, i)]
             Im1x = index[getIndex(P, 0, 0, i)]
             Im1z = I - 1
             Im2z = I - 2
-            coef(I, b, i, Cb, C, dx, Im1x, dz, Im1z, Im2z, kappa)
+            coef(I, a, b, i, Cb, C, dx, Im1x, dz, Im1z, Im2z, kappa)
 
             I = index[getIndex(P, 0, 1, i)]
             Im1y = I - (P + 2 - 1)
             Im1z = I - 1
             Im2z = I - 2
-            coef(I, b, i, Cb, C, dy, Im1y, dz, Im1z, Im2z, kappa)
+            coef(I, a, b, i, Cb, C, dy, Im1y, dz, Im1z, Im2z, kappa)
 
             I = index[getIndex(P, i, 1, 0)]
             Im1y = I - (P + 2 - 1 - i)
             Im1x = index[getIndex(P, i - 1, 1, 0)]
             Im2x = index[getIndex(P, i - 2, 1, 0)]
-            coef(I, b, i, Cb, C, dy, Im1y, dx, Im1x, Im2x, kappa)
+            coef(I, a, b, i, Cb, C, dy, Im1y, dx, Im1x, Im2x, kappa)
 
             I = index[getIndex(P, i, 0, 1)]
             Im1z = I - 1
             Im1x = index[getIndex(P, i - 1, 0, 1)]
             Im2x = index[getIndex(P, i - 2, 0, 1)]
-            coef(I, b, i, Cb, C, dz, Im1z, dx, Im1x, Im2x, kappa)
+            coef(I, a, b, i, Cb, C, dz, Im1z, dx, Im1x, Im2x, kappa)
 
             I = index[getIndex(P, 0, i, 1)]
             Im1z = I - 1
             Im1y = I - (P + 2 - i)
             Im2y = Im1y - (P + 2 - i + 1)
-            coef(I, b, i, Cb, C, dz, Im1z, dy, Im1y, Im2y, kappa)
+            coef(I, a, b, i, Cb, C, dz, Im1z, dy, Im1y, Im2y, kappa)
 
     # porting from line 270 of multipole.cpp
     # Stay inside previous conditional? I think that's ok
@@ -198,21 +218,21 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
                 Im2x = index[getIndex(P, i - 2, j, 0)]
                 Im1y = I - (P + 2 - j - i)
                 Im2y = Im1y - (P + 3 - j - i)
-                coef(I, b, i, j, Cb, C, dx, Im1x, Im2x, dy, Im1y, Im2y, kappa)
+                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dy, Im1y, Im2y, kappa)
 
                 I = index[getIndex(P, i, 0, j)]
                 Im1x = index[getIndex(P, i - 1, 0, j)]
                 Im2x = index[getIndex(P, i - 2, 0, j)]
                 Im1z = I - 1
                 Im2z = I - 2
-                coef(I, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
+                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
 
                 I = index[getIndex(P, 0, i, j)]
                 Im1y = I - (P + 2 - i)
                 Im2y = Im1y - (P + 3 - i)
                 Im1z = I - 1
                 Im2z = I - 2
-                coef(I, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
+                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
 
         if P > 2:
             Cb = - kappa / 3
@@ -232,10 +252,112 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
 
                 # pick up again at multipole.cpp line 345
 
+            for i in range(2, P - 1):
+                if yukawa:
+                    coef = yukawa_3
+                else:
+                    coef = laplace_3
+                Cb = -kappa / (2 + i)
+                C = 1 / ((i + 2) * R**2)
+                I = index[getIndex(P, i, 1, 1)]
+                Im1x = index[getIndex(P, i - 1, 1, 1)]
+                Im1y = I - (P + 2 - i - 1)
+                Im1z = I - 1
+                Im2x = index[getIndex(P, i - 2, 1, 1)]
 
+                coef(I, a, b, i, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2x, kappa)
+
+                I = index[getIndex(P, 1, i, 1)]
+                Im1x = index[getIndex(P, 0, i, 1)]
+                Im1y = I - (P + 2 - i - 1)
+                Im2y = Im1y - (P + 3 - i - 1)
+                Im1z = I - 1
+
+                coef(I, a, b, i, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2y, kappa)
+
+                I = index[getIndex(P, 1, 1, i)]
+                Im1x = index[getIndex(P, 0, 1, i)]
+                Im1y = I - P
+                Im1z = I - 1
+                Im2z = I - 2
+
+                coef(I, a, b, i, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2z, kappa)
+
+                # from multipole.cpp::397
+
+        if P > 4:
+            if yukawa:
+                coef = yukawa_4
+            else:
+                coef = laplace_4
+            for i in range(2, P - 2):
+                for j in range(2, P - 1):
+                    Cb = -kappa / (1 + i + j)
+                    C = 1 / ((1 + i + j) * R**2)
+                    C1 = -(2 * (1 + i + j) - 1)
+                    C2 = i + j
+
+                    I = index[getIndex(P, 1, i, j)]
+                    Im1x = index[getIndex(P, 0, i, j)]
+                    Im1y = I - (P + 2 - 1 - i)
+                    Im2y = Im1y - (P + 3 - 1 - i)
+                    Im1z = I - 1
+                    Im2z = I - 2
+
+                    coef(I, a, b, i, j, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z,
+                         Im2y, Im2z, kappa)
+
+                    I = index[getIndex(P, i, 1, j)]
+                    Im1x = index[getIndex(P, i - 1, 1, j)]
+                    Im1y = I - (P + 2 - i - 1)
+                    Im2x = index[getIndex(P, i - 2, 1, j)]
+                    Im1z = I - 1
+                    Im2z = I - 2
+
+                    coef(I, a, b, i, j, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z,
+                         Im2x, Im2z, kappa)
+
+                    I = index[getIndex(P, i, j, 1)]
+                    Im1x = index[getIndex(P, i - 1, j, 1)]
+                    Im2x = index[getIndex(P, i - 2, j, 1)]
+                    Im1y = I - (P + 2 - i - j)
+                    Im2y = Im1y - (P + 3 - i - j)
+                    Im1z = I - 1
+
+                    coef(I, a, b, i, j, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z,
+                         Im2x, Im2y, kappa)
+
+        # continue from mulipole.cpp::459
+        if P > 5:
+            for i in range(2, P - 3):
+                for j in range(2, P - 1 - i):
+                    for k in range(2, P + 1 - i - j):
+                        Cb = -kappa / (i + j + k)
+                        C = 1 / ((i + j + k) * R**2)
+                        C1 = -(2 * (i + j + k) - 1)
+                        C2 = i + j + k - 1
+
+                        I = index[getIndex(P, i, j, k)]
+                        Im1x = index[getIndex(P, i - 1, j, k)]
+                        Im2x = index[getIndex(P, i - 2, j, k)]
+                        Im1y = I - (P + 2 - i - j)
+                        Im2y = Im1y - (P + 3 - i - j)
+                        Im1z = I - 1
+                        Im2z = I - 2
+
+                        if yukawa:
+                            b[I] = Cb * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z]
+                                         + a[Im2x] + a[Im2y] + a[Im2z])
+                            a[I] = C * (-kappa * (dx * b[Im1x] + dy * b[Im1y] +
+                                                  dz * b[Im1z] + b[Im2x] + b[Im2y] +
+                                                  b[Im2z])
+                                        + C1 * (dx * a[Im1z]
+                                                + dy * a[Im1y]
+                                                + dz * a[Im1z])
+                                        - C2 * (a[Im2x] + a[Im2y] + a[Im2z]))
 
 @njit
-def yukawa_1(I, b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
+def yukawa_1(I, a, b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
     b[I] = Cb * (d_1 * a[Im1_1] + d_2 * a[Im1_2] + a[Im2_2])
     a[I] = C * (-kappa * (d_1 * b[Im1_1] + d_2 * b[Im1_2] + b[Im2_2])
                           - (2 * (i + 1) - 1)
@@ -243,20 +365,51 @@ def yukawa_1(I, b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
                           - (1 + i - 1) * a[Im2_2])
 
 @njit
-def yukawa_2(I, b, i, j, Cb, C, d_1, Im1_1, Im2_1, d_2, Im1_2, Im2_2, kappa):
+def yukawa_2(I, a, b, i, j, Cb, C, d_1, Im1_1, Im2_1, d_2, Im1_2, Im2_2, kappa):
     b[I] = Cb * (d_1 * a[Im1_1] + d_2 * a[Im1_2] + a[Im2_1] + a[Im2_2])
     a[I] = C * (-kappa * (d_1 * b[Im1_1] + d_2 * b[Im1_2] + b[Im2_1] + b[Im2_2])
                           - (2 * (i + 1) - 1)
                           * (d_1 * a[Im1_1] + d_2 * a[Im1_2])
                           - (i + j - 1) * (a[Im2_1] + a[Im2_2]))
+
 @njit
-def laplace_1(I, b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
+def yukawa_3(I, a, b, i, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2, kappa):
+    b[I] = Cb * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1x] + a[Im2])
+    a[I] = C * (-kappa * (dx * b[Im1x] + dy*b[Im1y] + dz*b[Im1z] + b[Im2])
+                -(2 * (i + 2) - 1)
+                * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z]) - (i + 1)*a[Im2])
+
+@njit
+def yukawa_4(I, a, b, i, j, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2_1, Im2_2, kappa):
+    C1 = -(2 * (1 + i + j) - 1)
+    C2 = i + j
+    b[I] = Cb * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z] + a[Im2_1] + a[Im2_2])
+    a[I] = C * (-kappa * (dx * b[Im1x] + dy * b[Im1y] + dz * b[Im1z] + b[Im2_1] + b[Im2_2])
+                + C1 * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z])
+                - C2 * (a[Im2_1] + a[Im2_2]))
+
+
+
+@njit
+def laplace_1(I, a, b, i, Cb, C, d_1, Im1_1, d_2, Im1_2, Im2_2, kappa):
     a[I] = C * ( -(2 * (1 + i) - 1)
                  * (d_1 * a[Im1_1] + d_2 * a[Im1_2])
                  - (1 + i - 1) * a[Im2_2])
 
 @njit
-def laplace_2(I, b, i, j, Cb, C, d_1, Im1_1, Im2_1, d_2, Im1_2, Im2_2, kappa):
+def laplace_2(I, a, b, i, j, Cb, C, d_1, Im1_1, Im2_1, d_2, Im1_2, Im2_2, kappa):
     a[I] = C * ( -(2 * (i + j) - 1)
                  * (d_1 * a[Im1_1] + d_2 * a[Im1_2])
                  - (i + j - 1) * (a[Im2_1] + a[Im2_2]))
+
+@njit
+def laplace_3(I, a, b, i, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2, kappa):
+    a[I] = C * (-(2 * (i + 2) - 1) * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z])
+                - (i + 1) * a[Im2])
+
+@njit
+def laplace_4(I, a, b, i, j, Cb, C, dx, dy, dz, Im1x, Im1y, Im1z, Im2_1, Im2_2, kappa):
+    C1 = -(2 * (1 + i + j) - 1)
+    C2 = i + j
+    a[I] = C * (C1 * (dx * a[Im1x] + dy * a[Im1y] + dz * a[Im1z])
+                - C2 * (a[Im2_1] + a[Im2_2]))
