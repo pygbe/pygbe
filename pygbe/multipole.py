@@ -26,6 +26,7 @@ def getIndex_arr(P, ii, jj, kk):
 @njit
 def multipole_sort(K_aux, V_aux, offTar, sizeTar, offMlt, M, Md, xi, yi, zi, xc, yc, zc, index, P, kappa, Nm, LorY):
 
+    a = numpy.zeros(Nm)
     for CI in range(len(offTar)):
         CI_begin = offTar[CI]
         CI_end = offTar[CI] + sizeTar[CI]
@@ -71,7 +72,7 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
         a[P + 1] = -dy / R**3
         a[1] = -dz / R**3
 
-    elif yukawa
+    elif yukawa:
         b[0] = numpy.exp(-kappa * R)
         a[0] = b[0] / R
 
@@ -80,9 +81,9 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
         b[P + 1] = -kappa * (dy * a[0])  # 0,1,0
         b[1]   = -kappa * (dz * a[0])  # 0,0,1
 
-        a[i]   = -1 / r ** 2 * (kappa * dx * b[0] + dx * a[0])
-        a[p + 1] = -1 / r ** 2 * (kappa * dy * b[0] + dy * a[0])
-        a[1]   = -1 / r ** 2 * (kappa * dz * b[0] + dz * a[0])
+        a[I]   = -1 / R ** 2 * (kappa * dx * b[0] + dx * a[0])
+        a[P + 1] = -1 / R ** 2 * (kappa * dy * b[0] + dy * a[0])
+        a[1]   = -1 / R ** 2 * (kappa * dz * b[0] + dz * a[0])
 
     for i in range(2, P+1):
         Cb = -kappa / i
@@ -204,9 +205,9 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
     # porting from line 270 of multipole.cpp
     # Stay inside previous conditional? I think that's ok
         if yukawa:
-            coef = yukawa_2
+            coef2 = yukawa_2
         else:
-            coef = laplace_2
+            coef2 = laplace_2
 
         for i in range(2, P + 1):
             for j in range(2, P + 1 - i):
@@ -218,21 +219,21 @@ def getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY):
                 Im2x = index[getIndex(P, i - 2, j, 0)]
                 Im1y = I - (P + 2 - j - i)
                 Im2y = Im1y - (P + 3 - j - i)
-                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dy, Im1y, Im2y, kappa)
+                coef2(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dy, Im1y, Im2y, kappa)
 
                 I = index[getIndex(P, i, 0, j)]
                 Im1x = index[getIndex(P, i - 1, 0, j)]
                 Im2x = index[getIndex(P, i - 2, 0, j)]
                 Im1z = I - 1
                 Im2z = I - 2
-                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
+                coef2(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
 
                 I = index[getIndex(P, 0, i, j)]
                 Im1y = I - (P + 2 - i)
                 Im2y = Im1y - (P + 3 - i)
                 Im1z = I - 1
                 Im2z = I - 2
-                coef(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
+                coef2(I, a, b, i, j, Cb, C, dx, Im1x, Im2x, dz, Im1z, Im2z, kappa)
 
         if P > 2:
             Cb = - kappa / 3
