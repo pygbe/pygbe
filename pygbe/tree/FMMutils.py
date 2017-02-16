@@ -8,7 +8,7 @@ from scipy.misc import comb
 # Wrapped code
 from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
 from pygbe.tree.direct import direct_c, direct_sort, directKt_sort
-from pygbe.tree.calculateMultipoles import P2M, M2M
+from pygbe.calculate_multipoles import P2M, M2M
 
 # CUDA libraries
 try:
