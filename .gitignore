@@ -13,11 +13,17 @@ geometry/sphere/sphere520K*
 tests/regression_tests/figs/*
 _build
 
+# output folders
+examples/sphere/output/
+examples/lys/output/
+examples/1PGBmut_sensor/output/
+examples/two_spheres/output/
+examples/lspr/output
+
 # compiletime stuff
 PyGBe.egg-info/
 build/
 dist/
-examples/sphere/output/
 pygbe/tree/calculateMultipoles.py
 pygbe/tree/calculateMultipoles_wrap.cpp
 pygbe/tree/direct.py
