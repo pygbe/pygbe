@@ -86,3 +86,49 @@ def report_results(error, N, expected_rate, iterations, Cext, analytical, total_
         print('Analytical solution: {} kcal/mol'.format(analytical), file=f)
         print('Error              : {}'.format(error), file=f)
         print('Total time         : {}'.format(total_time), file=f)
+
+
+def run_convergence(mesh, test_name, problem_folder, param):
+    """
+    Runs convergence tests over a series of mesh sizes
+
+    Inputs:
+    ------
+        mesh          : array of mesh suffixes
+        problem_folder: str, name of folder containing meshes, etc...
+        param         : str, name of param file
+
+    Returns:
+    -------
+        N         : len(mesh) array, elements of problem.
+        iterations: len(mesh) array, number of iterations to converge.
+        Cext      : len(mesh) array of float, Cross extinction section.
+        Time      : len(mesh) array of float, time to solution (wall-time)
+    """
+    print('Runs lspr case of silver sphere in water medium')
+    N = numpy.zeros(len(mesh))
+    iterations = numpy.zeros(len(mesh))
+    Cext = numpy.zeros(len(mesh))
+    Time = numpy.zeros(len(mesh))
+    for i in range(len(mesh)):
+        try:
+            print('Start run for mesh '+mesh[i])
+            results = pygbe(['',
+                            '-p', '{}'.format(param),
+                            '-c', '{}_{}.config'.format(test_name, mesh[i]),
+                            '-o', 'output_{}_{}'.format(test_name, mesh[i]),
+                            '-g', './',
+                            '{}'.format(problem_folder),], return_results_dict=True)
+
+            N[i] = results['total_elements']
+            iterations[i] = results['iterations']
+            Cext[i] = results.get('Cext', 0)
+            Time[i] = results['total_time']
+
+        except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
+            print('Mesh {} failed due to insufficient memory.'
+                  'Skipping this test, but convergence test should still complete'.format(mesh[i]))
+            time.sleep(4)
+
+
+    return(N, iterations, Esolv, Esurf, Ecoul, Time)
