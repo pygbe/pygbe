@@ -49,17 +49,18 @@ def mesh_ratio(N):
     return mesh_ratio
 
 
-def report_results(error, N, iterations, Cext, analytical, total_time, test_name=None):
+def report_results(error, N, expected_rate, iterations, Cext, analytical, total_time, test_name=None):
     """
     Prints out information for the convergence tests.
 
     Inputs:
     -------
-        error     : list of float, L2 Norm of error against analytical solution.
-        N         : list of int, Number of elements in test.
-        iterations: list of int, Number of iterations to converge.
-        Cext      : list of float, Cross extinction section.
-        analytical: list of float, analytical solution of the Cross extinction 
+        error        : list of float, L2 Norm of error against analytical solution.
+        N            : list of int, Number of elements in test.
+        expected_rate: float, expected error rate acording to mesh refinement. 
+        iterations   : list of int, Number of iterations to converge.
+        Cext         : list of float, Cross extinction section.
+        analytical   : list of float, analytical solution of the Cross extinction 
                                    section.
         total_time: list of float, total wall time of run i.
     """
@@ -71,7 +72,7 @@ def report_results(error, N, iterations, Cext, analytical, total_time, test_name
         flag = 0
         for i in range(len(error)-1):
             rate = error[i]/error[i+1]
-            if abs(rate-4)>0.6:
+            if abs(rate-expected_rate)>0.6:
                 flag = 1
                 print('Bad convergence for mesh {} to {}, with rate {}'.
                       format(i, i+1, rate), file=f)
