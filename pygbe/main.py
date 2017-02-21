@@ -494,6 +494,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f, 2)
 
+    try: 
+        with open(os.path.join(output_dir, output_pickle), 'rb') as f:
+            pickle.load(f)
+    except EOFError:
+        print('Error writing the pickle file, the results will be unreadable')
+        pass     
+    
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
     if log_output:
