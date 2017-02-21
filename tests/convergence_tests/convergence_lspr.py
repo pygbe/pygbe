@@ -127,6 +127,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
             Time[i] = results['total_time']
 
             mesh_ratio = mesh_ratio(N)
+            expected_rate = 0
 
             if all(ratio==mesh_ratio[0] for ratio in mesh_ratio):
                 expected_rate = mesh_ratio[0]
@@ -134,7 +135,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
                 print('Mesh ratio inconsistency. \nCheck that the mesh ratio' 
                       'remains constant along refinement'
                       'Convergence test report will bad convergence for this reason')
-                expected_rate = 0 
+                 
 
         except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
             print('Mesh {} failed due to insufficient memory.'
