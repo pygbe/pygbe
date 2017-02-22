@@ -108,7 +108,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
     print('Runs lspr case of silver sphere in water medium')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
-    Cext = numpy.zeros(len(mesh))
+    Cext = [0]*len(mesh)
     Time = numpy.zeros(len(mesh))
 
     for i in range(len(mesh)):
@@ -125,22 +125,22 @@ def run_convergence(mesh, test_name, problem_folder, param):
             iterations[i] = results['iterations']
             Cext[i] = results.get('Cext')
             Time[i] = results['total_time']
-
-            mesh_ratio = mesh_ratio(N)
-            expected_rate = 0
-
-            if all(ratio==mesh_ratio[0] for ratio in mesh_ratio):
-                expected_rate = mesh_ratio[0]
-            else:                
-                print('Mesh ratio inconsistency. \nCheck that the mesh ratio' 
-                      'remains constant along refinement'
-                      'Convergence test report will bad convergence for this reason')
                  
 
         except (pycuda._driver.MemoryError, pycuda._driver.LaunchError) as e:
             print('Mesh {} failed due to insufficient memory.'
                   'Skipping this test, but convergence test should still complete'.format(mesh[i]))
             time.sleep(4)
+
+    mesh_rate = mesh_ratio(N)
+    expected_rate = 0
+
+    if all(ratio==mesh_rate[0] for ratio in mesh_rate):
+        expected_rate = mesh_rate[0]
+    else:
+        print('Mesh ratio inconsistency. \nCheck that the mesh ratio' 
+              'remains constant along refinement'
+              'Convergence test report will bad convergence for this reason')
 
 
     return(N, iterations, expected_rate, Cext, Time)
