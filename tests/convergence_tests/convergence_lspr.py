@@ -123,7 +123,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
 
             N[i] = results['total_elements']
             iterations[i] = results['iterations']
-            Cext[i] = results.get('Cext', 0)
+            Cext[i] = results.get('Cext')
             Time[i] = results['total_time']
 
             mesh_ratio = mesh_ratio(N)
