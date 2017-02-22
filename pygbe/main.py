@@ -447,7 +447,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
-    if log_output
+    if log_output:
         sys.stdout = restore_stdout
 
     if return_results_dict:
