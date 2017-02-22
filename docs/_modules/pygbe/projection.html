@@ -129,7 +129,7 @@
 
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
@@ -137,7 +137,7 @@
                  <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">))):</span>
@@ -148,7 +148,7 @@
                     <span class="n">ind0</span><span class="o">.</span><span class="n">index_ptr</span><span class="p">)</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">X_V</span> <span class="o">=</span> <span class="n">X_V</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
@@ -159,7 +159,7 @@
     <span class="n">X_Vc</span> <span class="o">=</span> <span class="n">X_Vc</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">param</span><span class="o">.</span><span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
     <span class="n">K_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
@@ -192,14 +192,14 @@
         <span class="n">V_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">V_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">V_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
         <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
         <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">K_lyr</span> <span class="o">=</span> <span class="n">K_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span>
     <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">V_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="k">return</span> <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span></div>
 
@@ -251,7 +251,7 @@
 
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
@@ -260,7 +260,7 @@
                  <span class="n">X_aux</span><span class="p">,</span> <span class="n">X_aux</span><span class="p">,</span> <span class="n">X_aux</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">))):</span>
@@ -271,14 +271,14 @@
                     <span class="n">ind0</span><span class="o">.</span><span class="n">index_ptr</span><span class="p">)</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">X_Kt</span> <span class="o">=</span> <span class="n">X_Kt</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
     <span class="n">X_Ktc</span> <span class="o">=</span> <span class="n">X_Ktc</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">param</span><span class="o">.</span><span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
     <span class="n">Ktx_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
@@ -317,19 +317,19 @@
         <span class="n">Ktz_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">Ktz_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ktz_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
         <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
         <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">Kt_lyr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ktx_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
               <span class="n">Kty_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
               <span class="n">Ktz_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Kt_diag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">:</span>  <span class="c1"># if same surface</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Kt_diag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-12</span><span class="p">:</span>  <span class="c1"># if same surface</span>
         <span class="n">Kt_lyr</span> <span class="o">+=</span> <span class="n">Kt_diag</span> <span class="o">*</span> <span class="n">XKt</span>
 
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
 
     <span class="k">return</span> <span class="n">Kt_lyr</span></div>
 

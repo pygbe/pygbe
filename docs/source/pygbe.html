@@ -1303,8 +1303,131 @@ Second Edition&#8221;, SIAM, pp. 151-172, pp. 272-275, 2003
 </dd></dl>
 
 </div>
-<div class="section" id="pygbe-main-module">
-<h2>pygbe.main module<a class="headerlink" href="#pygbe-main-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pygbe.main">
+<span id="pygbe-main-module"></span><h2>pygbe.main module<a class="headerlink" href="#module-pygbe.main" title="Permalink to this headline">¶</a></h2>
+<p>This is the main function of the program.
+We use a boundary element method (BEM) to perform molecular electrostatics
+calculations with a continuum approach. It calculates solvation energies for
+proteins modeled with any number of dielectric regions.</p>
+<dl class="class">
+<dt id="pygbe.main.Logger">
+<em class="property">class </em><code class="descclassname">pygbe.main.</code><code class="descname">Logger</code><span class="sig-paren">(</span><em>filename='Default.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#Logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.Logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Allow writing both to STDOUT on screen and sending text to file
+in conjunction with the command
+<cite>sys.stdout = Logger(&#8220;desired_log_file.txt&#8221;)</cite></p>
+<dl class="method">
+<dt id="pygbe.main.Logger.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#Logger.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.Logger.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Required for Python 3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pygbe.main.Logger.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#Logger.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.Logger.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.check_file_exists">
+<code class="descclassname">pygbe.main.</code><code class="descname">check_file_exists</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#check_file_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.check_file_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to open the file <cite>filename</cite> and return True if it&#8217;s valid</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.check_for_nvcc">
+<code class="descclassname">pygbe.main.</code><code class="descname">check_for_nvcc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#check_for_nvcc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.check_for_nvcc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check system PATH for nvcc, exit if not found</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.find_config_files">
+<code class="descclassname">pygbe.main.</code><code class="descname">find_config_files</code><span class="sig-paren">(</span><em>cliargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#find_config_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.find_config_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that .config and .param files exist and can be opened.
+If either file isn&#8217;t found, PyGBe exits (and should print which
+file was not found).  Otherwise return the path to the config and
+param files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cliargs</strong> (<em>parser</em>) &#8211; parser containing cli arguments passed to PyGBe</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>cliargs.config</strong> (<em>string</em>) &#8211; path to config file</li>
+<li><strong>cliargs.param</strong> (<em>string</em>) &#8211; path to param file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.main">
+<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=['/home/travis/miniconda/envs/pygbe/bin/sphinx-build', '-b', 'html', '-d', '_build/doctrees', '.', '_build/html'], log_output=True, return_output_fname=False, return_results_dict=False, field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
+problem directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log_output</strong> (<em>Bool</em><em>, </em><em>default True.</em>) &#8211; If False, output is written only to STDOUT and not to a log file.</li>
+<li><strong>return_output_fname</strong> (<em>Bool</em><em>, </em><em>default False.</em>) &#8211; If True, function main() returns the name of the
+output log file. This is used for the regression tests.</li>
+<li><strong>return_results_dict</strong> (<em>Bool</em><em>, </em><em>default False.</em>) &#8211; If True, function main() returns the results of the run
+packed in a dictionary.  Used in testing and programmatic
+use of PyGBe</li>
+<li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) &#8211; If passed, this dictionary will supercede any config file found, useful in
+programmatically stepping through slight changes in a problem</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>output_fname</strong> &#8211; The name of the log file containing problem output</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str, if kwarg is True.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.read_inputs">
+<code class="descclassname">pygbe.main.</code><code class="descname">read_inputs</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#read_inputs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.read_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse command-line arguments to determine which config and param files to run
+Assumes that in the absence of specific command line arguments that pygbe
+problem folder resembles the following structure</p>
+<p>lys/
+- lys.param
+- lys.config
+- built_parse.pqr
+- geometry/Lys1.face
+- geometry/Lys1.vert
+- output/</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.main.resolve_relative_config_file">
+<code class="descclassname">pygbe.main.</code><code class="descname">resolve_relative_config_file</code><span class="sig-paren">(</span><em>config_file</em>, <em>full_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#resolve_relative_config_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.resolve_relative_config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does its level-headed best to find the config files specified by the user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>config_file</strong> (<em>str</em>) &#8211; the given path to a .param or .config file from the command line</li>
+<li><strong>full_path</strong> (<em>str</em>) &#8211; the full path to the problem folder</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-pygbe.matrixfree">
 <span id="pygbe-matrixfree-module"></span><h2>pygbe.matrixfree module<a class="headerlink" href="#module-pygbe.matrixfree" title="Permalink to this headline">¶</a></h2>
