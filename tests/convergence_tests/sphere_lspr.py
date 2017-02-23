@@ -42,7 +42,7 @@ def main():
                    N,
                    expected_rate,
                    iterations,
-                   Cext,
+                   Cext_0,
                    analytical,
                    total_time,
                    test_name='sphere_complex')
