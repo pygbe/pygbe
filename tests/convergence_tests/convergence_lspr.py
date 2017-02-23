@@ -125,7 +125,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
 
             N[i] = results['total_elements']
             iterations[i] = results['iterations']
-            Cext_0[i] = results.get('Cext_0')[0] #We do convergence analysis in the main sphere
+            Cext_0[i] = results.get('Cext_0') #We do convergence analysis in the main sphere
             Time[i] = results['total_time']
                  
 
