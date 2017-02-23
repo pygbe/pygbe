@@ -72,7 +72,7 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical, tota
         flag = 0
         for i in range(len(error)-1):
             rate = error[i]/error[i+1]
-            if abs(rate-expected_rate)>0.3:
+            if abs(rate-expected_rate)>0.4:
                 flag = 1
                 print('Bad convergence for mesh {} to {}, with rate {}'.
                       format(i, i+1, rate), file=f)
