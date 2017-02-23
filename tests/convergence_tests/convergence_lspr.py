@@ -108,7 +108,8 @@ def run_convergence(mesh, test_name, problem_folder, param):
     print('Runs lspr case of silver sphere in water medium')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
-    Cext = [0]*len(mesh)
+    #Cext = [0]*len(mesh)
+    iterations = numpy.zeros(len(mesh))
     Time = numpy.zeros(len(mesh))
 
     for i in range(len(mesh)):
@@ -123,7 +124,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
 
             N[i] = results['total_elements']
             iterations[i] = results['iterations']
-            Cext[i] = results.get('Cext')
+            Cext[i] = results.get('Cext')[0] #We do convergence analysis in the main sphere
             Time[i] = results['total_time']
                  
 
