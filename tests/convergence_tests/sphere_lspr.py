@@ -20,7 +20,7 @@ def main():
        test_outputs[test_name] = {'N': N, 'iterations': iterations,
                                   'expected_rate': expected_rate, 'Cext_0': Cext_0,
                                   'Time': Time} 
-    picklesave(test_outputs)
+    
 
     # load data for analysis
     N = test_outputs[test_name]['N']
@@ -43,6 +43,8 @@ def main():
 
     test_outputs[test_name]['error'] = error
     test_outputs[test_name]['analytical'] = analytical
+
+    picklesave(test_outputs)
  
     report_results(error,
                    N,
