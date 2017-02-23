@@ -109,7 +109,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
     #Cext = [0]*len(mesh)
-    iterations = numpy.zeros(len(mesh))
+    Cext = numpy.zeros(len(mesh))
     Time = numpy.zeros(len(mesh))
 
     for i in range(len(mesh)):
