@@ -413,14 +413,14 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         toc = time.time()
         print('Time Cext: {}s'.format(toc - tic))
 
-        print('\nCext:')
+        print('\nCext per surface')
         for i in range(len(Cext)):
             print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
 
         results_dict['time_Cext'] = toc - tic
         results_dict['surf_Cext'] = surf_Cext
-        results_dict['Cext'] = Cext
-
+        results_dict['Cext_list'] = Cext
+        results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
 
     else:
         # Calculate solvation energy

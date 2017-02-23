@@ -49,7 +49,7 @@ def mesh_ratio(N):
     return mesh_ratio
 
 
-def report_results(error, N, expected_rate, iterations, Cext, analytical, total_time, test_name=None):
+def report_results(error, N, expected_rate, iterations, Cext_0, analytical, total_time, test_name=None):
     """
     Prints out information for the convergence tests.
 
@@ -59,7 +59,7 @@ def report_results(error, N, expected_rate, iterations, Cext, analytical, total_
         N            : list of int, Number of elements in test.
         expected_rate: float, expected error rate acording to mesh refinement. 
         iterations   : list of int, Number of iterations to converge.
-        Cext         : list of float, Cross extinction section.
+        Cext_0       : float, Cross extinction section of the main sphere.
         analytical   : list of float, analytical solution of the Cross extinction 
                                    section.
         total_time: list of float, total wall time of run i.
@@ -82,7 +82,7 @@ def report_results(error, N, expected_rate, iterations, Cext, analytical, total_
 
         print('\nNumber of elements : {}'.format(N), file=f)
         print('Number of iteration: {}'.format(iterations), file=f)
-        print('Cext'.format(Cext), file=f)
+        print('Cext_0'.format(Cext_0), file=f)
         print('Analytical solution: {} kcal/mol'.format(analytical), file=f)
         print('Error              : {}'.format(error), file=f)
         print('Total time         : {}'.format(total_time), file=f)
@@ -102,14 +102,15 @@ def run_convergence(mesh, test_name, problem_folder, param):
     -------
         N         : len(mesh) array, elements of problem.
         iterations: len(mesh) array, number of iterations to converge.
-        Cext      : len(mesh) array of float, Cross extinction section.
+        Cext_0    : len(mesh) array of float, Cross extinction section of the 
+                    main sphere.
         Time      : len(mesh) array of float, time to solution (wall-time)
     """
     print('Runs lspr case of silver sphere in water medium')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
     #Cext = [0]*len(mesh)
-    Cext = numpy.zeros(len(mesh))
+    Cext_0 = numpy.zeros(len(mesh))
     Time = numpy.zeros(len(mesh))
 
     for i in range(len(mesh)):
@@ -124,7 +125,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
 
             N[i] = results['total_elements']
             iterations[i] = results['iterations']
-            Cext[i] = results.get('Cext')[0] #We do convergence analysis in the main sphere
+            Cext_0[i] = results.get('Cext_0')[0] #We do convergence analysis in the main sphere
             Time[i] = results['total_time']
                  
 
@@ -144,4 +145,4 @@ def run_convergence(mesh, test_name, problem_folder, param):
               'Convergence test report will bad convergence for this reason')
 
 
-    return(N, iterations, expected_rate, Cext, Time)
+    return(N, iterations, expected_rate, Cext_0, Time)

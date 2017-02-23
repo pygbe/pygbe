@@ -15,15 +15,15 @@ def main():
     param = 'sphere_complex.param'
     test_name = 'sphere_complex'
     if test_name not in test_outputs.keys():
-       N, iterations, expected_rate, Cext, Time = run_convergence(
+       N, iterations, expected_rate, Cext_0, Time = run_convergence(
             mesh, test_name, problem_folder, param)
-       test_outputs[test_name] = [N, iterations, expected_rate, Cext, Time]
+       test_outputs[test_name] = [N, iterations, expected_rate, Cext_0, Time]
 
     picklesave(test_outputs)
 
     # load data for analysis
     N, iterations, expected_rate = test_outputs['sphere_complex'][:3]
-    Cext = test_outputs['sphere_complex'][3]
+    Cext_0 = test_outputs['sphere_complex'][3]
     Time = test_outputs['sphere_complex'][-1]
 
     total_time = Time
@@ -36,7 +36,7 @@ def main():
 
     analytical = an_solution.Cext_analytical(radius, wavelength, diel_out, diel_in)
 
-    error = abs(Cext - analytical) / abs(analytical)
+    error = abs(Cext_0 - analytical) / abs(analytical)
 
     report_results(error,
                    N,
