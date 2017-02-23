@@ -72,7 +72,7 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical, tota
         flag = 0
         for i in range(len(error)-1):
             rate = error[i]/error[i+1]
-            if abs(rate-expected_rate)>0.6:
+            if abs(rate-expected_rate)>0.3:
                 flag = 1
                 print('Bad convergence for mesh {} to {}, with rate {}'.
                       format(i, i+1, rate), file=f)
@@ -82,7 +82,7 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical, tota
 
         print('\nNumber of elements : {}'.format(N), file=f)
         print('Number of iteration: {}'.format(iterations), file=f)
-        print('Cext_0'.format(Cext_0), file=f)
+        print('Cross extinction section surface 0 nm^2: {}'.format(Cext_0), file=f)
         print('Analytical solution: {} kcal/mol'.format(analytical), file=f)
         print('Error              : {}'.format(error), file=f)
         print('Total time         : {}'.format(total_time), file=f)
