@@ -17,7 +17,7 @@ def main():
     if test_name not in test_outputs.keys():
        N, iterations, expected_rate, Cext, Time = run_convergence(
             mesh, test_name, problem_folder, param)
-       test_outputs[test_name] = [N, iterations, expected_rate, Cext[0], Time]
+       test_outputs[test_name] = [N, iterations, expected_rate, Cext, Time]
 
     picklesave(test_outputs)
 
