@@ -23,11 +23,11 @@ def main():
     picklesave(test_outputs)
 
     # load data for analysis
-    N = test_outputs['sphere_complex']['N']
-    iterations = test_outputs['sphere_complex']['iterations']
-    expected_rate = test_outputs['sphere_complex']['expected_rate']
-    Cext_0 = test_outputs['sphere_complex']['Cext_0']
-    Time = test_outputs['sphere_complex']['Time']
+    N = test_outputs[test_name]['N']
+    iterations = test_outputs[test_name]['iterations']
+    expected_rate = test_outputs[test_name]['expected_rate']
+    Cext_0 = test_outputs[test_name]['Cext_0']
+    Time = test_outputs[test_name]['Time']
 
     total_time = Time
     
@@ -41,6 +41,9 @@ def main():
 
     error = abs(Cext_0 - analytical) / abs(analytical)
 
+    test_outputs[test_name]['error'] = error
+    test_outputs[test_name]['analytical'] = analytical
+ 
     report_results(error,
                    N,
                    expected_rate,
