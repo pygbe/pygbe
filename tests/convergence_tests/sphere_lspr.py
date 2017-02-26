@@ -9,51 +9,61 @@ def main():
     except FileNotFoundError:
         test_outputs = {}
 
+    #This test is for 10 nm radius silver sphere in water, at wavelength 380 nm 
+    radius = 10.
+    wavelength_Ag = 380.
+    wavelength_Au = 520.
+    diel_out_380 = 1.7972083599999999 + 1j * 8.504766399999999e-09 #water value extrapolated
+    diel_out_520 = 1.7800896400000001+ 1j * 3.3515104000000003e-09
+    diel_in_Ag = -3.3876520488233184 + 1j * 0.19220746083441781 #silver value extrapolated
+    diel_in_Au = -3.8874936460215972+ 1j * 2.6344121588317515 #gold value extrapolated
+
+    analytical_Ag = an_solution.Cext_analytical(radius, wavelength_Ag, diel_out_380, diel_in_Ag)
+    analytical_Au = an_solution.Cext_analytical(radius, wavelength_Au, diel_out_520, diel_in_Au)
+
     problem_folder = 'input_files'
 
     # dirichlet_surface
     param = 'sphere_complex.param'
-    test_name = 'sphere_complex'
-    if test_name not in test_outputs.keys():
-       N, iterations, expected_rate, Cext_0, Time = run_convergence(
-            mesh, test_name, problem_folder, param)
-       test_outputs[test_name] = {'N': N, 'iterations': iterations,
+    test_names = ['sphereAg_complex', 'sphereAu_complex']
+    for test_name in test_names:
+        if test_name not in test_outputs.keys():
+           N, iterations, expected_rate, Cext_0, Time = run_convergence(
+                mesh, test_name, problem_folder, param)
+           test_outputs[test_name] = {'N': N, 'iterations': iterations,
                                   'expected_rate': expected_rate, 'Cext_0': Cext_0,
                                   'Time': Time} 
     
 
-    # load data for analysis
-    N = test_outputs[test_name]['N']
-    iterations = test_outputs[test_name]['iterations']
-    expected_rate = test_outputs[test_name]['expected_rate']
-    Cext_0 = test_outputs[test_name]['Cext_0']
-    Time = test_outputs[test_name]['Time']
+        # load data for analysis
+        N = test_outputs[test_name]['N']
+        iterations = test_outputs[test_name]['iterations']
+        expected_rate = test_outputs[test_name]['expected_rate']
+        Cext_0 = test_outputs[test_name]['Cext_0']
+        Time = test_outputs[test_name]['Time']
 
-    total_time = Time
-    
-    #This test is for 10 nm radius silver sphere in water, at wavelength 380 nm 
-    radius = 10.
-    wavelength = 380.
-    diel_out = 1.7972083599999999 + 1j * 8.504766399999999e-09 #water value extrapolated
-    diel_in = -3.3876520488233184 + 1j * 0.19220746083441781 #silver value extrapolated
+        total_time = Time
 
-    analytical = an_solution.Cext_analytical(radius, wavelength, diel_out, diel_in)
+        if 'Ag' in test_name:
+            analytical = analytical_Ag
+        elif 'Au' in test_name:
+            analytical = analytical_Au
 
-    error = abs(Cext_0 - analytical) / abs(analytical)
+        error = abs(Cext_0 - analytical) / abs(analytical)
 
-    test_outputs[test_name]['error'] = error
-    test_outputs[test_name]['analytical'] = analytical
+        test_outputs[test_name]['error'] = error
+        test_outputs[test_name]['analytical'] = analytical
 
-    picklesave(test_outputs)
- 
-    report_results(error,
-                   N,
-                   expected_rate,
-                   iterations,
-                   Cext_0,
-                   analytical,
-                   total_time,
-                   test_name='sphere_complex')
+        picklesave(test_outputs)
+     
+        report_results(error,
+                       N,
+                       expected_rate,
+                       iterations,
+                       Cext_0,
+                       analytical,
+                       total_time,
+                       test_name='sphere_complex')
 
 
 if __name__ == "__main__":
