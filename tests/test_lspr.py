@@ -25,8 +25,7 @@ def test_lspr_elements_iterations(key_int):
     assert base_results[key_int] == results[key_int]
 
 
-@pytest.mark.parametrize('key', ['Cext',
-                                 'surf_Cext'])
+@pytest.mark.parametrize('key', ['Cext_0'])
 def test_lspr(key):
     results = get_results()
 
@@ -34,7 +33,7 @@ def test_lspr(key):
         base_results = pickle.load(f)
     #Cext and surf_Cext are lists, for the example are one element lists, so
     #to check the assertion we access that element. i.e [0]
-    assert abs(base_results[key][0] - results[key][0]) / abs(base_results[key][0] + 1e-16) < 1e-12
+    assert abs(base_results[key] - results[key]) / abs(base_results[key] + 1e-16) < 1e-12
 
 @functools.lru_cache(4)
 def get_results():
