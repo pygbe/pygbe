@@ -63,7 +63,7 @@ def main():
                        Cext_0,
                        analytical,
                        total_time,
-                       test_name='sphere_complex')
+                       test_name=test_name)
 
 
 if __name__ == "__main__":
