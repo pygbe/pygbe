@@ -37,7 +37,7 @@ def report_results(error, N, iterations, E, analytical, total_time, energy_type=
     Inputs:
     -------
         error: list of float
-            L2 Norm of error against analytical solution
+            Error for each mesh case
         N: list of int
             Number of elements in test
         iterations: list of int
