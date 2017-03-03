@@ -76,11 +76,11 @@ def print_summary(surf_array, field_array, param, results_dict):
     print('\tGMRES restart iteration : {}'.format(param.restart))
 
     print(28*'-'+'\n')
-    try:
-        key = 'elem_sq_ang/nm_surf{}'.format(i)
-        results_dict[key] = [1/numpy.average(surf_array[i].area)]
-    except IndexError:
-        pass
+        try:
+            key = 'elem_sq_ang_surf{}'.format(i)
+            results_dict[key] = [1/numpy.average(surf_array[i].area)]
+        except IndexError:
+            pass
 
     return results_dict
 # yapf: enable
