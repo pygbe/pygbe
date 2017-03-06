@@ -18,6 +18,7 @@ except ImportError:
 from pygbe.main import main as pygbe
 
 mesh = ['500', '2K', '8K', '32K']
+mesh_multiple = ['500-100', '2K-500', '8K-2K', '32K-8K']
 
 
 def picklesave(test_outputs):
@@ -36,7 +37,7 @@ def mesh_ratio(N):
     
     Arguments:
     ----------
-    N: list of int, Number of elements in test.
+    N: list, Number of elements / avg_density in test (depends on what applies).
 
     Returns:
     --------
