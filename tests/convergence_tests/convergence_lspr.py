@@ -66,7 +66,8 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical=None,
         total_time   : list of float, total wall time of run i.
         rich_extra   : float, richardson extrapolation solution of the Cross
                               extinction section (when applicable).
-        avg_density  : list, avegerage density per mesh, N_total/total_Area.  
+        avg_density  : list, avegerage density per mesh, N_total/total_Area 
+                            (when applicable).  
     """
     with open('convergence_test_results', 'a') as f:
         print('-' * 60, file=f)
@@ -163,3 +164,6 @@ def run_convergence(mesh, test_name, problem_folder, param, total_Area=None):
 
 
     return(N, avg_density, iterations, expected_rate, Cext_0, Time)
+
+
+
