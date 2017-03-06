@@ -58,11 +58,11 @@ def main():
                        expected_rate,
                        iterations,
                        Cext_0,
-                       analytical=None,
                        total_time,
-                       test_name=test_name,
+                       analytical=None,
                        rich_extra=rich_extra,
-                       avg_density=avg_density)
+                       avg_density=avg_density,
+                       test_name=test_name)
 
 
 if __name__ == "__main__":

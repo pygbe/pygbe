@@ -64,11 +64,11 @@ def main():
                        expected_rate,
                        iterations,
                        Cext_0,
-                       analytical=analytical,
                        total_time,
-                       test_name=test_name,
+                       analytical=analytical,
                        rich_extra=None,
-                       avg_density=None)
+                       avg_density=None,
+                       test_name=test_name)
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ def mesh_ratio(N):
     return mesh_ratio
 
 
-def report_results(error, N, expected_rate, iterations, Cext_0, analytical=None, total_time, test_name=None, rich_extra=None, avg_density=None):
+def report_results(error, N, expected_rate, iterations, Cext_0, total_time, analytical=None,  rich_extra=None, avg_density=None, test_name=None):
     """
     Prints out information for the convergence tests.
 
@@ -61,13 +61,14 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical=None,
         expected_rate: float, expected error rate acording to mesh refinement. 
         iterations   : list of int, Number of iterations to converge.
         Cext_0       : float, Cross extinction section of the main sphere.
+        total_time   : list of float, total wall time of run i.
         analytical   : float, analytical solution of the Cross extinction 
                                    section (when applicable).
-        total_time   : list of float, total wall time of run i.
         rich_extra   : float, richardson extrapolation solution of the Cross
                               extinction section (when applicable).
         avg_density  : list, avegerage density per mesh, N_total/total_Area 
-                            (when applicable).  
+                            (when applicable).
+        test_name    : str, name you want to assign to the test in report.      
     """
     with open('convergence_test_results', 'a') as f:
         print('-' * 60, file=f)
