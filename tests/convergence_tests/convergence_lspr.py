@@ -165,5 +165,39 @@ def run_convergence(mesh, test_name, problem_folder, param, total_Area=None):
 
     return(N, avg_density, iterations, expected_rate, Cext_0, Time)
 
+def richardson_extrapolation_lspr(test_result):
+    """
+    Performs an estimate of the exact solution using
+    Richardson extrapolation, given by
 
+    f_ex = (f_1 * f_3 - f_2^2) / (f_3 - 2*f_2+f_1)
+
+    where f_1 is a result from the finest grid and f_3 is from the coarsest.
+    The grids f_1, f_2, f_3 should have the same refinement ratio (e.g. 2 -> 4 -> 8)
+
+    Arguments:
+    ----------
+    test_result:
+
+    Returns:
+    --------
+    f_ex : float, richardson_extrapolation estimated exact solution.  
+    """
+    #We perform the richardson extrapolation in the main body. The body we
+    #meassure
+    try:
+        Cext_0 = compiled_results['Cext_0']
+    except KeyError:
+        print('No results found for main body cross extinction section  \n'
+              'Something has gone wrong.')
+        sys.exit()
+
+    # assuming 4 runs
+    f1 = Cext_0[3] 
+    f2 = Cext_0[2]
+    f3 = Cext_0[1]
+
+    f_ex = (f1 * f3 - f2**2) / (f3 - 2 * f2 + f1)
+
+    return f_ex 
 
