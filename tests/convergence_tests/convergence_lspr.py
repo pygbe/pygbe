@@ -50,20 +50,23 @@ def mesh_ratio(N):
     return mesh_ratio
 
 
-def report_results(error, N, expected_rate, iterations, Cext_0, analytical, total_time, test_name=None):
+def report_results(error, N, expected_rate, iterations, Cext_0, analytical=None, total_time, test_name=None, rich_extra=None, avg_density=None):
     """
     Prints out information for the convergence tests.
 
     Inputs:
     -------
-        error        : list of float, L2 Norm of error against analytical solution.
-        N            : list of int, Number of elements in test.
+        error        : list of float, error of the calculation per mesh case.
+        N            : list , Number of elements in test.
         expected_rate: float, expected error rate acording to mesh refinement. 
         iterations   : list of int, Number of iterations to converge.
         Cext_0       : float, Cross extinction section of the main sphere.
-        analytical   : list of float, analytical solution of the Cross extinction 
-                                   section.
-        total_time: list of float, total wall time of run i.
+        analytical   : float, analytical solution of the Cross extinction 
+                                   section (when applicable).
+        total_time   : list of float, total wall time of run i.
+        rich_extra   : float, richardson extrapolation solution of the Cross
+                              extinction section (when applicable).
+        avg_density  : list, avegerage density per mesh, N_total/total_Area.  
     """
     with open('convergence_test_results', 'a') as f:
         print('-' * 60, file=f)
@@ -82,9 +85,14 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical, tota
             print('Passed convergence test!', file=f)
 
         print('\nNumber of elements : {}'.format(N), file=f)
+        if avg_density:
+             print('Average density, elem/nm^2 : {}'.format(avg_density), file=f)
         print('Number of iteration: {}'.format(iterations), file=f)
         print('Cross extinction section surface 0 nm^2: {}'.format(Cext_0), file=f)
-        print('Analytical solution: {} kcal/mol'.format(analytical), file=f)
+        if analytical:        
+            print('Analytical solution: {} nm^2'.format(analytical), file=f)
+        if rich_extra:
+            print('Richardson extrapolation solution: {} nm^2'.format(rich_extra), file=f)        
         print('Error              : {}'.format(error), file=f)
         print('Total time         : {}'.format(total_time), file=f)
 
