@@ -26,6 +26,12 @@ def print_summary(surf_array, field_array, param, results_dict):
             rr[ii] = surf_array[i].tree[ii].r
         Levels = int(numpy.log(surf_array[i].tree[0].r/numpy.min(rr))/numpy.log(2) + 1)
 
+        try:
+            key = 'elem_sq_ang_surf{}'.format(i)
+            results_dict[key] = [1/numpy.average(surf_array[i].area)]
+        except IndexError:
+            pass
+
         print('Surface {}:'.format(i))
         print('\t{} elements'.format(N_aux))
         print('\tSurface type         : {}'.format(surf_array[i].surf_type))
@@ -76,11 +82,6 @@ def print_summary(surf_array, field_array, param, results_dict):
     print('\tGMRES restart iteration : {}'.format(param.restart))
 
     print(28*'-'+'\n')
-        try:
-            key = 'elem_sq_ang_surf{}'.format(i)
-            results_dict[key] = [1/numpy.average(surf_array[i].area)]
-        except IndexError:
-            pass
 
     return results_dict
 # yapf: enable
