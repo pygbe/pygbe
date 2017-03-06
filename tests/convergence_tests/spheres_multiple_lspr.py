@@ -15,7 +15,7 @@ def main():
 
     # multiple spheres lspr 
     param = 'sphere_complex.param'
-    test_names = 'sphere_multiple_complex'
+    test_name = 'sphere_multiple_complex'
 
     #In this case we have 1 sphere of radius 10 and 6 of radius 2
     R=10.
