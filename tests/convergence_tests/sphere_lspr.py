@@ -1,5 +1,5 @@
 from pygbe.util import an_solution
-from convergence_lspr import (mesh_ratio, run_convergence, picklesave, pickleload,
+from convergence_lspr import (run_convergence, picklesave, pickleload,
                               report_results, mesh)
 
 def main():
@@ -9,7 +9,8 @@ def main():
     except FileNotFoundError:
         test_outputs = {}
 
-    #This test is for 10 nm radius silver sphere in water, at wavelength 380 nm 
+    #This test is for 10 nm radius silver sphere in water, at wavelength 380 nm
+    #and a 10 nm gold sphere in water, at wavelength 380 
     radius = 10.
     wavelength_Ag = 380.
     wavelength_Au = 520.
@@ -23,16 +24,18 @@ def main():
 
     problem_folder = 'input_files'
 
-    # dirichlet_surface
+    # single sphere lspr
     param = 'sphere_complex.param'
     test_names = ['sphereAg_complex', 'sphereAu_complex']
     for test_name in test_names:
         if test_name not in test_outputs.keys():
-           N, iterations, expected_rate, Cext_0, Time = run_convergence(
-                mesh, test_name, problem_folder, param)
-           test_outputs[test_name] = {'N': N, 'iterations': iterations,
-                                  'expected_rate': expected_rate, 'Cext_0': Cext_0,
-                                  'Time': Time} 
+           N, avg_density, iterations, expected_rate, Cext_0, Time = run_convergence(
+                mesh, test_name, problem_folder, param, total_Area=None)
+           test_outputs[test_name] = {'N': N, 
+                                      'iterations': iterations,
+                                      'expected_rate': expected_rate,
+                                      'Cext_0': Cext_0,
+                                      'Time': Time} 
     
 
         # load data for analysis
@@ -61,9 +64,11 @@ def main():
                        expected_rate,
                        iterations,
                        Cext_0,
-                       analytical,
+                       analytical=analytical,
                        total_time,
-                       test_name=test_name)
+                       test_name=test_name,
+                       rich_extra=None,
+                       avg_density=None)
 
 
 if __name__ == "__main__":
