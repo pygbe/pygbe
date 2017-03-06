@@ -97,7 +97,7 @@ def report_results(error, N, expected_rate, iterations, Cext_0, analytical=None,
         print('Total time         : {}'.format(total_time), file=f)
 
 
-def run_convergence(mesh, test_name, problem_folder, param):
+def run_convergence(mesh, test_name, problem_folder, param, total_Area=None):
     """
     Runs convergence tests over a series of mesh sizes
 
@@ -106,6 +106,8 @@ def run_convergence(mesh, test_name, problem_folder, param):
         mesh          : array of mesh suffixes
         problem_folder: str, name of folder containing meshes, etc...
         param         : str, name of param file
+        total_Area    : float, total area of the meshes involved. (Provide 
+                        when avg_density needed for convergence test)
 
     Returns:
     -------
@@ -118,7 +120,7 @@ def run_convergence(mesh, test_name, problem_folder, param):
     print('Runs lspr case of silver sphere in water medium')
     N = numpy.zeros(len(mesh))
     iterations = numpy.zeros(len(mesh))
-    #Cext = [0]*len(mesh)
+    avg_density = ['NA']*4
     Cext_0 = numpy.zeros(len(mesh))
     Time = numpy.zeros(len(mesh))
 
@@ -133,6 +135,8 @@ def run_convergence(mesh, test_name, problem_folder, param):
                             '{}'.format(problem_folder),], return_results_dict=True)
 
             N[i] = results['total_elements']
+            if total_Area:
+                avg_density[i] = results['total_elements']/total_Area
             iterations[i] = results['iterations']
             Cext_0[i] = results.get('Cext_0') #We do convergence analysis in the main sphere
             Time[i] = results['total_time']
@@ -143,8 +147,12 @@ def run_convergence(mesh, test_name, problem_folder, param):
                   'Skipping this test, but convergence test should still complete'.format(mesh[i]))
             time.sleep(4)
 
-    mesh_rate = mesh_ratio(N)
-    expected_rate = 0
+    if total_Area:
+        mesh_rate = mesh_ratio(avg_density)
+        expected_rate = 0
+    else: 
+        mesh_rate = mesh_ratio(N)
+        expected_rate = 0
 
     if all(ratio==mesh_rate[0] for ratio in mesh_rate):
         expected_rate = mesh_rate[0]
@@ -154,4 +162,4 @@ def run_convergence(mesh, test_name, problem_folder, param):
               'Convergence test report will bad convergence for this reason')
 
 
-    return(N, iterations, expected_rate, Cext_0, Time)
+    return(N, avg_density, iterations, expected_rate, Cext_0, Time)
