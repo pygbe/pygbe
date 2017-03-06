@@ -4,7 +4,7 @@ Creates a sphere of radius r, centered at x0, y0, z0
 
 Arguments (command line arguments)
 ----------
-rec : int, number of recursions for unit sphere.
+rec : int, number of recursions for unit sphere. (# of elements = 2^[(2*rec)+1])        
 r   : float, radius.
 x0  : float, x center of sphere.
 y0  : float, y center of sphere.
