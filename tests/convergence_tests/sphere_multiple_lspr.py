@@ -44,7 +44,7 @@ def main():
     total_time = Time
 
     #Richardson extrapolation on the main sphere:
-    rich_extra = richardson_extrapolation_lspr(test_outputs[test_name]['Cext_0'])  
+    rich_extra = richardson_extrapolation_lspr(test_outputs[test_name])  
 
     error = abs(Cext_0 - rich_extra) / abs(rich_extra)
 
