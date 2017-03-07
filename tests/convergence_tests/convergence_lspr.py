@@ -187,7 +187,7 @@ def richardson_extrapolation_lspr(test_result):
     #We perform the richardson extrapolation in the main body. The body we
     #meassure
     try:
-        Cext_0 = compiled_results['Cext_0']
+        Cext_0 = test_result['Cext_0']
     except KeyError:
         print('No results found for main body cross extinction section  \n'
               'Something has gone wrong.')
