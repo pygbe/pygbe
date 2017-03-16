@@ -65,12 +65,12 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     tic.record()
     K = param.K
     w = getWeights(K)
-    X_V = numpy.zeros(Ns * K)
-    X_Kx = numpy.zeros(Ns * K)
-    X_Ky = numpy.zeros(Ns * K)
-    X_Kz = numpy.zeros(Ns * K)
-    X_Kc = numpy.zeros(Ns * K)
-    X_Vc = numpy.zeros(Ns * K)
+    X_V = numpy.zeros(Ns * K, dtype=REAL)
+    X_Kx = numpy.zeros(Ns * K, dtype=REAL)
+    X_Ky = numpy.zeros(Ns * K, dtype=REAL)
+    X_Kz = numpy.zeros(Ns * K, dtype=REAL)
+    X_Kc = numpy.zeros(Ns * K, dtype=REAL)
+    X_Vc = numpy.zeros(Ns * K, dtype=REAL)
 
     NsK = numpy.arange(Ns * K)
     X_V[:] = XV[NsK // K] * w[NsK % K] * surfSrc.area[NsK // K]
@@ -118,8 +118,8 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
     timing.time_sort += tic.time_till(toc) * 1e-3
 
     param.Nround = len(surfTar.twig) * param.NCRIT
-    K_aux = numpy.zeros(param.Nround)
-    V_aux = numpy.zeros(param.Nround)
+    K_aux = numpy.zeros(param.Nround, dtype=param.REAL)
+    V_aux = numpy.zeros(param.Nround, dtype=param.REAL)
 
     ### CPU code
     if param.GPU == 0:

@@ -360,7 +360,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ### Solve
     print('Solve')
-    phi = numpy.zeros(param.Neq)
+    phi = numpy.zeros(param.Neq, dtype=param.REAL)
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
                                timing, kernel)
     toc = time.time()

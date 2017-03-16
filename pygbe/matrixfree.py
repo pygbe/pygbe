@@ -243,21 +243,21 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
-            surf_array[i].XinK = numpy.zeros(N)
+            surf_array[i].XinK = numpy.zeros(N, dtype=param.REAL)
             surf_array[i].XinV = X[Naux:Naux + N]
             Naux += N
         elif surf_array[i].surf_type == 'neumann_surface' or surf_array[
                 i].surf_type == 'asc_surface':
             surf_array[i].XinK = X[Naux:Naux + N]
-            surf_array[i].XinV = numpy.zeros(N)
+            surf_array[i].XinV = numpy.zeros(N, dtype=param.REAL)
             Naux += N
         else:
             surf_array[i].XinK = X[Naux:Naux + N]
             surf_array[i].XinV = X[Naux + N:Naux + 2 * N]
             Naux += 2 * N
 
-        surf_array[i].Xout_int = numpy.zeros(N)
-        surf_array[i].Xout_ext = numpy.zeros(N)
+        surf_array[i].Xout_int = numpy.zeros(N, dtype=param.REAL)
+        surf_array[i].Xout_ext = numpy.zeros(N, dtype=param.REAL)
 
 #   Loop over fields
     for F in range(Nfield):
@@ -312,7 +312,7 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                     surf_array[c].Xout_ext += v
 
     #   Gather results into the result vector
-    MV = numpy.zeros(len(X))
+    MV = numpy.zeros(len(X), dtype=param.REAL)
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
@@ -682,8 +682,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     F          : array, RHS suitable for the GPU.
     """
 
-    F = numpy.zeros(param.Neq)
     REAL = param.REAL
+    F = numpy.zeros(param.Neq, dtype=REAL)
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
     for field in field_array:
@@ -716,7 +716,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    block=(param.BSZ, 1, 1),
                                    grid=(GSZ, 1))
 
-                    aux = numpy.zeros(Nround)
+                    aux = numpy.zeros(Nround, dtype=REAL)
                     F_gpu.get(aux)
 
                 else:
@@ -740,9 +740,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                      numpy.int32(param.BlocksPerTwig),
                                      block=(param.BSZ, 1, 1),
                                      grid=(GSZ, 1))
-                    aux_x = numpy.zeros(Nround)
-                    aux_y = numpy.zeros(Nround)
-                    aux_z = numpy.zeros(Nround)
+                    aux_x = numpy.zeros(Nround, dtype=REAL)
+                    aux_y = numpy.zeros(Nround, dtype=REAL)
+                    aux_z = numpy.zeros(Nround, dtype=REAL)
                     Fx_gpu.get(aux_x)
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
@@ -795,7 +795,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    block=(param.BSZ, 1, 1),
                                    grid=(GSZ, 1))
 
-                    aux = numpy.zeros(Nround)
+                    aux = numpy.zeros(Nround, dtype=REAL)
                     F_gpu.get(aux)
 
                 else:
@@ -819,9 +819,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                      numpy.int32(param.BlocksPerTwig),
                                      block=(param.BSZ, 1, 1),
                                      grid=(GSZ, 1))
-                    aux_x = numpy.zeros(Nround)
-                    aux_y = numpy.zeros(Nround)
-                    aux_z = numpy.zeros(Nround)
+                    aux_x = numpy.zeros(Nround, dtype=REAL)
+                    aux_y = numpy.zeros(Nround, dtype=REAL)
+                    aux_z = numpy.zeros(Nround, dtype=REAL)
                     Fx_gpu.get(aux_x)
                     Fy_gpu.get(aux_y)
                     Fz_gpu.get(aux_z)
@@ -1030,7 +1030,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
                 #           dphi_dn is defined inside)
                 for i in f.child:
                     s = surf_array[i]
-                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk, s.wk = GQ_1D(par_reac.Nk, param.REAL)
                     s.xk = REAL(s.xk)
                     s.wk = REAL(s.wk)
                     for C in range(len(s.tree)):
@@ -1059,7 +1059,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
                 if len(f.parent) > 0:
                     i = f.parent[0]
                     s = surf_array[i]
-                    s.xk, s.wk = GQ_1D(par_reac.Nk)
+                    s.xk, s.wk = GQ_1D(par_reac.Nk, param.REAL)
                     s.xk = REAL(s.xk)
                     s.wk = REAL(s.wk)
                     for C in range(len(s.tree)):

@@ -89,7 +89,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     else:
         # real type
         [axpy, dotu, dotc, scal] =\
-            get_blas_funcs(['axpy', 'dot', 'dot', 'scal'], [X])
+            get_blas_funcs(['axpy', 'dot', 'dot', 'scal'], [X], dtype=param.REAL)
 
     # Make full use of direct access to BLAS by defining own norm
     def norm(z):

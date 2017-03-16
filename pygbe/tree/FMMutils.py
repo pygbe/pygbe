@@ -8,7 +8,8 @@ from scipy.misc import comb
 # Wrapped code
 from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
 from pygbe.tree.direct import direct_c, direct_sort, directKt_sort
-from pygbe.tree.calculateMultipoles import P2M, M2M
+#from pygbe.tree.calculateMultipoles import P2M, M2M
+from pygbe.calculate_multipoles import P2M, M2M
 
 # CUDA libraries
 try:
@@ -655,9 +656,10 @@ def getMultipole(Cells, C, x, y, z, mV, mKx, mKy, mKz, ind0, P, NCRIT):
         Cells[C].Md[:] = 0.0
 
         l = Cells[C].source
-        P2M(Cells[C].M, Cells[C].Md, x[l], y[l], z[l], mV[l], mKx[l], mKy[l],
-            mKz[l], Cells[C].xc, Cells[C].yc, Cells[C].zc, ind0.II, ind0.JJ,
-            ind0.KK)
+        Cells[C].M, Cells[C].Md = P2M(Cells[C].M, Cells[C].Md, x[l], y[l],
+                                      z[l], mV[l], mKx[l], mKy[l], mKz[l],
+                                      Cells[C].xc, Cells[C].yc, Cells[C].zc,
+                                      ind0.II, ind0.JJ, ind0.KK)
 
 
 def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
@@ -695,10 +697,10 @@ def upwardSweep(Cells, CC, PC, P, II, JJ, KK, index, combII, combJJ, combKK,
     dy = Cells[PC].yc - Cells[CC].yc
     dz = Cells[PC].zc - Cells[CC].zc
 
-    M2M(Cells[PC].M, Cells[CC].M, dx, dy, dz, II, JJ, KK, combII, combJJ,
-        combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
-    M2M(Cells[PC].Md, Cells[CC].Md, dx, dy, dz, II, JJ, KK, combII, combJJ,
-        combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
+    Cells[PC].M = M2M(Cells[PC].M, Cells[CC].M, dx, dy, dz, II, JJ, KK, combII,
+                      combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
+    Cells[PC].Md = M2M(Cells[PC].Md, Cells[CC].Md, dx, dy, dz, II, JJ, KK,
+                       combII, combJJ, combKK, IImii, JJmjj, KKmkk, index_small, index_ptr)
 
 
 def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
@@ -845,8 +847,8 @@ def M2P_gpu(surfSrc, surfTar, K_gpu, V_gpu, surf, ind0, param, LorY, timing,
 
     tic.record()
     M2P_size = surfTar.offsetMlt[surf, len(surfTar.twig)]
-    MSort = numpy.zeros(param.Nm * M2P_size)
-    MdSort = numpy.zeros(param.Nm * M2P_size)
+    MSort = numpy.zeros(param.Nm * M2P_size, dtype=REAL)
+    MdSort = numpy.zeros(param.Nm * M2P_size, dtype=REAL)
 
     i = -1
     for C in surfTar.M2P_list[surf, 0:M2P_size]:
