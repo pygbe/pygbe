@@ -6,7 +6,7 @@ import numpy
 from numpy import pi
 
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms
-from pygbe.tree.direct import coulomb_direct
+from pygbe.direct import coulomb_direct
 from pygbe.projection import project, project_Kt, get_phir, get_phir_gpu
 from pygbe.classes import Parameters, IndexConstant
 from pygbe.util.semi_analytical import GQ_1D
@@ -1103,7 +1103,7 @@ def coulomb_energy(f, param):
     """
 
     point_energy = numpy.zeros(len(f.q), param.REAL)
-    coulomb_direct(f.xq[:, 0], f.xq[:, 1], f.xq[:, 2], f.q, point_energy)
+    point_energy = coulomb_direct(f.xq[:, 0], f.xq[:, 1], f.xq[:, 2], f.q, point_energy)
 
     cal2J = 4.184
     C0 = param.qe**2 * param.Na * 1e-3 * 1e10 / (cal2J * param.E_0)
