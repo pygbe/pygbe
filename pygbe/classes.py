@@ -4,10 +4,11 @@ from scipy import linalg
 import scipy.constants
 
 from pygbe.util.semi_analytical import GQ_1D
-from pygbe.tree.direct import computeDiagonal
+#from pygbe.tree.direct import computeDiagonal
 from pygbe.quadrature import quadratureRule_fine
 from pygbe.util.read_data import readcrd, readpqr, read_vertex, read_triangle
 from pygbe.tree.FMMutils import addSources, sortPoints, generateTree, findTwigs
+from pygbe.direct import compute_diagonal
 
 
 class Event():
@@ -212,10 +213,10 @@ class Surface():
 
         addSources(self.tree, self.twig, param.K)
 
-        self.xk, self.wk = GQ_1D(param.Nk)
+        self.xk, self.wk = GQ_1D(param.Nk, param.REAL)
         self.Xsk, self.Wsk = quadratureRule_fine(param.K_fine)
 
-        self.generate_preconditioner()
+        self.generate_preconditioner(param)
 
         tic = time.time()
         sortPoints(self, self.tree, self.twig, param)
@@ -291,7 +292,7 @@ class Surface():
 
         self.xj, self.yj, self.zj = gauss_array.T
 
-    def generate_preconditioner(self):
+    def generate_preconditioner(self, param):
         """Generate preconditioner
 
         Notes
@@ -314,13 +315,14 @@ class Surface():
         centers = numpy.vstack((self.xi, self.yi, self.zi)).T
 
         #   Compute diagonal integral for internal equation
-        VL = numpy.zeros(self.N)
-        KL = numpy.zeros(self.N)
-        VY = numpy.zeros(self.N)
-        KY = numpy.zeros(self.N)
-        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
-                        numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
-                        self.xk, self.wk)
+        VL = numpy.zeros(self.N, dtype=param.REAL)
+        KL = numpy.zeros(self.N, dtype=param.REAL)
+        VY = numpy.zeros(self.N, dtype=param.REAL)
+        KY = numpy.zeros(self.N, dtype=param.REAL)
+        VL, KL, VY, KY = compute_diagonal(VL, KL, VY, KY,
+                                         numpy.ravel(self.vertex[self.triangle[:]]),
+                                         numpy.ravel(centers), self.kappa_in, 2 * numpy.pi, 0.,
+                                         self.xk, self.wk)
         if self.LorY_in == 1:
             dX11 = KL
             dX12 = -VL
@@ -337,7 +339,7 @@ class Surface():
         KL = numpy.zeros(self.N)
         VY = numpy.zeros(self.N)
         KY = numpy.zeros(self.N)
-        computeDiagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
+        VL, KL, VY, KY = compute_diagonal(VL, KL, VY, KY, numpy.ravel(self.vertex[self.triangle[:]]),
                         numpy.ravel(centers), self.kappa_out, 2 * numpy.pi, 0.,
                         self.xk, self.wk)
         if self.LorY_out == 1:

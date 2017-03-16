@@ -9,7 +9,7 @@ import numpy
 from pygbe.util.semi_analyticalwrap import SA_wrap_arr
 
 
-def GQ_1D(K):
+def GQ_1D(K, dtype):
     """
     Gauss quadrature in 1D.
 
@@ -23,8 +23,8 @@ def GQ_1D(K):
     w: float, weights of the gauss point.
     """
 
-    T = numpy.zeros((K, K))
-    nvec = numpy.arange(1., K)
+    T = numpy.zeros((K, K), dtype=dtype)
+    nvec = numpy.arange(1., K, dtype=dtype)
     beta = 0.5 / numpy.sqrt(1 - 1 / (2 * nvec)**2)
     T = numpy.diag(beta, 1) + numpy.diag(beta, -1)
     d, v = numpy.linalg.eig(T)
