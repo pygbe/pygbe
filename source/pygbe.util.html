@@ -1,0 +1,1024 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pygbe.util package &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pygbe-util-package">
+<h1>pygbe.util package<a class="headerlink" href="#pygbe-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygbe.util.an_solution">
+<span id="pygbe-util-an-solution-module"></span><h2>pygbe.util.an_solution module<a class="headerlink" href="#module-pygbe.util.an_solution" title="Permalink to this headline">¶</a></h2>
+<p>It contains the functions to compute the cases that presents an analytical
+solutions.
+All functions output the analytical solution in kcal/mol</p>
+<dl class="function">
+<dt id="pygbe.util.an_solution.an_P">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">an_P</code><span class="sig-paren">(</span><em>q</em>, <em>xq</em>, <em>E_1</em>, <em>E_2</em>, <em>R</em>, <em>kappa</em>, <em>a</em>, <em>N</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#an_P"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.an_P" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the solvation energy according to Kirkwood-1934.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the Stern Layer.</em>) &#8211; </li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the polinomial expansion.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_P</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, solvation energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.an_spherical">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">an_spherical</code><span class="sig-paren">(</span><em>q</em>, <em>xq</em>, <em>E_1</em>, <em>E_2</em>, <em>E_0</em>, <em>R</em>, <em>N</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#an_spherical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.an_spherical" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the analytical solution of the potential of a sphere with
+Nq charges inside.
+Took from Kirkwood (1934).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>E_0</strong> (<em>float</em><em>, </em><em>dielectric constant of vacuum.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the spherical harmonic expansion.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>PHI</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, reaction potential.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_charge_single_energy">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_single_energy</code><span class="sig-paren">(</span><em>sigma0</em>, <em>r1</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_single_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_single_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the total energy of a single sphere at constant charge,
+inmmersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, total energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_charge_single_point">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_single_point</code><span class="sig-paren">(</span><em>sigma0</em>, <em>a</em>, <em>r</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_single_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_single_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the potential in a point &#8216;r&#8217; due to a spherical surface
+with constant charge sigma0 immersed in water. Solution to the
+Poisson-Boltzmann problem. .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) &#8211; point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>phi</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, potential.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_charge_single_potential">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_single_potential</code><span class="sig-paren">(</span><em>sigma0</em>, <em>radius</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_single_potential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_single_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the surface potential on a sphere at constant charged, immersed
+in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>phi</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, potential.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_charge_twosphere_dissimilar">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_twosphere_dissimilar</code><span class="sig-paren">(</span><em>sigma01</em>, <em>sigma02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_twosphere_dissimilar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_twosphere_dissimilar" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy between two dissimilar spheres at
+constant charge, immersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sigma01</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_charge_twosphere_identical">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_twosphere_identical</code><span class="sig-paren">(</span><em>sigma</em>, <em>a</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_twosphere_identical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_twosphere_identical" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy for two spheres at constants surface
+charge, according to Carnie&amp;Chan-1993.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sigma</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the spheres.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of spheres.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_single_charge">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_single_charge</code><span class="sig-paren">(</span><em>phi0</em>, <em>radius</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_single_charge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_single_charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the surface charge of a sphere at constant potential, immersed
+in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant .</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sigma</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, surface charge.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_single_energy">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_single_energy</code><span class="sig-paren">(</span><em>phi0</em>, <em>r1</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_single_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_single_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the total energy of a single sphere at constant potential,
+inmmersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, total energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_single_point">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_single_point</code><span class="sig-paren">(</span><em>phi0</em>, <em>a</em>, <em>r</em>, <em>kappa</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_single_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_single_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the potential in a point &#8216;r&#8217; due to a spherical surface
+with constant potential phi0, immersed in water. Solution to the
+Poisson-Boltzmann problem.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) &#8211; point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>phi</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, potential.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_twosphere">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_twosphere</code><span class="sig-paren">(</span><em>phi01</em>, <em>phi02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_twosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_twosphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the solvation energy of two spheres at constant potential,
+immersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_solv</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, solvation energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_twosphere_2">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_twosphere_2</code><span class="sig-paren">(</span><em>phi01</em>, <em>phi02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_twosphere_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_twosphere_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the solvation energy of two spheres at constant potential,
+immersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_solv</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, solvation energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_twosphere_dissimilar">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_twosphere_dissimilar</code><span class="sig-paren">(</span><em>phi01</em>, <em>phi02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_twosphere_dissimilar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_twosphere_dissimilar" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy for dissimilar spheres at constant
+potential, immersed in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.constant_potential_twosphere_identical">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_twosphere_identical</code><span class="sig-paren">(</span><em>phi01</em>, <em>phi02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_twosphere_identical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_twosphere_identical" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy for two spheres at constants surface
+potential, according to Carnie&amp;Chan-1993.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+<li><strong>Note</strong> &#8211; Even though it admits phi01 and phi02, they should be identical; and
+the same is applicable to r1 and r2.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.get_K">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">get_K</code><span class="sig-paren">(</span><em>x</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#get_K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.get_K" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the polinomials K needed for Kirkwood-1934 solutions.
+K_n(x) in Equation 4 in Kirkwood 1934.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em><em>, </em><em>evaluation point of K.</em>) &#8211; </li>
+<li><strong>n</strong> (<em>int</em><em>, </em><em>number of terms desired in the expansion.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>K</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, polinomials K.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.molecule_constant_charge">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">molecule_constant_charge</code><span class="sig-paren">(</span><em>q</em>, <em>sigma02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>E_1</em>, <em>E_2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#molecule_constant_charge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.molecule_constant_charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy between a molecule (sphere with
+point-charge in the center) and a sphere at constant charge, immersed
+in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
+<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.molecule_constant_potential">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">molecule_constant_potential</code><span class="sig-paren">(</span><em>q</em>, <em>phi02</em>, <em>r1</em>, <em>r2</em>, <em>R</em>, <em>kappa</em>, <em>E_1</em>, <em>E_2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#molecule_constant_potential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.molecule_constant_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the interaction energy between a molecule (sphere with
+point-charge in the center) and a sphere at constant potential, immersed
+in water.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>E_inter</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float, interaction energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.an_solution.two_sphere">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">two_sphere</code><span class="sig-paren">(</span><em>a</em>, <em>R</em>, <em>kappa</em>, <em>E_1</em>, <em>E_2</em>, <em>q</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#two_sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.two_sphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the analytical solution of a spherical surface and a spherical
+molecule with a center charge, both of radius R.
+Follows Cooper&amp;Barba 2016</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float</em><em>, </em><em>center to center distance.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of surface and molecule.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Einter</strong> (<em>float, interaction energy.</em>)</li>
+<li><strong>E1sphere</strong> (<em>float, solvation energy of one sphere.</em>)</li>
+<li><strong>E2sphere</strong> (<em>float, solvation energy of two spheres together.</em>)</li>
+<li><em>Note</em></li>
+<li><em>Einter should match (E2sphere - 2xE1sphere)</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygbe.util.read_data">
+<span id="pygbe-util-read-data-module"></span><h2>pygbe.util.read_data module<a class="headerlink" href="#module-pygbe.util.read_data" title="Permalink to this headline">¶</a></h2>
+<p>It contains the functions to read the all the data from the meshes files, its
+parameters and charges files.</p>
+<dl class="function">
+<dt id="pygbe.util.read_data.readCheck">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readCheck</code><span class="sig-paren">(</span><em>aux</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readCheck" title="Permalink to this definition">¶</a></dt>
+<dd><p>It checks if it is not reading more than one term.
+We use this function to check we are not missing &#8216;-&#8216; signs in the .pqr
+files, when we read the lines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aux</strong> (<em>str</em><em>, </em><em>string to be checked.</em>) &#8211; </li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>X</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, array with the correct &#8216;-&#8216; signs assigned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.readElectricField">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readElectricField</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readElectricField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readElectricField" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the information about the incident electric field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the infromation of the incident</em>) &#8211; electric field. (filname.config)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>electricField</strong> (<em>float, electric field intensity, it is in the &#8216;z&#8217;</em>) &#8211; direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</li>
+<li><strong>wavelength</strong> (<em>float, wavelength of the incident electric field.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.readParameters">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>It populates the attributes from the Parameters class with the information
+read from the .param file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_fields">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_fields</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the physical parameters from the configuration file for each region
+in the surface</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the physical parameters of each</em>) &#8211; region. (filename.config)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><em>Dictionary containing</em></li>
+<li><strong>LorY</strong> (<em>list, it contains integers, Laplace (1) or Yukawa (2),</em>) &#8211; corresponding to each region.</li>
+<li><strong>pot</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) &#8211; the energy in this region.</li>
+<li><strong>E</strong> (<em>list, it contains floats with the dielectric constant of each</em>) &#8211; region.</li>
+<li><strong>kappa</strong> (<em>list, it contains floats with the reciprocal of Debye length value</em>) &#8211; of each region.</li>
+<li><strong>charges</strong> (<em>list, it contains integers indicating if there are (1) or not (0)</em>) &#8211; charges in this region.</li>
+<li><strong>coulomb</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) &#8211; the coulomb energy in this region.</li>
+<li><strong>qfile</strong> (<em>list, location of the &#8216;.pqr&#8217; file with the location of the charges.</em>)</li>
+<li><strong>Nparent</strong> (<em>list, it contains integers indicating the number of &#8216;parent&#8217;</em>) &#8211; surfaces (surface containing this region)</li>
+<li><strong>parent</strong> (<em>list, it contains the file of the parent surface mesh, according</em>) &#8211; to their position in the FILE list, starting from 0 (eg. if
+the mesh file for the parent is the third one specified in
+the FILE section, parent=2)</li>
+<li><strong>Nchild</strong> (<em>list, it contains integers indicating number of child surfaces</em>) &#8211; (surfaces completely contained in this region).</li>
+<li><strong>child</strong> (<em>list, it contains position of the mesh files for the children</em>) &#8211; surface in the FILE section.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_surface">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_surface</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the type of surface of each region on the surface from the
+configuration file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface type of each region.</em>) &#8211; (filename.config).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>files</strong> (<em>list, it contains the files corresponding to each region in the</em>) &#8211; surface.</li>
+<li><strong>surf_type</strong> (<em>list, it contains the type of surface of each region.</em>)</li>
+<li><strong>phi0_file</strong> (<em>list, it contains the constant potential/surface charge for the</em>) &#8211; cases where it applies. (dirichlet or neumann surfaces)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_triangle">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_triangle</code><span class="sig-paren">(</span><em>filename</em>, <em>surf_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_triangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_triangle" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the triangles from the mesh file and it stores them on an
+array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.faces)</li>
+<li><strong>surf_type</strong> (<em>str</em><em>, </em><em>type of surface.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>triangle</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, triangles indices.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_vertex">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_vertex</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the vertex of the triangles from the mesh file and it stores
+them on an array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.vert)</li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>vertex</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, vertices of the triangles.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.readcrd">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readcrd</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readcrd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readcrd" title="Permalink to this definition">¶</a></dt>
+<dd><p>It reads the crd file, file that contains the charges information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>pos</strong> (<em>(Nqx3) array, positions of the charges.</em>)</li>
+<li><strong>q</strong> (<em>(Nqx1) array, value of the charges.</em>)</li>
+<li><strong>Nq</strong> (<em>int, number of charges.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.readpqr">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readpqr</code><span class="sig-paren">(</span><em>filename</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readpqr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readpqr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read charge information from pqr file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.pqr)</li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>pos</strong> (<em>(Nqx3) array, positions of the charges.</em>)</li>
+<li><strong>q</strong> (<em>(Nqx1) array, value of the charges.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygbe.util.semi_analytical">
+<span id="pygbe-util-semi-analytical-module"></span><h2>pygbe.util.semi_analytical module<a class="headerlink" href="#module-pygbe.util.semi_analytical" title="Permalink to this headline">¶</a></h2>
+<p>It contains the functions needed to compute the near singular integrals in
+python. For big problems these functions were written in C++ and we call them
+through the pycuda interface. At the end you have a commented test to compare
+both types.</p>
+<dl class="function">
+<dt id="pygbe.util.semi_analytical.GQ_1D">
+<code class="descclassname">pygbe.util.semi_analytical.</code><code class="descname">GQ_1D</code><span class="sig-paren">(</span><em>K</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/semi_analytical.html#GQ_1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.semi_analytical.GQ_1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gauss quadrature in 1D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>desired number of gauss points.</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>x</strong> (<em>float, location of the gauss point.</em>)</li>
+<li><strong>w</strong> (<em>float, weights of the gauss point.</em>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.semi_analytical.SA_arr">
+<code class="descclassname">pygbe.util.semi_analytical.</code><code class="descname">SA_arr</code><span class="sig-paren">(</span><em>y</em>, <em>x</em>, <em>kappa</em>, <em>same</em>, <em>xk</em>, <em>wk</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/semi_analytical.html#SA_arr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.semi_analytical.SA_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the integral line for all the sides of a triangle and for all
+the collocation points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> (<em>array</em><em>, </em><em>vertices coordinates of the triangles.</em>) &#8211; </li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>collocation points.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>same</strong> (<em>int</em><em>, </em><em>1 if the collocation point is in the panel of integration</em><em>,</em><em></em>) &#8211; 0 otherwise.</li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>phi_Y</strong> (<em>float, potential due to a Yukawa kernel.</em>)</li>
+<li><strong>dphi_Y</strong> (<em>float, normal derivative of potential due to a Yukawa kernel.</em>)</li>
+<li><strong>phi_L</strong> (<em>float, potential due to a Laplace kernel.</em>)</li>
+<li><strong>dphi_L</strong> (<em>float, normal derivative of potential due to a Laplace kernel.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.semi_analytical.intSide">
+<code class="descclassname">pygbe.util.semi_analytical.</code><code class="descname">intSide</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em>, <em>p</em>, <em>kappa</em>, <em>xk</em>, <em>wk</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/semi_analytical.html#intSide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.semi_analytical.intSide" title="Permalink to this definition">¶</a></dt>
+<dd><p>It solves the integral line over one side of the triangle .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) &#8211; </li>
+<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) &#8211; </li>
+<li><strong>p</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) &#8211; collocation point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>phi_Y</strong> (<em>float, potential due to a Yukawa kernel.</em>)</li>
+<li><strong>dphi_Y</strong> (<em>float, normal derivative of potential due to a Yukawa kernel.</em>)</li>
+<li><strong>phi_L</strong> (<em>float, potential due to a Laplace kernel.</em>)</li>
+<li><strong>dphi_L</strong> (<em>float, normal derivative of potential due to a Laplace kernel.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.semi_analytical.lineInt">
+<code class="descclassname">pygbe.util.semi_analytical.</code><code class="descname">lineInt</code><span class="sig-paren">(</span><em>z</em>, <em>x</em>, <em>v1</em>, <em>v2</em>, <em>kappa</em>, <em>xk</em>, <em>wk</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/semi_analytical.html#lineInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.semi_analytical.lineInt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line integral to solve the non-analytical part (integral in the angle) in
+the semi_analytical integrals needed to calculate the potentials.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) &#8211; collocation point.</li>
+<li><strong>x</strong> (<em>float</em><em>, </em><em>position of the collocation point.</em>) &#8211; </li>
+<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) &#8211; </li>
+<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>phi_Y</strong> (<em>float, potential due to a Yukawa kernel.</em>)</li>
+<li><strong>dphi_Y</strong> (<em>float, normal derivative of potential due to a Yukawa kernel.</em>)</li>
+<li><strong>phi_L</strong> (<em>float, potential due to a Laplace kernel.</em>)</li>
+<li><strong>dphi_L</strong> (<em>float, normal derivative of potential due to a Laplace kernel.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pygbe.util.semi_analyticalwrap">
+<span id="pygbe-util-semi-analyticalwrap-module"></span><h2>pygbe.util.semi_analyticalwrap module<a class="headerlink" href="#module-pygbe.util.semi_analyticalwrap" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pygbe.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pygbe.util" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer&#8217;s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

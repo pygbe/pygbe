@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pygbe.gmres &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.gmres</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generalized Minimum Residual Method (GMRES).</span>
+
+<span class="sd">GMRES iteratively refines the initial solution guess to the system Ax=b.</span>
+
+<span class="sd">This implementation was based mainly on the gmres_mgs from PyAMG, where</span>
+<span class="sd">modified Gram-Schmidt is used to orthogonalize the Krylov Space and</span>
+<span class="sd">Givens Rotations are used to provide the residual norm each iteration.</span>
+
+<span class="sd">Guidance code:</span>
+
+<span class="sd"> - PyAMG library:</span>
+<span class="sd">      https://github.com/pyamg/pyamg/blob/master/pyamg/krylov/_gmres_mgs.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="k">import</span> <span class="n">get_blas_funcs</span><span class="p">,</span> <span class="n">get_lapack_funcs</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.sputils</span> <span class="k">import</span> <span class="n">upcast</span>
+
+<span class="kn">from</span> <span class="nn">pygbe.matrixfree</span> <span class="k">import</span> <span class="n">gmres_dot</span>
+
+
+<div class="viewcode-block" id="apply_givens"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.gmres.apply_givens">[docs]</a><span class="k">def</span> <span class="nf">apply_givens</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply the first k Givens rotations in Q to the vector v.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        Q: list, list of consecutive 2x2 Givens rotations</span>
+<span class="sd">        v: array, vector to apply the rotations to</span>
+<span class="sd">        k: int, number of rotations to apply</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        v: array, that is changed in place.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">Qloc</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Qloc</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="gmres_mgs"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.gmres.gmres_mgs">[docs]</a><span class="k">def</span> <span class="nf">gmres_mgs</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GMRES solver.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    X          : array, initial guess.</span>
+<span class="sd">    b          : array, right hand side.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    ind0       : class, it contains the indices related to the treecode</span>
+<span class="sd">                        computation.</span>
+<span class="sd">    timing     : class, it contains timing information for different parts of</span>
+<span class="sd">                        the code.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    X          : array, an updated guess to the solution.</span>
+<span class="sd">    iteration  : int, number of outer iterations for convergence</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Yousef Saad, &quot;Iterative Methods for Sparse Linear Systems,</span>
+<span class="sd">       Second Edition&quot;, SIAM, pp. 151-172, pp. 272-275, 2003</span>
+<span class="sd">       http://www-users.cs.umn.edu/~saad/books.html</span>
+<span class="sd">    .. [2] C. T. Kelley, http://www4.ncsu.edu/~ctk/matlab_roots.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Defining xtype as dtype of the problem, to decide which BLAS functions</span>
+    <span class="c1"># import.</span>
+    <span class="n">xtype</span> <span class="o">=</span> <span class="n">upcast</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># Get fast access to underlying BLAS routines</span>
+    <span class="c1"># dotc is the conjugate dot, dotu does no conjugation</span>
+
+    <span class="p">[</span><span class="n">lartg</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_lapack_funcs</span><span class="p">([</span><span class="s1">&#39;lartg&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xtype</span><span class="p">)):</span>
+        <span class="p">[</span><span class="n">axpy</span><span class="p">,</span> <span class="n">dotu</span><span class="p">,</span> <span class="n">dotc</span><span class="p">,</span> <span class="n">scal</span><span class="p">]</span> <span class="o">=</span>\
+            <span class="n">get_blas_funcs</span><span class="p">([</span><span class="s1">&#39;axpy&#39;</span><span class="p">,</span> <span class="s1">&#39;dotu&#39;</span><span class="p">,</span> <span class="s1">&#39;dotc&#39;</span><span class="p">,</span> <span class="s1">&#39;scal&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># real type</span>
+        <span class="p">[</span><span class="n">axpy</span><span class="p">,</span> <span class="n">dotu</span><span class="p">,</span> <span class="n">dotc</span><span class="p">,</span> <span class="n">scal</span><span class="p">]</span> <span class="o">=</span>\
+            <span class="n">get_blas_funcs</span><span class="p">([</span><span class="s1">&#39;axpy&#39;</span><span class="p">,</span> <span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="s1">&#39;dot&#39;</span><span class="p">,</span> <span class="s1">&#39;scal&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">])</span>
+
+    <span class="c1"># Make full use of direct access to BLAS by defining own norm</span>
+    <span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">dotc</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">z</span><span class="p">)))</span>
+
+    <span class="c1"># Defining dimension</span>
+    <span class="n">dimen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="n">max_iter</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">max_iter</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">restart</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">tol</span>
+
+    <span class="c1"># Set number of outer and inner iterations</span>
+    <span class="n">max_outer</span> <span class="o">=</span> <span class="n">max_iter</span>
+
+    <span class="k">if</span> <span class="n">R</span> <span class="o">&gt;</span> <span class="n">dimen</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Setting number of inner iterations (restrt) to maximum</span><span class="se">\</span>
+<span class="s1">              allowed, which is A.shape[0] &#39;</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">dimen</span>
+
+    <span class="n">max_inner</span> <span class="o">=</span> <span class="n">R</span>
+
+    <span class="c1"># Prep for method</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="n">gmres_dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">aux</span>
+
+    <span class="n">normr</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="c1"># Check initial guess ( scaling by b, if b != 0, must account for</span>
+    <span class="c1"># case when norm(b) is very small)</span>
+    <span class="n">normb</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normb</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">normb</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">normr</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="o">*</span><span class="n">normb</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span>
+
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Here start the GMRES</span>
+    <span class="k">for</span> <span class="n">outer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_outer</span><span class="p">):</span>
+
+        <span class="c1"># Preallocate for Givens Rotations, Hessenberg matrix and Krylov Space</span>
+        <span class="c1"># Space required is O(dimen*max_inner).</span>
+        <span class="c1"># NOTE:  We are dealing with row-major matrices, so we traverse in a</span>
+        <span class="c1">#        row-major fashion,</span>
+        <span class="c1">#        i.e., H and V&#39;s transpose is what we store.</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Initialzing Givens Rotations</span>
+        <span class="c1"># Upper Hessenberg matrix, which is then</span>
+        <span class="c1"># converted to upper triagonal with Givens Rotations</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">max_inner</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_inner</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xtype</span><span class="p">)</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">max_inner</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">dimen</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xtype</span><span class="p">)</span>  <span class="c1"># Krylov space</span>
+
+        <span class="c1"># vs store the pointers to each column of V.</span>
+        <span class="c1"># This saves a considerable amount of time.</span>
+        <span class="n">vs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># v = r/normr</span>
+        <span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">scal</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">normr</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>  <span class="c1"># scal wrapper of dscal --&gt; x = a*x</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="c1">#Saving initial residual to be used to calculate the rel_resid</span>
+        <span class="k">if</span> <span class="n">iteration</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">res_0</span> <span class="o">=</span> <span class="n">normb</span>
+
+        <span class="c1">#RHS vector in the Krylov space</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dimen</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xtype</span><span class="p">)</span>
+        <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">normr</span>
+
+        <span class="k">for</span> <span class="n">inner</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_inner</span><span class="p">):</span>
+            <span class="c1">#New search direction</span>
+            <span class="n">v</span><span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">v</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">gmres_dot</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+ <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+            <span class="n">vs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+            <span class="c1">#Modified Gram Schmidt</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">vk</span> <span class="o">=</span> <span class="n">vs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="n">dotc</span><span class="p">(</span><span class="n">vk</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span>
+                <span class="n">v</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">axpy</span><span class="p">(</span><span class="n">vk</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">dimen</span><span class="p">,</span> <span class="o">-</span><span class="n">alpha</span><span class="p">)</span>  <span class="c1"># y := a*x + y</span>
+                <span class="c1">#axpy is a wrapper for daxpy (blas function)</span>
+
+            <span class="n">normv</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">normv</span>
+
+
+            <span class="c1">#Check for breakdown</span>
+            <span class="k">if</span> <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">v</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">scal</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="c1">#Apply for Givens rotations to H</span>
+            <span class="k">if</span> <span class="n">inner</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">apply_givens</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="p">:],</span> <span class="n">inner</span><span class="p">)</span>
+
+            <span class="c1">#Calculate and apply next complex-valued Givens rotations</span>
+
+            <span class="c1">#If max_inner = dimen, we don&#39;t need to calculate, this</span>
+            <span class="c1">#is unnecessary for the last inner iteration when inner = dimen -1</span>
+
+            <span class="k">if</span> <span class="n">inner</span> <span class="o">!=</span> <span class="n">dimen</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1">#lartg is a lapack function that computes the parameters</span>
+                    <span class="c1">#for a Givens rotation</span>
+                    <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span><span class="p">]</span> <span class="o">=</span> <span class="n">lartg</span><span class="p">(</span><span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="p">],</span> <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">Qblock</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">s</span><span class="p">),</span><span class="n">c</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xtype</span><span class="p">)</span>
+                    <span class="n">Q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Qblock</span><span class="p">)</span>
+
+                    <span class="c1">#Apply Givens Rotations to RHS for the linear system in</span>
+                    <span class="c1"># the krylov space.</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">inner</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Qblock</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">inner</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+
+                    <span class="c1">#Apply Givens rotations to H</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="p">]</span> <span class="o">=</span> <span class="n">dotu</span><span class="p">(</span><span class="n">Qblock</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">H</span><span class="p">[</span><span class="n">inner</span><span class="p">,</span> <span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="n">iteration</span><span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">inner</span> <span class="o">&lt;</span> <span class="n">max_inner</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">normr</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">rel_resid</span> <span class="o">=</span> <span class="n">normr</span><span class="o">/</span><span class="n">res_0</span>
+
+                <span class="k">if</span> <span class="n">rel_resid</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">iteration</span><span class="o">%</span><span class="mi">1</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Iteration: </span><span class="si">{}</span><span class="s1">, relative residual: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span><span class="n">rel_resid</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">inner</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">R</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residual: </span><span class="si">{}</span><span class="s1">. Restart...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rel_resid</span><span class="p">))</span>
+
+        <span class="c1"># end inner loop, back to outer loop</span>
+
+        <span class="c1"># Find best update to X in Krylov Space V.  Solve inner X inner system.</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span> <span class="p">(</span><span class="n">H</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">update</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="n">V</span><span class="p">[:</span><span class="n">inner</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">X</span><span class="o">=</span> <span class="n">X</span> <span class="o">+</span> <span class="n">update</span>
+        <span class="n">aux</span> <span class="o">=</span> <span class="n">gmres_dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">aux</span>
+
+        <span class="n">normr</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">rel_resid</span> <span class="o">=</span> <span class="n">normr</span><span class="o">/</span><span class="n">res_0</span>
+
+        <span class="c1"># test for convergence</span>
+        <span class="k">if</span> <span class="n">rel_resid</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;GMRES solve&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converged after </span><span class="si">%i</span><span class="s1"> iterations to a residual of </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span><span class="n">rel_resid</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time weight vector: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time sort         : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time data transfer: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time P2M          : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time M2M          : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time M2P          : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_M2P</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time P2P          : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_P2P</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Time analy: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_an</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">iteration</span>
+
+    <span class="c1">#end outer loop</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">iteration</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer&#8217;s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

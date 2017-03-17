@@ -1,0 +1,1288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pygbe.matrixfree &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.matrixfree</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Matrix free formulation of the matrix vector product in the GMRES.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">pi</span>
+
+<span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">computeIndices</span><span class="p">,</span> <span class="n">precomputeTerms</span>
+<span class="kn">from</span> <span class="nn">pygbe.tree.direct</span> <span class="k">import</span> <span class="n">coulomb_direct</span>
+<span class="kn">from</span> <span class="nn">pygbe.projection</span> <span class="k">import</span> <span class="n">project</span><span class="p">,</span> <span class="n">project_Kt</span><span class="p">,</span> <span class="n">get_phir</span><span class="p">,</span> <span class="n">get_phir_gpu</span>
+<span class="kn">from</span> <span class="nn">pygbe.classes</span> <span class="k">import</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">IndexConstant</span>
+<span class="kn">from</span> <span class="nn">pygbe.util.semi_analytical</span> <span class="k">import</span> <span class="n">GQ_1D</span>
+
+<span class="c1"># PyCUDA libraries</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pycuda.autoinit</span>
+    <span class="kn">import</span> <span class="nn">pycuda.gpuarray</span> <span class="k">as</span> <span class="nn">gpuarray</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Note:</span>
+<span class="c1">#  Remember ordering of equations:</span>
+<span class="c1">#      Same order as defined in config file,</span>
+<span class="c1">#      with internal equation first and then the external equation.</span>
+
+
+<div class="viewcode-block" id="selfInterior"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.selfInterior">[docs]</a><span class="k">def</span> <span class="nf">selfInterior</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Self surface interior operator:</span>
+
+<span class="sd">    The evaluation point and strengths of the single and double layer potential</span>
+<span class="sd">    are on the same surface. When we take the limit, the evaluation point</span>
+<span class="sd">    approaches the surface from the inside, then the result is added to the</span>
+<span class="sd">    interior equation.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf  : array, contains all the classes of the surface.</span>
+<span class="sd">    s     : int, position of the surface in the surface array.</span>
+<span class="sd">    LorY  : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    param : class, parameters related to the surface.</span>
+<span class="sd">    ind0  : class, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing: class, it contains timing information for different parts of the</span>
+<span class="sd">                   code.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    v     : array, result of the matrix-vector product corresponding to the self</span>
+<span class="sd">            interior interaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span>
+    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">surf</span><span class="o">.</span><span class="n">XinV</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">K_diag</span><span class="p">,</span>
+                           <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">K_lyr</span> <span class="o">-</span> <span class="n">V_lyr</span>
+
+    <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="selfExterior"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.selfExterior">[docs]</a><span class="k">def</span> <span class="nf">selfExterior</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Self surface exterior operator:</span>
+
+<span class="sd">    The evaluation point and the strengths of both the single and double layer</span>
+<span class="sd">    potential are on the same surface. When we take the limit, the evaluation</span>
+<span class="sd">    point approaches the surface from the outside, then the result is added to</span>
+<span class="sd">    the exterior equation.</span>
+
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf  : array, contains all the classes of the surface.</span>
+<span class="sd">    s     : int, position of the surface in the surface array.</span>
+<span class="sd">    LorY  : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    param : class, parameters related to the surface.</span>
+<span class="sd">    ind0  : class, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing: class, it contains timing information for different parts of the</span>
+<span class="sd">                   code.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    v     : array, result of the matrix-vector product corresponding to the self</span>
+<span class="sd">            exterior interaction.</span>
+<span class="sd">    K_lyr : array, self exterior double layer potential.</span>
+<span class="sd">    V_lyr : array, self exterior single layer potential.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">K_diag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span>
+    <span class="n">V_diag</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">surf</span><span class="o">.</span><span class="n">XinV</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">K_diag</span><span class="p">,</span>
+                           <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="n">K_lyr</span> <span class="o">+</span> <span class="n">surf</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">*</span> <span class="n">V_lyr</span>
+
+    <span class="k">return</span> <span class="n">v</span><span class="p">,</span> <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span></div>
+
+
+<div class="viewcode-block" id="nonselfExterior"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.nonselfExterior">[docs]</a><span class="k">def</span> <span class="nf">nonselfExterior</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">tar</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Non-self exterior operator:</span>
+
+<span class="sd">    The evaluation point resides in a surface that is outside the region</span>
+<span class="sd">    enclosed by the surface with the strength of the single and double layer</span>
+<span class="sd">    potentials. If both surfaces share a common external region, we add the</span>
+<span class="sd">    result to the external equation. If they don&#39;t share a common external region</span>
+<span class="sd">    we add the result to internal equation.</span>
+
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf  : array, contains all the classes of the surface.</span>
+<span class="sd">    src   : int, position in the array of the source surface (surface that</span>
+<span class="sd">                 contains the gauss points).</span>
+<span class="sd">    tar   : int, position in the array of the target surface (surface that</span>
+<span class="sd">                 contains the collocation points).</span>
+<span class="sd">    LorY  : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    param : class, parameters related to the surface.</span>
+<span class="sd">    ind0  : class, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing: class, it contains timing information for different parts of the</span>
+<span class="sd">                   code.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    v     : array, result of the matrix-vector product corresponding to the</span>
+<span class="sd">                   non-self exterior interaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">XinV</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">],</span>
+                           <span class="n">surf</span><span class="p">[</span><span class="n">tar</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                           <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="n">K_lyr</span> <span class="o">+</span> <span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">*</span> <span class="n">V_lyr</span>
+    <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="nonselfInterior"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.nonselfInterior">[docs]</a><span class="k">def</span> <span class="nf">nonselfInterior</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">tar</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Non-self interior operator:</span>
+
+<span class="sd">    The evaluation point resides in a surface that is inside the region</span>
+<span class="sd">    enclosed by the surface with the strength of the single and double layer</span>
+<span class="sd">    potentials, and the result has to be added to the exterior equation.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf  : array, contains all the classes of the surface.</span>
+<span class="sd">    src   : int, position in the array of the source surface (surface that</span>
+<span class="sd">                 contains the gauss points).</span>
+<span class="sd">    tar   : int, position in the array of the target surface (surface that</span>
+<span class="sd">                 contains the collocation points).</span>
+<span class="sd">    LorY  : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    param : class, parameters related to the surface.</span>
+<span class="sd">    ind0  : class, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing: class, it contains timing information for different parts of the</span>
+<span class="sd">                   code.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    v     : array, result of the matrix-vector product corresponding to the</span>
+<span class="sd">                   non-self interior interaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">XinV</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">[</span><span class="n">src</span><span class="p">],</span>
+                           <span class="n">surf</span><span class="p">[</span><span class="n">tar</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                           <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">K_lyr</span> <span class="o">-</span> <span class="n">V_lyr</span>
+
+    <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="selfASC"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.selfASC">[docs]</a><span class="k">def</span> <span class="nf">selfASC</span><span class="p">(</span><span class="n">surf</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">tar</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Self interaction for the aparent surface charge (ASC) formulation.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf  : array, contains all the classes of the surface.</span>
+<span class="sd">    src   : int, position in the array of the source surface (surface that</span>
+<span class="sd">                 contains the gauss points).</span>
+<span class="sd">    tar   : int, position in the array of the target surface (surface that</span>
+<span class="sd">                 contains the collocation points).</span>
+<span class="sd">    LorY  : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    param : class, parameters related to the surface.</span>
+<span class="sd">    ind0  : class, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing: class, it contains timing information for different parts of the</span>
+<span class="sd">                   code.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    v     : array, result of the matrix-vector product corresponding to the</span>
+<span class="sd">                  self interaction in the ASC formulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Kt_diag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">+</span> <span class="n">surf</span><span class="o">.</span><span class="n">Ein</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">-</span> <span class="n">surf</span><span class="o">.</span><span class="n">Ein</span><span class="p">)</span>
+    <span class="n">Kt_lyr</span> <span class="o">=</span> <span class="n">project_Kt</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">XinK</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">surf</span><span class="p">,</span> <span class="n">Kt_diag</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+    <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="n">Kt_lyr</span>
+
+    <span class="k">return</span> <span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="gmres_dot"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.gmres_dot">[docs]</a><span class="k">def</span> <span class="nf">gmres_dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It computes the matrix-vector product in the GMRES.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X          : array, initial vector guess.</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    ind0       : class, it contains the indices related to the treecode</span>
+<span class="sd">                        computation.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    timing     : class, it contains timing information for different parts of</span>
+<span class="sd">                        the code.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    MV         : array, resulting matrix-vector multiplication.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Nfield</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">)</span>
+    <span class="n">Nsurf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">)</span>
+
+    <span class="c1">#   Place weights on corresponding surfaces and allocate memory</span>
+    <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsurf</span><span class="p">):</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinK</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinV</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="k">elif</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinK</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinV</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinK</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">XinV</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N</span><span class="p">]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N</span>
+
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c1">#   Loop over fields</span>
+    <span class="k">for</span> <span class="n">F</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nfield</span><span class="p">):</span>
+
+        <span class="n">parent_type</span> <span class="o">=</span> <span class="s1">&#39;no_parent&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+
+        <span class="k">if</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="c1">#           ASC only for self-interaction so far</span>
+            <span class="n">LorY</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">LorY</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">selfASC</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">+=</span> <span class="n">v</span>
+
+        <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="n">LorY</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">LorY</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">kappa</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">selfInterior</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">p</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span>
+                                 <span class="n">kernel</span><span class="p">)</span>
+                <span class="n">surf_array</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">+=</span> <span class="n">v</span>
+
+                <span class="c1">#           if child surface -&gt; self exterior operator + sibling interaction</span>
+                <span class="c1">#           sibling interaction: non-self exterior saved on exterior vector</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">child</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">child</span>
+                <span class="k">for</span> <span class="n">c1</span> <span class="ow">in</span> <span class="n">C</span><span class="p">:</span>
+                    <span class="n">v</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">selfExterior</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">c1</span><span class="p">],</span> <span class="n">c1</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+                                             <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                    <span class="n">surf_array</span><span class="p">[</span><span class="n">c1</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">+=</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">c2</span> <span class="ow">in</span> <span class="n">C</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">c1</span> <span class="o">!=</span> <span class="n">c2</span><span class="p">:</span>
+                            <span class="n">v</span> <span class="o">=</span> <span class="n">nonselfExterior</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span>
+                                                <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                            <span class="n">surf_array</span><span class="p">[</span><span class="n">c1</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">+=</span> <span class="n">v</span>
+
+<span class="c1">#           if child and parent surface -&gt; parent-child and child-parent interaction</span>
+<span class="c1">#           parent-&gt;child: non-self interior saved on exterior vector</span>
+<span class="c1">#           child-&gt;parent: non-self exterior saved on interior vector</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">child</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span>
+                    <span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">C</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">F</span><span class="p">]</span><span class="o">.</span><span class="n">child</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">C</span><span class="p">:</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">nonselfExterior</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                    <span class="n">surf_array</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">+=</span> <span class="n">v</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">nonselfInterior</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                    <span class="n">surf_array</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">+=</span> <span class="n">v</span>
+
+    <span class="c1">#   Gather results into the result vector</span>
+    <span class="n">MV</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+    <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsurf</span><span class="p">):</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+            <span class="n">MV</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="k">elif</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+            <span class="n">MV</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="k">elif</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="n">MV</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">MV</span><span class="p">[</span><span class="n">Naux</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">MV</span><span class="p">[</span><span class="n">Naux</span> <span class="o">+</span> <span class="n">N</span><span class="p">:</span><span class="n">Naux</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_int</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Xout_ext</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                    <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">Naux</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N</span>
+
+    <span class="k">return</span> <span class="n">MV</span></div>
+
+<div class="viewcode-block" id="locate_s_in_RHS"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.locate_s_in_RHS">[docs]</a><span class="k">def</span> <span class="nf">locate_s_in_RHS</span><span class="p">(</span><span class="n">surf_index</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find starting index for current surface on RHS</span>
+
+<span class="sd">    This is assembling the RHS of the block matrix. Needs to go through all the</span>
+<span class="sd">    previous surfaces to find out where on the RHS vector it belongs. If any</span>
+<span class="sd">    previous surfaces were dirichlet, neumann or asc, then they take up half</span>
+<span class="sd">    the number of spots in the RHS, so we act accordingly.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    surf_index: int, index of surface in question</span>
+<span class="sd">    surf_array: list, list of all surfaces in problem</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    s_start: int, index to insert values on RHS</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">surfs</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">surf_index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">surfs</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span>
+                                           <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span>
+                                           <span class="s1">&#39;asc_surface&#39;</span><span class="p">]:</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">surfs</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">surfs</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">s_start</span></div>
+
+<div class="viewcode-block" id="calc_aux"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calc_aux">[docs]</a><span class="k">def</span> <span class="nf">calc_aux</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">surface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to calculate aux</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    field: Field object, current field being evaluated</span>
+<span class="sd">    surface: Surface object, current surface being evaluated</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    aux: numpy array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">q</span><span class="p">):</span>
+        <span class="n">dx_pq</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">xi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">dy_pq</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">yi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">dz_pq</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">zi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">R_pq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx_pq</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy_pq</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dz_pq</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="n">aux</span> <span class="o">-=</span> <span class="p">(</span><span class="n">q</span> <span class="o">/</span> <span class="p">(</span><span class="n">R_pq</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span>
+                    <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                     <span class="n">dy_pq</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                     <span class="n">dz_pq</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">aux</span> <span class="o">+=</span> <span class="n">q</span> <span class="o">/</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span> <span class="o">*</span> <span class="n">R_pq</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">aux</span></div>
+
+<div class="viewcode-block" id="generateRHS"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.generateRHS">[docs]</a><span class="k">def</span> <span class="nf">generateRHS</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">ind0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It generate the right hand side (RHS) for the GMRES.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+<span class="sd">    timing     : class, it contains timing information for different parts of</span>
+<span class="sd">                        the code.</span>
+<span class="sd">    ind0       : class, it contains the indices related to the treecode computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    F          : array, RHS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">F</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>
+
+    <span class="c1">#   Point charge contribution to RHS</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
+        <span class="n">Nq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Nq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1">#           First look at CHILD surfaces</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>  <span class="c1"># Loop over surfaces</span>
+                <span class="c1">#           Locate position of surface s in RHS</span>
+                <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                <span class="n">aux</span> <span class="o">=</span> <span class="n">calc_aux</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+<span class="c1">#               For CHILD surfaces, q contributes to RHS in</span>
+<span class="c1">#               EXTERIOR equation (hence Precond[1,:] and [3,:])</span>
+
+<span class="c1">#               No preconditioner</span>
+<span class="c1">#                F[s_start:s_start+s_size] += aux</span>
+
+<span class="c1">#               With preconditioner</span>
+<span class="c1">#               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]</span>
+<span class="c1">#               We do this only here (and not in the parent case) because interaction of charges</span>
+<span class="c1">#               with dirichlet or neumann surface happens only for the surface as a child surfaces.</span>
+                <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                        <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#           Now look at PARENT surface</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1">#           Locate position of surface s in RHS</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nq</span><span class="p">):</span>
+                    <span class="n">dx_pq</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">dy_pq</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">yi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">dz_pq</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">zi</span> <span class="o">-</span> <span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="n">R_pq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx_pq</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy_pq</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dz_pq</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                        <span class="n">aux</span> <span class="o">-=</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="o">*</span><span class="n">R_pq</span><span class="p">)</span> <span class="o">*</span>
+                                <span class="p">(</span><span class="n">dx_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                                 <span class="n">dy_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                                 <span class="n">dz_pq</span><span class="o">*</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">aux</span> <span class="o">+=</span> <span class="n">field</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span> <span class="o">*</span> <span class="n">R_pq</span><span class="p">)</span>
+
+<span class="c1">#               No preconditioner</span>
+<span class="c1">#                F[s_start:s_start+s_size] += aux</span>
+<span class="c1">#               With preconditioner</span>
+                <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#   Dirichlet/Neumann contribution to RHS</span>
+<span class="c1">#    for field in field_array:</span>
+
+        <span class="n">dirichlet</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">neumann</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">LorY</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">LorY</span>
+
+        <span class="c1">#       Find Dirichlet and Neumann surfaces in region</span>
+        <span class="c1">#       Dirichlet/Neumann surfaces can only be child of region,</span>
+        <span class="c1">#       no point on looking at parent surface</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+                <span class="n">dirichlet</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+                <span class="n">neumann</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neumann</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">dirichlet</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1">#           First look at influence on SIBLING surfaces</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+
+                <span class="n">param</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">kappa</span>
+
+                <span class="c1">#               Effect of dirichlet surfaces</span>
+                <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">dirichlet</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">sd</span> <span class="o">==</span> <span class="n">s</span><span class="p">)</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span>
+                                           <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)),</span>
+                                           <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">],</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                                           <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+                                           <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># if s is a charged surface, the surface has only one equation,</span>
+                    <span class="c1"># else, s has 2 equations and K_lyr affects the external</span>
+                    <span class="c1"># equation (SIBLING surfaces), which is placed after the internal</span>
+                    <span class="c1"># one, hence Precond[1,:] and Precond[3,:].</span>
+                    <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                          <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#               Effect of neumann surfaces</span>
+                <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">neumann</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">)),</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">],</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sn</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># if s is a charge surface, the surface has only one equation,</span>
+                    <span class="c1"># else, s has 2 equations and V_lyr affects the external</span>
+                    <span class="c1"># equation, which is placed after the internal one, hence</span>
+                    <span class="c1"># Precond[1,:] and Precond[3,:].</span>
+                    <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                          <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#           Now look at influence on PARENT surface</span>
+<span class="c1">#           The dirichlet/neumann surface will never be the parent,</span>
+<span class="c1">#           since we are not solving for anything inside them.</span>
+<span class="c1">#           Then, in this case we will not look at self interaction,</span>
+<span class="c1">#           which is dealt with by the sibling surface section</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+                <span class="n">s</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1">#               Effect of dirichlet surfaces</span>
+                <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">dirichlet</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span>
+                                           <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)),</span>
+                                           <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">],</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                                           <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+                                           <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># Surface s has 2 equations and K_lyr affects the internal</span>
+                    <span class="c1"># equation, hence Precond[0,:] and Precond[2,:].</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#               Effect of neumann surfaces</span>
+                <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">neumann</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">)),</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">],</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sn</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span>
+                                <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                    <span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">surf_array</span><span class="p">[</span>
+                                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># Surface s has 2 equations and K_lyr affects the internal</span>
+                    <span class="c1"># equation, hence Precond[0,:] and Precond[2,:].</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span>
+                        <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">F</span></div>
+
+
+<div class="viewcode-block" id="generateRHS_gpu"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.generateRHS_gpu">[docs]</a><span class="k">def</span> <span class="nf">generateRHS_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">ind0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It generate the right hand side (RHS) for the GMRES suitable for the GPU.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+<span class="sd">    timing     : class, it contains timing information for different parts of</span>
+<span class="sd">                        the code.</span>
+<span class="sd">    ind0       : class, it contains the indices related to the treecode</span>
+<span class="sd">                        computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    F          : array, RHS suitable for the GPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">F</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">computeRHS_gpu</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="s2">&quot;compute_RHS&quot;</span><span class="p">)</span>
+    <span class="n">computeRHSKt_gpu</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="s2">&quot;compute_RHSKt&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
+        <span class="n">Nq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Nq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>  <span class="c1"># Loop over surfaces</span>
+                <span class="n">surface</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                <span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
+
+                <span class="n">GSZ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">))</span>  <span class="c1"># CUDA grid size</span>
+
+                <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">!=</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">computeRHS_gpu</span><span class="p">(</span><span class="n">F_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">xq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">yq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">zq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">q_gpu</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">xiDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">yiDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">ziDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">sizeTarDev</span><span class="p">,</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nq</span><span class="p">),</span>
+                                   <span class="n">REAL</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">),</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">),</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BlocksPerTwig</span><span class="p">),</span>
+                                   <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                    <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">F_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Fx_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">Fy_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">Fz_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">computeRHSKt_gpu</span><span class="p">(</span><span class="n">Fx_gpu</span><span class="p">,</span>
+                                     <span class="n">Fy_gpu</span><span class="p">,</span>
+                                     <span class="n">Fz_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">xq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">yq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">zq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">q_gpu</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">xiDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">yiDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">ziDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">sizeTarDev</span><span class="p">,</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nq</span><span class="p">),</span>
+                                     <span class="n">REAL</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">),</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">),</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BlocksPerTwig</span><span class="p">),</span>
+                                     <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">aux_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">aux_y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">aux_z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">Fx_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_x</span><span class="p">)</span>
+                    <span class="n">Fy_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_y</span><span class="p">)</span>
+                    <span class="n">Fz_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_z</span><span class="p">)</span>
+
+                    <span class="n">aux</span> <span class="o">=</span> <span class="p">(</span><span class="n">aux_x</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_y</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_z</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="c1">#               For CHILD surfaces, q contributes to RHS in</span>
+<span class="c1">#               EXTERIOR equation (hence Precond[1,:] and [3,:])</span>
+
+<span class="c1"># With preconditioner</span>
+<span class="c1"># If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]</span>
+<span class="c1"># We do this only here (and not in the parent case) because interaction of charges</span>
+<span class="c1"># with dirichlet or neumann surface happens only for the surface as a child surfaces.</span>
+                <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">elif</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#           Now for PARENT surface</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">surface</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+
+                <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+                <span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
+
+                <span class="n">GSZ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span> <span class="o">/</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">))</span>  <span class="c1"># CUDA grid size</span>
+
+                <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">!=</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">computeRHS_gpu</span><span class="p">(</span><span class="n">F_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">xq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">yq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">zq_gpu</span><span class="p">,</span>
+                                   <span class="n">field</span><span class="o">.</span><span class="n">q_gpu</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">xiDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">yiDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">ziDev</span><span class="p">,</span>
+                                   <span class="n">surface</span><span class="o">.</span><span class="n">sizeTarDev</span><span class="p">,</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nq</span><span class="p">),</span>
+                                   <span class="n">REAL</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">),</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">),</span>
+                                   <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BlocksPerTwig</span><span class="p">),</span>
+                                   <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                    <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">F_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Fx_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">Fy_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">Fz_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+                    <span class="n">computeRHSKt_gpu</span><span class="p">(</span><span class="n">Fx_gpu</span><span class="p">,</span>
+                                     <span class="n">Fy_gpu</span><span class="p">,</span>
+                                     <span class="n">Fz_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">xq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">yq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">zq_gpu</span><span class="p">,</span>
+                                     <span class="n">field</span><span class="o">.</span><span class="n">q_gpu</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">xiDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">yiDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">ziDev</span><span class="p">,</span>
+                                     <span class="n">surface</span><span class="o">.</span><span class="n">sizeTarDev</span><span class="p">,</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nq</span><span class="p">),</span>
+                                     <span class="n">REAL</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">),</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">),</span>
+                                     <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BlocksPerTwig</span><span class="p">),</span>
+                                     <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                     <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="n">aux_x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">aux_y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">aux_z</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">Fx_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_x</span><span class="p">)</span>
+                    <span class="n">Fy_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_y</span><span class="p">)</span>
+                    <span class="n">Fz_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux_z</span><span class="p">)</span>
+
+                    <span class="n">aux</span> <span class="o">=</span> <span class="p">(</span><span class="n">aux_x</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_y</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="n">aux_z</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="c1">#               For PARENT surface, q contributes to RHS in</span>
+<span class="c1">#               INTERIOR equation (hence Precond[0,:] and [2,:])</span>
+
+<span class="c1">#               No preconditioner</span>
+<span class="c1">#                F[s_start:s_start+s_size] += aux</span>
+<span class="c1">#               With preconditioner</span>
+                <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">aux</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#   Dirichlet/Neumann contribution to RHS</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
+
+        <span class="n">dirichlet</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">neumann</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">LorY</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">LorY</span>
+
+        <span class="c1"># Find Dirichlet and Neumann surfaces in region</span>
+        <span class="c1"># Dirichlet/Neumann surfaces can only be child of region,</span>
+        <span class="c1"># no point on looking at parent surface</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+                <span class="n">dirichlet</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+                <span class="n">neumann</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">neumann</span> <span class="ow">or</span> <span class="n">dirichlet</span><span class="p">:</span>
+
+            <span class="c1"># First look at influence on SIBLING surfaces</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+                <span class="n">surface</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">kappa</span>
+
+                <span class="c1">#nEffect of dirichlet surfaces</span>
+                <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">dirichlet</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">sd</span> <span class="o">==</span> <span class="n">s</span><span class="p">)</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span>
+                                           <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)),</span>
+                                           <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">],</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                                           <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+                                           <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># if s is a charged surface, the surface has only one equation,</span>
+                    <span class="c1"># else, s has 2 equations and K_lyr affects the external</span>
+                    <span class="c1"># equation, which is placed after the internal one, hence</span>
+                    <span class="c1"># Precond[1,:] and Precond[3,:].</span>
+                    <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span>
+                                             <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span>
+                                             <span class="s1">&#39;asc_surface&#39;</span><span class="p">]:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#               Effect of neumann surfaces</span>
+                <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">neumann</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">2</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">)),</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">],</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sn</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># if s is a charged surface, the surface has only one equation,</span>
+                    <span class="c1"># else, s has 2 equations and V_lyr affects the external</span>
+                    <span class="c1"># equation, which is placed after the internal one, hence</span>
+                    <span class="c1"># Precond[1,:] and Precond[3,:].</span>
+                    <span class="k">if</span> <span class="n">surface</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span>
+                                             <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span>
+                                             <span class="s1">&#39;asc_surface&#39;</span><span class="p">]:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+                        <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                          <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#           Now look at influence on PARENT surface</span>
+<span class="c1">#           The dirichlet/neumann surface will never be the parent,</span>
+<span class="c1">#           since we are not solving for anything inside them.</span>
+<span class="c1">#           Then, in this case we will not look at self interaction.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+                <span class="n">s</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1">#               Effect of dirichlet surfaces</span>
+                <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">dirichlet</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span>
+                                           <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">]</span><span class="o">.</span><span class="n">xi</span><span class="p">)),</span>
+                                           <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sd</span><span class="p">],</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                                           <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+                                           <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># Surface s has 2 equations and K_lyr affects the internal</span>
+                    <span class="c1"># equation, hence Precond[0,:] and Precond[2,:].</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="n">K_lyr</span> <span class="o">*</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+<span class="c1">#               Effect of neumann surfaces</span>
+                <span class="k">for</span> <span class="n">sn</span> <span class="ow">in</span> <span class="n">neumann</span><span class="p">:</span>
+                    <span class="n">K_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">V_diag</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">)),</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">]</span><span class="o">.</span><span class="n">phi0</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">sn</span><span class="p">],</span>
+                        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">sn</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                        <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="c1"># Find location of surface s in RHS array</span>
+                    <span class="n">s_start</span> <span class="o">=</span> <span class="n">locate_s_in_RHS</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">)</span>
+                    <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+
+                    <span class="c1"># Surface s has 2 equations and K_lyr affects the internal</span>
+                    <span class="c1"># equation, hence Precond[0,:] and Precond[2,:].</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">F</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span>
+                      <span class="n">s_size</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">V_lyr</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">F</span></div>
+
+
+<div class="viewcode-block" id="calculate_solvation_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculate_solvation_energy">[docs]</a><span class="k">def</span> <span class="nf">calculate_solvation_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It calculates the solvation energy.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    E_solv     : float, solvation energy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+
+    <span class="n">par_reac</span> <span class="o">=</span> <span class="n">param</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span> <span class="o">=</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">6</span>
+
+    <span class="n">ind_reac</span> <span class="o">=</span> <span class="n">IndexConstant</span><span class="p">()</span>
+    <span class="n">computeIndices</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+    <span class="n">precomputeTerms</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span> <span class="o">=</span> <span class="mi">13</span>  <span class="c1"># Number of Gauss points per side for semi-analytical integrals</span>
+
+    <span class="n">cal2J</span> <span class="o">=</span> <span class="mf">4.184</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">E_0</span><span class="p">)</span>
+    <span class="n">E_solv</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">ff</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">region</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">pot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+            <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+
+                <span class="n">E_solv_aux</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">ff</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating solvation energy for region </span><span class="si">{}</span><span class="s1">, stored in E_solv[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">region</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
+
+                <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">phi_reac</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
+
+                <span class="c1">#           First look at CHILD surfaces</span>
+                <span class="c1">#           Need to account for normals pointing outwards</span>
+                <span class="c1">#           and E_hat coefficient (as region is outside and</span>
+                <span class="c1">#           dphi_dn is defined inside)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+
+                    <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+
+                    <span class="c1">#               Coefficient to account for dphi_dn defined in</span>
+                    <span class="c1">#               interior but calculation done in exterior</span>
+                    <span class="n">C1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">E_hat</span>
+
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
+                                               <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span>
+                                               <span class="n">ind_reac</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span>
+                                                   <span class="n">f</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span>
+                                                   <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
+                    <span class="n">phi_reac</span> <span class="o">-=</span> <span class="n">phi_aux</span>  <span class="c1"># Minus sign to account for normal pointing out</span>
+
+    <span class="c1">#           Now look at PARENT surface</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">xk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">xk</span><span class="p">)</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">)):</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+                        <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">Md</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span><span class="p">)</span>
+
+                    <span class="n">Naux</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span>
+                                               <span class="n">s</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">phi_aux</span><span class="p">,</span> <span class="n">AI</span> <span class="o">=</span> <span class="n">get_phir_gpu</span><span class="p">(</span>
+                            <span class="n">s</span><span class="o">.</span><span class="n">phi</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">dphi</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+                    <span class="n">AI_int</span> <span class="o">+=</span> <span class="n">AI</span>
+                    <span class="n">phi_reac</span> <span class="o">+=</span> <span class="n">phi_aux</span>
+
+                <span class="n">E_solv_aux</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span> <span class="o">*</span> <span class="n">phi_reac</span><span class="p">)</span>
+                <span class="n">E_solv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_solv_aux</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> of </span><span class="si">{}</span><span class="s1"> analytical integrals for phi_reac calculation in region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="mf">1.</span> <span class="o">*</span> <span class="n">AI_int</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">),</span> <span class="n">Naux</span><span class="p">,</span> <span class="n">region</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">E_solv</span></div>
+
+
+<div class="viewcode-block" id="coulomb_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.coulomb_energy">[docs]</a><span class="k">def</span> <span class="nf">coulomb_energy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It calculates the Coulomb energy .</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    f    : class, region in the field array where we desire to calculate the</span>
+<span class="sd">                  coloumb energy.</span>
+<span class="sd">    param: class, parameters related to the surface.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    Ecoul: float, coloumb energy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">point_energy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span><span class="p">),</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
+    <span class="n">coulomb_direct</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">point_energy</span><span class="p">)</span>
+
+    <span class="n">cal2J</span> <span class="o">=</span> <span class="mf">4.184</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">E_0</span><span class="p">)</span>
+
+    <span class="n">Ecoul</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">point_energy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Ecoul</span></div>
+
+
+<div class="viewcode-block" id="calculate_surface_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculate_surface_energy">[docs]</a><span class="k">def</span> <span class="nf">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It calculates the surface energy</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    kernel     : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    E_surf: float, surface energy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">par_reac</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+    <span class="n">par_reac</span> <span class="o">=</span> <span class="n">param</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">Nm</span> <span class="o">=</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span>
+
+    <span class="n">ind_reac</span> <span class="o">=</span> <span class="n">IndexConstant</span><span class="p">()</span>
+    <span class="n">computeIndices</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+    <span class="n">precomputeTerms</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">)</span>
+
+    <span class="n">par_reac</span><span class="o">.</span><span class="n">Nk</span> <span class="o">=</span> <span class="mi">13</span>  <span class="c1"># Number of Gauss points per side for semi-analytical integrals</span>
+
+    <span class="n">cal2J</span> <span class="o">=</span> <span class="mf">4.184</span>
+    <span class="n">C0</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">E_0</span><span class="p">)</span>
+    <span class="n">E_surf</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">ff</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="p">:</span>
+        <span class="n">parent_surf</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">]:</span>
+            <span class="n">ff</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating surface energy around region </span><span class="si">{}</span><span class="s1">, stored in E_surf[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
+            <span class="n">Esurf_aux</span> <span class="o">=</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="n">parent_surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">dphi</span> <span class="o">*</span>
+                                   <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+            <span class="n">E_surf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Esurf_aux</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
+            <span class="n">ff</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculating surface energy around region </span><span class="si">{}</span><span class="s1">, stored in E_surf[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">ff</span><span class="p">))</span>
+            <span class="n">Esurf_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="n">parent_surf</span><span class="o">.</span><span class="n">Eout</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">dphi</span> <span class="o">*</span>
+                                  <span class="n">parent_surf</span><span class="o">.</span><span class="n">phi</span> <span class="o">*</span> <span class="n">parent_surf</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+            <span class="n">E_surf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">Esurf_aux</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">E_surf</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer&#8217;s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
