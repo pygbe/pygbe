@@ -157,7 +157,7 @@ def compute_diagonal(vl, kl, vy, ky, triangle, centers, kappa, k_diag, v_diag, x
 
         LorY = 2  # Yukawa
         # was sa(y, x, kappa, same, K_diag, V_diag, LorY, xk, wk)
-        panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center)
+        #panel0_final, panel1_final, panel2_final, x_plane = sa(panel, center)
 
         ky[i], vy[i] = int_side(0, 0, panel0_final, panel1_final, x_plane[2],
                                 kappa, xk, wk, LorY)  # Side 0
