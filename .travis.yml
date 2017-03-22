@@ -29,5 +29,5 @@ script:
   - cd docs
   - make html
   - cd ..
-  - python -m doctr deploy
+  - python -m doctr deploy docs
 
