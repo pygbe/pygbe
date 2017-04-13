@@ -282,7 +282,7 @@ def read_fields(filename):
                 field['charges'].append(line[5])
                 field['coulomb'].append(line[6])
                 field['qfile'].append(line[7] if line[7] == 'NA' else
-                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER'), line[7]))
+                    os.path.join(os.environ.get('PYGBE_PROBLEM_FOLDER', ''), line[7]))
                 field['Nparent'].append(line[8])
                 field['parent'].append(line[9])
                 field['Nchild'].append(line[10])
