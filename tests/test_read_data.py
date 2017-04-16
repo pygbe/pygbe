@@ -14,6 +14,10 @@ def test_off_file_bad_type():
 
 def test_off_not_off_mesh():
     with pytest.raises(ValueError):
+        read_data.read_off_file('files/notmesh.off', numpy.float32)
+
+def test_off_bad_off_mesh():
+    with pytest.raises(ValueError):
         read_data.read_off_file('files/badmesh.off', numpy.float32)
 
 def test_read_off_mesh():

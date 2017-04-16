@@ -34,6 +34,7 @@ def read_off_file(filename, REAL):
     format = f.readline().strip().split()[0]
     if format != 'OFF':
         raise ValueError('OFF mesh incorrectly formatted')
+
     numverts, numtriangles, _ = f.readline().strip().split()
     verts = []
     for i in range(int(numverts)):
@@ -42,6 +43,8 @@ def read_off_file(filename, REAL):
     triangles = []
     for i in range(int(numtriangles)):
         triangles.append(f.readline().strip())
+        if triangles[-1] == '':
+            raise ValueError('Broken mesh, triangle or vertex count is bad')
     triangles = numpy.array([triangle.split() for triangle in triangles], dtype=numpy.int32)
 
     return verts, triangles[:,1:]
