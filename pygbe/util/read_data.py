@@ -6,13 +6,53 @@ import os
 import numpy
 
 
+def read_off_file(filename, REAL):
+    """
+    Read in the vertices and triangles from an `off` format mesh
+
+    Arguments
+    ---------
+    filename : str
+        name of meshfile to open (should be in .off format)
+    REAL : numpy dtype
+        precision to use when loading
+
+    Returns
+    -------
+    verts : array
+        N x 3 array of vertex coordinates
+    triangles : array
+        N x 3 array of triangle connectivity
+    """
+    try:
+        f = open(filename, 'r')
+    except FileNotFoundError:
+        raise FileNotFoundError('Mesh file not found')
+    if type(REAL) != type:
+        raise TypeError('Invalid mesh precision type used\n'
+        'Should be something like `numpy.float64`')
+    format = f.readline().strip().split()[0]
+    if format != 'OFF':
+        raise ValueError('OFF mesh incorrectly formatted')
+    numverts, numtriangles, _ = f.readline().strip().split()
+    verts = []
+    for i in range(int(numverts)):
+        verts.append(f.readline().strip())
+    verts = numpy.array([vert.split() for vert in verts], dtype=REAL)
+    triangles = []
+    for i in range(int(numtriangles)):
+        triangles.append(f.readline().strip())
+    triangles = numpy.array([triangle.split() for triangle in triangles], dtype=numpy.int32)
+
+    return verts, triangles[:,1:]
+
 def read_vertex(filename, REAL):
     """
     It reads the vertex of the triangles from the mesh file and it stores
     them on an array.
 
     Arguments
-    ----------
+    ---------
     filename: name of the file that contains the surface information.
               (filename.vert)
     REAL    : data type.
