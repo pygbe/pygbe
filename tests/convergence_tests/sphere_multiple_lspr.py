@@ -19,7 +19,7 @@ def main():
 
     #In this case we have 1 sphere of radius 10 and 6 of radius 2
     R=10.
-    r=2.    
+    r=4.    
     total_Area = 4*numpy.pi*(R*R + 6*r*r)
 
     if test_name not in test_outputs.keys():
