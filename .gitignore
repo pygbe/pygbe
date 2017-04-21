@@ -21,6 +21,7 @@ examples/two_spheres/output/
 examples/lspr/output/
 examples/lspr_7_spheres/output/
 
+
 # compiletime stuff
 PyGBe.egg-info/
 build/
