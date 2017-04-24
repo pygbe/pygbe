@@ -369,10 +369,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
 
     #   Check if there is a complex dielectric
-    complexDiel = 0
+    complex_diel = 0
     for f in field_array:
         if numpy.iscomplexobj(f.E):
-            complexDiel = 1
+            complex_diel = 1
 
 
     ### Solve
@@ -380,7 +380,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
-    if complexDiel == 1:
+    if complex_diel == 1:
         phi = numpy.zeros(param.Neq, type(f.E))
     else:
         phi = numpy.zeros(param.Neq)
