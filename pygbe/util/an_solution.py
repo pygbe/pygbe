@@ -1197,8 +1197,8 @@ def Cext_analytical(radius, wavelength, diel_out, diel_in):
     Cext_an   : float/array of floats, extinction cross section.
       
     """
-    wavenumber = 2*numpy.pi*numpy.sqrt(diel_out)/wavelength
-    C1 = wavenumber**2*(diel_in/diel_out-1)/(diel_in/diel_out+2)
-    Cext_an = 4*numpy.pi*radius**3/wavenumber.real * C1.imag 
+    wavenumber = 2 * numpy.pi * numpy.sqrt(diel_out) / wavelength
+    C1 = wavenumber**2 * (diel_in / diel_out - 1) / (diel_in / diel_out + 2)
+    Cext_an = 4 * numpy.pi * radius**3 / wavenumber.real * C1.imag 
     
     return Cext_an
