@@ -18,7 +18,7 @@ before_install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - conda config --set always_yes yes --set changeps1 no
+  - conda config --set always_yes yes --set changeps1 no --add channels conda-forge
   - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx
   - source activate pygbe
   - pip install doctr
@@ -29,5 +29,5 @@ script:
   - cd docs
   - make html
   - cd ..
-  - python -m doctr deploy
+  - python -m doctr deploy docs
 

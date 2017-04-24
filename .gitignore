@@ -22,6 +22,7 @@ examples/lspr_silver/output/
 examples/lspr_gold/output/
 examples/lspr_7_spheres/output/
 
+
 # compiletime stuff
 PyGBe.egg-info/
 build/
