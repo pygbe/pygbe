@@ -39,11 +39,11 @@ def test_lspr(key):
 def get_results():
     print('Generating results for lspr example...')
     if os.getcwd().rsplit('/', 1)[1] == 'tests':
-        results = main(['','../examples/lspr'],
+        results = main(['','../examples/lspr_silver'],
                         log_output=False,
                         return_results_dict=True)
     elif os.getcwd().rsplit('/', 1)[1] == 'pygbe':
-        results = main(['','./examples/lspr'],
+        results = main(['','./examples/lspr_silver'],
                         log_output=False,
                         return_results_dict=True)
     else:
