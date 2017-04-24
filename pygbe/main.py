@@ -381,7 +381,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
     if complex_diel == 1:
-        phi = numpy.zeros(param.Neq, type(f.E))
+        phi = numpy.zeros(param.Neq, dtype=type(f.E))
     else:
         phi = numpy.zeros(param.Neq)
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
