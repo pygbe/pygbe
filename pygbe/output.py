@@ -45,7 +45,7 @@ def print_summary(surf_array, field_array, param, results_dict):
         print('\tTwig cell size       : {}'.format(numpy.min(rr)))
         print('\tRbox/theta           : {}'.format(numpy.min(rr)/param.theta))
         print('\tAnalytic distance    : {}'.format(numpy.average(numpy.sqrt(2*surf_array[i].area))/param.threshold))
-        print('\tElem. per Ang^2\n\t(when lspr, per nm^2): {}'.format(1/numpy.average(surf_array[i].area)))
+        print('\tElem. per Ang^2      : {}'.format(1/numpy.average(surf_array[i].area)))
         print('\tMax, min, avg elem.  : {}, {}, {}'.format(numpy.max(surf_array[i].area),
                                                          numpy.min(surf_array[i].area),
                                                          numpy.average(surf_array[i].area)))

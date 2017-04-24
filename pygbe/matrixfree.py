@@ -1431,7 +1431,8 @@ def extinction_cross_section(surf_array, k, n, wavelength, electric_field):
 
         C1 = numpy.dot(n, v2) * waveNumber**2 / (s.Eout * electric_field)
 
-        Cext.append(1 / waveNumber.real * C1.imag)
+        #multiplying by 0.01 to convert to nm^2
+        Cext.append(1 / waveNumber.real * C1.imag * 0.01)
         surf_Cext.append(i)
 
     return Cext, surf_Cext
