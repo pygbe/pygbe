@@ -18,7 +18,8 @@ examples/sphere/output/
 examples/lys/output/
 examples/1PGBmut_sensor/output/
 examples/two_spheres/output/
-examples/lspr/output/
+examples/lspr_silver/output/
+examples/lspr_gold/output/
 examples/lspr_7_spheres/output/
 
 # compiletime stuff
