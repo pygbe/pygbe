@@ -400,12 +400,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
 
-    ###Calculating the dipole moment
-    dipole_moment(surf_array, electric_field)
 
     #Calculate extinction cross section for lspr problems
     if abs(electric_field) > 1e-12:
 
+        ###Calculating the dipole moment
+        dipole_moment(surf_array, electric_field)
+ 
         print('Calculate extinction cross section')
         tic = time.time()
         Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
