@@ -231,8 +231,8 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
 
             if iteration==max_iter:
                 print('Warning!!!!'
-                'You have reached the maximum number of iterations : {}.'.format(iteration)
-                'The run will stop. Check the residual behaviour you might have a bug.'
+                'You have reached the maximum number of iterations : {}.'.format(iteration))
+                print('The run will stop. Check the residual behaviour you might have a bug.'
                 'For future runs you might consider changing the tolerance or'
                 ' increasing the number of max_iter.')
 
