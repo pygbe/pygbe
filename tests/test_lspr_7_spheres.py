@@ -33,7 +33,7 @@ def test_lspr(key):
         base_results = pickle.load(f)
     #Cext and surf_Cext are lists, for the example are one element lists, so
     #to check the assertion we access that element. i.e [0]
-    assert abs(base_results[key] - results[key]) / abs(base_results[key] + 1e-16) < 1e-12
+    assert abs(base_results[key] - results[key]) / abs(base_results[key] + 1e-16) < 1e-10
 
 @functools.lru_cache(4)
 def get_results():
