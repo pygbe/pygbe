@@ -1,3 +1,5 @@
 input_files
 geometry
 convergence_runs
+convergence_test_results
+tests.pickle

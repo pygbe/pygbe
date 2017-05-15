@@ -18,7 +18,8 @@ before_install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - conda config --set always_yes yes --set changeps1 no
+  - conda config --set always_yes yes --set changeps1 no 
+  - conda config --add channels conda-forge
   - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx
   - source activate pygbe
   - pip install doctr
@@ -30,4 +31,5 @@ script:
   - make html
   - cd ..
   - python -m doctr deploy docs
+  - python -m doctr deploy --sync --no-require-master  --built-docs docs/_build/html "docs-$TRAVIS_BRANCH";
 

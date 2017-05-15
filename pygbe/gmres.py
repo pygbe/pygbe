@@ -103,14 +103,20 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     tol = param.tol
 
     # Set number of outer and inner iterations
-    max_outer = max_iter
-
+    
     if R > dimen:
         warn('Setting number of inner iterations (restrt) to maximum\
               allowed, which is A.shape[0] ')
         R = dimen
 
     max_inner = R
+
+    #max_outer should be max_iter/max_inner but this might not be an integer
+    #so we get the ceil of the division.
+    #In the inner loop there is a if statement to break in case max_iter is
+    #reached. 
+ 
+    max_outer = int(numpy.ceil(max_iter/max_inner))
 
     # Prep for method
     aux = gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel)
@@ -223,6 +229,15 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
             if (inner + 1 == R):
                 print('Residual: {}. Restart...'.format(rel_resid))
 
+            if iteration==max_iter:
+                print('Warning!!!!'
+                'You have reached the maximum number of iterations : {}.'.format(iteration))
+                print('The run will stop. Check the residual behaviour you might have a bug.'
+                'For future runs you might consider changing the tolerance or'
+                ' increasing the number of max_iter.')
+
+                break     
+                
         # end inner loop, back to outer loop
 
         # Find best update to X in Krylov Space V.  Solve inner X inner system.
@@ -238,7 +253,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
         # test for convergence
         if rel_resid < tol:
             print('GMRES solve')
-            print('Converged after %i iterations to a residual of %s'%(iteration,rel_resid))
+            print('Converged after {} iterations to a residual of {}'.format(iteration,rel_resid))
             print('Time weight vector: {}'.format(timing.time_mass))
             print('Time sort         : {}'.format(timing.time_sort))
             print('Time data transfer: {}'.format(timing.time_trans))

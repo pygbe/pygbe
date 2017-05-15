@@ -23,8 +23,9 @@ from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy)
-from pygbe.util.read_data import readParameters
+                              coulomb_energy, calculate_surface_energy, dipole_moment,
+                              extinction_cross_section)
+from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
@@ -177,7 +178,7 @@ def check_for_nvcc():
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False, field=None):
+         return_results_dict=False, field=None, lspr=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
@@ -196,6 +197,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     field : Dictionary, defaults to None.
          If passed, this dictionary will supercede any config file found, useful in
          programmatically stepping through slight changes in a problem
+    lspr : list, defaults to None
+         If passed, provides values for `electric_field` and `wavelength`, useful to
+         programmatically step through varying wavelengths
 
     Returns
     --------
@@ -258,7 +262,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ### Read parameters
     param = Parameters()
-    precision = readParameters(param, paramfile)
+    precision = read_parameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
         param.P + 3) // 6  # Number of terms in Taylor expansion
@@ -286,6 +290,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
+
+    ### Read electric field and its wavelength.
+    if lspr:
+        electric_field, wavelength = lspr
+    else:
+        electric_field, wavelength = read_electric_field(param, configFile)
+
 
     ### Fill surface class
     time_sort = 0.
@@ -342,10 +353,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0)
+                            ind0, electric_field)
     toc = time.time()
     rhs_time = toc - tic
 
@@ -356,14 +367,24 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('-'*30)
     print('Total setup time   : {}s'.format(setup_time))
 
-    tic = time.time()
+
+    #   Check if there is a complex dielectric
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
 
     ### Solve
+    tic = time.time()
+
     print('Solve')
-    phi = numpy.zeros(param.Neq)
+    # Initializing phi dtype according to the problem we are solving.
+    if complex_diel:
+        phi = numpy.zeros(param.Neq, dtype=numpy.complex)
+    else:
+        phi = numpy.zeros(param.Neq)
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
-                               timing, kernel)
+                            timing, kernel)
     toc = time.time()
+
     results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
@@ -376,66 +397,92 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
 
-    # Calculate solvation energy
-    print('Calculate Esolv')
-    tic = time.time()
-    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    print('Time Esolv: {}s'.format(toc - tic))
-    ii = -1
-    for i, f in enumerate(field_array):
-        if f.pot == 1:
-            parent_type = surf_array[f.parent[0]].surf_type
-            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-                ii += 1
-                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+
+    #Calculate extinction cross section for lspr problems
+    if abs(electric_field) > 1e-12:
+
+        ###Calculating the dipole moment
+        dipole_moment(surf_array, electric_field)
+ 
+        print('Calculate extinction cross section')
+        tic = time.time()
+        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
+                           wavelength, electric_field)
+        toc = time.time()
+        print('Time Cext: {}s'.format(toc - tic))
+
+        print('\nCext per surface')
+        for i in range(len(Cext)):
+            print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
+
+        results_dict['time_Cext'] = toc - tic
+        results_dict['surf_Cext'] = surf_Cext
+        results_dict['Cext_list'] = Cext
+        results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
+
+    else:
+        # Calculate solvation energy
+        print('Calculate Esolv')
+        tic = time.time()
+        E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
+        toc = time.time()
+        print('Time Esolv: {}s'.format(toc - tic))
+        ii = -1
+        for i, f in enumerate(field_array):
+            if f.pot == 1:
+                parent_type = surf_array[f.parent[0]].surf_type
+                if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
+                    ii += 1
+                    print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
                                                                           E_solv[ii],
                                                                           E_solv[ii] * 4.184))
 
-    # Calculate surface energy
-    print('\nCalculate Esurf')
-    tic = time.time()
-    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    ii = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
-            ii += 1
-            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
-                f, E_surf[ii], E_surf[ii] * 4.184))
-    print('Time Esurf: {}s'.format(toc - tic))
 
-    ### Calculate Coulombic interaction
-    print('\nCalculate Ecoul')
-    tic = time.time()
-    i = -1
-    E_coul = []
-    for f in field_array:
-        i += 1
-        if f.coulomb == 1:
-            print('Calculate Coulomb energy for region {}'.format(i))
-            E_coul.append(coulomb_energy(f, param))
-            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
-                i, E_coul[-1], E_coul[-1] * 4.184))
-    toc = time.time()
-    print('Time Ecoul: {}s'.format(toc - tic))
+        # Calculate surface energy
+        print('\nCalculate Esurf')
+        tic = time.time()
+        E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
+        toc = time.time()
+        ii = -1
+        for f in param.E_field:
+            parent_type = surf_array[field_array[f].parent[0]].surf_type
+            if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
+                ii += 1
+                print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+                    f, E_surf[ii], E_surf[ii] * 4.184))
+        print('Time Esurf: {}s'.format(toc - tic))
 
-    ### Output summary
-    print('\n'+'-'*30)
-    print('Totals:')
-    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
-    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
-    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
-    print('\nTime = {} s'.format(toc - TIC))
+        ### Calculate Coulombic interaction
+        print('\nCalculate Ecoul')
+        tic = time.time()
+        i = -1
+        E_coul = []
+        for f in field_array:
+            i += 1
+            if f.coulomb == 1:
+                print('Calculate Coulomb energy for region {}'.format(i))
+                E_coul.append(coulomb_energy(f, param))
+                print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+                    i, E_coul[-1], E_coul[-1] * 4.184))
+        toc = time.time()
+        print('Time Ecoul: {}s'.format(toc - tic))
+
+        ### Output summary
+        print('\n'+'-'*30)
+        print('Totals:')
+        print('Esolv = {} kcal/mol'.format(sum(E_solv)))
+        print('Esurf = {} kcal/mol'.format(sum(E_surf)))
+        print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+        print('\nTime = {} s'.format(toc - TIC))
+
+        results_dict['E_solv_kcal'] = sum(E_solv)
+        results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
+        results_dict['E_surf_kcal'] = sum(E_surf)
+        results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
+        results_dict['E_coul_kcal'] = sum(E_coul)
+        results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+
     results_dict['total_time'] = (toc - TIC)
-    results_dict['E_solv_kcal'] = sum(E_solv)
-    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
-    results_dict['E_surf_kcal'] = sum(E_surf)
-    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
-    results_dict['E_coul_kcal'] = sum(E_coul)
-    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
-
     results_dict['version'] = pygbe.__version__
 
     output_pickle = outputfname.split('-')
@@ -445,6 +492,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f, 2)
 
+    try: 
+        with open(os.path.join(output_dir, output_pickle), 'rb') as f:
+            pickle.load(f)
+    except EOFError:
+        print('Error writing the pickle file, the results will be unreadable')
+        pass     
+    
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
     if log_output:
