@@ -1,35 +1,35 @@
-pygbe.util package
-==================
+pygbe\.util package
+===================
 
 Submodules
 ----------
 
-pygbe.util.an_solution module
------------------------------
+pygbe\.util\.an\_solution module
+--------------------------------
 
 .. automodule:: pygbe.util.an_solution
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.util.read_data module
----------------------------
+pygbe\.util\.read\_data module
+------------------------------
 
 .. automodule:: pygbe.util.read_data
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.util.semi_analytical module
----------------------------------
+pygbe\.util\.semi\_analytical module
+------------------------------------
 
 .. automodule:: pygbe.util.semi_analytical
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.util.semi_analyticalwrap module
--------------------------------------
+pygbe\.util\.semi\_analyticalwrap module
+----------------------------------------
 
 .. automodule:: pygbe.util.semi_analyticalwrap
     :members:

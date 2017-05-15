@@ -68,15 +68,15 @@ root of the PyGBe repo and then ran <code class="docutils literal"><span class="
 <p>There are a few keyword arguments you can pass to PyGBe when running from
 IPython that are useful for programmatic work.</p>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">log_output</span></code></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">True</span></code></span><dd>If you are debugging you probably don&#8217;t need to the entirety of
+<dt><code class="docutils literal"><span class="pre">log_output</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">True</span></code></span></dt>
+<dd>If you are debugging you probably don&#8217;t need to the entirety of
 PyGBe output written to a log file, this will suspend that logging behavior
 and only stdout will be written to.</dd>
-<dt><code class="docutils literal"><span class="pre">return_output_fname</span></code></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span><dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will
+<dt><code class="docutils literal"><span class="pre">return_output_fname</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span></dt>
+<dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will
 return the name of the logfile created for the current run</dd>
-<dt><code class="docutils literal"><span class="pre">return_results_dict</span></code></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span><dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will return a dictionary with the calculated
+<dt><code class="docutils literal"><span class="pre">return_results_dict</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span></dt>
+<dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will return a dictionary with the calculated
 values (if applicable) of the config file used, param file used, any
 geometry files, the path of the problem, the number of elements and any
 calculated energy quantities.</dd>
@@ -86,8 +86,8 @@ calculated energy quantities.</dd>
 <p class="last"><code class="docutils literal"><span class="pre">return_results_dict</span></code> will supercede both <code class="docutils literal"><span class="pre">return_output_fname</span></code> and <code class="docutils literal"><span class="pre">log_output</span></code> if used.</p>
 </div>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">field</span></code></dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span><dd>If you are running several runs that are nearly identical, with only a few
+<dt><code class="docutils literal"><span class="pre">field</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span></dt>
+<dd>If you are running several runs that are nearly identical, with only a few
 changes to the configuration, rather than programmatically editing config
 files to generate each run, you can instead pass in a dictionary of the
 appropriate values.  This will circumvent the <code class="docutils literal"><span class="pre">initialize_field</span></code> function
@@ -182,7 +182,7 @@ that reads from the config file.</dd>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

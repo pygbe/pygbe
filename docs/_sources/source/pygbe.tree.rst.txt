@@ -1,43 +1,43 @@
-pygbe.tree package
-==================
+pygbe\.tree package
+===================
 
 Submodules
 ----------
 
-pygbe.tree.FMMutils module
---------------------------
+pygbe\.tree\.FMMutils module
+----------------------------
 
 .. automodule:: pygbe.tree.FMMutils
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.tree.calculateMultipoles module
--------------------------------------
+pygbe\.tree\.calculateMultipoles module
+---------------------------------------
 
 .. automodule:: pygbe.tree.calculateMultipoles
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.tree.cuda_kernels module
-------------------------------
+pygbe\.tree\.cuda\_kernels module
+---------------------------------
 
 .. automodule:: pygbe.tree.cuda_kernels
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.tree.direct module
-------------------------
+pygbe\.tree\.direct module
+--------------------------
 
 .. automodule:: pygbe.tree.direct
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.tree.multipole module
----------------------------
+pygbe\.tree\.multipole module
+-----------------------------
 
 .. automodule:: pygbe.tree.multipole
     :members:

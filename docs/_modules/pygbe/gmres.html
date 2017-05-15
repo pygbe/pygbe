@@ -147,14 +147,20 @@
     <span class="n">tol</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">tol</span>
 
     <span class="c1"># Set number of outer and inner iterations</span>
-    <span class="n">max_outer</span> <span class="o">=</span> <span class="n">max_iter</span>
-
+    
     <span class="k">if</span> <span class="n">R</span> <span class="o">&gt;</span> <span class="n">dimen</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Setting number of inner iterations (restrt) to maximum</span><span class="se">\</span>
 <span class="s1">              allowed, which is A.shape[0] &#39;</span><span class="p">)</span>
         <span class="n">R</span> <span class="o">=</span> <span class="n">dimen</span>
 
     <span class="n">max_inner</span> <span class="o">=</span> <span class="n">R</span>
+
+    <span class="c1">#max_outer should be max_iter/max_inner but this might not be an integer</span>
+    <span class="c1">#so we get the ceil of the division.</span>
+    <span class="c1">#In the inner loop there is a if statement to break in case max_iter is</span>
+    <span class="c1">#reached. </span>
+ 
+    <span class="n">max_outer</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">max_iter</span><span class="o">/</span><span class="n">max_inner</span><span class="p">))</span>
 
     <span class="c1"># Prep for method</span>
     <span class="n">aux</span> <span class="o">=</span> <span class="n">gmres_dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
@@ -267,6 +273,15 @@
             <span class="k">if</span> <span class="p">(</span><span class="n">inner</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">R</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residual: </span><span class="si">{}</span><span class="s1">. Restart...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rel_resid</span><span class="p">))</span>
 
+            <span class="k">if</span> <span class="n">iteration</span><span class="o">==</span><span class="n">max_iter</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning!!!!&#39;</span>
+                <span class="s1">&#39;You have reached the maximum number of iterations : </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The run will stop. Check the residual behaviour you might have a bug.&#39;</span>
+                <span class="s1">&#39;For future runs you might consider changing the tolerance or&#39;</span>
+                <span class="s1">&#39; increasing the number of max_iter.&#39;</span><span class="p">)</span>
+
+                <span class="k">break</span>     
+                
         <span class="c1"># end inner loop, back to outer loop</span>
 
         <span class="c1"># Find best update to X in Krylov Space V.  Solve inner X inner system.</span>
@@ -282,7 +297,7 @@
         <span class="c1"># test for convergence</span>
         <span class="k">if</span> <span class="n">rel_resid</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;GMRES solve&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converged after </span><span class="si">%i</span><span class="s1"> iterations to a residual of </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span><span class="n">rel_resid</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converged after </span><span class="si">{}</span><span class="s1"> iterations to a residual of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span><span class="n">rel_resid</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time weight vector: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time sort         : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span><span class="p">))</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time data transfer: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span><span class="p">))</span>
@@ -363,7 +378,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

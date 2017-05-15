@@ -145,6 +145,7 @@
 <span class="sd">                          potential (neumann).</span>
 <span class="sd">    phi           : list, potential on surface.</span>
 <span class="sd">    dphi          : list, derivative of potential on surface.</span>
+<span class="sd">    dipole        : list, dipole moment vector from a surface.</span>
 
 <span class="sd">    # Device data:</span>
 
@@ -186,6 +187,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">twig</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">=</span> <span class="n">surf_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Nsurf</span> <span class="o">=</span> <span class="n">Nsurf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dipole</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">phi0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">phi0_file</span><span class="p">)</span>
@@ -349,8 +351,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we have complex dielectric constants we need to initialize Precon with</span>
         <span class="c1"># complex type else it&#39;ll be float.</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span><span class="p">)</span> <span class="o">==</span> <span class="nb">complex</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="nb">complex</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">))</span>
         <span class="c1"># Stores the inverse of the block diagonal (also a tridiag matrix)</span>
@@ -728,7 +731,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

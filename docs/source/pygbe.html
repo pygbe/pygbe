@@ -847,6 +847,12 @@ Information about the solvent excluded surface.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="pygbe.classes.Surface.dipole">
+<code class="descname">dipole</code><a class="headerlink" href="#pygbe.classes.Surface.dipole" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list, dipole moment vector from a surface.</em></p>
+</dd></dl>
+
+<dl class="attribute">
 <dt>
 <code class="descname"># Device data</code></dt>
 <dd></dd></dl>
@@ -1086,7 +1092,7 @@ boundary elements. Journal of computational chemistry, 30(1), 132-153.</td></tr>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int</em><em> (</em><em>1</em><em>,</em><em>3</em><em>,</em><em>4</em><em>,</em><em>7</em><em>)</em><em></em><em>, </em><em>desired Gauss points per element.</em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<em>int</em><em> (</em><em>1</em><em>,</em><em>3</em><em>,</em><em>4</em><em>,</em><em>7</em><em>)</em><em>, </em><em>desired Gauss points per element.</em>) &#8211; </td>
 </tr>
 </tbody>
 </table>
@@ -1366,7 +1372,7 @@ param files</p>
 
 <dl class="function">
 <dt id="pygbe.main.main">
-<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=['/home/travis/miniconda/envs/pygbe/bin/sphinx-build', '-b', 'html', '-d', '_build/doctrees', '.', '_build/html'], log_output=True, return_output_fname=False, return_results_dict=False, field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=['/home/travis/miniconda/envs/pygbe/bin/sphinx-build', '-b', 'html', '-d', '_build/doctrees', '.', '_build/html'], log_output=True, return_output_fname=False, return_results_dict=False, field=None, lspr=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
 problem directory</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1382,6 +1388,8 @@ packed in a dictionary.  Used in testing and programmatic
 use of PyGBe</li>
 <li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) &#8211; If passed, this dictionary will supercede any config file found, useful in
 programmatically stepping through slight changes in a problem</li>
+<li><strong>lspr</strong> (<em>list</em><em>, </em><em>defaults to None</em>) &#8211; If passed, provides values for <cite>electric_field</cite> and <cite>wavelength</cite>, useful to
+programmatically step through varying wavelengths</li>
 </ul>
 </td>
 </tr>
@@ -1533,8 +1541,40 @@ problem folder resembles the following structure</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="pygbe.matrixfree.dipole_moment">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">dipole_moment</code><span class="sig-paren">(</span><em>surf_array</em>, <em>electric_field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#dipole_moment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.dipole_moment" title="Permalink to this definition">¶</a></dt>
+<dd><p>It calculates the dipole moment on a surface and stores it in the &#8216;dipole&#8217;
+attribute of the surface class. The dipole is expressed as a boundary
+integral.</p>
+<dl class="docutils">
+<dt>surf_array <span class="classifier-delimiter">:</span> <span class="classifier">array, contains the surface classes of each region on the</span></dt>
+<dd>surface.</dd>
+<dt>electric_field: float, electric field intensity, it is in the &#8216;z&#8217;</dt>
+<dd>direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.matrixfree.extinction_cross_section">
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">extinction_cross_section</code><span class="sig-paren">(</span><em>surf_array</em>, <em>k</em>, <em>n</em>, <em>wavelength</em>, <em>electric_field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#extinction_cross_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.extinction_cross_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>It computes the extinction cross section (Acording to Mischenko2007).</p>
+<dl class="docutils">
+<dt>surf_array <span class="classifier-delimiter">:</span> <span class="classifier">array, contains the surface classes of each region on the</span></dt>
+<dd>surface.</dd>
+</dl>
+<p>k            : array, unit vector in direction of wave propagation.
+n            : array, unit vector in direction of electric field.
+wavelength   : float, wavelength of the incident electric field.
+electric_field: float, electric field intensity, it is in the &#8216;z&#8217;</p>
+<blockquote>
+<div>direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</div></blockquote>
+<p>Cext         : list, contains the extinction cross section of surfaces.
+surf_Cext    : list, indices of the surface where Cext is being calculated.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pygbe.matrixfree.generateRHS">
-<code class="descclassname">pygbe.matrixfree.</code><code class="descname">generateRHS</code><span class="sig-paren">(</span><em>field_array</em>, <em>surf_array</em>, <em>param</em>, <em>kernel</em>, <em>timing</em>, <em>ind0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#generateRHS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.generateRHS" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">generateRHS</code><span class="sig-paren">(</span><em>field_array</em>, <em>surf_array</em>, <em>param</em>, <em>kernel</em>, <em>timing</em>, <em>ind0</em>, <em>electric_field=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#generateRHS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.generateRHS" title="Permalink to this definition">¶</a></dt>
 <dd><p>It generate the right hand side (RHS) for the GMRES.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1562,7 +1602,7 @@ problem folder resembles the following structure</p>
 
 <dl class="function">
 <dt id="pygbe.matrixfree.generateRHS_gpu">
-<code class="descclassname">pygbe.matrixfree.</code><code class="descname">generateRHS_gpu</code><span class="sig-paren">(</span><em>field_array</em>, <em>surf_array</em>, <em>param</em>, <em>kernel</em>, <em>timing</em>, <em>ind0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#generateRHS_gpu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.generateRHS_gpu" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.matrixfree.</code><code class="descname">generateRHS_gpu</code><span class="sig-paren">(</span><em>field_array</em>, <em>surf_array</em>, <em>param</em>, <em>kernel</em>, <em>timing</em>, <em>ind0</em>, <em>electric_field=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#generateRHS_gpu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.generateRHS_gpu" title="Permalink to this definition">¶</a></dt>
 <dd><p>It generate the right hand side (RHS) for the GMRES suitable for the GPU.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1984,7 +2024,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>number of Gauss points per element.</em><em> (</em><em>1</em><em>, </em><em>3</em><em>, </em><em>4</em><em>, </em><em>and 7 are supported</em><em>)</em><em></em>) &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>number of Gauss points per element.</em><em> (</em><em>1</em><em>, </em><em>3</em><em>, </em><em>4</em><em>, </em><em>and 7 are supported</em><em>)</em>) &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>w</strong></td>
 </tr>
@@ -2002,7 +2042,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em> (</em><em>1</em><em>, </em><em>7</em><em>, </em><em>13</em><em>, </em><em>17</em><em>, </em><em>19</em><em>, </em><em>25</em><em>, </em><em>37</em><em>, </em><em>48</em><em>, </em><em>52</em><em>, </em><em>61</em><em>, </em><em>79</em><em>)</em><em></em><em>, </em><em>number of Gauss points</em>) &#8211; per element.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em> (</em><em>1</em><em>, </em><em>7</em><em>, </em><em>13</em><em>, </em><em>17</em><em>, </em><em>19</em><em>, </em><em>25</em><em>, </em><em>37</em><em>, </em><em>48</em><em>, </em><em>52</em><em>, </em><em>61</em><em>, </em><em>79</em><em>)</em><em>, </em><em>number of Gauss points</em>) &#8211; per element.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
 <li><strong>X</strong> (<em>array, position of the gauss quadrature points.</em>)</li>
@@ -2083,7 +2123,7 @@ wights and gauss points for the regular Gauss quadrature.</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

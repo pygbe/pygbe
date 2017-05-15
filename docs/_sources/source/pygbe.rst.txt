@@ -12,72 +12,72 @@ Subpackages
 Submodules
 ----------
 
-pygbe.class_initialization module
----------------------------------
+pygbe\.class\_initialization module
+-----------------------------------
 
 .. automodule:: pygbe.class_initialization
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.classes module
---------------------
+pygbe\.classes module
+---------------------
 
 .. automodule:: pygbe.classes
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.gmres module
-------------------
+pygbe\.gmres module
+-------------------
 
 .. automodule:: pygbe.gmres
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.gpuio module
-------------------
+pygbe\.gpuio module
+-------------------
 
 .. automodule:: pygbe.gpuio
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.main module
------------------
+pygbe\.main module
+------------------
 
 .. automodule:: pygbe.main
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.matrixfree module
------------------------
+pygbe\.matrixfree module
+------------------------
 
 .. automodule:: pygbe.matrixfree
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.output module
--------------------
+pygbe\.output module
+--------------------
 
 .. automodule:: pygbe.output
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.projection module
------------------------
+pygbe\.projection module
+------------------------
 
 .. automodule:: pygbe.projection
     :members:
     :undoc-members:
     :show-inheritance:
 
-pygbe.quadrature module
------------------------
+pygbe\.quadrature module
+------------------------
 
 .. automodule:: pygbe.quadrature
     :members:

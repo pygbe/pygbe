@@ -52,6 +52,20 @@
 solutions.
 All functions output the analytical solution in kcal/mol</p>
 <dl class="function">
+<dt id="pygbe.util.an_solution.Cext_analytical">
+<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">Cext_analytical</code><span class="sig-paren">(</span><em>radius</em>, <em>wavelength</em>, <em>diel_out</em>, <em>diel_in</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#Cext_analytical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.Cext_analytical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the analytical solution of the extinction cross section.
+This solution is valid when the nano particle involved is a sphere.</p>
+<p>radius    : float, radius of the sphere in [nm].
+wavelength: float/array of floats, wavelength of the incident</p>
+<blockquote>
+<div>electric field in [nm].</div></blockquote>
+<p>diel_out  : complex/array of complex, dielectric constant inside surface.
+diel_in   : complex/array of complex, dielectric constant inside surface.</p>
+<p>Cext_an   : float/array of floats, extinction cross section.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="pygbe.util.an_solution.an_P">
 <code class="descclassname">pygbe.util.an_solution.</code><code class="descname">an_P</code><span class="sig-paren">(</span><em>q</em>, <em>xq</em>, <em>E_1</em>, <em>E_2</em>, <em>R</em>, <em>kappa</em>, <em>a</em>, <em>N</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#an_P"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.an_P" title="Permalink to this definition">¶</a></dt>
 <dd><p>It computes the solvation energy according to Kirkwood-1934.</p>
@@ -612,8 +626,8 @@ files, when we read the lines.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.read_data.readElectricField">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readElectricField</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readElectricField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readElectricField" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.read_electric_field">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_electric_field</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_electric_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_electric_field" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the information about the incident electric field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -626,35 +640,10 @@ files, when we read the lines.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>electricField</strong> (<em>float, electric field intensity, it is in the &#8216;z&#8217;</em>) &#8211; direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</li>
+<li><strong>electric_field</strong> (<em>float, electric field intensity, it is in the &#8216;z&#8217;</em>) &#8211; direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</li>
 <li><strong>wavelength</strong> (<em>float, wavelength of the incident electric field.</em>)</li>
 </ul>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.read_data.readParameters">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>It populates the attributes from the Parameters class with the information
-read from the .param file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
-<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
 </td>
 </tr>
 </tbody>
@@ -688,6 +677,31 @@ the FILE section, parent=2)</li>
 <li><strong>Nchild</strong> (<em>list, it contains integers indicating number of child surfaces</em>) &#8211; (surfaces completely contained in this region).</li>
 <li><strong>child</strong> (<em>list, it contains position of the mesh files for the children</em>) &#8211; surface in the FILE section.</li>
 </ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.read_parameters">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_parameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>It populates the attributes from the Parameters class with the information
+read from the .param file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
 </td>
 </tr>
 </tbody>
@@ -857,7 +871,7 @@ the collocation points.</p>
 <li><strong>y</strong> (<em>array</em><em>, </em><em>vertices coordinates of the triangles.</em>) &#8211; </li>
 <li><strong>x</strong> (<em>array</em><em>, </em><em>collocation points.</em>) &#8211; </li>
 <li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
-<li><strong>same</strong> (<em>int</em><em>, </em><em>1 if the collocation point is in the panel of integration</em><em>,</em><em></em>) &#8211; 0 otherwise.</li>
+<li><strong>same</strong> (<em>int</em><em>, </em><em>1 if the collocation point is in the panel of integration</em><em>,</em>) &#8211; 0 otherwise.</li>
 <li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
 <li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
 </ul>
@@ -1012,7 +1026,7 @@ the semi_analytical integrals needed to calculate the potentials.</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
