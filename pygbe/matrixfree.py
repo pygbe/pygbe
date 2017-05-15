@@ -305,18 +305,16 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     Nsurf = len(surf_array)
 
     #   Check if there is a complex dielectric
-    complex_diel = 0
-    for f in field_array:
-        if numpy.iscomplexobj(f.E):
-            complex_diel = 1
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
 
     #   Place weights on corresponding surfaces and allocate memory
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
-            if complex_diel == 1:
-                surf_array[i].XinK = numpy.zeros(N, type(f.E))
+            if complex_diel:
+                surf_array[i].XinK = numpy.zeros(N, dtype=numpy.complex)
             else:
                 surf_array[i].XinK = numpy.zeros(N)
             surf_array[i].XinV = X[Naux:Naux + N]
@@ -324,8 +322,8 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
         elif surf_array[i].surf_type == 'neumann_surface' or surf_array[
                 i].surf_type == 'asc_surface':
             surf_array[i].XinK = X[Naux:Naux + N]
-            if complex_diel == 1:
-                surf_array[i].XinV = numpy.zeros(N, type(f.E))
+            if complex_diel:
+                surf_array[i].XinV = numpy.zeros(N, dtype=numpy.complex)
             else:
                 surf_array[i].XinV = numpy.zeros(N)
             Naux += N
@@ -334,9 +332,9 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
             surf_array[i].XinV = X[Naux + N:Naux + 2 * N]
             Naux += 2 * N
 
-        if complex_diel == 1:
-            surf_array[i].Xout_int = numpy.zeros(N, type(f.E))
-            surf_array[i].Xout_ext = numpy.zeros(N, type(f.E))
+        if complex_diel:
+            surf_array[i].Xout_int = numpy.zeros(N, dtype=numpy.complex)
+            surf_array[i].Xout_ext = numpy.zeros(N, dtype=numpy.complex)
         else:
             surf_array[i].Xout_int = numpy.zeros(N)
             surf_array[i].Xout_ext = numpy.zeros(N)
@@ -394,8 +392,8 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                     surf_array[c].Xout_ext += v
 
     #   Gather results into the result vector
-    if complex_diel == 1:
-        MV = numpy.zeros(len(X), type(f.E))
+    if complex_diel:
+        MV = numpy.zeros(len(X), dtype=numpy.complex)
     else:
         MV = numpy.zeros(len(X))
     Naux = 0
@@ -501,14 +499,12 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
     F          : array, RHS.
     """
 
-    complex_diel = 0
-    for f in field_array:
-        if numpy.iscomplexobj(f.E):
-            complex_diel = 1
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
 
     # Initializing F dtype according to the problem we are solving.
-    if complex_diel == 1:
-        F = numpy.zeros(param.Neq, type(f.E))
+    if complex_diel:
+        F = numpy.zeros(param.Neq, dtype=numpy.complex)
     else:
         F = numpy.zeros(param.Neq)
 
@@ -823,14 +819,12 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
     F          : array, RHS suitable for the GPU.
     """
 
-    complex_diel = 0
-    for f in field_array:
-        if numpy.iscomplexobj(f.E):
-            complex_diel = 1
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
 
     # Initializing F dtype according to the problem we are solving.
-    if complex_diel == 1:
-        F = numpy.zeros(param.Neq, type(f.E))
+    if complex_diel:
+        F = numpy.zeros(param.Neq, dtype=numpy.complex)
     else:
         F = numpy.zeros(param.Neq)
 

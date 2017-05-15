@@ -369,19 +369,16 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
 
     #   Check if there is a complex dielectric
-    complex_diel = 0
-    for f in field_array:
-        if numpy.iscomplexobj(f.E):
-            complex_diel = 1
-
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
 
     ### Solve
     tic = time.time()
 
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
-    if complex_diel == 1:
-        phi = numpy.zeros(param.Neq, dtype=type(f.E))
+    if complex_diel:
+        phi = numpy.zeros(param.Neq, dtype=numpy.complex)
     else:
         phi = numpy.zeros(param.Neq)
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
