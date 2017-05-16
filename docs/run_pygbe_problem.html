@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Programmatic use of PyGBe &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="programmatic-use-of-pygbe">
+<h1>Programmatic use of PyGBe<a class="headerlink" href="#programmatic-use-of-pygbe" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">These options reflect what we do to configure problems in PyGBe, many
+of these choices are just that, choices.</p>
+</div>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span>       <span class="n">awk</span> <span class="s1">&#39;{print $6,$7,$8,$10}&#39;</span> <span class="mi">1</span><span class="n">K4R_pdb2pqr_modR</span><span class="o">.</span><span class="n">pqr</span> <span class="o">&gt;</span> <span class="n">molecule</span><span class="o">.</span><span class="n">xyzr</span>
+       <span class="n">pdb2pqr</span> <span class="o">--</span><span class="n">ff</span><span class="o">=</span><span class="n">amber</span> <span class="nb">input</span><span class="o">.</span><span class="n">pdb</span> <span class="n">output</span><span class="o">.</span><span class="n">pqr</span>
+       <span class="n">msms</span> <span class="o">-</span><span class="k">if</span> <span class="n">lys</span><span class="o">.</span><span class="n">xyzr</span> <span class="o">-</span><span class="n">of</span> <span class="n">lys1</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">1.4</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
+
+
+<span class="n">Steps</span><span class="p">:</span>
+
+       <span class="n">Download</span> <span class="n">a</span> <span class="n">pdb</span> <span class="n">file</span> <span class="kn">from</span> <span class="nn">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">rcsb</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pdb</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">home</span><span class="o">.</span><span class="n">do</span> <span class="n">Protein</span> <span class="n">Data</span> <span class="n">Bank</span>
+
+
+<span class="n">Software</span> <span class="n">needed</span><span class="p">:</span>
+       <span class="n">pdb2pqr</span> <span class="p">(</span><span class="n">possible</span> <span class="n">to</span> <span class="n">use</span> <span class="n">webserver</span><span class="p">:</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">nbcr</span><span class="o">-</span><span class="mf">222.</span><span class="n">ucsd</span><span class="o">.</span><span class="n">edu</span><span class="o">/</span><span class="n">pdb2pqr_2</span><span class="o">.</span><span class="mf">1.1</span><span class="o">/</span><span class="p">)</span>
+<span class="ow">or</span> <span class="n">install</span> <span class="n">latest</span> <span class="n">release</span> <span class="kn">from</span> <span class="nn">here</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Electrostatics</span><span class="o">/</span><span class="n">apbs</span><span class="o">-</span><span class="n">pdb2pqr</span><span class="o">/</span><span class="n">releases</span>
+
+       <span class="n">msms</span> <span class="p">(</span><span class="k">for</span> <span class="n">proteins</span> <span class="k">with</span> <span class="o">&lt;</span> <span class="mi">10000</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">otherwise</span> <span class="n">it</span> <span class="n">chokes</span><span class="p">):</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mgltools</span><span class="o">.</span><span class="n">scripps</span><span class="o">.</span><span class="n">edu</span><span class="o">/</span><span class="n">downloads</span>
+
+       <span class="n">nanoshaper</span> <span class="p">(</span><span class="n">works</span> <span class="n">well</span><span class="p">)</span> <span class="o">--</span> <span class="n">source</span> <span class="ow">is</span> <span class="n">behind</span> <span class="n">login</span> <span class="n">wall</span> <span class="n">but</span> <span class="n">can</span> <span class="n">download</span> <span class="n">binary</span> <span class="n">here</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">lwwilson1</span><span class="o">/</span><span class="n">mesh_routines</span><span class="o">/</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>in file named <cite>surfaceConfiguration.prm</cite></dt>
+<dd>Grid_scale = 1.0
+Grid_perfil = 90.0
+XYZR_FileName = molecule.xyzr
+Build_epsilon_maps = false
+Build_status_map = false
+Save_Mesh_MSMS_Format = true
+Compute_Vertex_Normals = true
+Surface = ses
+Smooth_Mesh = true
+Skin_Surface_Parameter = 0.45
+Cavity_Detection_Filling = false
+Conditional_Volume_Filling_Value = 11.4
+Keep_Water_Shaped_Cavities = false
+Probe_Radius = 1.4
+Accurate_Triangulation = true
+Triangulation = true
+Check_duplicated_vertices = true
+Save_Status_map = false
+Save_PovRay = false</dd>
+</dl>
+<div class="section" id="nanoshaper-0-3-1-configuration-file">
+<h2>###################### NanoShaper 0.3.1 Configuration file  ###################<a class="headerlink" href="#nanoshaper-0-3-1-configuration-file" title="Permalink to this headline">¶</a></h2>
+<p>################################ Grid params ##################################</p>
+<p># Grid scale
+Grid_scale = 5</p>
+<p># Percentage that the surface occupies with respect to the total grid volume
+# default value is 90.0; in the case of very small molecules (e.g. fullerene) keep more margin
+# (e.g. lower the value to 50%)
+Grid_perfil = 90.0</p>
+<p># Input atoms xyzr file name
+XYZR_FileName = dir_TestProteins/1vjw.xyzr
+# if you enable fullerene (or a small molecule) use Grid_perfil = 70.0 or lower</p>
+<p>############################## Internal maps ##################################</p>
+<p># Enable/Disable build of epsilon (dielectric) map
+Build_epsilon_maps  = false</p>
+<p># Enable/Disable build of map for cavity detection and for a non analytical
+# triangulation
+Build_status_map = false</p>
+<p>########################## Surface Type params ################################</p>
+<p># Possible values: skin,blobby,msms,mesh,ses
+Surface = skin
+Compute_Vertex_Normals = true
+Save_Mesh_MSMS_Format = true</p>
+<p># Apply final surface smoothing
+Smooth_Mesh = true</p>
+<p># Number of total threads
+Number_thread = 32 #default value is 32</p>
+<p># Skin surface parameter [0.05,0.95]
+# the extrema are possibly not numerically stable,
+# the suggested range is [0.15,0.95]
+# default value is 0.45
+Skin_Surface_Parameter = 0.45</p>
+<p># Blobbyness value for the blobby surface [-0.5,-5.0]
+# default value is -2.5
+Blobbyness = -2.5</p>
+<p># Name of the input surface file used if mesh Surface is enabled or msms.
+# In case of msms remove any extension, .face and .vert file will be
+# automatically loaded.
+# In case of mesh, .off and .ply files are supported
+Surface_File_Name = triangulatedSurf.off</p>
+<p>######################## Surface Processing params ############################
+# Enable or disable cavity detection together with the volume conditional
+# filling of voids and cavities
+Cavity_Detection_Filling = false</p>
+<p># It is the value of the minimal volume of a cavity to get filled if
+# cavity detection is enabled.
+# The default value is an approximation of the volume of the water molecule
+# default value is 11.4, this is the approximate volume of a water molecule
+# in Angstrom
+Conditional_Volume_Filling_Value = 11.4</p>
+<p># If this flag is true, cavities where a sphere of Probe_Radius cannot fit,
+# are removed.
+# Use this feature when cavity detection is enabled to filter out bad shaped
+# cavities whose
+# volume is higher than Conditional_Volume_Filling_Value.
+Keep_Water_Shaped_Cavities = false</p>
+<p># The radius of the sphere that represents a water molecule in Angstrom
+# default value is 1.4 Angstrom
+Probe_Radius = 1.4</p>
+<p># Enable accurate triangulation: if accurate triangulation is enable all points
+# are sampled from the original surface. If disabled the points are not
+# analytically sampled and an high memory saving can be obtained
+# together with a 3x speed-up on ray casting if both epsmap is disabled
+# MC phase will be slower because vertices are calculated on the fly
+Accurate_Triangulation = true</p>
+<p># Perform triangulation using a single ray-casting process. Vertex data is
+# inferred.
+Triangulation = true</p>
+<p># Check duplicated vertices when reading
+Check_duplicated_vertices = true</p>
+<p># If true save the status map. Enable this for cavity detection and
+# visualization of the coloured FD grid
+Save_Status_map = false</p>
+<p># Save Skin/SES in a PovRay file for ray-tracing.
+# This is a purely graphics representation because the surface is not in
+# a left handed system as it should in Pov-Ray
+Save_PovRay = false</p>
+<p>####################### Acceleration Data Structures ##########################</p>
+<p># Mesh Projection(3D)/Ray Casting (3D) acceleration grid
+# Increase <a href="#id1"><span class="problematic" id="id2">*</span></a>_size to increase performance and memory usage.
+# Increase <a href="#id3"><span class="problematic" id="id4">*</span></a>_cell if requested by NanoShaper</p>
+<p># default 100
+Max_mesh_auxiliary_grid_size = 100
+# default 250
+Max_mesh_patches_per_auxiliary_grid_cell = 250;
+# default 100
+Max_mesh_auxiliary_grid_2d_size = 100
+# default 250
+Max_mesh_patches_per_auxiliary_grid_2d_cell = 250</p>
+<p># SES Projection(3D)/Ray Casting (3D) acceleration grid
+# default 100
+Max_ses_patches_auxiliary_grid_size = 100
+# default 400
+Max_ses_patches_per_auxiliary_grid_cell = 400
+# defualt 40
+Max_ses_patches_auxiliary_grid_2d_size = 50
+# default 400
+Max_ses_patches_per_auxiliary_grid_2d_cell = 400</p>
+<p># Skin Projection(3D)/Ray Casting (3D) acceleration grid
+# default 100
+Max_skin_patches_auxiliary_grid_size = 100
+# default 400
+Max_skin_patches_per_auxiliary_grid_cell = 400
+# default 150
+Max_skin_patches_auxiliary_grid_2d_size = 150
+# default 400
+Max_skin_patches_per_auxiliary_grid_2d_cell = 200</p>
+<hr class="docutils" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer&#8217;s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
