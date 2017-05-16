@@ -226,6 +226,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     #   Check if there is a complex dielectric
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
+    else:
+        complex_diel = False
 
     ### Solve
     tic = time.time()
