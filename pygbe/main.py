@@ -23,8 +23,7 @@ from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy, dipole_moment,
-                              extinction_cross_section)
+                              coulomb_energy, calculate_surface_energy)
 from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
@@ -291,12 +290,6 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
 
-    ### Read electric field and its wavelength.
-    if lspr:
-        electric_field, wavelength = lspr
-    else:
-        electric_field, wavelength = read_electric_field(param, configFile)
-
 
     ### Fill surface class
     time_sort = 0.
@@ -377,10 +370,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
-    if complex_diel:
-        phi = numpy.zeros(param.Neq, dtype=numpy.complex)
+    if not complex_diel:
+        phi = numpy.zeros(param.Neq)    
     else:
-        phi = numpy.zeros(param.Neq)
+        raise ValueError('Dielectric should be real for solvation energy problems')
+        
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
                             timing, kernel)
     toc = time.time()
@@ -398,89 +392,66 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         s_start = surf.fill_phi(phi, s_start)
 
 
-    #Calculate extinction cross section for lspr problems
-    if abs(electric_field) > 1e-12:
-
-        ###Calculating the dipole moment
-        dipole_moment(surf_array, electric_field)
- 
-        print('Calculate extinction cross section')
-        tic = time.time()
-        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
-                           wavelength, electric_field)
-        toc = time.time()
-        print('Time Cext: {}s'.format(toc - tic))
-
-        print('\nCext per surface')
-        for i in range(len(Cext)):
-            print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
-
-        results_dict['time_Cext'] = toc - tic
-        results_dict['surf_Cext'] = surf_Cext
-        results_dict['Cext_list'] = Cext
-        results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
-
-    else:
-        # Calculate solvation energy
-        print('Calculate Esolv')
-        tic = time.time()
-        E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
-        toc = time.time()
-        print('Time Esolv: {}s'.format(toc - tic))
-        ii = -1
-        for i, f in enumerate(field_array):
-            if f.pot == 1:
-                parent_type = surf_array[f.parent[0]].surf_type
-                if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-                    ii += 1
-                    print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
-                                                                          E_solv[ii],
-                                                                          E_solv[ii] * 4.184))
-
-
-        # Calculate surface energy
-        print('\nCalculate Esurf')
-        tic = time.time()
-        E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
-        toc = time.time()
-        ii = -1
-        for f in param.E_field:
-            parent_type = surf_array[field_array[f].parent[0]].surf_type
-            if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
+    # Calculate solvation energy
+    print('Calculate Esolv')
+    tic = time.time()
+    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
+    toc = time.time()
+    print('Time Esolv: {}s'.format(toc - tic))
+    ii = -1
+    for i, f in enumerate(field_array):
+        if f.pot == 1:
+            parent_type = surf_array[f.parent[0]].surf_type
+            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
                 ii += 1
-                print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
-                    f, E_surf[ii], E_surf[ii] * 4.184))
-        print('Time Esurf: {}s'.format(toc - tic))
+                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+                                                                      E_solv[ii],
+                                                                      E_solv[ii] * 4.184))
 
-        ### Calculate Coulombic interaction
-        print('\nCalculate Ecoul')
-        tic = time.time()
-        i = -1
-        E_coul = []
-        for f in field_array:
-            i += 1
-            if f.coulomb == 1:
-                print('Calculate Coulomb energy for region {}'.format(i))
-                E_coul.append(coulomb_energy(f, param))
-                print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
-                    i, E_coul[-1], E_coul[-1] * 4.184))
-        toc = time.time()
-        print('Time Ecoul: {}s'.format(toc - tic))
 
-        ### Output summary
-        print('\n'+'-'*30)
-        print('Totals:')
-        print('Esolv = {} kcal/mol'.format(sum(E_solv)))
-        print('Esurf = {} kcal/mol'.format(sum(E_surf)))
-        print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
-        print('\nTime = {} s'.format(toc - TIC))
+    # Calculate surface energy
+    print('\nCalculate Esurf')
+    tic = time.time()
+    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
+    toc = time.time()
+    ii = -1
+    for f in param.E_field:
+        parent_type = surf_array[field_array[f].parent[0]].surf_type
+        if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
+            ii += 1
+            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+                f, E_surf[ii], E_surf[ii] * 4.184))
+    print('Time Esurf: {}s'.format(toc - tic))
 
-        results_dict['E_solv_kcal'] = sum(E_solv)
-        results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
-        results_dict['E_surf_kcal'] = sum(E_surf)
-        results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
-        results_dict['E_coul_kcal'] = sum(E_coul)
-        results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+    ### Calculate Coulombic interaction
+    print('\nCalculate Ecoul')
+    tic = time.time()
+    i = -1
+    E_coul = []
+    for f in field_array:
+        i += 1
+        if f.coulomb == 1:
+            print('Calculate Coulomb energy for region {}'.format(i))
+            E_coul.append(coulomb_energy(f, param))
+            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+                i, E_coul[-1], E_coul[-1] * 4.184))
+    toc = time.time()
+    print('Time Ecoul: {}s'.format(toc - tic))
+
+    ### Output summary
+    print('\n'+'-'*30)
+    print('Totals:')
+    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
+    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
+    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+    print('\nTime = {} s'.format(toc - TIC))
+
+    results_dict['E_solv_kcal'] = sum(E_solv)
+    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
+    results_dict['E_surf_kcal'] = sum(E_surf)
+    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
+    results_dict['E_coul_kcal'] = sum(E_coul)
+    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
 
     results_dict['total_time'] = (toc - TIC)
     results_dict['version'] = pygbe.__version__
