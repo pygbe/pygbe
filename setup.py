@@ -55,7 +55,8 @@ def main():
             packages = find_packages(),
             #tell setuptools to use the custom build and install classes
             #create an entrance point that points to pygbe.main.main
-            entry_points={'console_scripts': ['pygbe = pygbe.main:main']},
+            entry_points={'console_scripts': ['pygbe = pygbe.main:main',
+                                              'pygbe-lspr = pygbe.lspr:main']},
             #SWIG modules with all compilation options
             ext_modules = [
                 Extension("_multipole",
