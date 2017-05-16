@@ -15,7 +15,7 @@ except ImportError:
     else:
         sys.exit()
 
-from pygbe.main import main as pygbe
+from pygbe.lspr import main as pygbe
 
 mesh = ['500', '2K', '8K', '32K']
 mesh_multiple = ['500-100', '2K-500', '8K-2K', '32K-8K']
