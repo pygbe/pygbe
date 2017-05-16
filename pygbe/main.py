@@ -346,10 +346,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0, electric_field)
+                            ind0)
     toc = time.time()
     rhs_time = toc - tic
 
@@ -364,6 +364,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     #   Check if there is a complex dielectric
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
+    else: 
+        complex_diel = False
 
     ### Solve
     tic = time.time()
