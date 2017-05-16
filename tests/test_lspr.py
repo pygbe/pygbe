@@ -12,7 +12,7 @@ except ImportError:
     else:
         sys.exit()
 
-from pygbe.main import main
+from pygbe.lspr import main
 
 
 @pytest.mark.parametrize('key_int', ['total_elements',
