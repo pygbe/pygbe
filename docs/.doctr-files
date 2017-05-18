@@ -3,6 +3,7 @@ docs/_modules/pygbe/class_initialization.html
 docs/_modules/pygbe/classes.html
 docs/_modules/pygbe/gmres.html
 docs/_modules/pygbe/gpuio.html
+docs/_modules/pygbe/lspr.html
 docs/_modules/pygbe/main.html
 docs/_modules/pygbe/matrixfree.html
 docs/_modules/pygbe/output.html
@@ -22,7 +23,6 @@ docs/_sources/othersoftware.rst.txt
 docs/_sources/programmatic.rst.txt
 docs/_sources/references.rst.txt
 docs/_sources/run.rst.txt
-docs/_sources/run_pygbe_problem.rst.txt
 docs/_sources/source/modules.rst.txt
 docs/_sources/source/pygbe.rst.txt
 docs/_sources/source/pygbe.tree.rst.txt
@@ -61,7 +61,6 @@ docs/programmatic.html
 docs/py-modindex.html
 docs/references.html
 docs/run.html
-docs/run_pygbe_problem.html
 docs/search.html
 docs/searchindex.js
 docs/source/modules.html
