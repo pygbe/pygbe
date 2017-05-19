@@ -18,28 +18,44 @@ def download_zip_with_progress_bar(url):
                 f.write(chunk)
                 f.flush()
 
-def unzip(meshzip):
+def unzip(meshzip, folder_name, raname_folder):
+    '''Unzip a zip file
+
+    Arguments:
+    ----------
+    meshzip      : file we want to unzip
+    folder_name  : str, name of the folder after extracting.
+                  We want this to modify it when download, to follow pygbe 
+                  problem folder design for running.
+    raname_folder: str, name of the folder were we want to store the download.
+                   We rename the folder_name, to match config files. 
+    '''
     with zipfile.ZipFile(meshzip, 'r') as myzip:
         myzip.extractall(path='./tmp')
 
     print('Unzipping meshes to folder \'geometry/\'...')
-    os.rename(os.path.join('tmp', 'regresion_tests_meshes'), 'geometry')
+    os.rename(os.path.join('tmp', folder_name), raname_folder)
     os.rmdir('tmp')
     print('Removing zip file...')
     os.remove(meshzip)
 
-def check_mesh():
-    #check if there's a geometry folder present in the directory
-    if not os.path.isdir('geometry'):
+def check_mesh(mesh_file, folder_name, rename_folder, size):
+    ''' Check if there's a geometry folder present in the directory.
+
+    Arguments:
+    ----------
+    mesh_file  : str, mesh_file url
+    folder_name: str, name of the folder after extracting.
+                 We want to pass this to be used in unzip function, where 
+                 we rename it.
+    size       : str, estimate size of file    
+    '''
+    if not os.path.isdir(rename_folder):
         dl_check = input('The meshes for convergence tests don\'t appear to '
                          'be loaded. Would you like to download them from '
-                             'Zenodo? (~10MB) (y/n): ')
+                             'Zenodo?(' + size + ')(y/n): ')
         if dl_check == 'y':
-            mesh_file = 'https://zenodo.org/record/55349/files/pygbe_regresion_test_meshes.zip'
             download_zip_with_progress_bar(mesh_file)
-            unzip(mesh_file.split('/')[-1])
+            unzip(mesh_file.split('/')[-1], folder_name, rename_folder)
 
             print('Done!')
-
-if __name__ == '__main__':
-    check_mesh()
