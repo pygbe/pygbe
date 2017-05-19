@@ -46,7 +46,7 @@ Convergence tests
 
 There is a more robust set of tests located in
 ``pygbe/tests/convergence_tests``. These include comparisons to
-analytical solutions and checks to ensure convergence over a series of
+analytical solutions or richardson extrapolated solutions, and checks to ensure convergence over a series of
 finer meshes.
 
 Note that these tests take a few hours to run. To run them, navigate to
@@ -55,6 +55,14 @@ the convergence test folder and run
 .. code:: python
 
     python run_convergence_tests.py
+
+for Poisson Boltzmann related tests, or
+
+.. code:: python
+
+    python run_convergence_tests_lspr.py
+
+for Localized Surface Plasmon Resonance tests.
 
 Any individual set of convergence tests can be run by specifying a given
 test file, e.g.
