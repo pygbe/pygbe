@@ -1,0 +1,194 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Programmatic use of PyGBe &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Other software" href="othersoftware.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="programmatic-use-of-pygbe">
+<h1>Programmatic use of PyGBe<a class="headerlink" href="#programmatic-use-of-pygbe" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-pygbe-within-ipython">
+<h2>Using PyGBe within IPython<a class="headerlink" href="#using-pygbe-within-ipython" title="Permalink to this headline">¶</a></h2>
+<p>There will be times when you want to run PyGBe within a Python interpreter,
+as opposed to running on the command line. If you need to debug using <code class="docutils literal"><span class="pre">ipdb</span></code>
+or to generate figures that require several sequential runs, you’re better off
+scripting in Python than in Bash.</p>
+<p>The following example would run the Lysozyme example.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The first value in the list passed to main must be an empty string.
+The path to the example folder (<code class="docutils literal"><span class="pre">examples/lys</span></code>) is relative to
+wherever the interpreter was started. In this example, we entered the
+root of the PyGBe repo and then ran <code class="docutils literal"><span class="pre">ipython</span></code></p>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pygbe.main</span> <span class="k">import</span> <span class="n">main</span>
+ <span class="n">main</span><span class="p">([</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;examples/lys&#39;</span><span class="p">],</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="useful-kwargs">
+<h2>Useful kwargs<a class="headerlink" href="#useful-kwargs" title="Permalink to this headline">¶</a></h2>
+<p>There are a few keyword arguments you can pass to PyGBe when running from
+IPython that are useful for programmatic work.</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">log_output</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">True</span></code></span></dt>
+<dd>If you are debugging you probably don’t need to the entirety of
+PyGBe output written to a log file, this will suspend that logging behavior
+and only stdout will be written to.</dd>
+<dt><code class="docutils literal"><span class="pre">return_output_fname</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span></dt>
+<dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will
+return the name of the logfile created for the current run</dd>
+<dt><code class="docutils literal"><span class="pre">return_results_dict</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">False</span></code></span></dt>
+<dd>If <code class="docutils literal"><span class="pre">True</span></code> then <code class="docutils literal"><span class="pre">main()</span></code> will return a dictionary with the calculated
+values (if applicable) of the config file used, param file used, any
+geometry files, the path of the problem, the number of elements and any
+calculated energy quantities.</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal"><span class="pre">return_results_dict</span></code> will supercede both <code class="docutils literal"><span class="pre">return_output_fname</span></code> and <code class="docutils literal"><span class="pre">log_output</span></code> if used.</p>
+</div>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">field</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span></dt>
+<dd>If you are running several runs that are nearly identical, with only a few
+changes to the configuration, rather than programmatically editing config
+files to generate each run, you can instead pass in a dictionary of the
+appropriate values.  This will circumvent the <code class="docutils literal"><span class="pre">initialize_field</span></code> function
+that reads from the config file.</dd>
+</dl>
+</div>
+<div class="section" id="sample-field-dictionary">
+<h2>Sample field dictionary<a class="headerlink" href="#sample-field-dictionary" title="Permalink to this headline">¶</a></h2>
+<p>For reference, the config dictionary equivalent to the Lysozyme example would look like the following:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">lys_field</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">80</span><span class="p">],</span>
+            <span class="s1">&#39;LorY&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="s1">&#39;Nchild&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;Nparent&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="s1">&#39;charges&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;child&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+            <span class="s1">&#39;coulomb&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;kappa&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">],</span>
+            <span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+            <span class="s1">&#39;pot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;qfile&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;/home/gil/git/pygbe/examples/lys/lys1_charges.pqr&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NA&#39;</span>
+            <span class="s1">&#39;NA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NA&#39;</span><span class="p">]}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="othersoftware.html" title="previous chapter">Other software</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
