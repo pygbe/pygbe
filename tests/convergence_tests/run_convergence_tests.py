@@ -17,7 +17,12 @@ CUDA_DEVICE = '0'
 ENV = os.environ.copy()
 ENV['CUDA_DEVICE'] = CUDA_DEVICE
 
-check_mesh()
+mesh_file = 'https://zenodo.org/record/55349/files/pygbe_regresion_test_meshes.zip'
+folder_name = 'regresion_tests_meshes'
+rename_folder = 'geometry'
+size = '~10MB'
+
+check_mesh(mesh_file, folder_name, rename_folder, size)
 
 tic = time.time()
 
