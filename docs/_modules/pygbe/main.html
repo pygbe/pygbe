@@ -67,7 +67,8 @@
 <span class="kn">from</span> <span class="nn">pygbe.class_initialization</span> <span class="k">import</span> <span class="n">initialize_surface</span><span class="p">,</span> <span class="n">initialize_field</span>
 <span class="kn">from</span> <span class="nn">pygbe.output</span> <span class="k">import</span> <span class="n">print_summary</span>
 <span class="kn">from</span> <span class="nn">pygbe.matrixfree</span> <span class="k">import</span> <span class="p">(</span><span class="n">generateRHS</span><span class="p">,</span> <span class="n">generateRHS_gpu</span><span class="p">,</span> <span class="n">calculate_solvation_energy</span><span class="p">,</span>
-                              <span class="n">coulomb_energy</span><span class="p">,</span> <span class="n">calculate_surface_energy</span><span class="p">)</span>
+                              <span class="n">coulomb_energy</span><span class="p">,</span> <span class="n">calculate_surface_energy</span><span class="p">,</span> <span class="n">dipole_moment</span><span class="p">,</span>
+                              <span class="n">extinction_cross_section</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">read_parameters</span><span class="p">,</span> <span class="n">read_electric_field</span>
 <span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">computeIndices</span><span class="p">,</span> <span class="n">precomputeTerms</span><span class="p">,</span> <span class="n">generateList</span>
 
@@ -221,7 +222,7 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lspr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a PyGBe problem, write outputs to STDOUT and to log file in</span>
 <span class="sd">    problem directory</span>
@@ -240,6 +241,9 @@
 <span class="sd">    field : Dictionary, defaults to None.</span>
 <span class="sd">         If passed, this dictionary will supercede any config file found, useful in</span>
 <span class="sd">         programmatically stepping through slight changes in a problem</span>
+<span class="sd">    lspr : list, defaults to None</span>
+<span class="sd">         If passed, provides values for `electric_field` and `wavelength`, useful to</span>
+<span class="sd">         programmatically step through varying wavelengths</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
@@ -331,6 +335,12 @@
     <span class="c1">### Generate array of surfaces and read in elements</span>
     <span class="n">surf_array</span> <span class="o">=</span> <span class="n">initialize_surface</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
 
+    <span class="c1">### Read electric field and its wavelength.</span>
+    <span class="k">if</span> <span class="n">lspr</span><span class="p">:</span>
+        <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">lspr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">read_electric_field</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">configFile</span><span class="p">)</span>
+
 
     <span class="c1">### Fill surface class</span>
     <span class="n">time_sort</span> <span class="o">=</span> <span class="mf">0.</span>
@@ -387,10 +397,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generate RHS&#39;</span><span class="p">)</span>
     <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">F</span> <span class="o">=</span> <span class="n">generateRHS</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">ind0</span><span class="p">)</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">generateRHS</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">electric_field</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">F</span> <span class="o">=</span> <span class="n">generateRHS_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span>
-                            <span class="n">ind0</span><span class="p">)</span>
+                            <span class="n">ind0</span><span class="p">,</span> <span class="n">electric_field</span><span class="p">)</span>
     <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">rhs_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
 
@@ -405,19 +415,16 @@
     <span class="c1">#   Check if there is a complex dielectric</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
         <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span> 
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">### Solve</span>
     <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solve&#39;</span><span class="p">)</span>
     <span class="c1"># Initializing phi dtype according to the problem we are solving.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">complex_diel</span><span class="p">:</span>
-        <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>    
+    <span class="k">if</span> <span class="n">complex_diel</span><span class="p">:</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dielectric should be real for solvation energy problems&#39;</span><span class="p">)</span>
-        
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>
     <span class="n">phi</span><span class="p">,</span> <span class="n">iteration</span> <span class="o">=</span> <span class="n">gmres_mgs</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
                             <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
     <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -435,66 +442,89 @@
         <span class="n">s_start</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">fill_phi</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">s_start</span><span class="p">)</span>
 
 
-    <span class="c1"># Calculate solvation energy</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Esolv&#39;</span><span class="p">)</span>
-    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">E_solv</span> <span class="o">=</span> <span class="n">calculate_solvation_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
-    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Esolv: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
-    <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_array</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">pot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
-            <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+    <span class="c1">#Calculate extinction cross section for lspr problems</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">electric_field</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+
+        <span class="c1">###Calculating the dipole moment</span>
+        <span class="n">dipole_moment</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">electric_field</span><span class="p">)</span>
+ 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate extinction cross section&#39;</span><span class="p">)</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">Cext</span><span class="p">,</span> <span class="n">surf_Cext</span> <span class="o">=</span> <span class="n">extinction_cross_section</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span>
+                           <span class="n">wavelength</span><span class="p">,</span> <span class="n">electric_field</span><span class="p">)</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Cext: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Cext per surface&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Cext</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Surface </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1"> nm^2&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">surf_Cext</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Cext</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;time_Cext&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;surf_Cext&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf_Cext</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;Cext_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cext</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;Cext_0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>   <span class="c1">#We do convergence analysis in the main sphere</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calculate solvation energy</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Esolv&#39;</span><span class="p">)</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">E_solv</span> <span class="o">=</span> <span class="n">calculate_solvation_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Esolv: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_array</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">pot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+                <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+                    <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Esolv = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
+                                                                          <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                                                          <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+
+
+        <span class="c1"># Calculate surface energy</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Esurf&#39;</span><span class="p">)</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">E_surf</span> <span class="o">=</span> <span class="n">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="p">:</span>
+            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+            <span class="k">if</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
                 <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Esolv = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
-                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
-                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Esurf = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">f</span><span class="p">,</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Esurf: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
 
+        <span class="c1">### Calculate Coulombic interaction</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Ecoul&#39;</span><span class="p">)</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">E_coul</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">coulomb</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Coulomb energy for region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="n">E_coul</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coulomb_energy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Ecoul = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">,</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Ecoul: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
 
-    <span class="c1"># Calculate surface energy</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Esurf&#39;</span><span class="p">)</span>
-    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">E_surf</span> <span class="o">=</span> <span class="n">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
-    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="p">:</span>
-        <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
-        <span class="k">if</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
-            <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Esurf = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">f</span><span class="p">,</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Esurf: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+        <span class="c1">### Output summary</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Totals:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Esolv = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Esurf = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ecoul = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Time = </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">))</span>
 
-    <span class="c1">### Calculate Coulombic interaction</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Ecoul&#39;</span><span class="p">)</span>
-    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">E_coul</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">coulomb</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Coulomb energy for region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-            <span class="n">E_coul</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coulomb_energy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Ecoul = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">i</span><span class="p">,</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
-    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time Ecoul: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
-
-    <span class="c1">### Output summary</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Totals:&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Esolv = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Esurf = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ecoul = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Time = </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">))</span>
-
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span>
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span>
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span>
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span>
+        <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
 
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">)</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pygbe</span><span class="o">.</span><span class="n">__version__</span>

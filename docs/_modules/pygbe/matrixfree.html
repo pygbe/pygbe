@@ -351,8 +351,6 @@
     <span class="c1">#   Check if there is a complex dielectric</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
         <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1">#   Place weights on corresponding surfaces and allocate memory</span>
     <span class="n">Naux</span> <span class="o">=</span> <span class="mi">0</span>
@@ -547,8 +545,6 @@
 
     <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
         <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Initializing F dtype according to the problem we are solving.</span>
     <span class="k">if</span> <span class="n">complex_diel</span><span class="p">:</span>
@@ -869,8 +865,6 @@
 
     <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
         <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span> 
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Initializing F dtype according to the problem we are solving.</span>
     <span class="k">if</span> <span class="n">complex_diel</span><span class="p">:</span>
@@ -1418,7 +1412,7 @@
 <span class="sd">    attribute of the surface class. The dipole is expressed as a boundary</span>
 <span class="sd">    integral.</span>
 
-<span class="sd">    Arguments:</span>
+<span class="sd">    Arguments</span>
 <span class="sd">    ----------</span>
 <span class="sd">    surf_array   : array, contains the surface classes of each region on the</span>
 <span class="sd">                          surface.</span>
@@ -1444,20 +1438,20 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    It computes the extinction cross section (Acording to Mischenko2007).</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">    ----------</span>
-<span class="sd">    surf_array   : array, contains the surface classes of each region on the</span>
-<span class="sd">                          surface.</span>
-<span class="sd">    k            : array, unit vector in direction of wave propagation.</span>
-<span class="sd">    n            : array, unit vector in direction of electric field.</span>
-<span class="sd">    wavelength   : float, wavelength of the incident electric field.</span>
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    surf_array    : array, contains the surface classes of each region on the</span>
+<span class="sd">                           surface.</span>
+<span class="sd">    k             : array, unit vector in direction of wave propagation.</span>
+<span class="sd">    n             : array, unit vector in direction of electric field.</span>
+<span class="sd">    wavelength    : float, wavelength of the incident electric field.</span>
 <span class="sd">    electric_field: float, electric field intensity, it is in the &#39;z&#39;</span>
-<span class="sd">                          direction, &#39;-&#39; indicates &#39;-z&#39;.</span>
+<span class="sd">                           direction, &#39;-&#39; indicates &#39;-z&#39;.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
-<span class="sd">    Cext         : list, contains the extinction cross section of surfaces.</span>
-<span class="sd">    surf_Cext    : list, indices of the surface where Cext is being calculated.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Cext          : list, contains the extinction cross section of surfaces.</span>
+<span class="sd">    surf_Cext     : list, indices of the surface where Cext is being calculated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Cext</span> <span class="o">=</span> <span class="p">[]</span>
