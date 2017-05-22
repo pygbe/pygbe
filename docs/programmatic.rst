@@ -22,6 +22,12 @@ The following example would run the Lysozyme example.
    from pygbe.main import main
     main(['', 'examples/lys'], log_output=False)
 
+If it's a LSPR application, like the single silver sphere, we do:
+
+.. code:: python
+
+   from pygbe.lspr import main
+    main(['', 'examples/lspr_silver'], log_output=False)
 
 Useful kwargs
 =============
@@ -53,6 +59,7 @@ IPython that are useful for programmatic work.
     appropriate values.  This will circumvent the ``initialize_field`` function
     that reads from the config file.
 
+
 Sample field dictionary
 =======================
 
@@ -76,3 +83,39 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
                 'NA'
                 'NA',
                 'NA']}
+
+.. note:: For LSPR applications we have an extra keyword ``lspr``. This flag is 
+used to pass the incomming electric field parameters in a programmatic fashion. 
+
+``lspr`` : default ``None``
+    If you are running several runs that are nearly identical, with only a few
+    changes to the electric field configuration, rather than programmatically 
+    editing config files to generate each run, you can instead pass in a tuple of
+    the appropriate values.  This will circumvent the ``read_electric_field`` 
+    function that reads from the config file.
+    
+    
+Sample lspr tuple
+=================
+
+For reference, if we want to run the ``lspr_silver`` for different wavelengths, 
+we would create tuple that would look like:
+
+.. code:: python
+
+    lspr = (-1, [3800, 3850, 3900, 3950])
+
+In this case, keep in mind that the dielectric constant in LSPR cases depends
+on the wavelength. Therefore if you iterate over the wavelength you will need
+to update field 'E' in your field dictionary. For example, you can create a list
+where each element is a tuple of the form``(wavelength, diel_field)``. To iterate
+over each element of the list you would do something like:
+
+.. code:: python
+
+    wave_diel = list(zip(wavelength, diel))
+
+    for wave, E in wave_diel:
+        field_dict['E'] = E  
+        results = main(['', example_folder_path], field=field_dict,
+                  lspr=(-1,wave), return_results_dict=True)
