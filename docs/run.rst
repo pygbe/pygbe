@@ -69,6 +69,10 @@ available for this). Our code interfaces with meshes generated using
 `MSMS (Michel Sanner's Molecular Surface
 code) <http://mgltools.scripps.edu/packages/MSMS>`__.
 
+The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
+where generated with a script called ``mesh_sphere.py`` located in 
+``pygbe/preprocessing_tools/``.
+
 Performance:
 ~~~~~~~~~~~~
 
