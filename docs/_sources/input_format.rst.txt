@@ -20,12 +20,8 @@ the user must specify what kind of surface ``filename`` is. It can be:
 
 -  ``stern_layer``: surface interfacer stern layer with solvent.
 
--  ``dielectric_interface``: 
-
-        -  In Poisson Boltzmann applications: surface interfaces low dielectric
-           (inside protein) and high dielectric (outside protein).
-        -  In LSPR applications: surface interfaces dielectric inside the 
-           particle and the dielectric of the medium.
+-  ``dielectric_interface``: surface interfaces low dielectric (inside
+   protein) and high dielectric (outside protein).
 
 -  ``internal_cavity``: surface is an internal cavity (a result of
    '-all\_components' flag in MSMS). This is important to specify
@@ -74,15 +70,6 @@ Parameters:
 
 -  ``children``: position of the mesh files for the children surface in
    the FILE section
-
-``WAVE:`` Only applicable in LSPR problems. It specifies physical parameters of
-the incoming electric field in LSPR applications.
-Parameters:
-
--  ``Efield``: electric field intensity, it is in the 'z' direction, '-' 
-   indicates '-z'.
-
--  ``Wavelength``: wavelength of the incident electric field, in Ångström.
 
 Parameters file format
 ----------------------
