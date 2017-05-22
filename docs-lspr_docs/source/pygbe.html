@@ -1546,30 +1546,46 @@ problem folder resembles the following structure</p>
 <dd><p>It calculates the dipole moment on a surface and stores it in the ‘dipole’
 attribute of the surface class. The dipole is expressed as a boundary
 integral.</p>
-<dl class="docutils">
-<dt>surf_array <span class="classifier-delimiter">:</span> <span class="classifier">array, contains the surface classes of each region on the</span></dt>
-<dd>surface.</dd>
-<dt>electric_field: float, electric field intensity, it is in the ‘z’</dt>
-<dd>direction, ‘-‘ indicates ‘-z’.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) – surface.</li>
+<li><strong>electric_field</strong> (<em>float</em><em>, </em><em>electric field intensity</em><em>, </em><em>it is in the ‘z’</em>) – direction, ‘-‘ indicates ‘-z’.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="pygbe.matrixfree.extinction_cross_section">
 <code class="descclassname">pygbe.matrixfree.</code><code class="descname">extinction_cross_section</code><span class="sig-paren">(</span><em>surf_array</em>, <em>k</em>, <em>n</em>, <em>wavelength</em>, <em>electric_field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/matrixfree.html#extinction_cross_section"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.matrixfree.extinction_cross_section" title="Permalink to this definition">¶</a></dt>
 <dd><p>It computes the extinction cross section (Acording to Mischenko2007).</p>
-<dl class="docutils">
-<dt>surf_array <span class="classifier-delimiter">:</span> <span class="classifier">array, contains the surface classes of each region on the</span></dt>
-<dd>surface.</dd>
-</dl>
-<p>k            : array, unit vector in direction of wave propagation.
-n            : array, unit vector in direction of electric field.
-wavelength   : float, wavelength of the incident electric field.
-electric_field: float, electric field intensity, it is in the ‘z’</p>
-<blockquote>
-<div>direction, ‘-‘ indicates ‘-z’.</div></blockquote>
-<p>Cext         : list, contains the extinction cross section of surfaces.
-surf_Cext    : list, indices of the surface where Cext is being calculated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>surf_array</strong> (<em>array</em><em>, </em><em>contains the surface classes of each region on the</em>) – surface.</li>
+<li><strong>k</strong> (<em>array</em><em>, </em><em>unit vector in direction of wave propagation.</em>) – </li>
+<li><strong>n</strong> (<em>array</em><em>, </em><em>unit vector in direction of electric field.</em>) – </li>
+<li><strong>wavelength</strong> (<em>float</em><em>, </em><em>wavelength of the incident electric field.</em>) – </li>
+<li><strong>electric_field</strong> (<em>float</em><em>, </em><em>electric field intensity</em><em>, </em><em>it is in the ‘z’</em>) – direction, ‘-‘ indicates ‘-z’.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Cext</strong> (<em>list, contains the extinction cross section of surfaces.</em>)</li>
+<li><strong>surf_Cext</strong> (<em>list, indices of the surface where Cext is being calculated.</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

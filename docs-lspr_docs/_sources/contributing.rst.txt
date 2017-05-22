@@ -45,9 +45,9 @@ Convergence tests
 ^^^^^^^^^^^^^^^^^
 
 There is a more robust set of tests located in
-``pygbe/tests/convergence_tests``. These include comparisons to
-analytical solutions or richardson extrapolated solutions, and checks to ensure convergence over a series of
-finer meshes.
+``pygbe/tests/convergence_tests``. These include comparisons to analytical
+solutions or Richardson extrapolated solutions, and checks to ensure convergence
+over a series of finer meshes.
 
 Note that these tests take a few hours to run. To run them, navigate to
 the convergence test folder and run
