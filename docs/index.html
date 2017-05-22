@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics &#8212; PyGBe 0.2.1 documentation</title>
+    <title>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and nanoparticle plasmonics &#8212; PyGBe 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -42,15 +42,26 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics">
-<h1>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics<a class="headerlink" href="#pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics" title="Permalink to this headline">¶</a></h1>
-<p>PyGBe—pronounced <em>pigbē</em>—is a Python code to apply the boundary element
-method for molecular-electrostatics calculations in a continuum model.
-It computes solvation energies for proteins modeled with any number of
-dielectric regions. The mathematical formulation follows Yoon and
-Lenhoff (1990) for solving the Poisson-Boltzmann equation of the
-<a class="reference external" href="https://en.wikipedia.org/wiki/Implicit_solvation">implicit-solvent</a>
+  <div class="section" id="pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics-and-nanoparticle-plasmonics">
+<h1>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and nanoparticle plasmonics<a class="headerlink" href="#pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics-and-nanoparticle-plasmonics" title="Permalink to this headline">¶</a></h1>
+<p>PyGBe—pronounced <em>pigbē</em>—is a Python library that applies the boundary integral
+method for biomolecular electrostatics and nanoparticle plasmonics.</p>
+<div class="section" id="biomolecular-electrostatics">
+<h2>Biomolecular electrostatics:<a class="headerlink" href="#biomolecular-electrostatics" title="Permalink to this headline">¶</a></h2>
+<p>In this application, PyGBe uses continuum electrostatics to compute the solvation
+energy for proteins modeled with any number of dielectric regions. The
+mathematical formulation follows Yoon and Lenhoff (1990) for solving the
+Poisson-Boltzmann equation of the <a class="reference external" href="https://en.wikipedia.org/wiki/Implicit_solvation">implicit-solvent</a>
 model in integral form.</p>
+</div>
+<div class="section" id="localized-surface-plasmon-resonance">
+<h2>Localized Surface Plasmon Resonance :<a class="headerlink" href="#localized-surface-plasmon-resonance" title="Permalink to this headline">¶</a></h2>
+<p>PyGBe also uses electrostatics to compute the extinction cross section of
+scatterers that are much smaller than the incident wavelength. This is relevant,
+for example to model localized surface plasmon resonance of nanoparticles, where
+the quasi-static approximation is valid
+(<a class="reference external" href="http://ieeexplore.ieee.org/abstract/document/4137779">Mayergoyz, I. D. and Zhang, Z. (2007)</a>,
+<a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413">Jung, J., et al (2010)</a>).</p>
 <p>PyGBe achieves both algorithmic and hardware acceleration. The solution
 algorithm uses a
 <a class="reference external" href="https://en.wikipedia.org/wiki/Barnes–Hut_simulation">Barnes-Hut</a>
@@ -71,6 +82,7 @@ C++, wrapped using SWIG.</p>
 <li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
 <li class="toctree-l1"><a class="reference internal" href="programmatic.html">Programmatic use of PyGBe</a></li>
 </ul>
+</div>
 </div>
 </div>
 <div class="section" id="developer-documentation">
