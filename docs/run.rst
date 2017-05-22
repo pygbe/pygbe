@@ -52,6 +52,12 @@ For more information on PyGBe's command line interface, run
 
     > pygbe -h
 
+or
+
+::
+
+    > pygbe-lspr -h
+
 Mesh
 ~~~~
 
