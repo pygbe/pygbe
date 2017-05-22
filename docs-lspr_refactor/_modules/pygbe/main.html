@@ -221,7 +221,7 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lspr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a PyGBe problem, write outputs to STDOUT and to log file in</span>
 <span class="sd">    problem directory</span>
@@ -240,9 +240,6 @@
 <span class="sd">    field : Dictionary, defaults to None.</span>
 <span class="sd">         If passed, this dictionary will supercede any config file found, useful in</span>
 <span class="sd">         programmatically stepping through slight changes in a problem</span>
-<span class="sd">    lspr : list, defaults to None</span>
-<span class="sd">         If passed, provides values for `electric_field` and `wavelength`, useful to</span>
-<span class="sd">         programmatically step through varying wavelengths</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>

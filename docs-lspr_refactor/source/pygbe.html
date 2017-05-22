@@ -1414,7 +1414,7 @@ param files</p>
 
 <dl class="function">
 <dt id="pygbe.main.main">
-<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=[‘/home/travis/miniconda/envs/pygbe/bin/sphinx-build’, ‘-b’, ‘html’, ‘-d’, ‘_build/doctrees’, ‘.’, ‘_build/html’], log_output=True, return_output_fname=False, return_results_dict=False, field=None, lspr=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=[‘/home/travis/miniconda/envs/pygbe/bin/sphinx-build’, ‘-b’, ‘html’, ‘-d’, ‘_build/doctrees’, ‘.’, ‘_build/html’], log_output=True, return_output_fname=False, return_results_dict=False, field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
 problem directory</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1430,8 +1430,6 @@ packed in a dictionary.  Used in testing and programmatic
 use of PyGBe</li>
 <li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) – If passed, this dictionary will supercede any config file found, useful in
 programmatically stepping through slight changes in a problem</li>
-<li><strong>lspr</strong> (<em>list</em><em>, </em><em>defaults to None</em>) – If passed, provides values for <cite>electric_field</cite> and <cite>wavelength</cite>, useful to
-programmatically step through varying wavelengths</li>
 </ul>
 </td>
 </tr>
