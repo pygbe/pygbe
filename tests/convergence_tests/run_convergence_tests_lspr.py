@@ -14,7 +14,7 @@ CUDA_DEVICE = '0'
 ENV = os.environ.copy()
 ENV['CUDA_DEVICE'] = CUDA_DEVICE
 
-mesh_file = ''
+mesh_file = 'https://zenodo.org/record/580786/files/pygbe-lspr_convergence_test_meshes.zip'
 folder_name = 'lspr_convergence_test_meshes'
 rename_folder = 'geometry_lspr'
 size = '~3MB'
