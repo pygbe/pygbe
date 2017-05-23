@@ -1,5 +1,5 @@
-PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and nanoparticle plasmonics 
-=====================================================================================================
+PyGBe: Python and GPU Boundary-integral solver for electrostatics
+=================================================================
 
 PyGBe—pronounced *pigbē*—is a Python library that applies the boundary integral 
 method for biomolecular electrostatics and nanoparticle plasmonics.
