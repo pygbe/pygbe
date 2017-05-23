@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and nanoparticle plasmonics &#8212; PyGBe 0.2.1 documentation</title>
+    <title>PyGBe: Python and GPU Boundary-integral solver for electrostatics &#8212; PyGBe 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -42,10 +42,18 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics-and-nanoparticle-plasmonics">
-<h1>PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and nanoparticle plasmonics<a class="headerlink" href="#pygbe-python-gpus-and-boundary-elements-for-biomolecular-electrostatics-and-nanoparticle-plasmonics" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="pygbe-python-and-gpu-boundary-integral-solver-for-electrostatics">
+<h1>PyGBe: Python and GPU Boundary-integral solver for electrostatics<a class="headerlink" href="#pygbe-python-and-gpu-boundary-integral-solver-for-electrostatics" title="Permalink to this headline">¶</a></h1>
 <p>PyGBe—pronounced <em>pigbē</em>—is a Python library that applies the boundary integral
 method for biomolecular electrostatics and nanoparticle plasmonics.</p>
+<p>PyGBe achieves both algorithmic and hardware acceleration. The solution
+algorithm uses a
+<a class="reference external" href="https://en.wikipedia.org/wiki/Barnes–Hut_simulation">Barnes-Hut</a>
+treecode to accelerate each iteration of a GMRES solver to O(N logN),
+for N unknowns. It exploits NVIDIA GPU hardware on the most
+computationally intensive parts of the code using CUDA kernels in the
+treecode, interfacing with PyCUDA. Some parts of the code are written in
+C++, wrapped using SWIG.</p>
 <div class="section" id="biomolecular-electrostatics">
 <h2>Biomolecular electrostatics:<a class="headerlink" href="#biomolecular-electrostatics" title="Permalink to this headline">¶</a></h2>
 <p>In this application, PyGBe uses continuum electrostatics to compute the solvation
@@ -62,14 +70,6 @@ for example to model localized surface plasmon resonance of nanoparticles, where
 the quasi-static approximation is valid
 (<a class="reference external" href="http://ieeexplore.ieee.org/abstract/document/4137779">Mayergoyz, I. D. and Zhang, Z. (2007)</a>,
 <a class="reference external" href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413">Jung, J., et al (2010)</a>).</p>
-<p>PyGBe achieves both algorithmic and hardware acceleration. The solution
-algorithm uses a
-<a class="reference external" href="https://en.wikipedia.org/wiki/Barnes–Hut_simulation">Barnes-Hut</a>
-treecode to accelerate each iteration of a GMRES solver to O(N logN),
-for N unknowns. It exploits NVIDIA GPU hardware on the most
-computationally intensive parts of the code using CUDA kernels in the
-treecode, interfacing with PyCUDA. Some parts of the code are written in
-C++, wrapped using SWIG.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
