@@ -34,7 +34,7 @@ def unzip(meshzip, folder_name, rename_folder):
         myzip.extractall(path='./tmp')
 
     print('Unzipping meshes to folder \'geometry/\'...')
-    os.rename(os.path.join('tmp', folder_name), raname_folder)
+    os.rename(os.path.join('tmp', folder_name), rename_folder)
     os.rmdir('tmp')
     print('Removing zip file...')
     os.remove(meshzip)
