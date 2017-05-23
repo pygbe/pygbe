@@ -2,7 +2,16 @@ PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics and na
 =====================================================================================================
 
 PyGBe—pronounced *pigbē*—is a Python library that applies the boundary integral 
-method for biomolecular electrostatics and nanoparticle plasmonics. 
+method for biomolecular electrostatics and nanoparticle plasmonics.
+
+PyGBe achieves both algorithmic and hardware acceleration. The solution
+algorithm uses a
+`Barnes-Hut <https://en.wikipedia.org/wiki/Barnes–Hut_simulation>`__
+treecode to accelerate each iteration of a GMRES solver to O(N logN),
+for N unknowns. It exploits NVIDIA GPU hardware on the most
+computationally intensive parts of the code using CUDA kernels in the
+treecode, interfacing with PyCUDA. Some parts of the code are written in
+C++, wrapped using SWIG.
 
 Biomolecular electrostatics:
 ----------------------------
@@ -24,11 +33,4 @@ the quasi-static approximation is valid
 `Jung, J., et al (2010) <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413>`__).
 
 
-PyGBe achieves both algorithmic and hardware acceleration. The solution
-algorithm uses a
-`Barnes-Hut <https://en.wikipedia.org/wiki/Barnes–Hut_simulation>`__
-treecode to accelerate each iteration of a GMRES solver to O(N logN),
-for N unknowns. It exploits NVIDIA GPU hardware on the most
-computationally intensive parts of the code using CUDA kernels in the
-treecode, interfacing with PyCUDA. Some parts of the code are written in
-C++, wrapped using SWIG.
+
