@@ -18,7 +18,7 @@ def download_zip_with_progress_bar(url):
                 f.write(chunk)
                 f.flush()
 
-def unzip(meshzip, folder_name, raname_folder):
+def unzip(meshzip, folder_name, rename_folder):
     '''Unzip a zip file
 
     Arguments:
@@ -27,7 +27,7 @@ def unzip(meshzip, folder_name, raname_folder):
     folder_name  : str, name of the folder after extracting.
                   We want this to modify it when download, to follow pygbe 
                   problem folder design for running.
-    raname_folder: str, name of the folder were we want to store the download.
+    rename_folder: str, name of the folder were we want to store the download.
                    We rename the folder_name, to match config files. 
     '''
     with zipfile.ZipFile(meshzip, 'r') as myzip:
@@ -44,11 +44,13 @@ def check_mesh(mesh_file, folder_name, rename_folder, size):
 
     Arguments:
     ----------
-    mesh_file  : str, mesh_file url
-    folder_name: str, name of the folder after extracting.
-                 We want to pass this to be used in unzip function, where 
-                 we rename it.
-    size       : str, estimate size of file    
+    mesh_file    : str, mesh_file url
+    folder_name  : str, name of the folder after extracting.
+                   We want to pass this to be used in unzip function, where 
+                   we rename it.
+    rename_folder: str, name of the folder were we want to store the download.
+                   We rename the folder_name, to match config files. 
+    size         : str, estimate size of file    
     '''
     if not os.path.isdir(rename_folder):
         dl_check = input('The meshes for convergence tests don\'t appear to '
