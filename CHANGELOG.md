@@ -7,6 +7,24 @@
 
 * Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but who cares.
 * Better regression tests (faster, anyway) using pytest
+* Localized Surface Plasmon Resonance application:
+
+    #### Added:
+        - lspr main function to run this applications separately. 
+        - lspr application's examples to the `examples` folder.
+        - Regression and convergence tests for the examples added. 
+        - Update documentation with new application to github pages
+
+    #### Changed:
+        - GMRES function to accept complex numbers. Changed based on `gmres_mgs`
+        from PyAMG, where modified Gram-Schmidt is used to orthogonalize the
+        Krylov Space and Givens Rotations are used to provide the residual 
+        norm each iteration
+        - If complex dielectric, the matvec calls the tree code
+        separately with the Real part and Imaginary part of the solution and
+        multiplies by complex constant afterwards. This prevents to modify the 
+        treecode to accept complex numbers.
+        - Add to RHS functions the corresponding terms to solve lspr problems.
 
 ### Changed
 
