@@ -39,7 +39,7 @@
 * `config` and `param` files are now globbed for so they can have a name different
   than the folder which contains them.  
 * Updated license with new contributors
-* Layout of sphinx documentationt toolbars (home button added, more verbose layout)
+* Layout of sphinx documentation toolbars (home button added, more verbose layout)
 
 
 ### Fixed
