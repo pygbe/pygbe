@@ -52,15 +52,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">ArgumentParser</span>
 
 <span class="c1"># Import self made modules</span>
 <span class="kn">import</span> <span class="nn">pygbe</span>
@@ -73,8 +69,7 @@
                               <span class="n">extinction_cross_section</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">read_parameters</span><span class="p">,</span> <span class="n">read_electric_field</span>
 <span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">computeIndices</span><span class="p">,</span> <span class="n">precomputeTerms</span><span class="p">,</span> <span class="n">generateList</span>
-<span class="kn">from</span> <span class="nn">pygbe.main</span> <span class="k">import</span> <span class="p">(</span><span class="n">Logger</span><span class="p">,</span> <span class="n">read_inputs</span><span class="p">,</span> <span class="n">check_file_exists</span><span class="p">,</span> <span class="n">find_config_files</span><span class="p">,</span>
-                        <span class="n">resolve_relative_config_file</span><span class="p">,</span> <span class="n">check_for_nvcc</span><span class="p">)</span>    
+<span class="kn">from</span> <span class="nn">pygbe.main</span> <span class="k">import</span> <span class="p">(</span><span class="n">Logger</span><span class="p">,</span> <span class="n">read_inputs</span><span class="p">,</span> <span class="n">find_config_files</span><span class="p">,</span> <span class="n">check_for_nvcc</span><span class="p">)</span>    
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">pygbe.tree.cuda_kernels</span> <span class="k">import</span> <span class="n">kernels</span>
@@ -83,7 +78,7 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.lspr.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lspr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lspr_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run a PyGBe problem, write outputs to STDOUT and to log file in</span>
 <span class="sd">    problem directory</span>
@@ -102,7 +97,7 @@
 <span class="sd">    field : Dictionary, defaults to None.</span>
 <span class="sd">         If passed, this dictionary will supercede any config file found, useful in</span>
 <span class="sd">         programmatically stepping through slight changes in a problem.</span>
-<span class="sd">    lspr : list, defaults to None</span>
+<span class="sd">    lspr_values : list, defaults to None</span>
 <span class="sd">         If passed, provides values for `electric_field` and `wavelength`, useful to</span>
 <span class="sd">         programmatically step through varying wavelengths</span>
 
@@ -197,8 +192,8 @@
     <span class="n">surf_array</span> <span class="o">=</span> <span class="n">initialize_surface</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
 
     <span class="c1">### Read electric field and its wavelength.</span>
-    <span class="k">if</span> <span class="n">lspr</span><span class="p">:</span>
-        <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">lspr</span>
+    <span class="k">if</span> <span class="n">lspr_values</span><span class="p">:</span>
+        <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">lspr_values</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">read_electric_field</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">configFile</span><span class="p">)</span>
 
