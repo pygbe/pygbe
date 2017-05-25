@@ -298,8 +298,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     param.Neq = 0
     for s in surf_array:
         N_aux = len(s.triangle)
-        param.N += N_aux
-        if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface' or s.surf_type == 'asc_surface':
+        param.N += N_aux        
+        if s.surf_type in ['dirichlet_surface', 'neumann_surface', 'asc_surface']:
             param.Neq += N_aux
         else:
             param.Neq += 2 * N_aux
