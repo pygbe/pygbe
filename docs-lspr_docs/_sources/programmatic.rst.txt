@@ -84,11 +84,11 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
                 'NA',
                 'NA']}
 
-.. note:: For LSPR applications we have an extra keyword ``lspr``. This flag is 
+.. note:: For LSPR applications we have an extra keyword ``lspr_values``. This flag is 
           used to pass the incomming electric field parameters in a programmatic
           fashion. 
 
-``lspr`` : default ``None``
+``lspr_values`` : default ``None``
     If you are running several runs that are nearly identical, with only a few
     changes to the electric field configuration, rather than programmatically 
     editing config files to generate each run, you can instead pass in a tuple of
@@ -96,15 +96,15 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
     function that reads from the config file.
     
     
-Sample lspr tuple
-=================
+Sample lspr_values tuple
+=========================
 
 For reference, if we want to run the ``lspr_silver`` for different wavelengths, 
 we would create tuple that would look like:
 
 .. code:: python
 
-    lspr = (-1, [3800, 3850, 3900, 3950])
+    lspr_values = (-1, [3800, 3850, 3900, 3950])
 
 In this case, keep in mind that the dielectric constant in LSPR cases depends
 on the wavelength. Therefore if you iterate over the wavelength you will need
@@ -119,4 +119,4 @@ over each element of the list you would do something like:
     for wave, E in wave_diel:
         field_dict['E'] = E  
         results = main(['', example_folder_path], field=field_dict,
-                  lspr=(-1,wave), return_results_dict=True)
+                  lspr_values=(-1,wave), return_results_dict=True)

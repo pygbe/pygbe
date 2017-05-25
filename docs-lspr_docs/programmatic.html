@@ -122,12 +122,12 @@ that reads from the config file.</dd>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">For LSPR applications we have an extra keyword <code class="docutils literal"><span class="pre">lspr</span></code>. This flag is
+<p class="last">For LSPR applications we have an extra keyword <code class="docutils literal"><span class="pre">lspr_values</span></code>. This flag is
 used to pass the incomming electric field parameters in a programmatic
 fashion.</p>
 </div>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">lspr</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span></dt>
+<dt><code class="docutils literal"><span class="pre">lspr_values</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span></dt>
 <dd>If you are running several runs that are nearly identical, with only a few
 changes to the electric field configuration, rather than programmatically
 editing config files to generate each run, you can instead pass in a tuple of
@@ -135,11 +135,11 @@ the appropriate values.  This will circumvent the <code class="docutils literal"
 function that reads from the config file.</dd>
 </dl>
 </div>
-<div class="section" id="sample-lspr-tuple">
-<h2>Sample lspr tuple<a class="headerlink" href="#sample-lspr-tuple" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="sample-lspr-values-tuple">
+<h2>Sample lspr_values tuple<a class="headerlink" href="#sample-lspr-values-tuple" title="Permalink to this headline">¶</a></h2>
 <p>For reference, if we want to run the <code class="docutils literal"><span class="pre">lspr_silver</span></code> for different wavelengths,
 we would create tuple that would look like:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">lspr</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">3800</span><span class="p">,</span> <span class="mi">3850</span><span class="p">,</span> <span class="mi">3900</span><span class="p">,</span> <span class="mi">3950</span><span class="p">])</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">lspr_values</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">3800</span><span class="p">,</span> <span class="mi">3850</span><span class="p">,</span> <span class="mi">3900</span><span class="p">,</span> <span class="mi">3950</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>In this case, keep in mind that the dielectric constant in LSPR cases depends
@@ -152,7 +152,7 @@ over each element of the list you would do something like:</p>
 <span class="k">for</span> <span class="n">wave</span><span class="p">,</span> <span class="n">E</span> <span class="ow">in</span> <span class="n">wave_diel</span><span class="p">:</span>
     <span class="n">field_dict</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">main</span><span class="p">([</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">example_folder_path</span><span class="p">],</span> <span class="n">field</span><span class="o">=</span><span class="n">field_dict</span><span class="p">,</span>
-              <span class="n">lspr</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">wave</span><span class="p">),</span> <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+              <span class="n">lspr_values</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">wave</span><span class="p">),</span> <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
