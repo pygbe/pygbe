@@ -7,7 +7,7 @@
 
 * Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but who cares.
 * Better regression tests (faster, anyway) using pytest
-* Localized Surface Plasmon Resonance application:
+* Localized Surface Plasmon Resonance application.
 * lspr main function to run this applications separately. 
 * lspr application's examples to the `examples` folder.
 * Regression and convergence tests for the examples added. 
