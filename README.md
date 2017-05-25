@@ -135,8 +135,6 @@ To test PyGBe-LSPR, run the single silver sphere (``lspr_silver``) example.
 
 To run lspr cases, you can use
 
-::
-
     > pygbe-lspr examples/lspr_silver
 
 To run any PyGBe case, you can pass `pygbe` (or ``pygbe-lspr`` if it's a LSPR
@@ -160,8 +158,6 @@ For more information on PyGBe's command line interface, run
 
 or
 
-::
-
     > pygbe-lspr -h
 
 ### Mesh
@@ -175,7 +171,7 @@ meshes generated using
 
 
 The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
-where generated with a script called ``mesh_sphere.py`` located in 
+were generated with a script called ``mesh_sphere.py`` located in 
 ``pygbe/preprocessing_tools/``.
 
 ## Citing PyGBe
@@ -209,7 +205,7 @@ You can use this citation or the BibTeX entry below.
 * Barnes, J. and Hut, P. (1986), "A hierarchical O(N log N) force-calculation algorithm," _Nature_, **324**: 446–449, [doi: 10.1038/324446a0](http://dx.doi.org/10.1038/324446a0)
 * Yoon, B.J. and Lenhoff, A.M. (1990), "A boundary element method for molecular electrostatics with electrolyte effects," _Journal of Computational Chemistry_,
 **11**(9): 1080–1086, [doi: 10.1002/jcc.540110911](http://dx.doi.org/10.1002/jcc.540110911).
-* Mayergoyz, I. D. and Zhang, Z. (2007). "The comptation of extinction cross sections of
+* Mayergoyz, I. D. and Zhang, Z. (2007). "The computation of extinction cross sections of
 resonant metallic nanoparticles subject to optical radiation", _IEEE Trans. Magn._,
 **43**(4):1681–1684,[doi: 10.1109/TMAG.2007.892500](http://ieeexplore.ieee.org/document/4137779/).
 * Jung, J., Pedersen, T. G., Sondergaard, T., Pedersen, K., Larsen, A. N., and Nielsen,
