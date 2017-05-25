@@ -79,19 +79,14 @@ directory</p>
 <div class="section" id="convergence-tests">
 <h3>Convergence tests<a class="headerlink" href="#convergence-tests" title="Permalink to this headline">¶</a></h3>
 <p>There is a more robust set of tests located in
-<code class="docutils literal"><span class="pre">pygbe/tests/convergence_tests</span></code>. These include comparisons to analytical
-solutions or Richardson extrapolated solutions, and checks to ensure convergence
-over a series of finer meshes.</p>
+<code class="docutils literal"><span class="pre">pygbe/tests/convergence_tests</span></code>. These include comparisons to
+analytical solutions and checks to ensure convergence over a series of
+finer meshes.</p>
 <p>Note that these tests take a few hours to run. To run them, navigate to
 the convergence test folder and run</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>for Poisson Boltzmann related tests, or</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests_lspr</span><span class="o">.</span><span class="n">py</span>
-</pre></div>
-</div>
-<p>for Localized Surface Plasmon Resonance tests.</p>
 <p>Any individual set of convergence tests can be run by specifying a given
 test file, e.g.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
