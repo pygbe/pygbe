@@ -8,15 +8,11 @@ compute the extinction cross-section.
 """
 
 import os
-import re
 import sys
 import time
-import glob
 import numpy
 import pickle
-import subprocess
 from datetime import datetime
-from argparse import ArgumentParser
 
 # Import self made modules
 import pygbe
@@ -29,8 +25,7 @@ from pygbe.matrixfree import (generateRHS, generateRHS_gpu, dipole_moment,
                               extinction_cross_section)
 from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
-from pygbe.main import (Logger, read_inputs, check_file_exists, find_config_files,
-                        resolve_relative_config_file, check_for_nvcc)    
+from pygbe.main import (Logger, read_inputs, find_config_files, check_for_nvcc)    
 
 try:
     from pygbe.tree.cuda_kernels import kernels
