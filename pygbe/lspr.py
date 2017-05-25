@@ -34,7 +34,7 @@ except:
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False, field=None, lspr=None):
+         return_results_dict=False, field=None, lspr_values=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
@@ -53,7 +53,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     field : Dictionary, defaults to None.
          If passed, this dictionary will supercede any config file found, useful in
          programmatically stepping through slight changes in a problem.
-    lspr : list, defaults to None
+    lspr_values : list, defaults to None
          If passed, provides values for `electric_field` and `wavelength`, useful to
          programmatically step through varying wavelengths
 
@@ -148,8 +148,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     surf_array = initialize_surface(field_array, configFile, param)
 
     ### Read electric field and its wavelength.
-    if lspr:
-        electric_field, wavelength = lspr
+    if lspr_values:
+        electric_field, wavelength = lspr_values
     else:
         electric_field, wavelength = read_electric_field(param, configFile)
 
