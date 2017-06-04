@@ -213,7 +213,7 @@ the Poisson-Boltzmann equation.
 
 If you use this software, we request that you cite our paper in _The Journal of Open Source Software_:
 
-– Christopher D. Cooper Natalia C. Clementi Gilbert Forsyth Lorena A. Barba (2016). 
+– Christopher D. Cooper, Natalia C. Clementi, Gilbert Forsyth, Lorena A. Barba (2016). 
 PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics,
-_J. Open Source Software_, **1**(4):43, doi:10.21105/joss.00043
+_J. Open Source Software_, **1**(4):43, [doi:10.21105/joss.00043](http://dx.doi.org/10.21105/joss.00043)
   
