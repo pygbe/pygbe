@@ -201,12 +201,19 @@ You can use this citation or the BibTeX entry below.
 A few other open-source packages exist for solving implicit-solvent models of
 the Poisson-Boltzmann equation.
 
-#### Volumetric-based solvers
+* Volumetric-based solvers for the partial-differential formulation
+  * [Delphi](http://compbio.clemson.edu/delphi)
+  * [APBS](http://www.poissonboltzmann.org/)
 
-* [Delphi](http://compbio.clemson.edu/delphi)
-* [APBS](http://www.poissonboltzmann.org/)
+* Boundary-based solvers for the integral formulation
+  * AFMPB (both [serial](http://cpc.cs.qub.ac.uk/summaries/AEGB_v1_1.html) and [parallel](http://cpc.cs.qub.ac.uk/summaries/AEGB_v2_0.html) versions exist)
+  * [TABI](http://faculty.smu.edu/wgeng/research/bipb.html)
+  
+## How to cite this software
 
-#### Boundary-element method
+If you use this software, we request that you cite our paper in _The Journal of Open Source Software_:
 
-* AFMPB (both [serial](http://cpc.cs.qub.ac.uk/summaries/AEGB_v1_1.html) and [parallel](http://cpc.cs.qub.ac.uk/summaries/AEGB_v2_0.html) versions exist)
-* [TABI](http://faculty.smu.edu/wgeng/research/bipb.html)
+– Christopher D. Cooper Natalia C. Clementi Gilbert Forsyth Lorena A. Barba (2016). 
+PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics,
+_J. Open Source Software_, **1**(4):43, doi:10.21105/joss.00043
+  
