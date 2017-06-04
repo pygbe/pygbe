@@ -1,6 +1,6 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -33,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body>
+  <body role="document">
   
 
     <div class="document">
@@ -68,7 +68,7 @@
 <span class="kn">from</span> <span class="nn">pygbe.output</span> <span class="k">import</span> <span class="n">print_summary</span>
 <span class="kn">from</span> <span class="nn">pygbe.matrixfree</span> <span class="k">import</span> <span class="p">(</span><span class="n">generateRHS</span><span class="p">,</span> <span class="n">generateRHS_gpu</span><span class="p">,</span> <span class="n">calculate_solvation_energy</span><span class="p">,</span>
                               <span class="n">coulomb_energy</span><span class="p">,</span> <span class="n">calculate_surface_energy</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">read_parameters</span><span class="p">,</span> <span class="n">read_electric_field</span>
+<span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">readParameters</span>
 <span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">computeIndices</span><span class="p">,</span> <span class="n">precomputeTerms</span><span class="p">,</span> <span class="n">generateList</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -302,7 +302,7 @@
 
     <span class="c1">### Read parameters</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
-    <span class="n">precision</span> <span class="o">=</span> <span class="n">read_parameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">paramfile</span><span class="p">)</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">readParameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">paramfile</span><span class="p">)</span>
 
     <span class="n">param</span><span class="o">.</span><span class="n">Nm</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
         <span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">6</span>  <span class="c1"># Number of terms in Taylor expansion</span>
@@ -331,7 +331,6 @@
     <span class="c1">### Generate array of surfaces and read in elements</span>
     <span class="n">surf_array</span> <span class="o">=</span> <span class="n">initialize_surface</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
 
-
     <span class="c1">### Fill surface class</span>
     <span class="n">time_sort</span> <span class="o">=</span> <span class="mf">0.</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">)):</span>
@@ -342,8 +341,8 @@
     <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">surf_array</span><span class="p">:</span>
         <span class="n">N_aux</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
-        <span class="n">param</span><span class="o">.</span><span class="n">N</span> <span class="o">+=</span> <span class="n">N_aux</span>        
-        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">]:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">N</span> <span class="o">+=</span> <span class="n">N_aux</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
             <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">+=</span> <span class="n">N_aux</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N_aux</span>
@@ -401,27 +400,14 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total setup time   : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">setup_time</span><span class="p">))</span>
 
-
-    <span class="c1">#   Check if there is a complex dielectric</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span> 
-        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="c1">### Solve</span>
     <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
+    <span class="c1">### Solve</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solve&#39;</span><span class="p">)</span>
-    <span class="c1"># Initializing phi dtype according to the problem we are solving.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">complex_diel</span><span class="p">:</span>
-        <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>    
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dielectric should be real for solvation energy problems&#39;</span><span class="p">)</span>
-        
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>
     <span class="n">phi</span><span class="p">,</span> <span class="n">iteration</span> <span class="o">=</span> <span class="n">gmres_mgs</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
-                            <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+                               <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
     <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span>
     <span class="n">solve_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solve time        : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">solve_time</span><span class="p">))</span>
@@ -433,7 +419,6 @@
     <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">surf_array</span><span class="p">:</span>
         <span class="n">s_start</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">fill_phi</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">s_start</span><span class="p">)</span>
-
 
     <span class="c1"># Calculate solvation energy</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Esolv&#39;</span><span class="p">)</span>
@@ -448,9 +433,8 @@
             <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
                 <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: Esolv = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
-                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
-                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
-
+                                                                          <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                                                          <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
 
     <span class="c1"># Calculate surface energy</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Esurf&#39;</span><span class="p">)</span>
@@ -488,7 +472,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Esurf = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ecoul = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Time = </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">))</span>
-
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">)</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span>
@@ -496,7 +480,6 @@
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
 
-    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">)</span>
     <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pygbe</span><span class="o">.</span><span class="n">__version__</span>
 
     <span class="n">output_pickle</span> <span class="o">=</span> <span class="n">outputfname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
@@ -506,13 +489,6 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">output_pickle</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span> 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">output_pickle</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error writing the pickle file, the results will be unreadable&#39;</span><span class="p">)</span>
-        <span class="k">pass</span>     
-    
     <span class="c1">#reset stdout so regression tests, etc, don&#39;t get logged into the output</span>
     <span class="c1">#file that they themselves are trying to read</span>
     <span class="k">if</span> <span class="n">log_output</span><span class="p">:</span>
@@ -558,7 +534,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer&#8217;s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
@@ -593,7 +569,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -1,6 +1,6 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -33,7 +33,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body>
+  <body role="document">
   
 
     <div class="document">
@@ -52,20 +52,6 @@
 solutions.
 All functions output the analytical solution in kcal/mol</p>
 <dl class="function">
-<dt id="pygbe.util.an_solution.Cext_analytical">
-<code class="descclassname">pygbe.util.an_solution.</code><code class="descname">Cext_analytical</code><span class="sig-paren">(</span><em>radius</em>, <em>wavelength</em>, <em>diel_out</em>, <em>diel_in</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#Cext_analytical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.Cext_analytical" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the analytical solution of the extinction cross section.
-This solution is valid when the nano particle involved is a sphere.</p>
-<p>radius    : float, radius of the sphere in [nm].
-wavelength: float/array of floats, wavelength of the incident</p>
-<blockquote>
-<div>electric field in [nm].</div></blockquote>
-<p>diel_out  : complex/array of complex, dielectric constant inside surface.
-diel_in   : complex/array of complex, dielectric constant inside surface.</p>
-<p>Cext_an   : float/array of floats, extinction cross section.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="pygbe.util.an_solution.an_P">
 <code class="descclassname">pygbe.util.an_solution.</code><code class="descname">an_P</code><span class="sig-paren">(</span><em>q</em>, <em>xq</em>, <em>E_1</em>, <em>E_2</em>, <em>R</em>, <em>kappa</em>, <em>a</em>, <em>N</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#an_P"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.an_P" title="Permalink to this definition">¶</a></dt>
 <dd><p>It computes the solvation energy according to Kirkwood-1934.</p>
@@ -74,14 +60,14 @@ diel_in   : complex/array of complex, dielectric constant inside surface.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) – </li>
-<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) – </li>
-<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) – </li>
-<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the Stern Layer.</em>) – </li>
-<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the polinomial expansion.</em>) – </li>
+<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the Stern Layer.</em>) &#8211; </li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the polinomial expansion.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -106,13 +92,13 @@ Took from Kirkwood (1934).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) – </li>
-<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) – </li>
-<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) – </li>
-<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) – </li>
-<li><strong>E_0</strong> (<em>float</em><em>, </em><em>dielectric constant of vacuum.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the spherical harmonic expansion.</em>) – </li>
+<li><strong>q</strong> (<em>array</em><em>, </em><em>charges.</em>) &#8211; </li>
+<li><strong>xq</strong> (<em>array</em><em>, </em><em>positions of the charges.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>E_0</strong> (<em>float</em><em>, </em><em>dielectric constant of vacuum.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>N</strong> (<em>int</em><em>, </em><em>number of terms desired in the spherical harmonic expansion.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -136,10 +122,10 @@ inmmersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -156,7 +142,7 @@ inmmersed in water.</p>
 <dl class="function">
 <dt id="pygbe.util.an_solution.constant_charge_single_point">
 <code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_charge_single_point</code><span class="sig-paren">(</span><em>sigma0</em>, <em>a</em>, <em>r</em>, <em>kappa</em>, <em>epsilon</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_charge_single_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_charge_single_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>It computes the potential in a point ‘r’ due to a spherical surface
+<dd><p>It computes the potential in a point &#8216;r&#8217; due to a spherical surface
 with constant charge sigma0 immersed in water. Solution to the
 Poisson-Boltzmann problem. .</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -164,11 +150,11 @@ Poisson-Boltzmann problem. .</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) – </li>
-<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) – point.</li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) &#8211; point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -192,10 +178,10 @@ in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) – </li>
-<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>sigma0</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -219,13 +205,13 @@ constant charge, immersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sigma01</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 1.</em>) – </li>
-<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>sigma01</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -249,11 +235,11 @@ charge, according to Carnie&amp;Chan-1993.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sigma</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the spheres.</em>) – </li>
-<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of spheres.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>sigma</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the spheres.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of spheres.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -277,10 +263,10 @@ in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) – </li>
-<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant .</em>) – </li>
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant .</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -304,10 +290,10 @@ inmmersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -324,7 +310,7 @@ inmmersed in water.</p>
 <dl class="function">
 <dt id="pygbe.util.an_solution.constant_potential_single_point">
 <code class="descclassname">pygbe.util.an_solution.</code><code class="descname">constant_potential_single_point</code><span class="sig-paren">(</span><em>phi0</em>, <em>a</em>, <em>r</em>, <em>kappa</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#constant_potential_single_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.constant_potential_single_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>It computes the potential in a point ‘r’ due to a spherical surface
+<dd><p>It computes the potential in a point &#8216;r&#8217; due to a spherical surface
 with constant potential phi0, immersed in water. Solution to the
 Poisson-Boltzmann problem.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -332,10 +318,10 @@ Poisson-Boltzmann problem.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) – </li>
-<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) – </li>
-<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) – point.</li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
+<li><strong>phi0</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere.</em>) &#8211; </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>radius of the sphere.</em>) &#8211; </li>
+<li><strong>r</strong> (<em>float</em><em>, </em><em>distance from the center of the sphere to the evaluation</em>) &#8211; point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -359,13 +345,13 @@ immersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) – </li>
-<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -389,13 +375,13 @@ immersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) – </li>
-<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -419,13 +405,13 @@ potential, immersed in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) – </li>
-<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -449,14 +435,14 @@ potential, according to Carnie&amp;Chan-1993.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) – </li>
-<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) – </li>
-<li><strong>Note</strong> – Even though it admits phi01 and phi02, they should be identical; and
+<li><strong>phi01</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 1.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>epsilon</strong> (<em>float</em><em>, </em><em>water dielectric constant.</em>) &#8211; </li>
+<li><strong>Note</strong> &#8211; Even though it admits phi01 and phi02, they should be identical; and
 the same is applicable to r1 and r2.</li>
 </ul>
 </td>
@@ -481,8 +467,8 @@ K_n(x) in Equation 4 in Kirkwood 1934.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<em>float</em><em>, </em><em>evaluation point of K.</em>) – </li>
-<li><strong>n</strong> (<em>int</em><em>, </em><em>number of terms desired in the expansion.</em>) – </li>
+<li><strong>x</strong> (<em>float</em><em>, </em><em>evaluation point of K.</em>) &#8211; </li>
+<li><strong>n</strong> (<em>int</em><em>, </em><em>number of terms desired in the expansion.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -507,14 +493,14 @@ in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) – </li>
-<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) – </li>
-<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) – </li>
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
+<li><strong>sigma02</strong> (<em>float</em><em>, </em><em>constant charge on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -539,14 +525,14 @@ in water.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) – </li>
-<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) – </li>
-<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) – </li>
-<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) – </li>
-<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) – </li>
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
+<li><strong>phi02</strong> (<em>float</em><em>, </em><em>constant potential on the surface of the sphere 2.</em>) &#8211; </li>
+<li><strong>r1</strong> (<em>float</em><em>, </em><em>radius of sphere 1</em><em>, </em><em>i.e the molecule.</em>) &#8211; </li>
+<li><strong>r2</strong> (<em>float</em><em>, </em><em>radius of sphere 2.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>distance center to center.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere/molecule.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere/molecule.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -571,12 +557,12 @@ Follows Cooper&amp;Barba 2016</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em><em>, </em><em>center to center distance.</em>) – </li>
-<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of surface and molecule.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) – </li>
-<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) – </li>
-<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) – </li>
+<li><strong>a</strong> (<em>float</em><em>, </em><em>center to center distance.</em>) &#8211; </li>
+<li><strong>R</strong> (<em>float</em><em>, </em><em>radius of surface and molecule.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>E_1</strong> (<em>float</em><em>, </em><em>dielectric constant inside the sphere.</em>) &#8211; </li>
+<li><strong>E_2</strong> (<em>float</em><em>, </em><em>dielectric constant outside the sphere.</em>) &#8211; </li>
+<li><strong>q</strong> (<em>float</em><em>, </em><em>number of qe to be asigned to the charge.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -603,22 +589,22 @@ parameters and charges files.</p>
 <dt id="pygbe.util.read_data.readCheck">
 <code class="descclassname">pygbe.util.read_data.</code><code class="descname">readCheck</code><span class="sig-paren">(</span><em>aux</em>, <em>REAL</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readCheck" title="Permalink to this definition">¶</a></dt>
 <dd><p>It checks if it is not reading more than one term.
-We use this function to check we are not missing ‘-‘ signs in the .pqr
+We use this function to check we are not missing &#8216;-&#8216; signs in the .pqr
 files, when we read the lines.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>aux</strong> (<em>str</em><em>, </em><em>string to be checked.</em>) – </li>
-<li><strong>REAL</strong> (<em>data type.</em>) – </li>
+<li><strong>aux</strong> (<em>str</em><em>, </em><em>string to be checked.</em>) &#8211; </li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>X</strong></p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, array with the correct ‘-‘ signs assigned.</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array, array with the correct &#8216;-&#8216; signs assigned.</p>
 </td>
 </tr>
 </tbody>
@@ -626,24 +612,49 @@ files, when we read the lines.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pygbe.util.read_data.read_electric_field">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_electric_field</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_electric_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_electric_field" title="Permalink to this definition">¶</a></dt>
+<dt id="pygbe.util.read_data.readElectricField">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readElectricField</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readElectricField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readElectricField" title="Permalink to this definition">¶</a></dt>
 <dd><p>It reads the information about the incident electric field.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) – </li>
-<li><strong>filename</strong> (<em>name of the file that contains the infromation of the incident</em>) – electric field. (filname.config)</li>
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the infromation of the incident</em>) &#8211; electric field. (filname.config)</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>electric_field</strong> (<em>float, electric field intensity, it is in the ‘z’</em>) – direction, ‘-‘ indicates ‘-z’.</li>
+<li><strong>electricField</strong> (<em>float, electric field intensity, it is in the &#8216;z&#8217;</em>) &#8211; direction, &#8216;-&#8216; indicates &#8216;-z&#8217;.</li>
 <li><strong>wavelength</strong> (<em>float, wavelength of the incident electric field.</em>)</li>
 </ul>
 </p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pygbe.util.read_data.readParameters">
+<code class="descclassname">pygbe.util.read_data.</code><code class="descname">readParameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#readParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.readParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>It populates the attributes from the Parameters class with the information
+read from the .param file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) &#8211; </li>
+<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) &#8211; (filename.param)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> &#8211; other fucntions.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
 </td>
 </tr>
 </tbody>
@@ -659,49 +670,24 @@ in the surface</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the physical parameters of each</em>) – region. (filename.config)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the physical parameters of each</em>) &#8211; region. (filename.config)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
 <li><em>Dictionary containing</em></li>
-<li><strong>LorY</strong> (<em>list, it contains integers, Laplace (1) or Yukawa (2),</em>) – corresponding to each region.</li>
-<li><strong>pot</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) – the energy in this region.</li>
-<li><strong>E</strong> (<em>list, it contains floats with the dielectric constant of each</em>) – region.</li>
-<li><strong>kappa</strong> (<em>list, it contains floats with the reciprocal of Debye length value</em>) – of each region.</li>
-<li><strong>charges</strong> (<em>list, it contains integers indicating if there are (1) or not (0)</em>) – charges in this region.</li>
-<li><strong>coulomb</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) – the coulomb energy in this region.</li>
-<li><strong>qfile</strong> (<em>list, location of the ‘.pqr’ file with the location of the charges.</em>)</li>
-<li><strong>Nparent</strong> (<em>list, it contains integers indicating the number of ‘parent’</em>) – surfaces (surface containing this region)</li>
-<li><strong>parent</strong> (<em>list, it contains the file of the parent surface mesh, according</em>) – to their position in the FILE list, starting from 0 (eg. if
+<li><strong>LorY</strong> (<em>list, it contains integers, Laplace (1) or Yukawa (2),</em>) &#8211; corresponding to each region.</li>
+<li><strong>pot</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) &#8211; the energy in this region.</li>
+<li><strong>E</strong> (<em>list, it contains floats with the dielectric constant of each</em>) &#8211; region.</li>
+<li><strong>kappa</strong> (<em>list, it contains floats with the reciprocal of Debye length value</em>) &#8211; of each region.</li>
+<li><strong>charges</strong> (<em>list, it contains integers indicating if there are (1) or not (0)</em>) &#8211; charges in this region.</li>
+<li><strong>coulomb</strong> (<em>list, it contains integers indicating to calculate (1) or not (2)</em>) &#8211; the coulomb energy in this region.</li>
+<li><strong>qfile</strong> (<em>list, location of the &#8216;.pqr&#8217; file with the location of the charges.</em>)</li>
+<li><strong>Nparent</strong> (<em>list, it contains integers indicating the number of &#8216;parent&#8217;</em>) &#8211; surfaces (surface containing this region)</li>
+<li><strong>parent</strong> (<em>list, it contains the file of the parent surface mesh, according</em>) &#8211; to their position in the FILE list, starting from 0 (eg. if
 the mesh file for the parent is the third one specified in
 the FILE section, parent=2)</li>
-<li><strong>Nchild</strong> (<em>list, it contains integers indicating number of child surfaces</em>) – (surfaces completely contained in this region).</li>
-<li><strong>child</strong> (<em>list, it contains position of the mesh files for the children</em>) – surface in the FILE section.</li>
+<li><strong>Nchild</strong> (<em>list, it contains integers indicating number of child surfaces</em>) &#8211; (surfaces completely contained in this region).</li>
+<li><strong>child</strong> (<em>list, it contains position of the mesh files for the children</em>) &#8211; surface in the FILE section.</li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pygbe.util.read_data.read_parameters">
-<code class="descclassname">pygbe.util.read_data.</code><code class="descname">read_parameters</code><span class="sig-paren">(</span><em>param</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/read_data.html#read_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.read_data.read_parameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>It populates the attributes from the Parameters class with the information
-read from the .param file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) – </li>
-<li><strong>filename</strong> (<em>name of the file that contains the parameters information.</em>) – (filename.param)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dataType</strong> – other fucntions.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">we return the dataType of each attributes because we need it for</p>
 </td>
 </tr>
 </tbody>
@@ -717,12 +703,12 @@ configuration file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface type of each region.</em>) – (filename.config).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>name of the file that contains the surface type of each region.</em>) &#8211; (filename.config).</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><strong>files</strong> (<em>list, it contains the files corresponding to each region in the</em>) – surface.</li>
+<li><strong>files</strong> (<em>list, it contains the files corresponding to each region in the</em>) &#8211; surface.</li>
 <li><strong>surf_type</strong> (<em>list, it contains the type of surface of each region.</em>)</li>
-<li><strong>phi0_file</strong> (<em>list, it contains the constant potential/surface charge for the</em>) – cases where it applies. (dirichlet or neumann surfaces)</li>
+<li><strong>phi0_file</strong> (<em>list, it contains the constant potential/surface charge for the</em>) &#8211; cases where it applies. (dirichlet or neumann surfaces)</li>
 </ul>
 </td>
 </tr>
@@ -740,8 +726,8 @@ array.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) – (filename.faces)</li>
-<li><strong>surf_type</strong> (<em>str</em><em>, </em><em>type of surface.</em>) – </li>
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.faces)</li>
+<li><strong>surf_type</strong> (<em>str</em><em>, </em><em>type of surface.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -765,8 +751,8 @@ them on an array.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) – (filename.vert)</li>
-<li><strong>REAL</strong> (<em>data type.</em>) – </li>
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.vert)</li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -789,8 +775,8 @@ them on an array.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) – </li>
-<li><strong>REAL</strong> (<em>data type.</em>) – </li>
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; </li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -815,8 +801,8 @@ them on an array.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) – (filename.pqr)</li>
-<li><strong>REAL</strong> (<em>data type.</em>) – </li>
+<li><strong>filename</strong> (<em>name of the file that contains the surface information.</em>) &#8211; (filename.pqr)</li>
+<li><strong>REAL</strong> (<em>data type.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -846,7 +832,7 @@ both types.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>desired number of gauss points.</em>) – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>K</strong> (<em>int</em><em>, </em><em>desired number of gauss points.</em>) &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
 <li><strong>x</strong> (<em>float, location of the gauss point.</em>)</li>
@@ -868,12 +854,12 @@ the collocation points.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>y</strong> (<em>array</em><em>, </em><em>vertices coordinates of the triangles.</em>) – </li>
-<li><strong>x</strong> (<em>array</em><em>, </em><em>collocation points.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>same</strong> (<em>int</em><em>, </em><em>1 if the collocation point is in the panel of integration</em><em>,</em>) – 0 otherwise.</li>
-<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) – </li>
-<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) – </li>
+<li><strong>y</strong> (<em>array</em><em>, </em><em>vertices coordinates of the triangles.</em>) &#8211; </li>
+<li><strong>x</strong> (<em>array</em><em>, </em><em>collocation points.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>same</strong> (<em>int</em><em>, </em><em>1 if the collocation point is in the panel of integration</em><em>,</em>) &#8211; 0 otherwise.</li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -899,12 +885,12 @@ the collocation points.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) – </li>
-<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) – </li>
-<li><strong>p</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) – collocation point.</li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) – </li>
-<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) – </li>
+<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) &#8211; </li>
+<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) &#8211; </li>
+<li><strong>p</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) &#8211; collocation point.</li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -931,13 +917,13 @@ the semi_analytical integrals needed to calculate the potentials.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>z</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) – collocation point.</li>
-<li><strong>x</strong> (<em>float</em><em>, </em><em>position of the collocation point.</em>) – </li>
-<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) – </li>
-<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) – </li>
-<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) – </li>
-<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) – </li>
-<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) – </li>
+<li><strong>z</strong> (<em>float</em><em>, </em><em>distance</em><em> (</em><em>height</em><em>) </em><em>between the plane of the triangle and the</em>) &#8211; collocation point.</li>
+<li><strong>x</strong> (<em>float</em><em>, </em><em>position of the collocation point.</em>) &#8211; </li>
+<li><strong>v1</strong> (<em>float</em><em>, </em><em>low extreme integral value.</em>) &#8211; </li>
+<li><strong>v2</strong> (<em>float</em><em>, </em><em>high extreme integral value.</em>) &#8211; </li>
+<li><strong>kappa</strong> (<em>float</em><em>, </em><em>reciprocal of Debye length.</em>) &#8211; </li>
+<li><strong>xk</strong> (<em>float</em><em>, </em><em>position of the gauss point.</em>) &#8211; </li>
+<li><strong>wk</strong> (<em>float</em><em>, </em><em>weight of the gauss point.</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -993,7 +979,7 @@ the semi_analytical integrals needed to calculate the potentials.</p>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../run.html">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing PyGBe</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer&#8217;s Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
@@ -1026,7 +1012,7 @@ the semi_analytical integrals needed to calculate the potentials.</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

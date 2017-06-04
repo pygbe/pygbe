@@ -44,14 +44,6 @@ pygbe\.gpuio module
     :undoc-members:
     :show-inheritance:
 
-pygbe\.lspr module
-------------------
-
-.. automodule:: pygbe.lspr
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 pygbe\.main module
 ------------------
 
