@@ -72,4 +72,10 @@ def main():
 
 
 if __name__ == "__main__":
+    from check_for_meshes import check_mesh
+    mesh_file = ''
+    folder_name = 'lspr_convergence_test_meshes'
+    rename_folder = 'geometry_lspr'
+    size = '~3MB'
+    check_mesh(mesh_file, folder_name, rename_folder, size)
     main()

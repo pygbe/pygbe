@@ -66,6 +66,16 @@ Parameters:
 - `children`:     position of the mesh files for the children surface in the FILE section
 
 
+``WAVE:`` Only applicable in LSPR problems. It specifies physical parameters of
+the incoming electric field in LSPR applications.
+Parameters:
+
+-  ``Efield``: electric field intensity, it is in the 'z' direction, '-' 
+   indicates '-z'.
+
+-  ``Wavelength``: wavelength of the incident electric field, in Ångström.
+
+
 ## Parameters file format
 
 - `Precision`:    double or float. (float not supported yet!).
