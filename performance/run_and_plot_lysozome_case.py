@@ -46,7 +46,7 @@ def compile_dict_results(files):
             if k in compiled_results.keys():
                 compiled_results[k].append(v)
             else:
-                compiled_results[k] = [v]
+                compiled_results[k] = v
 
     return compiled_results
 
