@@ -88,6 +88,17 @@ previous step. We need the <cite>xyzr</cite> file as input for MSMS.</p>
 </div>
 <p>Where _XX_XX correspond to the version you download. You can find information
 about the different flags here <a class="reference external" href="http://mgl.scripps.edu/people/sanner/html/msms_man.html">http://mgl.scripps.edu/people/sanner/html/msms_man.html</a></p>
+<p>If you want to add a Stern Layer you will need to create first the <cite>xyzr</cite> for
+Stern Layer and the generate the mesh. To do this:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Create the <cite>.stern</cite> file (i.e the xyzr for the stern layer) using the <cite>generateStern.py</cite> located in <cite>/pygbe/preprocessing_tools</cite></li>
+<li>Create mesh using MSMS setting <cite>-prob 0.5</cite>. For example:</li>
+</ul>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">.</span> <span class="o">-</span><span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">stern</span> <span class="o">-</span><span class="n">of</span> <span class="n">protein1_stern</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">0.5</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
+</pre></div>
+</div>
+</div></blockquote>
 </div></blockquote>
 </li>
 </ol>
