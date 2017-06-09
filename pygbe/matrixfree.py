@@ -1369,7 +1369,7 @@ def dipole_moment(surf_array, electric_field):
     integral.
 
     Arguments
-    ----------
+    ---------
     surf_array   : array, contains the surface classes of each region on the
                           surface.
     electric_field: float, electric field intensity, it is in the 'z'
