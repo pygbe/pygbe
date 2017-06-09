@@ -85,7 +85,7 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
                 'NA']}
 
 .. note:: For LSPR applications we have an extra keyword ``lspr_values``. This flag is 
-          used to pass the incomming electric field parameters in a programmatic
+          used to pass the incoming electric field parameters in a programmatic
           fashion. 
 
 ``lspr_values`` : default ``None``
