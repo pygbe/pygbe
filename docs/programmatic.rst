@@ -101,7 +101,7 @@ Sample lspr_values tuple
 =========================
 
 For reference, if we want to run the ``lspr_silver`` for different wavelengths, 
-we would create tuple that would look like:
+we create tuple that would look like:
 
 .. code:: python
 
