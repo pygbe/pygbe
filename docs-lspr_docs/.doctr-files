@@ -18,6 +18,7 @@ docs-lspr_docs/_sources/contributing.rst.txt
 docs-lspr_docs/_sources/index.rst.txt
 docs-lspr_docs/_sources/input_format.rst.txt
 docs-lspr_docs/_sources/installation.rst.txt
+docs-lspr_docs/_sources/mesh_pqr_setup.rst.txt
 docs-lspr_docs/_sources/othersoftware.rst.txt
 docs-lspr_docs/_sources/programmatic.rst.txt
 docs-lspr_docs/_sources/references.rst.txt
@@ -54,6 +55,7 @@ docs-lspr_docs/genindex.html
 docs-lspr_docs/index.html
 docs-lspr_docs/input_format.html
 docs-lspr_docs/installation.html
+docs-lspr_docs/mesh_pqr_setup.html
 docs-lspr_docs/objects.inv
 docs-lspr_docs/othersoftware.html
 docs-lspr_docs/programmatic.html

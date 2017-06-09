@@ -56,13 +56,26 @@ All functions output the analytical solution in kcal/mol</p>
 <code class="descclassname">pygbe.util.an_solution.</code><code class="descname">Cext_analytical</code><span class="sig-paren">(</span><em>radius</em>, <em>wavelength</em>, <em>diel_out</em>, <em>diel_in</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/util/an_solution.html#Cext_analytical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.util.an_solution.Cext_analytical" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the analytical solution of the extinction cross section.
 This solution is valid when the nano particle involved is a sphere.</p>
-<p>radius    : float, radius of the sphere in [nm].
-wavelength: float/array of floats, wavelength of the incident</p>
-<blockquote>
-<div>electric field in [nm].</div></blockquote>
-<p>diel_out  : complex/array of complex, dielectric constant inside surface.
-diel_in   : complex/array of complex, dielectric constant inside surface.</p>
-<p>Cext_an   : float/array of floats, extinction cross section.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>radius</strong> (<em>float</em><em>, </em><em>radius of the sphere in</em><em> [</em><em>nm</em><em>]</em><em></em>) – </li>
+<li><strong>wavelength</strong> (<em>float/array of floats</em><em>, </em><em>wavelength of the incident</em>) – electric field in [nm].</li>
+<li><strong>diel_out</strong> (<em>complex/array of complex</em><em>, </em><em>dielectric constant inside surface.</em>) – </li>
+<li><strong>diel_in</strong> (<em>complex/array of complex</em><em>, </em><em>dielectric constant inside surface.</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Cext_an</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float/array of floats, extinction cross section.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -994,6 +1007,7 @@ the semi_analytical integrals needed to calculate the potentials.</p>
 <li class="toctree-l1"><a class="reference internal" href="../run.html">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>

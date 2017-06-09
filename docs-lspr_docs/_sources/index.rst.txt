@@ -8,6 +8,7 @@
    run
    cite
    contributing
+   mesh_pqr_setup.rst
    input_format
    references
    othersoftware
