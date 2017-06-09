@@ -88,7 +88,8 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
           used to pass the incoming electric field parameters in a programmatic
           fashion. 
 
-``lspr_values`` : default ``None``
+    ``lspr_values`` : default ``None``
+    
     If you are running several runs that are nearly identical, with only a few
     changes to the electric field configuration, rather than programmatically 
     editing config files to generate each run, you can instead pass in a tuple of
