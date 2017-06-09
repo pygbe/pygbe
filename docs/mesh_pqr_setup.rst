@@ -38,3 +38,13 @@ mesh. In order to achieve this we need to follow few steps:
     Where _XX_XX correspond to the version you download. You can find information
     about the different flags here http://mgl.scripps.edu/people/sanner/html/msms_man.html
     
+    If you want to add a Stern Layer you will need to create first the `xyzr` for
+    Stern Layer and the generate the mesh. To do this:
+    
+        -  Create the `.stern` file (i.e the xyzr for the stern layer) using the `generateStern.py` located in `/pygbe/preprocessing_tools`
+        
+        - Create mesh using MSMS setting `-prob 0.5`. For example:
+        
+        .. code:: console
+
+            /msms_XX_XX/msms_XX_XX. -if protein.stern -of protein1_stern -prob 0.5 -d 2 -no_header
