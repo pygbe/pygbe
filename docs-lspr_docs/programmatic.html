@@ -122,23 +122,23 @@ that reads from the config file.</dd>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">For LSPR applications we have an extra keyword <code class="docutils literal"><span class="pre">lspr_values</span></code>. This flag is
-used to pass the incomming electric field parameters in a programmatic
-fashion.</p>
-</div>
 <dl class="docutils">
-<dt><code class="docutils literal"><span class="pre">lspr_values</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">default <code class="docutils literal"><span class="pre">None</span></code></span></dt>
-<dd>If you are running several runs that are nearly identical, with only a few
+<dt>For LSPR applications we have an extra keyword <code class="docutils literal"><span class="pre">lspr_values</span></code>. This flag is</dt>
+<dd>used to pass the incoming electric field parameters in a programmatic
+fashion.</dd>
+</dl>
+<p><code class="docutils literal"><span class="pre">lspr_values</span></code> : default <code class="docutils literal"><span class="pre">None</span></code></p>
+<p class="last">If you are running several runs that are nearly identical, with only a few
 changes to the electric field configuration, rather than programmatically
 editing config files to generate each run, you can instead pass in a tuple of
 the appropriate values.  This will circumvent the <code class="docutils literal"><span class="pre">read_electric_field</span></code>
-function that reads from the config file.</dd>
-</dl>
+function that reads from the config file.</p>
+</div>
 </div>
 <div class="section" id="sample-lspr-values-tuple">
 <h2>Sample lspr_values tuple<a class="headerlink" href="#sample-lspr-values-tuple" title="Permalink to this headline">¶</a></h2>
 <p>For reference, if we want to run the <code class="docutils literal"><span class="pre">lspr_silver</span></code> for different wavelengths,
-we would create tuple that would look like:</p>
+we create tuple that would look like:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">lspr_values</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">3800</span><span class="p">,</span> <span class="mi">3850</span><span class="p">,</span> <span class="mi">3900</span><span class="p">,</span> <span class="mi">3950</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -222,7 +222,7 @@ over each element of the list you would do something like:</p>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

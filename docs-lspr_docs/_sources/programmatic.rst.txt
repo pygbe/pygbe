@@ -85,10 +85,11 @@ For reference, the config dictionary equivalent to the Lysozyme example would lo
                 'NA']}
 
 .. note:: For LSPR applications we have an extra keyword ``lspr_values``. This flag is 
-          used to pass the incomming electric field parameters in a programmatic
+          used to pass the incoming electric field parameters in a programmatic
           fashion. 
 
-``lspr_values`` : default ``None``
+    ``lspr_values`` : default ``None``
+    
     If you are running several runs that are nearly identical, with only a few
     changes to the electric field configuration, rather than programmatically 
     editing config files to generate each run, you can instead pass in a tuple of
@@ -100,7 +101,7 @@ Sample lspr_values tuple
 =========================
 
 For reference, if we want to run the ``lspr_silver`` for different wavelengths, 
-we would create tuple that would look like:
+we create tuple that would look like:
 
 .. code:: python
 
