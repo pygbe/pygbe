@@ -1228,7 +1228,7 @@
 <span class="sd">    Calculates the analytical solution of the extinction cross section.</span>
 <span class="sd">    This solution is valid when the nano particle involved is a sphere. </span>
 <span class="sd">    </span>
-<span class="sd">    Arguments:</span>
+<span class="sd">    Arguments</span>
 <span class="sd">    ----------</span>
 <span class="sd">    radius    : float, radius of the sphere in [nm].</span>
 <span class="sd">    wavelength: float/array of floats, wavelength of the incident</span>
@@ -1236,10 +1236,9 @@
 <span class="sd">    diel_out  : complex/array of complex, dielectric constant inside surface.</span>
 <span class="sd">    diel_in   : complex/array of complex, dielectric constant inside surface. </span>
 
-<span class="sd">    Returns:</span>
+<span class="sd">    Returns</span>
 <span class="sd">    --------</span>
-<span class="sd">    Cext_an   : float/array of floats, extinction cross section.</span>
-<span class="sd">      </span>
+<span class="sd">    Cext_an   : float/array of floats, extinction cross section.     </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">wavenumber</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">diel_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span>
     <span class="n">C1</span> <span class="o">=</span> <span class="n">wavenumber</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diel_in</span> <span class="o">/</span> <span class="n">diel_out</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">diel_in</span> <span class="o">/</span> <span class="n">diel_out</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
@@ -1278,6 +1277,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../run.html">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>

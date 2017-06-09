@@ -18,6 +18,7 @@ docs/_sources/contributing.rst.txt
 docs/_sources/index.rst.txt
 docs/_sources/input_format.rst.txt
 docs/_sources/installation.rst.txt
+docs/_sources/mesh_pqr_setup.rst.txt
 docs/_sources/othersoftware.rst.txt
 docs/_sources/programmatic.rst.txt
 docs/_sources/references.rst.txt
@@ -54,6 +55,7 @@ docs/genindex.html
 docs/index.html
 docs/input_format.html
 docs/installation.html
+docs/mesh_pqr_setup.html
 docs/objects.inv
 docs/othersoftware.html
 docs/programmatic.html
