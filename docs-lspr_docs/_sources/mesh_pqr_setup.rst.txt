@@ -1,6 +1,9 @@
 Generate meshes and pqr
 -----------------------
 
+Protein meshes and pqr
+======================
+
 For the problems that involve proteins we use MSMS to generate the corresponding 
 mesh. In order to achieve this we need to follow few steps:
 
@@ -48,3 +51,8 @@ mesh. In order to achieve this we need to follow few steps:
         .. code:: console
 
             ./msms_XX_XX/msms_XX_XX. -if protein.stern -of protein1_stern -prob 0.5 -d 2 -no_header
+
+Sphere and brick meshes
+=======================
+           
+For problems that require spheres or bricks we generate the corresponding meshes by using the scripts `mesh_sphere.py` and `mesh_brick.py`. These scripts are located in `/pygbe/preprocessing_tools`. 
