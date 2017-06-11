@@ -1309,6 +1309,48 @@ Second Edition”, SIAM, pp. 151-172, pp. 272-275, 2003
 </dd></dl>
 
 </div>
+<div class="section" id="module-pygbe.lspr">
+<span id="pygbe-lspr-module"></span><h2>pygbe.lspr module<a class="headerlink" href="#module-pygbe.lspr" title="Permalink to this headline">¶</a></h2>
+<p>This is the main function of the program.
+We use a boundary element method (BEM) to perform simple nanoparticle
+plasmonics. Localized surface plasmon resonance (LSPR) is an optical effect,
+but electrostatics is a good approximation in the long-wavelength limit. For
+nanoparticles smaller than the wavelength of incident light, PyGBe
+compute the extinction cross-section.</p>
+<dl class="function">
+<dt id="pygbe.lspr.main">
+<code class="descclassname">pygbe.lspr.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=[‘/home/travis/miniconda/envs/pygbe/bin/sphinx-build’, ‘-b’, ‘html’, ‘-d’, ‘_build/doctrees’, ‘.’, ‘_build/html’], log_output=True, return_output_fname=False, return_results_dict=False, field=None, lspr_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/lspr.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.lspr.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
+problem directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log_output</strong> (<em>Bool</em><em>, </em><em>default True.</em>) – If False, output is written only to STDOUT and not to a log file.</li>
+<li><strong>return_output_fname</strong> (<em>Bool</em><em>, </em><em>default False.</em>) – If True, function main() returns the name of the
+output log file. This is used for the regression tests.</li>
+<li><strong>return_results_dict</strong> (<em>Bool</em><em>, </em><em>default False.</em>) – If True, function main() returns the results of the run
+packed in a dictionary.  Used in testing and programmatic
+use of PyGBe</li>
+<li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) – If passed, this dictionary will supercede any config file found, useful in
+programmatically stepping through slight changes in a problem.</li>
+<li><strong>lspr_values</strong> (<em>list</em><em>, </em><em>defaults to None</em>) – If passed, provides values for <cite>electric_field</cite> and <cite>wavelength</cite>, useful to
+programmatically step through varying wavelengths</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>output_fname</strong> – The name of the log file containing problem output</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str, if kwarg is True.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-pygbe.main">
 <span id="pygbe-main-module"></span><h2>pygbe.main module<a class="headerlink" href="#module-pygbe.main" title="Permalink to this headline">¶</a></h2>
 <p>This is the main function of the program.
@@ -1372,7 +1414,7 @@ param files</p>
 
 <dl class="function">
 <dt id="pygbe.main.main">
-<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=[‘/home/travis/miniconda/envs/pygbe/bin/sphinx-build’, ‘-b’, ‘html’, ‘-d’, ‘_build/doctrees’, ‘.’, ‘_build/html’], log_output=True, return_output_fname=False, return_results_dict=False, field=None, lspr=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pygbe.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>argv=[‘/home/travis/miniconda/envs/pygbe/bin/sphinx-build’, ‘-b’, ‘html’, ‘-d’, ‘_build/doctrees’, ‘.’, ‘_build/html’], log_output=True, return_output_fname=False, return_results_dict=False, field=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/main.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.main.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run a PyGBe problem, write outputs to STDOUT and to log file in
 problem directory</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1388,8 +1430,6 @@ packed in a dictionary.  Used in testing and programmatic
 use of PyGBe</li>
 <li><strong>field</strong> (<em>Dictionary</em><em>, </em><em>defaults to None.</em>) – If passed, this dictionary will supercede any config file found, useful in
 programmatically stepping through slight changes in a problem</li>
-<li><strong>lspr</strong> (<em>list</em><em>, </em><em>defaults to None</em>) – If passed, provides values for <cite>electric_field</cite> and <cite>wavelength</cite>, useful to
-programmatically step through varying wavelengths</li>
 </ul>
 </td>
 </tr>
