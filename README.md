@@ -158,6 +158,12 @@ converter (there are online tools available for this). Our code interfaces with
 meshes generated using
 [MSMS (Michel Sanner's Molecular Surface code)](http://mgltools.scripps.edu/packages/MSMS).
 
+The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
+where generated with a script called `mesh_sphere.py` located in 
+`pygbe/preprocessing_tools/`.
+
+In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html) you can find detailed instructions to generate the pqr and meshes.  
+
 ## Citing PyGBe
 
 If PyGBe contributes to a project that leads to a scientific publication, please cite the the project.
