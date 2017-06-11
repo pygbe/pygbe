@@ -19,14 +19,14 @@ The following example would run the Lysozyme example.
 
 .. code:: python
 
-   from pygbe.main import main
+    from pygbe.main import main
     main(['', 'examples/lys'], log_output=False)
 
 If it's a LSPR application, like the single silver sphere, we do:
 
 .. code:: python
 
-   from pygbe.lspr import main
+    from pygbe.lspr import main
     main(['', 'examples/lspr_silver'], log_output=False)
 
 Useful kwargs
