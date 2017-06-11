@@ -14,7 +14,7 @@ mesh. In order to achieve this we need to follow few steps:
 
         where we picked `amber` as the force field.
 
-3. Create `xyzr` file:
+5. Create `xyzr` file:
     .. code:: console
         
         awk '{print $6,$7,$8,$10}' protein.pqr > protein.xyzr
@@ -22,8 +22,8 @@ mesh. In order to achieve this we need to follow few steps:
     We are extracting certain columns from the `protein.pqr` we create in the 
     previous step. We need the `xyzr` file as input for MSMS.
 
-4. Download MSMS from http://mgltools.scripps.edu/downloads.
-5. Create mesh from command line:
+6. Download MSMS from http://mgltools.scripps.edu/downloads.
+7. Create mesh from command line:
     
     .. code:: console
 
