@@ -307,6 +307,8 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     #   Check if there is a complex dielectric
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
+    else:
+        complex_diel = False
 
     #   Place weights on corresponding surfaces and allocate memory
     Naux = 0
@@ -501,6 +503,8 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
 
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
+    else:
+        complex_diel = False
 
     # Initializing F dtype according to the problem we are solving.
     if complex_diel:
@@ -821,6 +825,8 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
+    else: 
+        complex_diel = False
 
     # Initializing F dtype according to the problem we are solving.
     if complex_diel:

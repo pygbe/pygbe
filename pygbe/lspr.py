@@ -1,19 +1,18 @@
 """
 This is the main function of the program.
-We use a boundary element method (BEM) to perform molecular electrostatics
-calculations with a continuum approach. It calculates solvation energies for
-proteins modeled with any number of dielectric regions.
+We use a boundary element method (BEM) to perform simple nanoparticle
+plasmonics. Localized surface plasmon resonance (LSPR) is an optical effect,
+but electrostatics is a good approximation in the long-wavelength limit. For
+nanoparticles smaller than the wavelength of incident light, PyGBe 
+compute the extinction cross-section.
 """
+
 import os
-import re
 import sys
 import time
-import glob
 import numpy
 import pickle
-import subprocess
 from datetime import datetime
-from argparse import ArgumentParser
 
 # Import self made modules
 import pygbe
@@ -22,10 +21,11 @@ from pygbe.classes import Timing, Parameters, IndexConstant
 from pygbe.gpuio import dataTransfer
 from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
-from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
-                              coulomb_energy, calculate_surface_energy)
+from pygbe.matrixfree import (generateRHS, generateRHS_gpu, dipole_moment,
+                              extinction_cross_section)
 from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
+from pygbe.main import (Logger, read_inputs, find_config_files, check_for_nvcc)    
 
 try:
     from pygbe.tree.cuda_kernels import kernels
@@ -33,151 +33,8 @@ except:
     pass
 
 
-#courtesy of http://stackoverflow.com/a/5916874
-class Logger(object):
-    """
-    Allow writing both to STDOUT on screen and sending text to file
-    in conjunction with the command
-    `sys.stdout = Logger("desired_log_file.txt")`
-    """
-
-    def __init__(self, filename="Default.log"):
-        self.terminal = sys.stdout
-        self.log = open(filename, "a")
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-
-    def flush(self):
-        """Required for Python 3"""
-        pass
-
-
-def read_inputs(args):
-    """
-    Parse command-line arguments to determine which config and param files to run
-    Assumes that in the absence of specific command line arguments that pygbe
-    problem folder resembles the following structure
-
-    lys/
-    - lys.param
-    - lys.config
-    - built_parse.pqr
-    - geometry/Lys1.face
-    - geometry/Lys1.vert
-    - output/
-    """
-
-    parser = ArgumentParser(description='Manage PyGBe command line arguments')
-    parser.add_argument('problem_folder',
-                        type=str,
-                        help="Path to folder containing problem files")
-    parser.add_argument('-c',
-                        '--config',
-                        dest='config',
-                        type=str,
-                        default=None,
-                        help="Path to problem config file")
-    parser.add_argument('-p',
-                        '--param',
-                        dest='param',
-                        type=str,
-                        default=None,
-                        help="Path to problem param file")
-    parser.add_argument('-o',
-                        '--output',
-                        dest='output',
-                        type=str,
-                        default='output',
-                        help="Output folder")
-    parser.add_argument('-g',
-                        '--geometry',
-                        dest='geometry',
-                        type=str,
-                        help="Custom geometry folder prefix")
-
-    return parser.parse_args(args)
-
-
-def check_file_exists(filename):
-    """Try to open the file `filename` and return True if it's valid """
-    return os.path.exists(filename)
-
-
-def find_config_files(cliargs):
-    """
-    Check that .config and .param files exist and can be opened.
-    If either file isn't found, PyGBe exits (and should print which
-    file was not found).  Otherwise return the path to the config and
-    param files
-
-    Arguments
-    ---------
-    cliargs: parser
-        parser containing cli arguments passed to PyGBe
-
-    Returns
-    -------
-    cliargs.config: string
-        path to config file
-    cliargs.param: string
-        path to param file
-    """
-
-    prob_path = cliargs.problem_folder
-    full_path = os.path.abspath(prob_path)
-    os.environ['PYGBE_PROBLEM_FOLDER'] = full_path
-
-    if cliargs.config is None:
-        cliargs.config = next(glob.iglob(os.path.join(full_path, '*.config')))
-    else:
-        cliargs.config = resolve_relative_config_file(cliargs.config, full_path)
-    if cliargs.param is None:
-        cliargs.param = next(glob.iglob(os.path.join(full_path, '*.param')))
-    else:
-        cliargs.param = resolve_relative_config_file(cliargs.param, full_path)
-
-    return cliargs.config, cliargs.param
-
-
-def resolve_relative_config_file(config_file, full_path):
-    """
-    Does its level-headed best to find the config files specified by the user
-
-    Arguments
-    ---------
-    config_file: str
-        the given path to a .param or .config file from the command line
-    full_path: str
-        the full path to the problem folder
-    """
-
-    if check_file_exists(config_file):
-        return config_file
-    elif check_file_exists(os.path.abspath(config_file)):
-        return os.path.join(os.getcwd(), config_file)
-    elif check_file_exists(os.path.join(full_path, config_file)):
-        return os.path.join(full_path, config_file)
-    else:
-        sys.exit('Did not find expected config files\n'
-                 'Could not find {}'.format(config_file))
-
-
-def check_for_nvcc():
-    """Check system PATH for nvcc, exit if not found"""
-    try:
-        subprocess.check_output(['which', 'nvcc'])
-        return True
-    except subprocess.CalledProcessError:
-        print(
-            "Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH"
-        )
-        return False
-
-
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False, field=None):
+         return_results_dict=False, field=None, lspr_values=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
@@ -195,7 +52,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         use of PyGBe
     field : Dictionary, defaults to None.
          If passed, this dictionary will supercede any config file found, useful in
-         programmatically stepping through slight changes in a problem
+         programmatically stepping through slight changes in a problem.
+    lspr_values : list, defaults to None
+         If passed, provides values for `electric_field` and `wavelength`, useful to
+         programmatically step through varying wavelengths
 
     Returns
     --------
@@ -287,6 +147,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
 
+    ### Read electric field and its wavelength.
+    if lspr_values:
+        electric_field, wavelength = lspr_values
+    else:
+        electric_field, wavelength = read_electric_field(param, configFile)
+
 
     ### Fill surface class
     time_sort = 0.
@@ -298,7 +164,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     param.Neq = 0
     for s in surf_array:
         N_aux = len(s.triangle)
-        param.N += N_aux        
+        param.N += N_aux
         if s.surf_type in ['dirichlet_surface', 'neumann_surface', 'asc_surface']:
             param.Neq += N_aux
         else:
@@ -343,10 +209,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0)
+                            ind0, electric_field)
     toc = time.time()
     rhs_time = toc - tic
 
@@ -361,7 +227,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     #   Check if there is a complex dielectric
     if any([numpy.iscomplexobj(f.E) for f in field_array]):
         complex_diel = True
-    else: 
+    else:
         complex_diel = False
 
     ### Solve
@@ -369,11 +235,11 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
-    if not complex_diel:
-        phi = numpy.zeros(param.Neq)    
+    if complex_diel:
+        phi = numpy.zeros(param.Neq, dtype=numpy.complex)
     else:
-        raise ValueError('Dielectric should be real for solvation energy problems')
-        
+        raise ValueError('Dielectric should be complex for LSPR problems')
+
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
                             timing, kernel)
     toc = time.time()
@@ -391,66 +257,31 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         s_start = surf.fill_phi(phi, s_start)
 
 
-    # Calculate solvation energy
-    print('Calculate Esolv')
-    tic = time.time()
-    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    print('Time Esolv: {}s'.format(toc - tic))
-    ii = -1
-    for i, f in enumerate(field_array):
-        if f.pot == 1:
-            parent_type = surf_array[f.parent[0]].surf_type
-            if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
-                ii += 1
-                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
-                                                                      E_solv[ii],
-                                                                      E_solv[ii] * 4.184))
+    #Calculate extinction cross section for lspr problems
+    if abs(electric_field) > 1e-12:
 
+        ###Calculating the dipole moment
+        dipole_moment(surf_array, electric_field)
+ 
+        print('Calculate extinction cross section')
+        tic = time.time()
+        Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
+                           wavelength, electric_field)
+        toc = time.time()
+        print('Time Cext: {}s'.format(toc - tic))
 
-    # Calculate surface energy
-    print('\nCalculate Esurf')
-    tic = time.time()
-    E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
-    toc = time.time()
-    ii = -1
-    for f in param.E_field:
-        parent_type = surf_array[field_array[f].parent[0]].surf_type
-        if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
-            ii += 1
-            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
-                f, E_surf[ii], E_surf[ii] * 4.184))
-    print('Time Esurf: {}s'.format(toc - tic))
+        print('\nCext per surface')
+        for i in range(len(Cext)):
+            print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
 
-    ### Calculate Coulombic interaction
-    print('\nCalculate Ecoul')
-    tic = time.time()
-    i = -1
-    E_coul = []
-    for f in field_array:
-        i += 1
-        if f.coulomb == 1:
-            print('Calculate Coulomb energy for region {}'.format(i))
-            E_coul.append(coulomb_energy(f, param))
-            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
-                i, E_coul[-1], E_coul[-1] * 4.184))
-    toc = time.time()
-    print('Time Ecoul: {}s'.format(toc - tic))
+        results_dict['time_Cext'] = toc - tic
+        results_dict['surf_Cext'] = surf_Cext
+        results_dict['Cext_list'] = Cext
+        results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
 
-    ### Output summary
-    print('\n'+'-'*30)
-    print('Totals:')
-    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
-    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
-    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
-    print('\nTime = {} s'.format(toc - TIC))
-
-    results_dict['E_solv_kcal'] = sum(E_solv)
-    results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
-    results_dict['E_surf_kcal'] = sum(E_surf)
-    results_dict['E_surf_kJ'] = sum(E_surf) * 4.184
-    results_dict['E_coul_kcal'] = sum(E_coul)
-    results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
+    else:
+        raise ValueError('electric_field should not be zero to calculate'
+                         'the extinction cross section')
 
     results_dict['total_time'] = (toc - TIC)
     results_dict['version'] = pygbe.__version__

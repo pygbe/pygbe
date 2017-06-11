@@ -53,7 +53,11 @@ def main():
                    test_name='twosphere neumann')
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from check_for_meshes import check_mesh
-    check_mesh()
+    mesh_file = 'https://zenodo.org/record/55349/files/pygbe_regresion_test_meshes.zip'
+    folder_name = 'regresion_tests_meshes'
+    rename_folder = 'geometry'
+    size = '~10MB'
+    check_mesh(mesh_file, folder_name, rename_folder, size)
     main()

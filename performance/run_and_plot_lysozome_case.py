@@ -18,7 +18,7 @@ def pickleload(filename):
     Does what it says.  Loads a pickle (and returns it)
     """
     with open(filename, 'rb') as f:
-        results_dict = pickle.load(f)
+        results_dict = pickle.load(f, encoding='latin1')
 
     return results_dict
 

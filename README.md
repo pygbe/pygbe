@@ -29,12 +29,12 @@ corresponding commands in your flavor of Linux to install.
 ### Dependencies (last tested)
 * Python 3.4+
 * Numpy 1.11.1
-* SciPy 0.17.1
+* SciPy 0.17.1+
 * SWIG 3.0.8
 * NVCC 7.5 
     * gcc < 4.10
 * PyCUDA 2016.1.3
-* matplotlib 1.5.1 (optional, for post-processing only)
+* matplotlib 1.5.1+ (optional, for post-processing only)
 
 #### Python and Numpy
 
@@ -131,7 +131,14 @@ To run this case, you can use
 
     > pygbe examples/lys
 
-To run any PyGBe case, you can pass `pygbe` a relative or an absolute path to
+To test PyGBe-LSPR, run the single silver sphere (``lspr_silver``) example.
+
+To run lspr cases, you can use
+
+    > pygbe-lspr examples/lspr_silver
+
+To run any PyGBe case, you can pass `pygbe` (or ``pygbe-lspr`` if it's a LSPR
+application) a relative or an absolute path to
 the problem folder.
 
 Note that PyGBe will grab the first `param` and `config` files that it finds in
@@ -149,6 +156,10 @@ For more information on PyGBe's command line interface, run
 
     > pygbe -h
 
+or
+
+    > pygbe-lspr -h
+
 ### Mesh
 
 In the `examples` folder, we provide meshes and `.pqr` files for a few example
@@ -162,7 +173,7 @@ The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres
 where generated with a script called `mesh_sphere.py` located in 
 `pygbe/preprocessing_tools/`.
 
-In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html) you can find detailed instructions to generate the pqr and meshes.  
+In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html) you can find detailed instructions to generate the pqr and meshes. 
 
 ## Citing PyGBe
 
@@ -195,6 +206,12 @@ You can use this citation or the BibTeX entry below.
 * Barnes, J. and Hut, P. (1986), "A hierarchical O(N log N) force-calculation algorithm," _Nature_, **324**: 446–449, [doi: 10.1038/324446a0](http://dx.doi.org/10.1038/324446a0)
 * Yoon, B.J. and Lenhoff, A.M. (1990), "A boundary element method for molecular electrostatics with electrolyte effects," _Journal of Computational Chemistry_,
 **11**(9): 1080–1086, [doi: 10.1002/jcc.540110911](http://dx.doi.org/10.1002/jcc.540110911).
+* Mayergoyz, I. D. and Zhang, Z. (2007). "The computation of extinction cross sections of
+resonant metallic nanoparticles subject to optical radiation", _IEEE Trans. Magn._,
+**43**(4):1681–1684,[doi: 10.1109/TMAG.2007.892500](http://ieeexplore.ieee.org/document/4137779/).
+* Jung, J., Pedersen, T. G., Sondergaard, T., Pedersen, K., Larsen, A. N., and Nielsen,
+B. B. (2010), "Electrostatic plasmon resonances of metal nanospheres in layered
+geometries", _Phys. Rev. B_, **81**(12), [doi:10.1103/PhysRevB.81.125413](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413).
 
 ### Papers published using PyGBe
 
