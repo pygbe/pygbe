@@ -62,8 +62,13 @@ the folder <code class="docutils literal"><span class="pre">examples</span></cod
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="n">examples</span><span class="o">/</span><span class="n">lys</span>
 </pre></div>
 </div>
-<p>To run any PyGBe case, you can pass <code class="docutils literal"><span class="pre">pygbe</span></code> a relative or an absolute
-path to the problem folder.</p>
+<p>To test PyGBe-LSPR, run the single silver sphere (<code class="docutils literal"><span class="pre">lspr_silver</span></code>) example.</p>
+<p>To run lspr cases, you can use</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span><span class="o">-</span><span class="n">lspr</span> <span class="n">examples</span><span class="o">/</span><span class="n">lspr_silver</span>
+</pre></div>
+</div>
+<p>To run any PyGBe case, you can pass <code class="docutils literal"><span class="pre">pygbe</span></code> (or <code class="docutils literal"><span class="pre">pygbe-lspr</span></code> if it’s a LSPR
+application) a relative or an absolute path to the problem folder.</p>
 <p>Note that PyGBe will grab the first <code class="docutils literal"><span class="pre">param</span></code> and <code class="docutils literal"><span class="pre">config</span></code> files that
 it finds in the problem folder (they don’t have to share a name with the
 folder, but it’s helpful for organization). If you want to explicitly
@@ -78,8 +83,12 @@ the <code class="docutils literal"><span class="pre">geometry</span></code> fold
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="o">-</span><span class="n">h</span>
 </pre></div>
 </div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span><span class="o">-</span><span class="n">lspr</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
 <div class="section" id="mesh">
-<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
+<h2>Mesh:<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <p>In the <code class="docutils literal"><span class="pre">examples</span></code> folder, we provide meshes and <code class="docutils literal"><span class="pre">.pqr</span></code> files for a
 few example problems. To plug in your own protein data, download the
 corresponding <code class="docutils literal"><span class="pre">.pdb</span></code> file from the Protein Data Bank, then get its
@@ -87,6 +96,14 @@ corresponding <code class="docutils literal"><span class="pre">.pdb</span></code
 available for this). Our code interfaces with meshes generated using
 <a class="reference external" href="http://mgltools.scripps.edu/packages/MSMS">MSMS (Michel Sanner’s Molecular Surface
 code)</a>.</p>
+<p>The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
+where generated with a script called <code class="docutils literal"><span class="pre">mesh_sphere.py</span></code> located in
+<code class="docutils literal"><span class="pre">pygbe/preprocessing_tools/</span></code>.</p>
+<p>In <a class="reference external" href="http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html">Generate meshes and pqr</a> you can find detailed instructions to generate the pqr and meshes.</p>
+</div>
+<div class="section" id="input-and-parameter-files">
+<h2>Input and Parameter files:<a class="headerlink" href="#input-and-parameter-files" title="Permalink to this headline">¶</a></h2>
+<p>You can find detailed instructions to generate these files in the <a class="reference external" href="http://barbagroup.github.io/pygbe/docs/input_format.html">Input Files section</a>.</p>
 </div>
 <div class="section" id="performance">
 <h2>Performance:<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h2>
@@ -127,6 +144,7 @@ Performance</a></p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_pqr_setup.html">Generate meshes and pqr</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>

@@ -19,6 +19,7 @@ docs-develop/_sources/contributing.rst.txt
 docs-develop/_sources/index.rst.txt
 docs-develop/_sources/input_format.rst.txt
 docs-develop/_sources/installation.rst.txt
+docs-develop/_sources/mesh_pqr_setup.rst.txt
 docs-develop/_sources/othersoftware.rst.txt
 docs-develop/_sources/programmatic.rst.txt
 docs-develop/_sources/references.rst.txt
@@ -55,6 +56,7 @@ docs-develop/genindex.html
 docs-develop/index.html
 docs-develop/input_format.html
 docs-develop/installation.html
+docs-develop/mesh_pqr_setup.html
 docs-develop/objects.inv
 docs-develop/othersoftware.html
 docs-develop/programmatic.html

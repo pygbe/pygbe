@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Input File Format" href="input_format.html" />
+    <link rel="next" title="Generate meshes and pqr" href="mesh_pqr_setup.html" />
     <link rel="prev" title="Citing PyGBe" href="cite.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -79,14 +79,19 @@ directory</p>
 <div class="section" id="convergence-tests">
 <h3>Convergence tests<a class="headerlink" href="#convergence-tests" title="Permalink to this headline">¶</a></h3>
 <p>There is a more robust set of tests located in
-<code class="docutils literal"><span class="pre">pygbe/tests/convergence_tests</span></code>. These include comparisons to
-analytical solutions and checks to ensure convergence over a series of
-finer meshes.</p>
+<code class="docutils literal"><span class="pre">pygbe/tests/convergence_tests</span></code>. These include comparisons to analytical
+solutions or Richardson extrapolated solutions, and checks to ensure convergence
+over a series of finer meshes.</p>
 <p>Note that these tests take a few hours to run. To run them, navigate to
 the convergence test folder and run</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
+<p>for Poisson Boltzmann related tests, or</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_convergence_tests_lspr</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>for Localized Surface Plasmon Resonance tests.</p>
 <p>Any individual set of convergence tests can be run by specifying a given
 test file, e.g.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">lysozyme</span><span class="o">.</span><span class="n">py</span>
@@ -177,6 +182,7 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
 <li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_pqr_setup.html">Generate meshes and pqr</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
@@ -189,7 +195,7 @@ Travis to the <code class="docutils literal"><span class="pre">gh-pages</span></
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="cite.html" title="previous chapter">Citing PyGBe</a></li>
-      <li>Next: <a href="input_format.html" title="next chapter">Input File Format</a></li>
+      <li>Next: <a href="mesh_pqr_setup.html" title="next chapter">Generate meshes and pqr</a></li>
   </ul></li>
 </ul>
 </div>
