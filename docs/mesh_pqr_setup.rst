@@ -27,7 +27,7 @@ mesh. In order to achieve this we need to follow few steps:
     
     .. code:: console
 
-        /msms_XX_XX/msms_XX_XX. -if protein.xyzr -of protein1 -prob 1.4 -d 2 -no_header
+        ./msms_XX_XX/msms_XX_XX. -if protein.xyzr -of protein1 -prob 1.4 -d 2 -no_header
         
     If you want all the components, inside cavities you will add the flag
     
@@ -47,4 +47,4 @@ mesh. In order to achieve this we need to follow few steps:
         
         .. code:: console
 
-            /msms_XX_XX/msms_XX_XX. -if protein.stern -of protein1_stern -prob 0.5 -d 2 -no_header
+            ./msms_XX_XX/msms_XX_XX. -if protein.stern -of protein1_stern -prob 0.5 -d 2 -no_header
