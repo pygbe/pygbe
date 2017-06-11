@@ -120,4 +120,4 @@ over each element of the list you would do something like:
     for wave, E in wave_diel:
         field_dict['E'] = E  
         results = main(['', example_folder_path], field=field_dict,
-                  lspr_values=(-1,wave), return_results_dict=True)
+                       lspr_values=(-1,wave), return_results_dict=True)
