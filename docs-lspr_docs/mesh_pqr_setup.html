@@ -63,8 +63,6 @@ mesh. In order to achieve this we need to follow few steps:</p>
 </dd>
 </dl>
 </li>
-</ol>
-<ol class="arabic" start="3">
 <li><dl class="first docutils">
 <dt>Create <cite>xyzr</cite> file:</dt>
 <dd><div class="code console first highlight-default"><div class="highlight"><pre><span></span><span class="n">awk</span> <span class="s1">&#39;{print $6,$7,$8,$10}&#39;</span> <span class="n">protein</span><span class="o">.</span><span class="n">pqr</span> <span class="o">&gt;</span> <span class="n">protein</span><span class="o">.</span><span class="n">xyzr</span>
@@ -79,7 +77,7 @@ previous step. We need the <cite>xyzr</cite> file as input for MSMS.</p>
 </li>
 <li><p class="first">Create mesh from command line:</p>
 <blockquote>
-<div><div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">.</span> <span class="o">-</span><span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">xyzr</span> <span class="o">-</span><span class="n">of</span> <span class="n">protein1</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">1.4</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
+<div><div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">msms_XX_XX</span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">.</span> <span class="o">-</span><span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">xyzr</span> <span class="o">-</span><span class="n">of</span> <span class="n">protein1</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">1.4</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
 </pre></div>
 </div>
 <p>If you want all the components, inside cavities you will add the flag</p>
@@ -95,7 +93,7 @@ Stern Layer and the generate the mesh. To do this:</p>
 <li>Create the <cite>.stern</cite> file (i.e the xyzr for the stern layer) using the <cite>generateStern.py</cite> located in <cite>/pygbe/preprocessing_tools</cite></li>
 <li>Create mesh using MSMS setting <cite>-prob 0.5</cite>. For example:</li>
 </ul>
-<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">.</span> <span class="o">-</span><span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">stern</span> <span class="o">-</span><span class="n">of</span> <span class="n">protein1_stern</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">0.5</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">msms_XX_XX</span><span class="o">/</span><span class="n">msms_XX_XX</span><span class="o">.</span> <span class="o">-</span><span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">stern</span> <span class="o">-</span><span class="n">of</span> <span class="n">protein1_stern</span> <span class="o">-</span><span class="n">prob</span> <span class="mf">0.5</span> <span class="o">-</span><span class="n">d</span> <span class="mi">2</span> <span class="o">-</span><span class="n">no_header</span>
 </pre></div>
 </div>
 </div></blockquote>
