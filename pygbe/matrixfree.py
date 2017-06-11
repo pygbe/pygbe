@@ -1374,8 +1374,8 @@ def dipole_moment(surf_array, electric_field):
     attribute of the surface class. The dipole is expressed as a boundary
     integral.
 
-    Arguments:
-    ----------
+    Arguments
+    ---------
     surf_array   : array, contains the surface classes of each region on the
                           surface.
     electric_field: float, electric field intensity, it is in the 'z'
@@ -1400,20 +1400,20 @@ def extinction_cross_section(surf_array, k, n, wavelength, electric_field):
     """
     It computes the extinction cross section (Acording to Mischenko2007).
 
-    Arguments:
-    ----------
-    surf_array   : array, contains the surface classes of each region on the
-                          surface.
-    k            : array, unit vector in direction of wave propagation.
-    n            : array, unit vector in direction of electric field.
-    wavelength   : float, wavelength of the incident electric field.
+    Arguments
+    ---------
+    surf_array    : array, contains the surface classes of each region on the
+                           surface.
+    k             : array, unit vector in direction of wave propagation.
+    n             : array, unit vector in direction of electric field.
+    wavelength    : float, wavelength of the incident electric field.
     electric_field: float, electric field intensity, it is in the 'z'
-                          direction, '-' indicates '-z'.
+                           direction, '-' indicates '-z'.
 
-    Returns:
-    --------
-    Cext         : list, contains the extinction cross section of surfaces.
-    surf_Cext    : list, indices of the surface where Cext is being calculated.
+    Returns
+    -------
+    Cext          : list, contains the extinction cross section of surfaces.
+    surf_Cext     : list, indices of the surface where Cext is being calculated.
     """
 
     Cext = []
