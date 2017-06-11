@@ -19,14 +19,14 @@ The following example would run the Lysozyme example.
 
 .. code:: python
 
-   from pygbe.main import main
+    from pygbe.main import main
     main(['', 'examples/lys'], log_output=False)
 
 If it's a LSPR application, like the single silver sphere, we do:
 
 .. code:: python
 
-   from pygbe.lspr import main
+    from pygbe.lspr import main
     main(['', 'examples/lspr_silver'], log_output=False)
 
 Useful kwargs
@@ -120,4 +120,4 @@ over each element of the list you would do something like:
     for wave, E in wave_diel:
         field_dict['E'] = E  
         results = main(['', example_folder_path], field=field_dict,
-                  lspr_values=(-1,wave), return_results_dict=True)
+                       lspr_values=(-1,wave), return_results_dict=True)
