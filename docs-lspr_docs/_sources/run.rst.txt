@@ -58,8 +58,8 @@ or
 
     > pygbe-lspr -h
 
-Mesh
-~~~~
+Mesh:
+~~~~~
 
 In the ``examples`` folder, we provide meshes and ``.pqr`` files for a
 few example problems. To plug in your own protein data, download the
@@ -72,6 +72,15 @@ code) <http://mgltools.scripps.edu/packages/MSMS>`__.
 The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
 where generated with a script called ``mesh_sphere.py`` located in 
 ``pygbe/preprocessing_tools/``.
+
+In `Generate meshes and pqr <http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html>`__ you can find detailed instructions to generate the pqr and meshes.  
+
+
+Input and Parameter files:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can find detailed instructions to generate these files in the `Input Files section <http://barbagroup.github.io/pygbe/docs/input_format.html>`__.
+
 
 Performance:
 ~~~~~~~~~~~~
