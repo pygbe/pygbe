@@ -25,14 +25,27 @@ bibliography: paper.bib
 
 # Summary
 
-PyGBe—pronounced _pigbē_—is a Python code to apply the boundary element method for molecular-electrostatics 
-calculations in a continuum model.
-It computes solvation energies for proteins modeled with any number of dielectric regions, which is relevant in calculations of protein binding affinity, protein-surface interaction, acid-dissociation contants, among other applications. 
-The mathematical formulation follows @YoonLenhoff1990 for solving the Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation) model in integral form.
+PyGBe—pronounced _pigbē_—is a Python library that uses the boundary integral 
+method applied to biomolecular electrostatics and nanoparticle plasmonics. 
 
-PyGBe achieves both algorithmic and hardware acceleration, as detailed in @CooperBardhanBarba2014.
-The solution algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode from @BarnesHut1986 to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. 
-It exploits NVIDIA GPU hardware on the most computationally intensive parts of the code using CUDA kernels in the treecode, interfacing with PyCUDA (see @kloeckner_pycuda_2012). 
-Some parts of the code are written in C++, wrapped using SWIG. 
+This PyGBe release updates the exisiting library presented in @DCooper2016 to Python 3,
+introduces an application to nanoplasmonics and, it includes better regression tests
+using pytest and a redesign of the convergence tests.
+
+The nanoplasmonics incorporation allows treating localized surface plasmons resonance
+quasi-statically (see @Mayergoyz2007). Localized surface plasmon resonance (LSPR) is an optical
+effect (see @Boheren1983), but electrostatics is a good approximation in the long-wavelength
+limit. We use an integral formulation (see @Jung2010), making the existing Boundary element 
+approach suitable and able to exploits the exisiting algorithmic and hardware 
+accelaration detailed in @CooperBardhanBarba2014.
+
+For nanoparticles smaller than the wavelength of incident light, PyGBe 
+can compute the extinction cross-section in absorbing and non-absorbing mediums
+@Mishchenko2007. We plan to use this new feature of PyGBe to study the 
+suitability and performance of nanobiosensors and, to explore nanophotonics 
+applications.
+
+We believe PyGBe to be the first open-source software able to compute extinction
+cross-sections of arbitrary geometry. 
 
 # References
