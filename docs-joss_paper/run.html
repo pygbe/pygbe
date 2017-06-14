@@ -1,0 +1,191 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Run PyGBe &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Citing PyGBe" href="cite.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="run-pygbe">
+<h1>Run PyGBe<a class="headerlink" href="#run-pygbe" title="Permalink to this headline">¶</a></h1>
+<p>PyGBe cases are divided up into individual folders. We have included a
+few example problems in <code class="docutils literal"><span class="pre">examples</span></code>.</p>
+<p>Test the PyGBe installation by running the Lysozyme (<code class="docutils literal"><span class="pre">lys</span></code>) example in
+the folder <code class="docutils literal"><span class="pre">examples</span></code>. The structure of the folder is as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>lys
+  ˫ lys.param
+  ˫ lys.config
+  ˫ built_parse.pqr
+  ˫ geometry/Lys1.face
+  ˫ geometry/Lys1.vert
+  ˫ output/
+</pre></div>
+</div>
+<p>To run this case, you can use</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="n">examples</span><span class="o">/</span><span class="n">lys</span>
+</pre></div>
+</div>
+<p>To test PyGBe-LSPR, run the single silver sphere (<code class="docutils literal"><span class="pre">lspr_silver</span></code>) example.</p>
+<p>To run lspr cases, you can use</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span><span class="o">-</span><span class="n">lspr</span> <span class="n">examples</span><span class="o">/</span><span class="n">lspr_silver</span>
+</pre></div>
+</div>
+<p>To run any PyGBe case, you can pass <code class="docutils literal"><span class="pre">pygbe</span></code> (or <code class="docutils literal"><span class="pre">pygbe-lspr</span></code> if it’s a LSPR
+application) a relative or an absolute path to the problem folder.</p>
+<p>Note that PyGBe will grab the first <code class="docutils literal"><span class="pre">param</span></code> and <code class="docutils literal"><span class="pre">config</span></code> files that
+it finds in the problem folder (they don’t have to share a name with the
+folder, but it’s helpful for organization). If you want to explicitly
+pass in a different/specific <code class="docutils literal"><span class="pre">param</span></code> or <code class="docutils literal"><span class="pre">config</span></code> file, you can use
+the <code class="docutils literal"><span class="pre">-p</span></code> and <code class="docutils literal"><span class="pre">-c</span></code> flags, respectively.</p>
+<p>If you have a centralized <code class="docutils literal"><span class="pre">geometry</span></code> folder, or want to reuse existing
+files without copying them, you can also pass the <code class="docutils literal"><span class="pre">-g</span></code> flag to
+<code class="docutils literal"><span class="pre">pygbe</span></code> to point to the custom location. Note that this path should
+point to a folder which contains a folder called <code class="docutils literal"><span class="pre">geometry</span></code>, not to
+the <code class="docutils literal"><span class="pre">geometry</span></code> folder itself.</p>
+<p>For more information on PyGBe’s command line interface, run</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">pygbe</span><span class="o">-</span><span class="n">lspr</span> <span class="o">-</span><span class="n">h</span>
+</pre></div>
+</div>
+<div class="section" id="mesh">
+<h2>Mesh:<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
+<p>In the <code class="docutils literal"><span class="pre">examples</span></code> folder, we provide meshes and <code class="docutils literal"><span class="pre">.pqr</span></code> files for a
+few example problems. To plug in your own protein data, download the
+corresponding <code class="docutils literal"><span class="pre">.pdb</span></code> file from the Protein Data Bank, then get its
+<code class="docutils literal"><span class="pre">.pqr</span></code> file using any PDB to PQR converter (there are online tools
+available for this). Our code interfaces with meshes generated using
+<a class="reference external" href="http://mgltools.scripps.edu/packages/MSMS">MSMS (Michel Sanner’s Molecular Surface
+code)</a>.</p>
+<p>The meshes for the LSPR examples and some Poisson Boltzmann that involve spheres,
+where generated with a script called <code class="docutils literal"><span class="pre">mesh_sphere.py</span></code> located in
+<code class="docutils literal"><span class="pre">pygbe/preprocessing_tools/</span></code>.</p>
+<p>In <a class="reference external" href="http://barbagroup.github.io/pygbe/docs/mesh_pqr_setup.html">Generate meshes and pqr</a> you can find detailed instructions to generate the pqr and meshes.</p>
+</div>
+<div class="section" id="input-and-parameter-files">
+<h2>Input and Parameter files:<a class="headerlink" href="#input-and-parameter-files" title="Permalink to this headline">¶</a></h2>
+<p>You can find detailed instructions to generate these files in the <a class="reference external" href="http://barbagroup.github.io/pygbe/docs/input_format.html">Input Files section</a>.</p>
+</div>
+<div class="section" id="performance">
+<h2>Performance:<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h2>
+<p>A short notebook outlining performance gains vs APBS is available here:
+<a class="reference external" href="https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb">PyGBe
+Performance</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="cite.html" title="next chapter">Citing PyGBe</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
