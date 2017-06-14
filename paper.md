@@ -25,24 +25,27 @@ bibliography: paper.bib
 
 # Summary
 
-PyGBe—pronounced _pigbē_—is a Python library that uses the boundary integral 
-method applied to biomolecular electrostatics and nanoparticle plasmonics. 
+PyGBe—pronounced _pigbē_—is a Python library that solves problems in 
+biomolecular electrostatics and nanoparticle plasmonics
+using the boundary integral method.
 
-This PyGBe release updates the exisiting library presented in @DCooper2016 to Python 3,
-introduces an application to nanoplasmonics and, it includes better regression tests
-using pytest and a redesign of the convergence tests.
+This PyGBe release makes the followign contributions:
+(1) it updates the exisiting library presented in @DCooper2016 to Python 3,
+(2) it introduces a new capability to solve problems in nanoplasmonics, and 
+(3) it includes better regression tests using pytest and a redesign of the convergence tests.
 
-The nanoplasmonics incorporation allows treating localized surface plasmons resonance
-quasi-statically (see @Mayergoyz2007). Localized surface plasmon resonance (LSPR) is an optical
+The largest contribution is extending PyGBe to nanoplasmonics.
+It allows treating localized surface plasmon resonance (LSPR)
+quasi-statically (see @Mayergoyz2007). LSPR is an optical
 effect (see @Boheren1983), but electrostatics is a good approximation in the long-wavelength
-limit. We use an integral formulation (see @Jung2010), making the existing Boundary element 
-approach suitable and able to exploits the exisiting algorithmic and hardware 
+limit. We use an integral formulation (see @Jung2010), making the existing boundary  
+approach suitable and able to exploit the exisiting algorithmic and hardware 
 accelaration detailed in @CooperBardhanBarba2014.
 
 For nanoparticles smaller than the wavelength of incident light, PyGBe 
-can compute the extinction cross-section in absorbing and non-absorbing mediums
+can compute the extinction cross-section of absorbing and non-absorbing media
 @Mishchenko2007. We plan to use this new feature of PyGBe to study the 
-suitability and performance of nanobiosensors and, to explore nanophotonics 
+suitability and performance of nanobiosensors and to explore nanophotonics 
 applications.
 
 We believe PyGBe to be the first open-source software able to compute extinction
