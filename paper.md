@@ -35,8 +35,8 @@ This PyGBe release makes the followign contributions:
 (3) it includes better regression tests using pytest and a redesign of the convergence tests.
 
 
-The largest contribution is extending PyGBe to nanoplasmonics.
-It allows treating localized surface plasmon resonance (LSPR)
+The largest contribution is extending PyGBe to nanoplasmonics, 
+by treating localized surface plasmon resonance (LSPR)
 quasi-statically (see @Mayergoyz2007). LSPR is an optical
 effect (see @Bohren1983), but electrostatics is a good approximation in the long-wavelength
 limit. We use an integral formulation (see @Jung2010), making the existing boundary  
