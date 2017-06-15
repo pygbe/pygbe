@@ -221,15 +221,24 @@ geometries", _Phys. Rev. B_, **81**(12), [doi:10.1103/PhysRevB.81.125413](https:
 
 ### Other software
 
+#### Poisson-Boltzmann Solvers
+
 A few other open-source packages exist for solving implicit-solvent models of
 the Poisson-Boltzmann equation.
 
-#### Volumetric-based solvers
+##### Volumetric-based solvers
 
 * [Delphi](http://compbio.clemson.edu/delphi)
 * [APBS](http://www.poissonboltzmann.org/)
 
-#### Boundary-element method
+##### Boundary-element method
 
 * AFMPB (both [serial](http://cpc.cs.qub.ac.uk/summaries/AEGB_v1_1.html) and [parallel](http://cpc.cs.qub.ac.uk/summaries/AEGB_v2_0.html) versions exist)
 * [TABI](http://faculty.smu.edu/wgeng/research/bipb.html)
+
+
+#### Nanoplasmonic Solvers
+
+##### Boundary-element method
+
+* [MNPBEM](http://physik.uni-graz.at/mnpbem/#1) A Matlab Toolbox
