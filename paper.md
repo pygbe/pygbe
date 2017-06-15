@@ -38,7 +38,7 @@ This PyGBe release makes the followign contributions:
 The largest contribution is extending PyGBe to nanoplasmonics.
 It allows treating localized surface plasmon resonance (LSPR)
 quasi-statically (see @Mayergoyz2007). LSPR is an optical
-effect (see @Boheren1983), but electrostatics is a good approximation in the long-wavelength
+effect (see @Bohren1983), but electrostatics is a good approximation in the long-wavelength
 limit. We use an integral formulation (see @Jung2010), making the existing boundary  
 approach suitable and able to exploit the exisiting algorithmic and hardware 
 accelaration detailed in @CooperBardhanBarba2014.
