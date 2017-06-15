@@ -39,7 +39,7 @@ The largest contribution is extending PyGBe to nanoplasmonics,
 by treating localized surface plasmon resonance (LSPR)
 quasi-statically (see @Mayergoyz2007). LSPR is an optical
 effect (see @Bohren1983), but electrostatics is a good approximation in the long-wavelength
-limit. We use an integral formulation (see @Jung2010), making the existing boundary  
+limit. We use an integral formulation (see @Jung2010), making the existing boundary
 approach suitable and able to exploit the exisiting algorithmic and hardware 
 accelaration detailed in @CooperBardhanBarba2014.
 
@@ -49,7 +49,12 @@ can compute the extinction cross-section of absorbing and non-absorbing media
 suitability and performance of nanobiosensors and to explore nanophotonics 
 applications.
 
-We believe PyGBe to be the first open-source software able to compute extinction
-cross-sections of arbitrary geometry. 
+There is already in the literature a boundaray element Matlab toolbox ([MNPBEM](http://physik.uni-graz.at/mnpbem/#1))
+for the simulation of metallic nanoparticles. However, they have limitations on
+the problem size since they do not have software or hardware acceleration. We 
+believe PyGBe to be the first open-source software able to compute extinction
+cross-sections of arbitrary geometry that uses 
+[Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode from
+@BarnesHut1986 to accelerate each iteration of a GMRES solver to O(N logN), for N unknowns. 
 
 # References
