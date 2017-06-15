@@ -34,7 +34,7 @@ using pytest and a redesign of the convergence tests.
 
 The nanoplasmonics incorporation allows treating localized surface plasmons resonance
 quasi-statically (see @Mayergoyz2007). Localized surface plasmon resonance (LSPR) is an optical
-effect (see @Boheren1983), but electrostatics is a good approximation in the long-wavelength
+effect (see @Bohren1983), but electrostatics is a good approximation in the long-wavelength
 limit. We use an integral formulation (see @Jung2010), making the existing Boundary element 
 approach suitable and able to exploits the exisiting algorithmic and hardware 
 accelaration detailed in @CooperBardhanBarba2014.
