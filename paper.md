@@ -42,17 +42,15 @@ effect (see @Bohren1983), but electrostatics is a good approximation in the long
 limit. We use an integral formulation (see @Jung2010), making the existing boundary
 approach suitable and able to exploit the algorithmic and hardware 
 accelaration detailed in @CooperBardhanBarba2014, via the [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation) treecode (@BarnesHut1986).
-
 For nanoparticles smaller than the wavelength of incident light, PyGBe 
 can compute the extinction cross-section of absorbing and non-absorbing media
-@Mishchenko2007. We plan to use this new feature of PyGBe to study the 
-suitability and performance of nanobiosensors and to explore nanophotonics 
-applications.
+@Mishchenko2007. 
 
-Compared to other open-source solvers capable of computing the extinction cross-section of 
-metallic nanoparticles of general geometries (such as [MNPBEM](http://physik.uni-graz.at/mnpbem/#1)), PyGBe uses
-the faster long-wavelength limit approximation and algorithmic and hardware acceleration. Moreover, the 
-memory footprint of the treecode is smaller than explicitly generating the matrix, making PyGBe
-suitable for medium-to-large scale applications.
+To our knowledge, PyGBe is the first fully open software for computing extinction cross-sections of arbitrary geometries. 
+It is also the only such software (again, as far as we know) that uses a fast algorithm—O(N logN), for N unknowns—and hardware acceleration on GPUs. 
+A Matlab toolbox is available, [MNPBEM](http://physik.uni-graz.at/mnpbem/#1)), that provides similar functionality, but with poor scaling (N^2 or even N^3).
+It also stores the full matrix, whereas PyGBe is matrix free.
+Nevertheless, MNPBEM has found seveal applicantions in nanoplasmonics.
+We plan to use PyGBe-LSPR to the study of nanobiosensors and to explore nanophotonics applications.
 
 # References
