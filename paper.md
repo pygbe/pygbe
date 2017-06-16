@@ -29,7 +29,7 @@ PyGBe—pronounced _pigbē_—is a Python library that solves problems in
 biomolecular electrostatics and nanoparticle plasmonics
 using the boundary integral method.
 
-This PyGBe release makes the followign contributions:
+This PyGBe release makes the following contributions:
 (1) it updates the exisiting library presented in @DCooper2016 to Python 3,
 (2) it introduces a new capability to solve problems in nanoplasmonics, and 
 (3) it includes better regression tests using pytest and a redesign of the convergence tests.
