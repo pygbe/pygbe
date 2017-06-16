@@ -46,11 +46,11 @@ For nanoparticles smaller than the wavelength of incident light, PyGBe
 can compute the extinction cross-section of absorbing and non-absorbing media
 @Mishchenko2007. 
 
-To our knowledge, PyGBe is the first fully open software for computing extinction cross-sections of arbitrary geometries. 
-It is also the only such software (again, as far as we know) that uses a fast algorithm—O(N logN), for N unknowns—and hardware acceleration on GPUs. 
-A Matlab toolbox is available, [MNPBEM](http://physik.uni-graz.at/mnpbem/#1), that provides similar functionality, but with poor scaling (N^2 or even N^3).
-It also stores the full matrix, whereas PyGBe is matrix free.
-Nevertheless, MNPBEM has found seveal applicantions in nanoplasmonics.
-We plan to use PyGBe-LSPR to the study of nanobiosensors and to explore nanophotonics applications.
+
+To our knowledge, PyGBe is the only software that uses a fast algorithm—O(N logN),
+for N unknowns—and hardware acceleration on GPUs, to compute the extinction cross-sections 
+of arbitrary geometries. We plan to use PyGBe-LSPR to the study of nanobiosensors and to explore
+nanophotonics applications
+
 
 # References
