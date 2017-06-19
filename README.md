@@ -4,7 +4,7 @@ PyGBe—pronounced *pigbē*—is a Python library that applies the boundary inte
 method for biomolecular electrostatics and nanoparticle plasmonics.
 
 PyGBe achieves both algorithmic and hardware acceleration. The solution
-algorithm uses a [Barnes-Hut] (https://en.wikipedia.org/wiki/Barnes–Hut_simulation)
+algorithm uses a [Barnes-Hut](https://en.wikipedia.org/wiki/Barnes–Hut_simulation)
 treecode to accelerate each iteration of a GMRES solver to O(N logN),
 for N unknowns. It exploits NVIDIA GPU hardware on the most
 computationally intensive parts of the code using CUDA kernels in the
@@ -28,8 +28,8 @@ PyGBe also uses electrostatics to compute the extinction cross section of
 scatterers that are much smaller than the incident wavelength. This is relevant, 
 for example, to model localized surface plasmon resonance of nanoparticles, where
 the quasi-static approximation is valid
-([Mayergoyz, I. D. and Zhang, Z. (2007)] (http://ieeexplore.ieee.org/abstract/document/4137779),
-[Jung, J., et al (2010)] (https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413)).
+([Mayergoyz, I. D. and Zhang, Z. (2007)](http://ieeexplore.ieee.org/abstract/document/4137779),
+[Jung, J., et al (2010)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413)).
 
 
 ## Documentation
