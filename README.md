@@ -19,7 +19,7 @@ C++, wrapped using SWIG.
 In this application, PyGBe uses continuum electrostatics to compute the solvation
 energy for proteins modeled with any number of dielectric regions. The 
 mathematical formulation follows Yoon and Lenhoff (1990) for solving the 
-Poisson-Boltzmann equation of the [implicit-solvent] (https://en.wikipedia.org/wiki/Implicit_solvation)
+Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wiki/Implicit_solvation)
 model in integral form.
 
 ## Localized Surface Plasmon Resonance:
