@@ -1,5 +1,5 @@
 ---
-title: 'PyGBe: Python and GPU Boundary-integral solver for electrostatics'
+title: 'PyGBe-LSPR: Python and GPU Boundary-integral solver for electrostatics'
 tags:
   - electrostatics
   - biophysics
