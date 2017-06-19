@@ -27,7 +27,7 @@ Localized Surface Plasmon Resonance :
 
 PyGBe also uses electrostatics to compute the extinction cross section of 
 scatterers that are much smaller than the incident wavelength. This is relevant, 
-for example to model localized surface plasmon resonance of nanoparticles, where
+for example, to model localized surface plasmon resonance of nanoparticles, where
 the quasi-static approximation is valid
 (`Mayergoyz, I. D. and Zhang, Z. (2007) <http://ieeexplore.ieee.org/abstract/document/4137779>`__,
 `Jung, J., et al (2010) <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.81.125413>`__).
