@@ -167,7 +167,7 @@ def readcrd(filename, REAL):
     return pos, q
 
 
-def readParameters(param, filename):
+def read_parameters(param, filename):
     """
     It populates the attributes from the Parameters class with the information
     read from the .param file.
@@ -342,7 +342,7 @@ def read_surface(filename):
 
     return files, surf_type, phi0_file
 
-def readElectricField(param, filename):
+def read_electric_field(param, filename):
     """
     It reads the information about the incident electric field.
 
@@ -354,21 +354,21 @@ def readElectricField(param, filename):
 
     Returns
     -------
-    electricField: float, electric field intensity, it is in the 'z'
+    electric_field: float, electric field intensity, it is in the 'z'
                           direction, '-' indicates '-z'.
     wavelength   : float, wavelength of the incident electric field.
     """
 
-    electricField = 0
+    electric_field = 0
     wavelength = 0
     with open(filename, 'r') as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.split()
+    for line in lines:
+        line = line.split()
 
-            if len(line)>0:
-                if line[0] == 'WAVE':
-                    electricField = param.REAL((line[1]))
-                    wavelength    = param.REAL((line[2]))
+        if len(line)>0:
+            if line[0] == 'WAVE':
+                electric_field = param.REAL((line[1]))
+                wavelength    = param.REAL((line[2]))
 
-    return electricField, wavelength
+    return electric_field, wavelength

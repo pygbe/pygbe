@@ -18,7 +18,7 @@ def pickleload(filename):
     Does what it says.  Loads a pickle (and returns it)
     """
     with open(filename, 'rb') as f:
-        results_dict = pickle.load(f)
+        results_dict = pickle.load(f, encoding='latin1')
 
     return results_dict
 
@@ -46,7 +46,7 @@ def compile_dict_results(files):
             if k in compiled_results.keys():
                 compiled_results[k].append(v)
             else:
-                compiled_results[k] = [v]
+                compiled_results[k] = v
 
     return compiled_results
 

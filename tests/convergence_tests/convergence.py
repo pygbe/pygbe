@@ -3,7 +3,6 @@ import os
 import sys
 import time
 import numpy
-import shutil
 import pickle
 import datetime
 
@@ -22,11 +21,11 @@ mesh = ['500', '2K', '8K', '32K']
 lysozome_mesh = ['1','2','4','8']
 
 def picklesave(test_outputs):
-    with open('tests','wb') as f:
+    with open('tests.pickle','wb') as f:
         pickle.dump(test_outputs, f, 2)
 
 def pickleload():
-    with open('tests', 'rb') as f:
+    with open('tests.pickle', 'rb') as f:
         test_outputs = pickle.load(f)
 
     return test_outputs
@@ -38,7 +37,7 @@ def report_results(error, N, iterations, E, analytical, total_time, energy_type=
     Inputs:
     -------
         error: list of float
-            L2 Norm of error against analytical solution
+            Error for each mesh case
         N: list of int
             Number of elements in test
         iterations: list of int

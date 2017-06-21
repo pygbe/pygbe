@@ -101,6 +101,7 @@ class Surface():
                           potential (neumann).
     phi           : list, potential on surface.
     dphi          : list, derivative of potential on surface.
+    dipole        : list, dipole moment vector from a surface.
 
     # Device data:
 
@@ -142,6 +143,7 @@ class Surface():
         self.twig = []
         self.surf_type = surf_type
         self.Nsurf = Nsurf
+        self.dipole = []
 
         if surf_type in ['dirichlet_surface', 'neumann_surface']:
             self.phi0 = numpy.loadtxt(phi0_file)
@@ -305,8 +307,9 @@ class Surface():
         """
         # If we have complex dielectric constants we need to initialize Precon with
         # complex type else it'll be float.
-        if type(self.E_hat) == complex:
-            self.Precond = numpy.zeros((4, self.N), complex)
+
+        if numpy.iscomplexobj(self.E_hat):
+            self.Precond = numpy.zeros((4, self.N), dtype=type(self.E_hat))
         else:
             self.Precond = numpy.zeros((4, self.N))
         # Stores the inverse of the block diagonal (also a tridiag matrix)

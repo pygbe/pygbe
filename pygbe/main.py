@@ -24,7 +24,7 @@ from pygbe.class_initialization import initialize_surface, initialize_field
 from pygbe.output import print_summary
 from pygbe.matrixfree import (generateRHS, generateRHS_gpu, calculate_solvation_energy,
                               coulomb_energy, calculate_surface_energy)
-from pygbe.util.read_data import readParameters
+from pygbe.util.read_data import read_parameters, read_electric_field
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms, generateList
 
 try:
@@ -258,7 +258,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     ### Read parameters
     param = Parameters()
-    precision = readParameters(param, paramfile)
+    precision = read_parameters(param, paramfile)
 
     param.Nm = (param.P + 1) * (param.P + 2) * (
         param.P + 3) // 6  # Number of terms in Taylor expansion
@@ -287,6 +287,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
 
+
     ### Fill surface class
     time_sort = 0.
     for i in range(len(surf_array)):
@@ -297,8 +298,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     param.Neq = 0
     for s in surf_array:
         N_aux = len(s.triangle)
-        param.N += N_aux
-        if s.surf_type == 'dirichlet_surface' or s.surf_type == 'neumann_surface' or s.surf_type == 'asc_surface':
+        param.N += N_aux        
+        if s.surf_type in ['dirichlet_surface', 'neumann_surface', 'asc_surface']:
             param.Neq += N_aux
         else:
             param.Neq += 2 * N_aux
@@ -356,14 +357,27 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('-'*30)
     print('Total setup time   : {}s'.format(setup_time))
 
-    tic = time.time()
+
+    #   Check if there is a complex dielectric
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
+    else: 
+        complex_diel = False
 
     ### Solve
+    tic = time.time()
+
     print('Solve')
-    phi = numpy.zeros(param.Neq)
+    # Initializing phi dtype according to the problem we are solving.
+    if not complex_diel:
+        phi = numpy.zeros(param.Neq)    
+    else:
+        raise ValueError('Dielectric should be real for solvation energy problems')
+        
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
-                               timing, kernel)
+                            timing, kernel)
     toc = time.time()
+
     results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
@@ -375,6 +389,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     s_start = 0
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
+
 
     # Calculate solvation energy
     print('Calculate Esolv')
@@ -389,8 +404,9 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
                 ii += 1
                 print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
-                                                                          E_solv[ii],
-                                                                          E_solv[ii] * 4.184))
+                                                                      E_solv[ii],
+                                                                      E_solv[ii] * 4.184))
+
 
     # Calculate surface energy
     print('\nCalculate Esurf')
@@ -428,7 +444,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Esurf = {} kcal/mol'.format(sum(E_surf)))
     print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
     print('\nTime = {} s'.format(toc - TIC))
-    results_dict['total_time'] = (toc - TIC)
+
     results_dict['E_solv_kcal'] = sum(E_solv)
     results_dict['E_solv_kJ'] = sum(E_solv) * 4.184
     results_dict['E_surf_kcal'] = sum(E_surf)
@@ -436,6 +452,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['E_coul_kcal'] = sum(E_coul)
     results_dict['E_coul_kJ'] = sum(E_coul) * 4.184
 
+    results_dict['total_time'] = (toc - TIC)
     results_dict['version'] = pygbe.__version__
 
     output_pickle = outputfname.split('-')
@@ -445,6 +462,13 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f, 2)
 
+    try: 
+        with open(os.path.join(output_dir, output_pickle), 'rb') as f:
+            pickle.load(f)
+    except EOFError:
+        print('Error writing the pickle file, the results will be unreadable')
+        pass     
+    
     #reset stdout so regression tests, etc, don't get logged into the output
     #file that they themselves are trying to read
     if log_output:

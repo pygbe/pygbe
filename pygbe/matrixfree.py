@@ -53,8 +53,24 @@ def selfInterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = 2 * pi
     V_diag = 0
     IorE = 1
-    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
+    
+    if numpy.iscomplexobj(surf.XinK) or numpy.iscomplexobj(surf.XinV): 
+    #if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+
+        K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.XinV.real, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+
+        K_lyr_Im, V_lyr_Im = project(surf.XinK.imag, surf.XinV.imag, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
+    else:
+        K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
+
     v = K_lyr - V_lyr
 
     return v
@@ -92,8 +108,24 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     K_diag = -2 * pi
     V_diag = 0.
     IorE = 2
-    K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
+
+    if numpy.iscomplexobj(surf.XinK) or numpy.iscomplexobj(surf.XinV): 
+    #if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
+
+        K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.XinV.real, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+        K_lyr_Im, V_lyr_Im = project(surf.XinK.imag, surf.XinV.imag, LorY, surf,
+                             surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
+    else:
+        K_lyr, V_lyr = project(surf.XinK, surf.XinV, LorY, surf, surf, K_diag,
                            V_diag, IorE, s, param, ind0, timing, kernel)
+
+
     v = -K_lyr + surf.E_hat * V_lyr
 
     return v, K_lyr, V_lyr
@@ -133,10 +165,27 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     K_diag = 0
     V_diag = 0
     IorE = 1
-    K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
+
+    if numpy.iscomplexobj(surf[src].XinK) or numpy.iscomplexobj(surf[src].XinV): 
+    #if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
+
+        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
+                                 LorY, surf[src], surf[tar], K_diag, V_diag,
+                                 IorE, src, param, ind0, timing, kernel)
+        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, surf[src].XinV.imag,
+                                 LorY, surf[src], surf[tar], K_diag, V_diag,
+                                 IorE, src, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
+    else:
+        K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
+
     v = -K_lyr + surf[src].E_hat * V_lyr
+
     return v
 
 
@@ -171,7 +220,24 @@ def nonselfInterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     K_diag = 0
     V_diag = 0
     IorE = 2
-    K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
+
+    if numpy.iscomplexobj(surf[src].XinK) or numpy.iscomplexobj(surf[src].XinV): 
+    #if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
+
+        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].XinV.real,
+                                    LorY, surf[src], surf[tar], K_diag, V_diag,
+                                    IorE, src, param, ind0, timing, kernel)
+
+        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, surf[src].XinV.imag,
+                                    LorY, surf[src], surf[tar], K_diag, V_diag,
+                                    IorE, src, param, ind0, timing, kernel)
+
+        K_lyr = K_lyr_Re + 1j * K_lyr_Im
+        V_lyr = V_lyr_Re + 1j * V_lyr_Im
+
+    else:
+
+        K_lyr, V_lyr = project(surf[src].XinK, surf[src].XinV, LorY, surf[src],
                            surf[tar], K_diag, V_diag, IorE, src, param, ind0,
                            timing, kernel)
     v = K_lyr - V_lyr
@@ -238,26 +304,42 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
     Nfield = len(field_array)
     Nsurf = len(surf_array)
 
+    #   Check if there is a complex dielectric
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
+    else:
+        complex_diel = False
+
     #   Place weights on corresponding surfaces and allocate memory
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
         if surf_array[i].surf_type == 'dirichlet_surface':
-            surf_array[i].XinK = numpy.zeros(N)
+            if complex_diel:
+                surf_array[i].XinK = numpy.zeros(N, dtype=numpy.complex)
+            else:
+                surf_array[i].XinK = numpy.zeros(N)
             surf_array[i].XinV = X[Naux:Naux + N]
             Naux += N
         elif surf_array[i].surf_type == 'neumann_surface' or surf_array[
                 i].surf_type == 'asc_surface':
             surf_array[i].XinK = X[Naux:Naux + N]
-            surf_array[i].XinV = numpy.zeros(N)
+            if complex_diel:
+                surf_array[i].XinV = numpy.zeros(N, dtype=numpy.complex)
+            else:
+                surf_array[i].XinV = numpy.zeros(N)
             Naux += N
         else:
             surf_array[i].XinK = X[Naux:Naux + N]
             surf_array[i].XinV = X[Naux + N:Naux + 2 * N]
             Naux += 2 * N
 
-        surf_array[i].Xout_int = numpy.zeros(N)
-        surf_array[i].Xout_ext = numpy.zeros(N)
+        if complex_diel:
+            surf_array[i].Xout_int = numpy.zeros(N, dtype=numpy.complex)
+            surf_array[i].Xout_ext = numpy.zeros(N, dtype=numpy.complex)
+        else:
+            surf_array[i].Xout_int = numpy.zeros(N)
+            surf_array[i].Xout_ext = numpy.zeros(N)
 
 #   Loop over fields
     for F in range(Nfield):
@@ -312,7 +394,10 @@ def gmres_dot(X, surf_array, field_array, ind0, param, timing, kernel):
                     surf_array[c].Xout_ext += v
 
     #   Gather results into the result vector
-    MV = numpy.zeros(len(X))
+    if complex_diel:
+        MV = numpy.zeros(len(X), dtype=numpy.complex)
+    else:
+        MV = numpy.zeros(len(X))
     Naux = 0
     for i in range(Nsurf):
         N = len(surf_array[i].triangle)
@@ -396,7 +481,7 @@ def calc_aux(field, surface):
 
     return aux
 
-def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
+def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field=0):
     """
     It generate the right hand side (RHS) for the GMRES.
 
@@ -416,7 +501,16 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     F          : array, RHS.
     """
 
-    F = numpy.zeros(param.Neq)
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
+    else:
+        complex_diel = False
+
+    # Initializing F dtype according to the problem we are solving.
+    if complex_diel:
+        F = numpy.zeros(param.Neq, dtype=numpy.complex)
+    else:
+        F = numpy.zeros(param.Neq)
 
     #   Point charge contribution to RHS
     for field in field_array:
@@ -483,6 +577,53 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
                         0, :]
                     F[s_start + s_size:s_start + 2 *
                       s_size] += aux * surf_array[s].Precond[2, :]
+
+
+        # Effect of an incomming electric field (only on outmost region)
+        # Assuming field comes in z direction
+        LorY = field_array[j].LorY
+
+        if len(field_array[j].parent) == 0 and abs(electric_field) > 1e-12:
+
+             for s in field_array[j].child:  # Loop over child surfaces
+                #Locate position of surface s in RHS
+                s_start = 0
+                for ss in range(s):
+                    if surf_array[
+                            ss].surf_type == 'dirichlet_surface' or surf_array[
+                                ss].surf_type == 'neumann_surface' or surf_array[
+                                    ss].surf_type == 'asc_surface':
+                        print('Surface definition error:')
+                        print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
+
+                    else:
+                        s_start += 2 * len(surf_array[ss].xi)
+
+                s_size = len(surf_array[s].xi)
+
+                tar = surf_array[s]
+                if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
+                   or tar.surf_type=='asc_surface'):
+                    print('LSPR problems required different surface definition')
+                    print('Check the input files to correct this')
+                    continue
+
+                else:
+                    #Assuming field comes in z direction then
+                    phi_field = electric_field*tar.normal[:,2]
+                    #The contribution is in the exterior equation
+                    K_diag = -2 * pi
+                    V_diag = 0
+                    IorE   = 2
+
+                    K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
+                                            phi_field, LorY, tar, tar,
+                                            K_diag, V_diag, IorE, s, param,
+                                            ind0, timing, kernel)
+
+                    F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
+
+                    F[s_start+s_size:s_start+2*s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
 #    for field in field_array:
@@ -661,7 +802,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0):
     return F
 
 
-def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
+def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electric_field=0):
     """
     It generate the right hand side (RHS) for the GMRES suitable for the GPU.
 
@@ -682,7 +823,17 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
     F          : array, RHS suitable for the GPU.
     """
 
-    F = numpy.zeros(param.Neq)
+    if any([numpy.iscomplexobj(f.E) for f in field_array]):
+        complex_diel = True
+    else: 
+        complex_diel = False
+
+    # Initializing F dtype according to the problem we are solving.
+    if complex_diel:
+        F = numpy.zeros(param.Neq, dtype=numpy.complex)
+    else:
+        F = numpy.zeros(param.Neq)
+
     REAL = param.REAL
     computeRHS_gpu = kernel.get_function("compute_RHS")
     computeRHSKt_gpu = kernel.get_function("compute_RHSKt")
@@ -710,7 +861,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    surface.ziDev,
                                    surface.sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field.E),
+                                   REAL(1),
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -718,6 +869,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
+                    aux *= 1./(field.E) #We do this to because if E is
+                    #complex, and compute_RHS doesn't accept complex numbers.
+                    #so we multiply outside.
 
                 else:
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)
@@ -789,7 +943,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                                    surface.ziDev,
                                    surface.sizeTarDev,
                                    numpy.int32(Nq),
-                                   REAL(field.E),
+                                   REAL(1),
                                    numpy.int32(param.NCRIT),
                                    numpy.int32(param.BlocksPerTwig),
                                    block=(param.BSZ, 1, 1),
@@ -797,6 +951,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
 
                     aux = numpy.zeros(Nround)
                     F_gpu.get(aux)
+                    aux *= 1./(field.E)
 
                 else:
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)
@@ -830,6 +985,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                            aux_y[surface.unsort]*surface.normal[:,1] +
                            aux_z[surface.unsort]*surface.normal[:,2])
 
+
 #               For PARENT surface, q contributes to RHS in
 #               INTERIOR equation (hence Precond[0,:] and [2,:])
 
@@ -842,6 +998,51 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0):
                 else:
                     F[s_start:s_start + s_size] += aux[surface.unsort] * surface.Precond[0, :]
                     F[s_start + s_size:s_start + 2 * s_size] += aux[surface.unsort] * surface.Precond[2, :]
+
+        # Effect of an incomming electric field (only on outmost region)
+        # Assuming field comes in z direction
+        LorY = field.LorY
+
+        if len(field.parent) == 0 and abs(electric_field) > 1e-12:
+
+             for s in field.child:  # Loop over child surfaces
+                #Locate position of surface s in RHS
+                s_start = 0
+                for ss in range(s):
+                    if surf_array[
+                            ss].surf_type == 'dirichlet_surface' or surf_array[
+                                ss].surf_type == 'neumann_surface' or surf_array[
+                                    ss].surf_type == 'asc_surface':
+                        print('Surface definition error:')
+                        print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
+
+                    else:
+                        s_start += 2 * len(surf_array[ss].xi)
+
+                s_size = len(surf_array[s].xi)
+
+                tar = surf_array[s]
+                if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
+                   or tar.surf_type=='asc_surface'):
+                    print('LSPR problems required different surface definition')
+                    print('Check the input files to correct this')
+                    continue
+
+                else:
+                    #Assuming field comes in z direction then
+                    phi_field = electric_field*tar.normal[:,2]
+                    #The contribution is in the exterior equation
+                    K_diag = -2 * pi
+                    V_diag = 0
+                    IorE   = 2
+
+                    K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
+                                            phi_field, LorY, tar, tar,
+                                            K_diag, V_diag, IorE, s, param,
+                                            ind0, timing, kernel)
+
+                    F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
+                    F[s_start+s_size:s_start+2*s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
     for field in field_array:
@@ -1166,3 +1367,72 @@ def calculate_surface_energy(surf_array, field_array, param, kernel):
                                   parent_surf.phi * parent_surf.area)
             E_surf.append(0.5 * C0 * Esurf_aux)
     return E_surf
+
+def dipole_moment(surf_array, electric_field):
+    """
+    It calculates the dipole moment on a surface and stores it in the 'dipole'
+    attribute of the surface class. The dipole is expressed as a boundary
+    integral.
+
+    Arguments
+    ---------
+    surf_array   : array, contains the surface classes of each region on the
+                          surface.
+    electric_field: float, electric field intensity, it is in the 'z'
+                          direction, '-' indicates '-z'.
+    """
+
+    for i in range(len(surf_array)):
+
+        s = surf_array[i]
+        xc = numpy.array([s.xi, s.yi, s.zi])
+
+        #Changing dphi to outer side of surfaces
+        dphi = s.dphi * s.E_hat - (1 - s.E_hat) * electric_field * s.normal[:,2]
+
+        I1 = numpy.sum(xc * dphi * s.area, axis=1)
+        I2 = numpy.sum(numpy.transpose(s.normal) * s.phi * s.area, axis=1)
+
+        s.dipole = s.Eout * (I1-I2)
+
+
+def extinction_cross_section(surf_array, k, n, wavelength, electric_field):
+    """
+    It computes the extinction cross section (Acording to Mischenko2007).
+
+    Arguments
+    ---------
+    surf_array    : array, contains the surface classes of each region on the
+                           surface.
+    k             : array, unit vector in direction of wave propagation.
+    n             : array, unit vector in direction of electric field.
+    wavelength    : float, wavelength of the incident electric field.
+    electric_field: float, electric field intensity, it is in the 'z'
+                           direction, '-' indicates '-z'.
+
+    Returns
+    -------
+    Cext          : list, contains the extinction cross section of surfaces.
+    surf_Cext     : list, indices of the surface where Cext is being calculated.
+    """
+
+    Cext = []
+    surf_Cext = []
+
+    for i in range(len(surf_array)):
+
+        s = surf_array[i]
+
+        diffractionCoeff = numpy.sqrt(s.Eout)
+        waveNumber = 2 * numpy.pi * diffractionCoeff / wavelength
+
+        v1 = numpy.cross(k, s.dipole)
+        v2 = numpy.cross(v1, k)
+
+        C1 = numpy.dot(n, v2) * waveNumber**2 / (s.Eout * electric_field)
+
+        #multiplying by 0.01 to convert to nm^2
+        Cext.append(1 / waveNumber.real * C1.imag * 0.01)
+        surf_Cext.append(i)
+
+    return Cext, surf_Cext

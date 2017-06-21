@@ -4,13 +4,13 @@ Creates a sphere of radius r, centered at x0, y0, z0
 
 Arguments (command line arguments)
 ----------
-rec : int, number of recursions for unit sphere.
+rec : int, number of recursions for unit sphere. (# of elements = 2^[(2*rec)+1])        
 r   : float, radius.
 x0  : float, x center of sphere.
 y0  : float, y center of sphere.
 z0  : float, z center of sphere.
 name: str, output file name.
- 
+
 Returns
 -----
 File with vertices ".vert"
@@ -31,7 +31,7 @@ def read_inputs():
     -x0  : float, x coordinate of the center of sphere.
     -y0  : float, y coordinate of the center of sphere.
     -z0  : float, z coordinate of the center of sphere.
-    -name: str, output file name.    
+    -name: str, output file name.
     """
 
     parser = ArgumentParser(description='Manage mesh_sphere command line arguments')
