@@ -1,0 +1,224 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pygbe.gpuio &#8212; PyGBe 0.2.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.gpuio</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">It contains the function in charge of the data transfer to the GPU.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="c1"># PyCUDA libraries</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pycuda.autoinit</span>
+    <span class="kn">import</span> <span class="nn">pycuda.gpuarray</span> <span class="k">as</span> <span class="nn">gpuarray</span>
+    <span class="kn">import</span> <span class="nn">pycuda.driver</span> <span class="k">as</span> <span class="nn">cuda</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">pygbe.classes</span> <span class="k">import</span> <span class="n">Event</span>
+
+
+<div class="viewcode-block" id="dataTransfer"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.gpuio.dataTransfer">[docs]</a><span class="k">def</span> <span class="nf">dataTransfer</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It manages the data transfer to the GPU.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surf_array : array, contains the surface classes of each region on the</span>
+<span class="sd">                        surface.</span>
+<span class="sd">    field_array: array, contains the Field classes of each region on the surface.</span>
+<span class="sd">    ind        : class, it contains the indices related to the treecode</span>
+<span class="sd">                        computation.</span>
+<span class="sd">    param      : class, parameters related to the surface.</span>
+<span class="sd">    kernel: pycuda source module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">Nsurf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsurf</span><span class="p">):</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xiDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xiSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">yiDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">yiSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">ziDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">ziSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xjDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xjSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">yjDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">yjSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">zjDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">zjSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">AreaDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">AreaSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sglInt_intDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sglInt_intSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sglInt_extDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sglInt_extSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">vertexDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">triangleSort</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xcDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xcSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">ycDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">ycSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">zcDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">zcSort</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">)))</span>
+
+        <span class="c1">#       Avoid transferring size 1 arrays to GPU (some systems crash)</span>
+        <span class="n">Nbuff</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarget</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Nbuff</span><span class="p">:</span>
+            <span class="n">sizeTarget_buffer</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nbuff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">sizeTarget_buffer</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarget</span><span class="p">)]</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span>
+                <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarget</span><span class="p">[:]</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">sizeTarget_buffer</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+                <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sizeTarget</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+
+    <span class="c1">#        surf_array[s].sizeTarDev = gpuarray.to_gpu(surf_array[s].sizeTarget.astype(numpy.int32))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offSrcDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offsetSource</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offTwgDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offsetTwigs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offMltDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">offsetMlt</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">M2P_lstDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">M2P_list</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">P2P_lstDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span>
+            <span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">P2P_list</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xkDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">xk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">wkDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">wk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">XskDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Xsk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">WskDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">Wsk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">kDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">((</span><span class="n">surf_array</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">sortSource</span> <span class="o">%</span>
+                                              <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+
+    <span class="n">ind</span><span class="o">.</span><span class="n">indexDev</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">index_large</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+
+    <span class="n">Nfield</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nfield</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span>
+                <span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+            <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">yq_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span>
+                <span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+            <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">zq_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span>
+                <span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">xq</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+            <span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">q_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="n">REAL</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
