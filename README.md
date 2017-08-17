@@ -196,6 +196,12 @@ In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_set
 
 [PyGBe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb)
 
+Requirements:
+
+* `pip install client`
+* `conda install requests`
+
+
 ## References
 
 * Barnes, J. and Hut, P. (1986), "A hierarchical O(N log N) force-calculation algorithm," _Nature_, **324**: 446–449, [doi: 10.1038/324446a0](http://dx.doi.org/10.1038/324446a0)
