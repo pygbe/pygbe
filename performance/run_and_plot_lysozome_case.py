@@ -187,6 +187,44 @@ def unzip(meshzip):
     print('Removing zip file...')
     os.remove(meshzip)
 
+def repro_fig():
+    """
+    Reproduce figure for latest performance report 
+    """
+    try:
+        os.mkdir('results_K40')
+    except OSError:
+        pass
+    if [a for a in os.listdir('results_K40') if 'pickle' in a]:
+        run_check_yn = input('\n\n\n'
+                              'You are about to reproduce the figure that shows the '
+                              'results reported in the Jupyter notebook located in this '
+                              'directory. '
+                              'Do you want to reproduce it?  If you select "no" '
+                              'you will be asked if you want to re-run the tests '
+                              'again using your hardware. '
+                              'If you select "yes" you will proceed to reproduce the '
+                              'figure (yes/no): ')
+
+        if run_check_yn in ['No', 'no', 'n']:
+            return
+        elif run_check_yn in ['Yes', 'yes', 'y']:
+            files = [os.path.join('results_K40', a)
+                 for a in os.listdir('results_K40') if 'pickle' in a]
+            files.sort()
+            compiled_results = compile_dict_results(files)
+            generate_plot(compiled_results, filetype='pdf')
+            continue_check_yn = input('\n\n\n''Do you want to re-run the test with your ' 
+                                      'local hardware? ')
+            if continue_check_yn in ['No', 'no', 'n']:
+                sys.exit()
+            elif continue_check_yn in ['Yes', 'yes', 'y']:
+                return
+        else:
+            print('Didn\'t understand your response, exiting')
+            sys.exit()
+
+
 
 def run_check():
     """
@@ -231,6 +269,9 @@ def main():
                        'Type "y" or some variant of yes to accept this: ')
 
     if run_yn in ['Yes', 'yes', 'y', 'Y']:
+
+        #ask if user want to reproduce fig in notebook
+        repro_fig()
         #check that meshes are present
         check_mesh()
         #run the lysozome problems
