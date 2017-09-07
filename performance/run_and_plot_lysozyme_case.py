@@ -76,7 +76,7 @@ def richardson_extrapolation(compiled_results):
 
 
 
-def generate_plot(compiled_results, filetype='pdf'):
+def generate_plot(compiled_results, filetype='pdf', repro=None):
     """
     Generates a plot with some hard-coded info based on APBS runs
     """
@@ -116,7 +116,11 @@ def generate_plot(compiled_results, filetype='pdf'):
     pyplot.subplots_adjust(left=0.22, bottom=0.21, right=0.96, top=0.95)
     pyplot.axis([xmin,xmax,-2450,-2040])
     pyplot.legend(loc='lower right')
-    fname = 'Esolv_lys.{}'.format(filetype)
+
+    if repro:
+        fname = 'Esolv_lys_K40repro.{}'.format(filetype)
+    else:
+        fname = 'Esolv_lys.{}'.format(filetype)
     print('Writing figure to "{}"'.format(fname))
     pyplot.savefig(fname)
 
@@ -135,7 +139,12 @@ def generate_plot(compiled_results, filetype='pdf'):
     pyplot.ylabel('Time to solution [s]',fontsize=10)
     pyplot.xlabel('Error',fontsize=10)
     pyplot.legend(loc='lower left')
-    fname = 'time_lys.{}'.format(filetype)
+
+    if repro:
+        fname = 'time_lys_K40repro.{}'.format(filetype)
+    else:
+        fname = 'time_lys.{}'.format(filetype)
+
     print('Writing figure to "{}"'.format(fname))
     pyplot.savefig(fname)
 
@@ -146,7 +155,12 @@ def generate_plot(compiled_results, filetype='pdf'):
     pyplot.xlabel('Number of elements', fontsize=10)
     pyplot.ylabel('Time to solution [s]', fontsize=10)
     pyplot.subplots_adjust(left=0.19, bottom=0.21, right=0.96, top=0.95)
-    fname = 'time_v_N_lys.{}'.format(filetype)
+
+    if repro:
+        fname = 'time_v_N_lys_K40repro.{}'.format(filetype)
+    else:
+        fname = 'time_v_N_lys.{}'.format(filetype)    
+
     print('Writing figure to "{}"'.format(fname))
     pyplot.savefig(fname)
 
@@ -213,7 +227,7 @@ def repro_fig():
                  for a in os.listdir('results_K40') if 'pickle' in a]
             files.sort()
             compiled_results = compile_dict_results(files)
-            generate_plot(compiled_results, filetype='pdf')
+            generate_plot(compiled_results, filetype='pdf', repro=True)
             continue_check_yn = input('\n\n\n''Do you want to re-run the test with your ' 
                                       'local hardware? (yes/no): ')
             if continue_check_yn in ['No', 'no', 'n']:
