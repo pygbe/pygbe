@@ -87,4 +87,4 @@ Performance:
 
 A short notebook outlining performance gains vs APBS is available here:
 `PyGBe
-Performance <https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb>`__
+Performance <https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe_Performance.ipynb>`__
