@@ -12,11 +12,13 @@ to add something to PyGBe, first fork the repository. Make your changes
 on your fork of the repository and then open a pull request with your
 changes against the main PyGBe repository.
 
-New features should follow the following rules: 1. PEP8 style guide
-should be followed 2. New features should include unit tests 3. All
-functions should have NumPy style doctrings. See
-`here <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`__
-for reference)
+New features should follow the following rules: 
+
+1. PEP8 style guide should be followed
+2. New features should include unit tests
+3. All functions should have NumPy style doctrings. See
+   `here <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`__
+   for reference)
 
 Running the tests
 ~~~~~~~~~~~~~~~~~
@@ -80,7 +82,7 @@ or
 Generating documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-PyGBe uses ```doctr`` <https://github.com/gforsyth/doctr>`__ to
+PyGBe uses `doctr <https://github.com/gforsyth/doctr>`__ to
 automatically generate documentation using Travis CI. If you have made a
 number of changes to the docs, it is best to first manually check them
 to make sure everything if working as expected. Otherwise, don't worry
