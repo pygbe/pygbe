@@ -212,9 +212,7 @@
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
-            <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  &quot;</span>
-            <span class="s2">&quot;PyGBe will continue to run but will run significantly slower.  &quot;</span>
-            <span class="s2">&quot;For optimal performance, add `nvcc` to your PATH&quot;</span>
+            <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
