@@ -215,7 +215,7 @@ def repro_fig():
             compiled_results = compile_dict_results(files)
             generate_plot(compiled_results, filetype='pdf')
             continue_check_yn = input('\n\n\n''Do you want to re-run the test with your ' 
-                                      'local hardware? ')
+                                      'local hardware? (yes/no): ')
             if continue_check_yn in ['No', 'no', 'n']:
                 sys.exit()
             elif continue_check_yn in ['Yes', 'yes', 'y']:
