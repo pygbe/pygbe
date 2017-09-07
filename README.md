@@ -198,7 +198,7 @@ In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_set
 
 Requirements:
 
-* `pip install client`
+* `pip install clint`
 * `conda install requests`
 
 
