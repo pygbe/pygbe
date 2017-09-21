@@ -38,18 +38,28 @@ Detailed documentation is available at http://barbagroup.github.io/pygbe/docs/
 
 ## Installation
 
+### Using Docker
+
+Requirements:
+
+* Install [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker), (instructions in their README)
+    - Check [pre-requisites](https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites)
+* Follow instructions at the top of `Dockerfile`
+
+### Regular installation
+
 The following instructions assume that the operating system is Ubuntu. Run the
 corresponding commands in your flavor of Linux to install.
 
 ### Dependencies (last tested)
-* Python 3.4+
-* Numpy 1.11.1
-* SciPy 0.17.1+
-* SWIG 3.0.8
-* NVCC 7.5 
-    * gcc < 4.10
-* PyCUDA 2016.1.3
-* matplotlib 1.5.1+ (optional, for post-processing only)
+* Python 3.4+ (3.6.1)
+* Numpy 1.11.1+ (1.13.1)
+* SciPy 0.17.1+ (0.19.1)
+* SWIG 3.0.8+ (3.0.10)
+* NVCC 8.0 
+    * gcc  5.4.0
+* PyCUDA 2017.1.1
+* matplotlib 1.5.1+ (2.0.2) (optional, for post-processing only)
 
 #### Python and Numpy
 
@@ -196,10 +206,10 @@ In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_set
 
 [PyGBe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe_Performance.ipynb)
 
-Requirements:
+Requirements (latest version tested):
 
-* `pip install clint`
-* `conda install requests`
+* `pip install clint`  (0.5.1)
+* `conda install requests`  (2.14.2)
 
 
 ## References
