@@ -4,6 +4,14 @@
 # `nvidia-docker build --tag=pygbe:0.3 .`
 # To run a container:
 # `nvidia-docker run --name=pygbe -it pygbe:0.3 /bin/bash`
+# To access the software:
+# Once in the container, pygbe can be found in `/opt/pygbe/0.3`
+# To stop the container:
+# `nvidia-docker stop pygbe`
+# To restart the container:
+# `nvidia-docker restart pygbe`
+# To access the container once you exited
+# `nvidia-docker exec -it pygbe /bin/bash`
 # To delete the container:
 # `docker rm pygbe`
 
