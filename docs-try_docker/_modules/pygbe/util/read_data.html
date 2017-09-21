@@ -1,0 +1,492 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pygbe.util.read_data &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.util.read_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">It contains the functions to read the all the data from the meshes files, its</span>
+<span class="sd">parameters and charges files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+
+<div class="viewcode-block" id="read_vertex"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_vertex">[docs]</a><span class="k">def</span> <span class="nf">read_vertex</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It reads the vertex of the triangles from the mesh file and it stores</span>
+<span class="sd">    them on an array.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: name of the file that contains the surface information.</span>
+<span class="sd">              (filename.vert)</span>
+<span class="sd">    REAL    : data type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vertex: array, vertices of the triangles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">)</span>
+    <span class="n">geo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_GEOMETRY&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geo_path</span><span class="p">:</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">geo_path</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+    <span class="n">vertex</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">vertex</span></div>
+
+
+<div class="viewcode-block" id="read_triangle"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_triangle">[docs]</a><span class="k">def</span> <span class="nf">read_triangle</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It reads the triangles from the mesh file and it stores them on an</span>
+<span class="sd">    array.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : name of the file that contains the surface information.</span>
+<span class="sd">               (filename.faces)</span>
+<span class="sd">    surf_type: str, type of surface.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    triangle: array, triangles indices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">)</span>
+    <span class="n">geo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_GEOMETRY&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geo_path</span><span class="p">:</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">geo_path</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;internal_cavity&#39;</span><span class="p">:</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># v2 and v3 are flipped to match my sign convention!</span>
+        <span class="n">triangle</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="n">triangle</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">triangle</span></div>
+
+
+<div class="viewcode-block" id="readCheck"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readCheck">[docs]</a><span class="k">def</span> <span class="nf">readCheck</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It checks if it is not reading more than one term.</span>
+<span class="sd">    We use this function to check we are not missing &#39;-&#39; signs in the .pqr</span>
+<span class="sd">    files, when we read the lines.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    aux : str, string to be checked.</span>
+<span class="sd">    REAL: data type.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X: array, array with the correct &#39;-&#39; signs assigned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cut</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">aux</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+            <span class="n">cut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aux</span><span class="p">))</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">aux</span><span class="p">[</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span><span class="n">cut</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">X</span></div>
+
+
+<div class="viewcode-block" id="readpqr"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readpqr">[docs]</a><span class="k">def</span> <span class="nf">readpqr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read charge information from pqr file</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: name of the file that contains the surface information.</span>
+<span class="sd">               (filename.pqr)</span>
+<span class="sd">    REAL    : data type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pos     : (Nqx3) array, positions of the charges.</span>
+<span class="sd">    q       : (Nqx1) array, value of the charges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM&#39;</span><span class="p">:</span>
+            <span class="c1">#  grab coordinates and charge from columns</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">q0</span> <span class="o">=</span> <span class="p">[</span><span class="n">REAL</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="readcrd"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.readcrd">[docs]</a><span class="k">def</span> <span class="nf">readcrd</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It reads the crd file, file that contains the charges information.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : name of the file that contains the surface information.</span>
+<span class="sd">    REAL     : data type.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pos      : (Nqx3) array, positions of the charges.</span>
+<span class="sd">    q        : (Nqx1) array, value of the charges.</span>
+<span class="sd">    Nq       : int, number of charges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>  <span class="c1"># and start==2:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="n">q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">REAL</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">]))</span>
+                <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">REAL</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">REAL</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">REAL</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="read_parameters"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_parameters">[docs]</a><span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It populates the attributes from the Parameters class with the information</span>
+<span class="sd">    read from the .param file.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    param   : class, parameters related to the surface.</span>
+<span class="sd">    filename: name of the file that contains the parameters information.</span>
+<span class="sd">              (filename.param)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dataType: we return the dataType of each attributes because we need it for</span>
+<span class="sd">              other fucntions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">val</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">dataType</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Data type</span>
+    <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;double&#39;</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">REAL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span>
+    <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">REAL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Gauss points per element</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Nk</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>  <span class="c1"># Number of Gauss points per side</span>
+    <span class="c1"># for semi analytical integral</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">K_fine</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Number of Gauss points per element</span>
+    <span class="c1"># for near singular integrals</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>  <span class="c1"># L/d threshold to use analytical integrals</span>
+    <span class="c1"># Over: analytical, under: quadrature</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">BSZ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>  <span class="c1"># CUDA block size</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">restart</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>  <span class="c1"># Restart for GMRES</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>  <span class="c1"># Tolerance for GMRES</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>  <span class="c1"># Max number of iteration for GMRES</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>  <span class="c1"># Order of Taylor expansion for treecode</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">eps</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>  <span class="c1"># Epsilon machine</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>  <span class="c1"># Max number of targets per twig box of tree</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">REAL</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>  <span class="c1"># MAC criterion for treecode</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span>  <span class="c1"># =1: use GPU, =0 no GPU</span>
+
+    <span class="k">return</span> <span class="n">dataType</span></div>
+
+
+<div class="viewcode-block" id="read_fields"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_fields">[docs]</a><span class="k">def</span> <span class="nf">read_fields</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read the physical parameters from the configuration file for each region</span>
+<span class="sd">    in the surface</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: name of the file that contains the physical parameters of each</span>
+<span class="sd">              region. (filename.config)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Dictionary containing:</span>
+<span class="sd">    LorY    : list, it contains integers, Laplace (1) or Yukawa (2),</span>
+<span class="sd">                    corresponding to each region.</span>
+<span class="sd">    pot     : list, it contains integers indicating to calculate (1) or not (2)</span>
+<span class="sd">                    the energy in this region.</span>
+<span class="sd">    E       : list, it contains floats with the dielectric constant of each</span>
+<span class="sd">                    region.</span>
+<span class="sd">    kappa   : list, it contains floats with the reciprocal of Debye length value</span>
+<span class="sd">                    of each region.</span>
+<span class="sd">    charges : list, it contains integers indicating if there are (1) or not (0)</span>
+<span class="sd">                    charges in this region.</span>
+<span class="sd">    coulomb : list, it contains integers indicating to calculate (1) or not (2)</span>
+<span class="sd">                    the coulomb energy in this region.</span>
+<span class="sd">    qfile   : list, location of the &#39;.pqr&#39; file with the location of the charges.</span>
+<span class="sd">    Nparent : list, it contains integers indicating the number of &#39;parent&#39;</span>
+<span class="sd">                    surfaces (surface containing this region)</span>
+<span class="sd">    parent  : list, it contains the file of the parent surface mesh, according</span>
+<span class="sd">                    to their position in the FILE list, starting from 0 (eg. if</span>
+<span class="sd">                    the mesh file for the parent is the third one specified in</span>
+<span class="sd">                    the FILE section, parent=2)</span>
+<span class="sd">    Nchild  : list, it contains integers indicating number of child surfaces</span>
+<span class="sd">                    (surfaces completely contained in this region).</span>
+<span class="sd">    child   :  list, it contains position of the mesh files for the children</span>
+<span class="sd">                     surface in the FILE section.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">field</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;charges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;coulomb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;qfile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nparent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;child&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FIELD&#39;</span><span class="p">:</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;pot&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;charges&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;coulomb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;qfile&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">),</span> <span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nparent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+                <span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;Nchild&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+                    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;child&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">11</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;LorY&#39;</span><span class="p">,</span> <span class="s1">&#39;Nparent&#39;</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="s1">&#39;Nchild&#39;</span><span class="p">,</span> <span class="s1">&#39;child&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;pot&#39;</span><span class="p">,</span> <span class="s1">&#39;coulomb&#39;</span><span class="p">,</span> <span class="s1">&#39;charges&#39;</span><span class="p">]:</span>
+        <span class="n">field</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+
+    <span class="c1"># NOTE: We ignore the value of `param.REAL` here but cast down in</span>
+    <span class="c1"># `class_initialization.initialize_field` if necessary</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">complex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;j&#39;</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]]</span>
+    <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;NA&#39;</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">field</span></div>
+
+
+<div class="viewcode-block" id="read_surface"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_surface">[docs]</a><span class="k">def</span> <span class="nf">read_surface</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It reads the type of surface of each region on the surface from the</span>
+<span class="sd">    configuration file.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    filename: name of the file that contains the surface type of each region.</span>
+<span class="sd">              (filename.config).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    files    : list, it contains the files corresponding to each region in the</span>
+<span class="sd">                     surface.</span>
+<span class="sd">    surf_type: list, it contains the type of surface of each region.</span>
+<span class="sd">    phi0_file: list, it contains the constant potential/surface charge for the</span>
+<span class="sd">                     cases where it applies. (dirichlet or neumann surfaces)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">surfaces_req_phi0</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;neumann_surface_hyper&#39;</span><span class="p">]</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">surf_type</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">phi0_file</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FILE&#39;</span><span class="p">:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">surf_type</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">surfaces_req_phi0</span><span class="p">:</span>
+                    <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">),</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">phi0_file</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;no_file&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">files</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">,</span> <span class="n">phi0_file</span></div>
+
+<div class="viewcode-block" id="read_electric_field"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.read_data.read_electric_field">[docs]</a><span class="k">def</span> <span class="nf">read_electric_field</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It reads the information about the incident electric field.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    param        : class, parameters related to the surface.</span>
+<span class="sd">    filename     : name of the file that contains the infromation of the incident</span>
+<span class="sd">                   electric field. (filname.config)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    electric_field: float, electric field intensity, it is in the &#39;z&#39;</span>
+<span class="sd">                          direction, &#39;-&#39; indicates &#39;-z&#39;.</span>
+<span class="sd">    wavelength   : float, wavelength of the incident electric field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">electric_field</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;WAVE&#39;</span><span class="p">:</span>
+                <span class="n">electric_field</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">((</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">wavelength</span>    <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">((</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">electric_field</span><span class="p">,</span> <span class="n">wavelength</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
