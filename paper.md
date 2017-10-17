@@ -62,8 +62,8 @@ can compute the extinction cross-section of absorbing and non-absorbing media
 
 To our knowledge, PyGBe is the only open-source software that uses a fast algorithm—O(N logN),
 for N unknowns—and hardware acceleration on GPUs to compute the extinction cross-sections 
-of arbitrary geometries. We plan to use PyGBe-LSPR to the study of nanobiosensors and to explore
-nanophotonics applications
+of arbitrary geometries. We plan to use PyGBe-LSPR research related to nanobiosensors and to explore
+nanophotonics applications.
 
 
 # References
