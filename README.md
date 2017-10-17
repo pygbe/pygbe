@@ -38,14 +38,6 @@ Detailed documentation is available at http://barbagroup.github.io/pygbe/docs/
 
 ## Installation
 
-### Using Docker
-
-Requirements:
-
-* Install [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker), (instructions in their README)
-    - Check [pre-requisites](https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites)
-* Follow instructions at the top of `Dockerfile`
-
 ### Regular installation
 
 The following instructions assume that the operating system is Ubuntu. Run the
@@ -117,8 +109,6 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04 (using gcc
-< 4.10).
 
 ### Installing PyGBe
 
@@ -133,6 +123,19 @@ If you are installing PyGBe systemwide (if you installed PyCUDA systemwide),
 then use `sudo` on the install command
 
     > sudo python setup.py install clean
+
+
+PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04.
+
+
+### Installation using [Docker](https://docs.docker.com/get-started/)
+
+Requirements:
+
+* Install [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker), (instructions in their README)
+    - Check [pre-requisites](https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites)
+* Follow instructions at the top of `Dockerfile`.
+
 
 ## Run PyGBe
 
