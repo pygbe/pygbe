@@ -171,7 +171,9 @@ def check_for_nvcc():
         return True
     except subprocess.CalledProcessError:
         print(
-            "Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH"
+            "Could not find `nvcc` on your PATH.  Is cuda installed?  "
+            "PyGBe will continue to run but will run significantly slower.  "
+            "For optimal performance, add `nvcc` to your PATH"
         )
         return False
 

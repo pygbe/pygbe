@@ -194,7 +194,13 @@ In [Generate meshes and pqr](http://barbagroup.github.io/pygbe/docs/mesh_pqr_set
 
 ### Performance:
 
-[PyGBe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe%20Performance.ipynb)
+[PyGBe Performance](https://github.com/barbagroup/pygbe/blob/master/performance/PyGBe_Performance.ipynb)
+
+Requirements:
+
+* `pip install clint`
+* `conda install requests`
+
 
 ## References
 

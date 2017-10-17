@@ -3,6 +3,9 @@
 ## Current development
 ---
 
+
+## 0.3
+---
 ### Added
 
 * Ported PyGBe to Python 3 (!!!).  This breaks Python 2 support, but who cares.
