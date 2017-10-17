@@ -1,22 +1,25 @@
 Installation
 ------------
 
+Regular installation
+~~~~~~~~~~~~~~~~~~~~
+
 The following instructions assume that the operating system is Ubuntu.
 Run the corresponding commands in your flavor of Linux to install.
 
 Dependencies (last tested)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
--  Python 3.4+
--  Numpy 1.11.1
--  SciPy 0.17.1
--  SWIG 3.0.8
--  NVCC 7.5
+-  Python 3.4+ (3.6.1)
+-  Numpy 1.11.1+ (1.13.1)
+-  SciPy 0.17.1+ (0.19.1)
+-  SWIG 3.0.8+ (3.0.10)
+-  NVCC 8.0
 
-   -  gcc < 4.10
+   -  gcc  5.4.0
 
--  PyCUDA 2016.1.3
--  matplotlib 1.5.1 (optional, for post-processing only)
+-  PyCUDA 2017.1.1
+-  matplotlib 1.5.1+ (2.0.2) (optional, for post-processing only)
 
 Python and Numpy
 ^^^^^^^^^^^^^^^^
@@ -30,7 +33,7 @@ the following:
 
 .. code:: console
 
-    conda create -n pygbe python=3.5 numpy scipy swig matplotlib
+    conda create -n pygbe python=3.6 numpy scipy swig matplotlib
     source activate pygbe
 
 and then proceed with the rest of the installation instructions
@@ -85,8 +88,6 @@ Test the installation by running the following:
     > cd test
     > python test_driver.py
 
-PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04
-(using gcc < 4.10).
 
 Installing PyGBe
 ~~~~~~~~~~~~~~~~
@@ -106,3 +107,17 @@ systemwide), then use ``sudo`` on the install command
 ::
 
     > sudo python setup.py install clean
+
+PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04.
+
+
+Installation using `Docker <https://docs.docker.com/get-started/>`__
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Requirements
+^^^^^^^^^^^^
+- Install `nvidia-docker <https://github.com/NVIDIA/nvidia-docker>`__, (instructions in their README)
+
+    - Check `pre-requisites <https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites>`__
+
+- Follow instructions at the top of ``Dockerfile``.

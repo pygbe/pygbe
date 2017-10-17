@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>pygbe.main &#8212; PyGBe 0.2.1 documentation</title>
-    
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -215,7 +212,9 @@
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
-            <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  PyGBe will continue to run but will run significantly slower.  For optimal performance, add `nvcc` to your PATH&quot;</span>
+            <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  &quot;</span>
+            <span class="s2">&quot;PyGBe will continue to run but will run significantly slower.  &quot;</span>
+            <span class="s2">&quot;For optimal performance, add `nvcc` to your PATH&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -594,7 +593,7 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Installation &#8212; PyGBe 0.2.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -45,22 +42,25 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="regular-installation">
+<h2>Regular installation<a class="headerlink" href="#regular-installation" title="Permalink to this headline">¶</a></h2>
 <p>The following instructions assume that the operating system is Ubuntu.
 Run the corresponding commands in your flavor of Linux to install.</p>
 <div class="section" id="dependencies-last-tested">
-<h2>Dependencies (last tested)<a class="headerlink" href="#dependencies-last-tested" title="Permalink to this headline">¶</a></h2>
+<h3>Dependencies (last tested)<a class="headerlink" href="#dependencies-last-tested" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Python 3.4+</li>
-<li>Numpy 1.11.1</li>
-<li>SciPy 0.17.1</li>
-<li>SWIG 3.0.8</li>
-<li>NVCC 7.5<ul>
-<li>gcc &lt; 4.10</li>
+<li>Python 3.4+ (3.6.1)</li>
+<li>Numpy 1.11.1+ (1.13.1)</li>
+<li>SciPy 0.17.1+ (0.19.1)</li>
+<li>SWIG 3.0.8+ (3.0.10)</li>
+<li>NVCC 8.0<ul>
+<li>gcc  5.4.0</li>
 </ul>
 </li>
-<li>PyCUDA 2016.1.3</li>
-<li>matplotlib 1.5.1 (optional, for post-processing only)</li>
+<li>PyCUDA 2017.1.1</li>
+<li>matplotlib 1.5.1+ (2.0.2) (optional, for post-processing only)</li>
 </ul>
+</div>
 <div class="section" id="python-and-numpy">
 <h3>Python and Numpy<a class="headerlink" href="#python-and-numpy" title="Permalink to this headline">¶</a></h3>
 <p>To install the specific version of these packages we recommend using
@@ -68,7 +68,7 @@ either <a class="reference external" href="http://conda.pydata.org/docs/get-star
 <a class="reference external" href="http://python-packaging-user-guide.readthedocs.org/en/latest/installing/">pip</a>.</p>
 <p>To create a new environment for using PyGBe with <code class="docutils literal"><span class="pre">conda</span></code> you can do
 the following:</p>
-<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pygbe</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.5</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">swig</span> <span class="n">matplotlib</span>
+<div class="code console highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pygbe</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">swig</span> <span class="n">matplotlib</span>
 <span class="n">source</span> <span class="n">activate</span> <span class="n">pygbe</span>
 </pre></div>
 </div>
@@ -114,8 +114,6 @@ install and simply run</p>
 <span class="o">&gt;</span> <span class="n">python</span> <span class="n">test_driver</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04
-(using gcc &lt; 4.10).</p>
 </div>
 </div>
 <div class="section" id="installing-pygbe">
@@ -131,6 +129,24 @@ install and simply run</p>
 systemwide), then use <code class="docutils literal"><span class="pre">sudo</span></code> on the install command</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="n">clean</span>
 </pre></div>
+</div>
+<p>PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04.</p>
+</div>
+<div class="section" id="installation-using-docker">
+<h2>Installation using <a class="reference external" href="https://docs.docker.com/get-started/">Docker</a><a class="headerlink" href="#installation-using-docker" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">Install <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a>, (instructions in their README)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Check <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites">pre-requisites</a></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Follow instructions at the top of <code class="docutils literal"><span class="pre">Dockerfile</span></code>.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -201,7 +217,7 @@ systemwide), then use <code class="docutils literal"><span class="pre">sudo</spa
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>
