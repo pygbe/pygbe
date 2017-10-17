@@ -394,24 +394,25 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
 
     # Calculate solvation energy
-    print('Calculate Esolv')
+    print('\nCalculate Solvation Energy (E_solv)')
     tic = time.time()
     E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
     toc = time.time()
-    print('Time Esolv: {}s'.format(toc - tic))
+    print('Time E_solv: {}s'.format(toc - tic))
     ii = -1
     for i, f in enumerate(field_array):
         if f.pot == 1:
             parent_type = surf_array[f.parent[0]].surf_type
             if parent_type != 'dirichlet_surface' and parent_type != 'neumann_surface':
                 ii += 1
-                print('Region {}: Esolv = {} kcal/mol = {} kJ/mol'.format(i,
+                print('Region {}: E_solv = {} kcal/mol = {} kJ/mol'.format(i,
                                                                       E_solv[ii],
                                                                       E_solv[ii] * 4.184))
 
 
     # Calculate surface energy
-    print('\nCalculate Esurf')
+    print('\nCalculate Surface Energy (E_surf)')
+
     tic = time.time()
     E_surf = calculate_surface_energy(surf_array, field_array, param, kernel)
     toc = time.time()
@@ -420,12 +421,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         parent_type = surf_array[field_array[f].parent[0]].surf_type
         if parent_type == 'dirichlet_surface' or parent_type == 'neumann_surface':
             ii += 1
-            print('Region {}: Esurf = {} kcal/mol = {} kJ/mol'.format(
+            print('Region {}: E_surf = {} kcal/mol = {} kJ/mol'.format(
                 f, E_surf[ii], E_surf[ii] * 4.184))
-    print('Time Esurf: {}s'.format(toc - tic))
+    print('Time E_surf: {}s'.format(toc - tic))
 
     ### Calculate Coulombic interaction
-    print('\nCalculate Ecoul')
+    print('\nCalculate Coulomb Energy (E_coul)')
     tic = time.time()
     i = -1
     E_coul = []
@@ -434,17 +435,17 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         if f.coulomb == 1:
             print('Calculate Coulomb energy for region {}'.format(i))
             E_coul.append(coulomb_energy(f, param))
-            print('Region {}: Ecoul = {} kcal/mol = {} kJ/mol'.format(
+            print('Region {}: E_coul = {} kcal/mol = {} kJ/mol'.format(
                 i, E_coul[-1], E_coul[-1] * 4.184))
     toc = time.time()
-    print('Time Ecoul: {}s'.format(toc - tic))
+    print('Time E_coul: {}s'.format(toc - tic))
 
     ### Output summary
     print('\n'+'-'*30)
     print('Totals:')
-    print('Esolv = {} kcal/mol'.format(sum(E_solv)))
-    print('Esurf = {} kcal/mol'.format(sum(E_surf)))
-    print('Ecoul = {} kcal/mol'.format(sum(E_coul)))
+    print('E_solv = {} kcal/mol'.format(sum(E_solv)))
+    print('E_surf = {} kcal/mol'.format(sum(E_surf)))
+    print('E_coul = {} kcal/mol'.format(sum(E_coul)))
     print('\nTime = {} s'.format(toc - TIC))
 
     results_dict['E_solv_kcal'] = sum(E_solv)
