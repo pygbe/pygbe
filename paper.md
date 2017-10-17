@@ -25,9 +25,14 @@ bibliography: paper.bib
 
 # Summary
 
-PyGBe—pronounced _pigbē_—is a Python library that solves problems in 
-biomolecular electrostatics and nanoparticle plasmonics
-using the boundary integral method.
+PyGBe—pronounced _pigbē_—is a Python library for applications in 
+biomolecular electrostatics and nanoparticle plasmonics.
+The previous code release, reported in @DCooper2016, solves the Poisson-Boltzmann equation
+for biomolecules immersed in an ionic solvent, using the boundary integral method.
+It computes the solvation energy, which is the free energy spent in moving a biomolecule
+from vaccum to its dissolved state.
+This quantity is used for assessing binding affinity, protein-surface interactions, 
+and other mechanisms at this scale.
 
 This PyGBe release makes the following contributions:
 (1) it updates the exisiting library presented in @DCooper2016 to Python 3,
