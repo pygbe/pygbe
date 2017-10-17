@@ -259,7 +259,7 @@ the Poisson-Boltzmann equation.
 
 ## How to contribute to PyGBe
 
-If you are interested in contribute to the `PyGBe` project go to the [Developer's Guide](http://barbagroup.github.io/pygbe/docs/contributing.html) and follow the instructions. 
+If you are interested in contributing to the `PyGBe` project go to the [Developer's Guide](http://barbagroup.github.io/pygbe/docs/contributing.html) and follow the instructions. 
 
 
 ## How to cite PyGBe
