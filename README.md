@@ -70,7 +70,6 @@ source activate pygbe
 and then proceed with the rest of the installation instructions (although note
 that if you do this, `swig` is already installed.
 
-
 #### SWIG
 
 To install SWIG we recommend using either `conda`, your distribution package
@@ -256,6 +255,12 @@ the Poisson-Boltzmann equation.
 ##### Boundary-element method
 
 * [MNPBEM](http://physik.uni-graz.at/mnpbem/#1) A Matlab Toolbox
+
+
+## How to contribute to PyGBe
+
+If you are interested in contribute to the `PyGBe` project go to the [Developer's Guide](http://barbagroup.github.io/pygbe/docs/contributing.html) and follow the instructions. 
+
 
 ## How to cite PyGBe
 
