@@ -394,7 +394,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
 
     # Calculate solvation energy
-    print('Calculate Solvation Energy (E_solv)')
+    print('\nCalculate Solvation Energy (E_solv)')
     tic = time.time()
     E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
     toc = time.time()

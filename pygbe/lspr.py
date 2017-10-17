@@ -263,7 +263,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         ###Calculating the dipole moment
         dipole_moment(surf_array, electric_field)
  
-        print('Calculate extinction cross section (Cext)')
+        print('\nCalculate extinction cross section (Cext)')
         tic = time.time()
         Cext, surf_Cext = extinction_cross_section(surf_array, numpy.array([1,0,0]), numpy.array([0,0,1]),
                            wavelength, electric_field)
