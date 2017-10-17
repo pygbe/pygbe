@@ -1341,7 +1341,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
-<span class="sd">    Ecoul: float, coloumb energy.</span>
+<span class="sd">    E_coul: float, coloumb energy.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">point_energy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">q</span><span class="p">),</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
@@ -1350,8 +1350,8 @@
     <span class="n">cal2J</span> <span class="o">=</span> <span class="mf">4.184</span>
     <span class="n">C0</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">E_0</span><span class="p">)</span>
 
-    <span class="n">Ecoul</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">point_energy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Ecoul</span></div>
+    <span class="n">E_coul</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">point_energy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">E_coul</span></div>
 
 
 <div class="viewcode-block" id="calculate_surface_energy"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.matrixfree.calculate_surface_energy">[docs]</a><span class="k">def</span> <span class="nf">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
