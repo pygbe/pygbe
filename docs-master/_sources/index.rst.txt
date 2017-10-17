@@ -16,8 +16,8 @@
 
 
 
-Developer Documentation
-=======================
+Code Documentation
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`
