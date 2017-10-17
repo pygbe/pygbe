@@ -63,7 +63,7 @@ To create a new environment for using PyGBe with `conda` you can do the
 following:
 
 ```console
-conda create -n pygbe python=3.5 numpy scipy swig matplotlib
+conda create -n pygbe python=3.6 numpy scipy swig matplotlib
 source activate pygbe
 ```
 
