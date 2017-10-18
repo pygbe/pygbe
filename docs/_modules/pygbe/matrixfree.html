@@ -990,9 +990,9 @@
                                    <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                                    <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-                    <span class="n">aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
-                    <span class="n">F_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux</span><span class="p">)</span>
-                    <span class="n">aux</span> <span class="o">*=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
+                    <span class="n">aux1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">)</span>
+                    <span class="n">F_gpu</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">aux1</span><span class="p">)</span>
+                    <span class="n">aux</span> <span class="o">=</span> <span class="n">aux1</span><span class="o">/</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">E</span><span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">Fx_gpu</span> <span class="o">=</span> <span class="n">gpuarray</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nround</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
