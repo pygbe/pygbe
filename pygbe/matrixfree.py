@@ -949,9 +949,9 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
                                    block=(param.BSZ, 1, 1),
                                    grid=(GSZ, 1))
 
-                    aux = numpy.zeros(Nround)
-                    F_gpu.get(aux)
-                    aux *= 1./(field.E)
+                    aux1 = numpy.zeros(Nround)
+                    F_gpu.get(aux1)
+                    aux = aux1/(field.E)
 
                 else:
                     Fx_gpu = gpuarray.zeros(Nround, dtype=REAL)
