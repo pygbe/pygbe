@@ -1300,7 +1300,7 @@ def coulomb_energy(f, param):
 
     Returns
     --------
-    Ecoul: float, coloumb energy.
+    E_coul: float, coloumb energy.
     """
 
     point_energy = numpy.zeros(len(f.q), param.REAL)
@@ -1309,8 +1309,8 @@ def coulomb_energy(f, param):
     cal2J = 4.184
     C0 = param.qe**2 * param.Na * 1e-3 * 1e10 / (cal2J * param.E_0)
 
-    Ecoul = numpy.sum(point_energy) * 0.5 * C0 / (4 * pi * f.E)
-    return Ecoul
+    E_coul = numpy.sum(point_energy) * 0.5 * C0 / (4 * pi * f.E)
+    return E_coul
 
 
 def calculate_surface_energy(surf_array, field_array, param, kernel):
