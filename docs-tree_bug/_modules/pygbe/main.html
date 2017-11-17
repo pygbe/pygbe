@@ -1,0 +1,606 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pygbe.main &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is the main function of the program.</span>
+<span class="sd">We use a boundary element method (BEM) to perform molecular electrostatics</span>
+<span class="sd">calculations with a continuum approach. It calculates solvation energies for</span>
+<span class="sd">proteins modeled with any number of dielectric regions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="k">import</span> <span class="n">ArgumentParser</span>
+
+<span class="c1"># Import self made modules</span>
+<span class="kn">import</span> <span class="nn">pygbe</span>
+<span class="kn">from</span> <span class="nn">pygbe.gmres</span> <span class="k">import</span> <span class="n">gmres_mgs</span>
+<span class="kn">from</span> <span class="nn">pygbe.classes</span> <span class="k">import</span> <span class="n">Timing</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">IndexConstant</span>
+<span class="kn">from</span> <span class="nn">pygbe.gpuio</span> <span class="k">import</span> <span class="n">dataTransfer</span>
+<span class="kn">from</span> <span class="nn">pygbe.class_initialization</span> <span class="k">import</span> <span class="n">initialize_surface</span><span class="p">,</span> <span class="n">initialize_field</span>
+<span class="kn">from</span> <span class="nn">pygbe.output</span> <span class="k">import</span> <span class="n">print_summary</span>
+<span class="kn">from</span> <span class="nn">pygbe.matrixfree</span> <span class="k">import</span> <span class="p">(</span><span class="n">generateRHS</span><span class="p">,</span> <span class="n">generateRHS_gpu</span><span class="p">,</span> <span class="n">calculate_solvation_energy</span><span class="p">,</span>
+                              <span class="n">coulomb_energy</span><span class="p">,</span> <span class="n">calculate_surface_energy</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">read_parameters</span><span class="p">,</span> <span class="n">read_electric_field</span>
+<span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">computeIndices</span><span class="p">,</span> <span class="n">precomputeTerms</span><span class="p">,</span> <span class="n">generateList</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pygbe.tree.cuda_kernels</span> <span class="k">import</span> <span class="n">kernels</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="c1">#courtesy of http://stackoverflow.com/a/5916874</span>
+<div class="viewcode-block" id="Logger"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger">[docs]</a><span class="k">class</span> <span class="nc">Logger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allow writing both to STDOUT on screen and sending text to file</span>
+<span class="sd">    in conjunction with the command</span>
+<span class="sd">    `sys.stdout = Logger(&quot;desired_log_file.txt&quot;)`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;Default.log&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Logger.write"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Logger.flush"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Required for Python 3&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="read_inputs"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.read_inputs">[docs]</a><span class="k">def</span> <span class="nf">read_inputs</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse command-line arguments to determine which config and param files to run</span>
+<span class="sd">    Assumes that in the absence of specific command line arguments that pygbe</span>
+<span class="sd">    problem folder resembles the following structure</span>
+
+<span class="sd">    lys/</span>
+<span class="sd">    - lys.param</span>
+<span class="sd">    - lys.config</span>
+<span class="sd">    - built_parse.pqr</span>
+<span class="sd">    - geometry/Lys1.face</span>
+<span class="sd">    - geometry/Lys1.vert</span>
+<span class="sd">    - output/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Manage PyGBe command line arguments&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;problem_folder&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to folder containing problem files&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;--config&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;config&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to problem config file&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;--param&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;param&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to problem param file&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;--output&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output folder&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-g&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;--geometry&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Custom geometry folder prefix&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_file_exists"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.check_file_exists">[docs]</a><span class="k">def</span> <span class="nf">check_file_exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Try to open the file `filename` and return True if it&#39;s valid &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_config_files"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.find_config_files">[docs]</a><span class="k">def</span> <span class="nf">find_config_files</span><span class="p">(</span><span class="n">cliargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check that .config and .param files exist and can be opened.</span>
+<span class="sd">    If either file isn&#39;t found, PyGBe exits (and should print which</span>
+<span class="sd">    file was not found).  Otherwise return the path to the config and</span>
+<span class="sd">    param files</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    cliargs: parser</span>
+<span class="sd">        parser containing cli arguments passed to PyGBe</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cliargs.config: string</span>
+<span class="sd">        path to config file</span>
+<span class="sd">    cliargs.param: string</span>
+<span class="sd">        path to param file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">prob_path</span> <span class="o">=</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">problem_folder</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">prob_path</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_path</span>
+
+    <span class="k">if</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">iglob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s1">&#39;*.config&#39;</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">resolve_relative_config_file</span><span class="p">(</span><span class="n">cliargs</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">iglob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s1">&#39;*.param&#39;</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="n">resolve_relative_config_file</span><span class="p">(</span><span class="n">cliargs</span><span class="o">.</span><span class="n">param</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span></div>
+
+
+<div class="viewcode-block" id="resolve_relative_config_file"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.resolve_relative_config_file">[docs]</a><span class="k">def</span> <span class="nf">resolve_relative_config_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">full_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Does its level-headed best to find the config files specified by the user</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    config_file: str</span>
+<span class="sd">        the given path to a .param or .config file from the command line</span>
+<span class="sd">    full_path: str</span>
+<span class="sd">        the full path to the problem folder</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">check_file_exists</span><span class="p">(</span><span class="n">config_file</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">config_file</span>
+    <span class="k">elif</span> <span class="n">check_file_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">config_file</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">config_file</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">check_file_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Did not find expected config files</span><span class="se">\n</span><span class="s1">&#39;</span>
+                 <span class="s1">&#39;Could not find </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="check_for_nvcc"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.check_for_nvcc">[docs]</a><span class="k">def</span> <span class="nf">check_for_nvcc</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Check system PATH for nvcc, exit if not found&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s1">&#39;which&#39;</span><span class="p">,</span> <span class="s1">&#39;nvcc&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  &quot;</span>
+            <span class="s2">&quot;PyGBe will continue to run but will run significantly slower.  &quot;</span>
+            <span class="s2">&quot;For optimal performance, add `nvcc` to your PATH&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+         <span class="n">return_results_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a PyGBe problem, write outputs to STDOUT and to log file in</span>
+<span class="sd">    problem directory</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    log_output : Bool, default True.</span>
+<span class="sd">        If False, output is written only to STDOUT and not to a log file.</span>
+<span class="sd">    return_output_fname: Bool, default False.</span>
+<span class="sd">        If True, function main() returns the name of the</span>
+<span class="sd">        output log file. This is used for the regression tests.</span>
+<span class="sd">    return_results_dict: Bool, default False.</span>
+<span class="sd">        If True, function main() returns the results of the run</span>
+<span class="sd">        packed in a dictionary.  Used in testing and programmatic</span>
+<span class="sd">        use of PyGBe</span>
+<span class="sd">    field : Dictionary, defaults to None.</span>
+<span class="sd">         If passed, this dictionary will supercede any config file found, useful in</span>
+<span class="sd">         programmatically stepping through slight changes in a problem</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    output_fname       : str, if kwarg is True.</span>
+<span class="sd">                         The name of the log file containing problem output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">read_inputs</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">configFile</span><span class="p">,</span> <span class="n">paramfile</span> <span class="o">=</span> <span class="n">find_config_files</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYGBE_PROBLEM_FOLDER&#39;</span><span class="p">)</span>
+    <span class="c1">#check if a custom geometry location has been specified</span>
+    <span class="c1">#if it has, add an ENV_VAR to handle it</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
+        <span class="n">geo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">geo_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYGBE_GEOMETRY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geo_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Invalid geometry prefix provided (Folder not found)&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">geo_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">)</span>
+
+    <span class="c1">#try to expand ~ if present in output path</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+    <span class="c1">#if output path is absolute, use that, otherwise prepend</span>
+    <span class="c1">#problem path</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">):</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span>
+    <span class="c1"># create output directory if it doesn&#39;t already exist</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">results_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">()</span>
+    <span class="n">outputfname</span> <span class="o">=</span> <span class="s1">&#39;{:%Y-%m-</span><span class="si">%d</span><span class="s1">-%H%M%S}-output.log&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;output_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputfname</span>
+    <span class="k">if</span> <span class="n">log_output</span><span class="p">:</span>
+        <span class="n">restore_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">outputfname</span><span class="p">))</span>
+    <span class="c1"># Time stamp</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Run started on:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Date: </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">tm_year</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">,</span>
+                                    <span class="n">timestamp</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Time: </span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">tm_min</span><span class="p">,</span>
+                                    <span class="n">timestamp</span><span class="o">.</span><span class="n">tm_sec</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">PyGBe version: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pygbe</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+    <span class="n">TIC</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Config file: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">configFile</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameter file: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">paramfile</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Geometry folder: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geo_path</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Running in: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">full_path</span><span class="p">))</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;config_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">configFile</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;param_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">paramfile</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;geo_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geo_path</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;full_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_path</span>
+
+    <span class="c1">### Read parameters</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">read_parameters</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">paramfile</span><span class="p">)</span>
+
+    <span class="n">param</span><span class="o">.</span><span class="n">Nm</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">P</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">6</span>  <span class="c1"># Number of terms in Taylor expansion</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">BlocksPerTwig</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">))</span>
+                              <span class="p">)</span>  <span class="c1"># CUDA blocks that fit per twig</span>
+
+    <span class="n">HAS_GPU</span> <span class="o">=</span> <span class="n">check_for_nvcc</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">HAS_GPU</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;{:-^</span><span class="si">{}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;No GPU DETECTED&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Your param file has `GPU = 1` but CUDA was not detected.</span><span class="se">\n</span><span class="s2">&quot;</span>
+              <span class="s2">&quot;Continuing using CPU.  If you do not want this, use Ctrl-C</span><span class="se">\n</span><span class="s2">&quot;</span>
+              <span class="s2">&quot;to stop the program and check that your CUDA installation</span><span class="se">\n</span><span class="s2">&quot;</span>
+              <span class="s2">&quot;is on your $PATH&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;{:-^</span><span class="si">{}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;No GPU DETECTED&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">### Generate array of fields</span>
+    <span class="k">if</span> <span class="n">field</span><span class="p">:</span>
+        <span class="n">field_array</span> <span class="o">=</span> <span class="n">initialize_field</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">field_array</span> <span class="o">=</span> <span class="n">initialize_field</span><span class="p">(</span><span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+
+    <span class="c1">### Generate array of surfaces and read in elements</span>
+    <span class="n">surf_array</span> <span class="o">=</span> <span class="n">initialize_surface</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">configFile</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+
+
+    <span class="c1">### Fill surface class</span>
+    <span class="n">time_sort</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surf_array</span><span class="p">)):</span>
+        <span class="n">time_sort</span> <span class="o">+=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fill_surface</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="c1">### Output setup summary</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">surf_array</span><span class="p">:</span>
+        <span class="n">N_aux</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">N</span> <span class="o">+=</span> <span class="n">N_aux</span>        
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">]:</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">+=</span> <span class="n">N_aux</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">Neq</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">N_aux</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Total elements : </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">N</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total equations: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">))</span>
+
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;total_elements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">N</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;N_equation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">Neq</span>
+
+    <span class="n">results_dict</span> <span class="o">=</span> <span class="n">print_summary</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">results_dict</span><span class="p">)</span>
+
+    <span class="c1">### Precomputation</span>
+    <span class="n">ind0</span> <span class="o">=</span> <span class="n">IndexConstant</span><span class="p">()</span>
+    <span class="n">computeIndices</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind0</span><span class="p">)</span>
+    <span class="n">precomputeTerms</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind0</span><span class="p">)</span>
+
+    <span class="c1">### Load CUDA code</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernels</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Nm</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">K_fine</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">### Generate interaction list</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generate interaction list&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">generateList</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">list_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+    <span class="c1">### Transfer data to GPU</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Transfer data to GPU&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataTransfer</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">transfer_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+    <span class="n">timing</span> <span class="o">=</span> <span class="n">Timing</span><span class="p">()</span>
+
+    <span class="c1">### Generate RHS</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generate RHS&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">generateRHS</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">ind0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">generateRHS_gpu</span><span class="p">(</span><span class="n">field_array</span><span class="p">,</span> <span class="n">surf_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span>
+                            <span class="n">ind0</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">rhs_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+    <span class="n">setup_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;List time          : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">list_time</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data transfer time : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transfer_time</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RHS generation time: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rhs_time</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total setup time   : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">setup_time</span><span class="p">))</span>
+
+
+    <span class="c1">#   Check if there is a complex dielectric</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">E</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">]):</span>
+        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="n">complex_diel</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1">### Solve</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solve&#39;</span><span class="p">)</span>
+    <span class="c1"># Initializing phi dtype according to the problem we are solving.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">complex_diel</span><span class="p">:</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Neq</span><span class="p">)</span>    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Dielectric should be real for solvation energy problems&#39;</span><span class="p">)</span>
+        
+    <span class="n">phi</span><span class="p">,</span> <span class="n">iteration</span> <span class="o">=</span> <span class="n">gmres_mgs</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                            <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iteration</span>
+    <span class="n">solve_time</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Solve time        : </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">solve_time</span><span class="p">))</span>
+    <span class="n">phifname</span> <span class="o">=</span> <span class="s1">&#39;{:%Y-%m-</span><span class="si">%d</span><span class="s1">-%H%M%S}-phi.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;solve_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">solve_time</span>
+    <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">phifname</span><span class="p">),</span> <span class="n">phi</span><span class="p">)</span>
+
+    <span class="c1"># Put result phi in corresponding surfaces</span>
+    <span class="n">s_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="n">surf_array</span><span class="p">:</span>
+        <span class="n">s_start</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">fill_phi</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">s_start</span><span class="p">)</span>
+
+
+    <span class="c1"># Calculate solvation energy</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Solvation Energy (E_solv)&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">E_solv</span> <span class="o">=</span> <span class="n">calculate_solvation_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time E_solv: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">pot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+            <span class="k">if</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="n">parent_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+                <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: E_solv = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
+                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                                                      <span class="n">E_solv</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+
+
+    <span class="c1"># Calculate surface energy</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Surface Energy (E_surf)&#39;</span><span class="p">)</span>
+
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">E_surf</span> <span class="o">=</span> <span class="n">calculate_surface_energy</span><span class="p">(</span><span class="n">surf_array</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">E_field</span><span class="p">:</span>
+        <span class="n">parent_type</span> <span class="o">=</span> <span class="n">surf_array</span><span class="p">[</span><span class="n">field_array</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">surf_type</span>
+        <span class="k">if</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">or</span> <span class="n">parent_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+            <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: E_surf = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">E_surf</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time E_surf: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+
+    <span class="c1">### Calculate Coulombic interaction</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculate Coulomb Energy (E_coul)&#39;</span><span class="p">)</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">E_coul</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">coulomb</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculate Coulomb energy for region </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">E_coul</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coulomb_energy</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">param</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Region </span><span class="si">{}</span><span class="s1">: E_coul = </span><span class="si">{}</span><span class="s1"> kcal/mol = </span><span class="si">{}</span><span class="s1"> kJ/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">E_coul</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">4.184</span><span class="p">))</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time E_coul: </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+
+    <span class="c1">### Output summary</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Totals:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;E_solv = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;E_surf = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;E_coul = </span><span class="si">{}</span><span class="s1"> kcal/mol&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Time = </span><span class="si">{}</span><span class="s1"> s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">))</span>
+
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_solv_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_solv</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_surf_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_surf</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kcal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;E_coul_kJ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">E_coul</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.184</span>
+
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;total_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">TIC</span><span class="p">)</span>
+    <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pygbe</span><span class="o">.</span><span class="n">__version__</span>
+
+    <span class="n">output_pickle</span> <span class="o">=</span> <span class="n">outputfname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="n">output_pickle</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">output_pickle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;resultspickle&#39;</span><span class="p">)</span>
+    <span class="n">output_pickle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_pickle</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">output_pickle</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span> 
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">output_pickle</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error writing the pickle file, the results will be unreadable&#39;</span><span class="p">)</span>
+        <span class="k">pass</span>     
+    
+    <span class="c1">#reset stdout so regression tests, etc, don&#39;t get logged into the output</span>
+    <span class="c1">#file that they themselves are trying to read</span>
+    <span class="k">if</span> <span class="n">log_output</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">restore_stdout</span>
+
+    <span class="k">if</span> <span class="n">return_results_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">results_dict</span>
+
+    <span class="k">if</span> <span class="n">return_output_fname</span> <span class="ow">and</span> <span class="n">log_output</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">outputfname</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
