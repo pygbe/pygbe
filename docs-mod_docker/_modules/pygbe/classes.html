@@ -1,0 +1,741 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pygbe.classes &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.classes</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">linalg</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span>
+
+<span class="kn">from</span> <span class="nn">pygbe.util.semi_analytical</span> <span class="k">import</span> <span class="n">GQ_1D</span>
+<span class="kn">from</span> <span class="nn">pygbe.tree.direct</span> <span class="k">import</span> <span class="n">computeDiagonal</span>
+<span class="kn">from</span> <span class="nn">pygbe.quadrature</span> <span class="k">import</span> <span class="n">quadratureRule_fine</span>
+<span class="kn">from</span> <span class="nn">pygbe.util.read_data</span> <span class="k">import</span> <span class="n">readcrd</span><span class="p">,</span> <span class="n">readpqr</span><span class="p">,</span> <span class="n">read_vertex</span><span class="p">,</span> <span class="n">read_triangle</span>
+<span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="n">addSources</span><span class="p">,</span> <span class="n">sortPoints</span><span class="p">,</span> <span class="n">generateTree</span><span class="p">,</span> <span class="n">findTwigs</span>
+
+
+<div class="viewcode-block" id="Event"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Event">[docs]</a><span class="k">class</span> <span class="nc">Event</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for logging like in pycuda&#39;s cuda.Event()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Event.record"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Event.record">[docs]</a>    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1e3</span></div>
+
+<div class="viewcode-block" id="Event.time_till"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Event.time_till">[docs]</a>    <span class="k">def</span> <span class="nf">time_till</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">toc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">toc</span><span class="o">.</span><span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span></div>
+
+<div class="viewcode-block" id="Event.synchronize"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Event.synchronize">[docs]</a>    <span class="k">def</span> <span class="nf">synchronize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Surface"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface">[docs]</a><span class="k">class</span> <span class="nc">Surface</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surface class.</span>
+<span class="sd">    Information about the solvent excluded surface.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    triangle      : list, indices to triangle vertices.</span>
+<span class="sd">    vertex        : list, position of vertices.</span>
+<span class="sd">    XinV          : list, weights input for single layer potential.</span>
+<span class="sd">    XinK          : list, weights input for double layer potential.</span>
+<span class="sd">    Xout_int      : list, output vector of interior operators.</span>
+<span class="sd">    Xout_ext      : list, output vector of exterior operators.</span>
+<span class="sd">    xi            : list, x component of center.</span>
+<span class="sd">    yi            : list, y component of center.</span>
+<span class="sd">    zi            : list, z component of center.</span>
+<span class="sd">    xj            : list, x component of gauss nodes.</span>
+<span class="sd">    yj            : list, y component of gauss nodes.</span>
+<span class="sd">    zj            : list, z component of gauss nodes.</span>
+<span class="sd">    area          : list, areas of triangles.</span>
+<span class="sd">    normal        : list, normal of triangles.</span>
+<span class="sd">    sglInt_int    : list, singular integrals for V for internal equation.</span>
+<span class="sd">    sglInt_ext    : list, singular integrals for V for external equation.</span>
+<span class="sd">    xk            : list, position of gauss points on edges.</span>
+<span class="sd">    wk            : list, weight of gauss points on edges.</span>
+<span class="sd">    Xsk           : list, position of gauss points for near singular integrals.</span>
+<span class="sd">    Wsk           : list, weight of gauss points for near singular integrals.</span>
+<span class="sd">    tree          : list, tree structure.</span>
+<span class="sd">    twig          : list, tree twigs.</span>
+<span class="sd">    xiSort        : list, sorted x component of center.</span>
+<span class="sd">    yiSort        : list, sorted y component of center.</span>
+<span class="sd">    ziSort        : list, sorted z component of center.</span>
+<span class="sd">    xjSort        : list, sorted x component of gauss nodes.</span>
+<span class="sd">    yjSort        : list, sorted y component of gauss nodes.</span>
+<span class="sd">    zjSort        : list, sorted z component of gauss nodes.</span>
+<span class="sd">    xcSort        : list, sorted x component of the box centers according to</span>
+<span class="sd">                          M2P_list array.</span>
+<span class="sd">    ycSort        : list, sorted y component of the box centers according to</span>
+<span class="sd">                          M2P_list array.</span>
+<span class="sd">    zcSort        : list, sorted z component of the box centers according to</span>
+<span class="sd">                          M2P_list array.</span>
+<span class="sd">    areaSort      : list, sorted array of areas.</span>
+<span class="sd">    sglInt_intSort: list, sorted array of singular integrals for V for internal</span>
+<span class="sd">                          equation.</span>
+<span class="sd">    sglInt_extSort: list, sorted array of singular integrals for V for external</span>
+<span class="sd">                          equation.</span>
+<span class="sd">    unsort        : list, array of indices to unsort targets.</span>
+<span class="sd">    triangleSort  : list, sorted array of triangles.</span>
+<span class="sd">    sortTarget    : list, indices to sort targets.</span>
+<span class="sd">    sortSource    : list, indices to sort sources.</span>
+<span class="sd">    offsetSource  : list, offsets to sorted source array.</span>
+<span class="sd">    offsetTarget  : list, offsets to sorted target array.</span>
+<span class="sd">    sizeTarget    : list, number of targets per twig.</span>
+<span class="sd">    offsetTwigs   : list, offset to twig in P2P list array.</span>
+<span class="sd">    P2P_list      : list, pointers to twigs for P2P interaction list.</span>
+<span class="sd">    offsetMlt     : list, offset to multipoles in M2P list array.</span>
+<span class="sd">    M2P_list      : list, pointers to boxes for M2P interaction list.</span>
+<span class="sd">    Precond       : list, sparse representation of preconditioner for self</span>
+<span class="sd">                          interaction block.</span>
+<span class="sd">    Ein           : float, permitivitty inside surface.</span>
+<span class="sd">    Eout          : float, permitivitty outside surface.</span>
+<span class="sd">    E_hat         : float, ratio of Ein/Eout.</span>
+<span class="sd">    kappa_in      : float, kappa inside surface.</span>
+<span class="sd">    kappa_out     : float, kappa inside surface.</span>
+<span class="sd">    LorY_in       : int, Laplace (1) or Yukawa (2) in inner region.</span>
+<span class="sd">    LorY_out      : int, Laplace (1) or Yukawa (2) in outer region.</span>
+<span class="sd">    surf_type     : int, Surface type: internal_cavity (=0), stern or</span>
+<span class="sd">                         dielecric_interface (=1).</span>
+<span class="sd">    phi0          : list, known surface potential (dirichlet) or derivative of</span>
+<span class="sd">                          potential (neumann).</span>
+<span class="sd">    phi           : list, potential on surface.</span>
+<span class="sd">    dphi          : list, derivative of potential on surface.</span>
+<span class="sd">    dipole        : list, dipole moment vector from a surface.</span>
+
+<span class="sd">    # Device data:</span>
+
+<span class="sd">    xiDev        : list, sorted x component of center (on the GPU).</span>
+<span class="sd">    yiDev        : list, sorted y component of center (on the GPU).</span>
+<span class="sd">    ziDev        : list, sorted z component of center (on the GPU).</span>
+<span class="sd">    xjDev        : list, sorted x component of gauss nodes (on the GPU).</span>
+<span class="sd">    yjDev        : list, sorted y component of gauss nodes (on the GPU).</span>
+<span class="sd">    zjDev        : list, sorted z component of gauss nodes (on the GPU).</span>
+<span class="sd">    xcDev        : list, sorted x component of the box centers according to</span>
+<span class="sd">                         M2P_list array (on the GPU).</span>
+<span class="sd">    ycDev        : list, sorted y component of the box centers according to</span>
+<span class="sd">                         M2P_list array (on the GPU).</span>
+<span class="sd">    zcDev        : list, sorted z component of the box centers according to</span>
+<span class="sd">                         M2P_list array (on the GPU).</span>
+<span class="sd">    areaDev      : list, areas of triangles (on the GPU).</span>
+<span class="sd">    sglInt_intDev: list, singular integrals for V for internal equation (on the</span>
+<span class="sd">                         GPU).</span>
+<span class="sd">    sglInt_extDev: list, singular integrals for V for external equation (on the</span>
+<span class="sd">                         GPU).</span>
+<span class="sd">    vertexDev    : list, sorted vertex of the triangles.</span>
+<span class="sd">    sizeTarDev   : list, number of targets per twig (on the GPU).</span>
+<span class="sd">    offSrcDev    : list, offsets to sorted source array (on the GPU).</span>
+<span class="sd">    offMltDev    : list, offset to multipoles in M2P list array (on the GPU).</span>
+<span class="sd">    offTwgDev    : list, offset to twig in P2P list array (on the GPU).</span>
+<span class="sd">    M2P_lstDev   : list, pointers to boxes for M2P interaction list (on the GPU).</span>
+<span class="sd">    P2P_lstDev   : list, pointers to twigs for P2P interaction list (on the GPU).</span>
+<span class="sd">    xkDev        : list, position of gauss points on edges (on the GPU).</span>
+<span class="sd">    wkDev        : list, weight of gauss points on edges (on the GPU).</span>
+<span class="sd">    XskDev       : list, position of gauss points for near singular integrals</span>
+<span class="sd">                         (on the GPU).</span>
+<span class="sd">    WskDev       : list, weight of gauss points for near singular integrals (on</span>
+<span class="sd">                         the GPU).</span>
+<span class="sd">    kDev         : list, quadrature number of each quadrature point, in order.</span>
+<span class="sd">                         (on the GPU)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nsurf</span><span class="p">,</span> <span class="n">surf_type</span><span class="p">,</span> <span class="n">phi0_file</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twig</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">=</span> <span class="n">surf_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsurf</span> <span class="o">=</span> <span class="n">Nsurf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dipole</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">surf_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phi0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">phi0_file</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Surface.define_surface"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.define_surface">[docs]</a>    <span class="k">def</span> <span class="nf">define_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load the vertices and triangles that define the molecule surface&quot;&quot;&quot;</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="n">read_vertex</span><span class="p">(</span><span class="n">files</span> <span class="o">+</span> <span class="s1">&#39;.vert&#39;</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">triangle_raw</span> <span class="o">=</span> <span class="n">read_triangle</span><span class="p">(</span><span class="n">files</span> <span class="o">+</span> <span class="s1">&#39;.face&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span><span class="p">)</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time load mesh: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">))</span>
+        <span class="n">area_null</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">area_null</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zero_areas</span><span class="p">(</span><span class="n">triangle_raw</span><span class="p">,</span> <span class="n">area_null</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triangle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">triangle_raw</span><span class="p">,</span> <span class="n">area_null</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Removed areas=0: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">area_null</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Surface.define_regions"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.define_regions">[docs]</a>    <span class="k">def</span> <span class="nf">define_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_array</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Look for regions inside/outside&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsurf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>  <span class="c1"># Inside region</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kappa_in</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">kappa</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Ein</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">E</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">LorY_in</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">LorY</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">child</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>  <span class="c1"># Outside region</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">kappa_out</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">kappa</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Eout</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">E</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">LorY_out</span> <span class="o">=</span> <span class="n">field_array</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">LorY</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">,</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ein</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Eout</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Surface.fill_surface"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.fill_surface">[docs]</a>    <span class="k">def</span> <span class="nf">fill_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill the surface with all the necessary information to solve it.</span>
+
+<span class="sd">        -Set the Gauss points.</span>
+<span class="sd">        -Generate tree, compute the indices and precompute terms for M2M.</span>
+<span class="sd">        -Generate preconditioner.</span>
+<span class="sd">        -Compute the diagonal integral for internal and external equations.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        param    : class, parameters related to the surface we are studying.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span>
+        <span class="c1"># Calculate centers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_centers</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_norms</span><span class="p">()</span>
+        <span class="c1"># Set Gauss points (sources)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_gauss_points</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+
+        <span class="c1"># Calculate distances, get R_C0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_distance</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+        <span class="c1"># Generate tree, compute indices and precompute terms for M2M</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">generateTree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zi</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">Nm</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_C0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span><span class="p">)</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">twig</span> <span class="o">=</span> <span class="n">findTwigs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">twig</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
+
+        <span class="n">addSources</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">twig</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">GQ_1D</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Xsk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wsk</span> <span class="o">=</span> <span class="n">quadratureRule_fine</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">K_fine</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generate_preconditioner</span><span class="p">()</span>
+
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">sortPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">twig</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">time_sort</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+        <span class="k">return</span> <span class="n">time_sort</span></div>
+
+<div class="viewcode-block" id="Surface.calc_centers"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.calc_centers">[docs]</a>    <span class="k">def</span> <span class="nf">calc_centers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the centers of each element of the surface&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:],</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:],</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:],</span> <span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Surface.calc_norms"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.calc_norms">[docs]</a>    <span class="k">def</span> <span class="nf">calc_norms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the surface normal vector&quot;&quot;&quot;</span>
+        <span class="n">L0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span>
+        <span class="n">L2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">L0</span><span class="p">,</span> <span class="n">L2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal</span> <span class="o">/=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Surface.calc_distance"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.calc_distance">[docs]</a>    <span class="k">def</span> <span class="nf">calc_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the radius spanned by the points on the surface&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">yi</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">zi</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yi</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span>
+                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zi</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_center</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R_C0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Surface.get_gauss_points"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.get_gauss_points">[docs]</a>    <span class="k">def</span> <span class="nf">get_gauss_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the Gauss points for far away integrals.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        n       : int (1,3,4,7), desired Gauss points per element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">gauss_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">gauss_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]))</span>
+
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5.</span><span class="p">,</span> <span class="mi">3</span><span class="o">/</span><span class="mf">5.</span><span class="p">]))</span>
+
+        <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">797426985353087</span><span class="p">,</span> <span class="o">.</span><span class="mi">101286507323456</span><span class="p">,</span> <span class="o">.</span><span class="mi">101286507323456</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">101286507323456</span><span class="p">,</span> <span class="o">.</span><span class="mi">797426985353087</span><span class="p">,</span> <span class="o">.</span><span class="mi">101286507323456</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">101286507323456</span><span class="p">,</span> <span class="o">.</span><span class="mi">101286507323456</span><span class="p">,</span> <span class="o">.</span><span class="mi">797426985353087</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">059715871789770</span><span class="p">,</span> <span class="o">.</span><span class="mi">470142064105115</span><span class="p">,</span> <span class="o">.</span><span class="mi">470142064105115</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">470142064105115</span><span class="p">,</span> <span class="o">.</span><span class="mi">059715871789770</span><span class="p">,</span> <span class="o">.</span><span class="mi">470142064105115</span><span class="p">]))</span>
+                <span class="n">gauss_array</span><span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">470142064105115</span><span class="p">,</span> <span class="o">.</span><span class="mi">470142064105115</span><span class="p">,</span> <span class="o">.</span><span class="mi">059715871789770</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zj</span> <span class="o">=</span> <span class="n">gauss_array</span><span class="o">.</span><span class="n">T</span></div>
+
+<div class="viewcode-block" id="Surface.generate_preconditioner"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.generate_preconditioner">[docs]</a>    <span class="k">def</span> <span class="nf">generate_preconditioner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate preconditioner</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Uses block-diagonal preconditioner [3]_</span>
+
+<span class="sd">        .. [3] Altman, M. D., Bardhan, J. P., White, J. K., &amp; Tidor, B. (2009).</span>
+<span class="sd">           Accurate solution of multi‐region continuum biomolecule electrostatic</span>
+<span class="sd">           problems using the linearized Poisson–Boltzmann equation with curved</span>
+<span class="sd">           boundary elements. Journal of computational chemistry, 30(1), 132-153.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If we have complex dielectric constants we need to initialize Precon with</span>
+        <span class="c1"># complex type else it&#39;ll be float.</span>
+
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">iscomplexobj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">))</span>
+        <span class="c1"># Stores the inverse of the block diagonal (also a tridiag matrix)</span>
+        <span class="c1"># Order: Top left, top right, bott left, bott right</span>
+        <span class="n">centers</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zi</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="c1">#   Compute diagonal integral for internal equation</span>
+        <span class="n">VL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">KL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">VY</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">KY</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">computeDiagonal</span><span class="p">(</span><span class="n">VL</span><span class="p">,</span> <span class="n">KL</span><span class="p">,</span> <span class="n">VY</span><span class="p">,</span> <span class="n">KY</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:]]),</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_in</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">LorY_in</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dX11</span> <span class="o">=</span> <span class="n">KL</span>
+            <span class="n">dX12</span> <span class="o">=</span> <span class="o">-</span><span class="n">VL</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_int</span> <span class="o">=</span> <span class="n">VL</span>  <span class="c1"># Array for singular integral of V through interior</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">LorY_in</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dX11</span> <span class="o">=</span> <span class="n">KY</span>
+            <span class="n">dX12</span> <span class="o">=</span> <span class="o">-</span><span class="n">VY</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_int</span> <span class="o">=</span> <span class="n">VY</span>  <span class="c1"># Array for singular integral of V through interior</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_int</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="c1">#   Compute diagonal integral for external equation</span>
+        <span class="n">VL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">KL</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">VY</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">KY</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">computeDiagonal</span><span class="p">(</span><span class="n">VL</span><span class="p">,</span> <span class="n">KL</span><span class="p">,</span> <span class="n">VY</span><span class="p">,</span> <span class="n">KY</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">triangle</span><span class="p">[:]]),</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">centers</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">kappa_out</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">xk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">LorY_out</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dX21</span> <span class="o">=</span> <span class="n">KL</span>
+            <span class="n">dX22</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">*</span> <span class="n">VL</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_ext</span> <span class="o">=</span> <span class="n">VL</span>  <span class="c1"># Array for singular integral of V through exterior</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">LorY_out</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">dX21</span> <span class="o">=</span> <span class="n">KY</span>
+            <span class="n">dX22</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_hat</span> <span class="o">*</span> <span class="n">VY</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_ext</span> <span class="o">=</span> <span class="n">VY</span>  <span class="c1"># Array for singular integral of V through exterior</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sglInt_ext</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">!=</span> <span class="s1">&#39;dirichlet_surface&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">!=</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+            <span class="n">d_aux</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">dX22</span> <span class="o">-</span> <span class="n">dX21</span> <span class="o">*</span> <span class="n">dX12</span> <span class="o">/</span> <span class="n">dX11</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dX11</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dX11</span> <span class="o">*</span> <span class="n">dX12</span> <span class="o">*</span> <span class="n">d_aux</span> <span class="o">*</span> <span class="n">dX21</span> <span class="o">/</span> <span class="n">dX11</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">dX11</span> <span class="o">*</span> <span class="n">dX12</span> <span class="o">*</span> <span class="n">d_aux</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">d_aux</span> <span class="o">*</span> <span class="n">dX21</span> <span class="o">/</span> <span class="n">dX11</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d_aux</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">VY</span>  <span class="c1"># So far only for Yukawa outside</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Precond</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Surface.zero_areas"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.zero_areas">[docs]</a>    <span class="k">def</span> <span class="nf">zero_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">triangle_raw</span><span class="p">,</span> <span class="n">area_null</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Looks for &quot;zero-areas&quot;, areas that are really small, almost zero. It appends</span>
+<span class="sd">        them to area_null list.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ----------</span>
+<span class="sd">        s           : class, surface where we whan to look for zero areas.</span>
+<span class="sd">        triangle_raw: list, triangles of the surface.</span>
+<span class="sd">        area_null   : list, contains the zero areas.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        area_null   : list, indices of the triangles with zero-areas.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">triangle_raw</span><span class="p">)):</span>
+            <span class="n">L0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="n">triangle_raw</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="n">triangle_raw</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+            <span class="n">L2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="n">triangle_raw</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="n">triangle_raw</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+            <span class="n">normal_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">L0</span><span class="p">,</span> <span class="n">L2</span><span class="p">)</span>
+            <span class="n">area_aux</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal_aux</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">area_aux</span> <span class="o">&lt;</span> <span class="mf">1e-10</span><span class="p">:</span>
+                <span class="n">area_null</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">area_null</span></div>
+
+<div class="viewcode-block" id="Surface.fill_phi"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Surface.fill_phi">[docs]</a>    <span class="k">def</span> <span class="nf">fill_phi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">s_start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Place the result vector on surface structure.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        phi        : array, result vector.</span>
+<span class="sd">        s_start    : int, offset to grab the corresponding section of phi</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">s_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;dirichlet_surface&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dphi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="n">s_size</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;neumann_surface&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dphi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="n">s_size</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">surf_type</span> <span class="o">==</span> <span class="s1">&#39;asc_surface&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dphi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ein</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">s_size</span><span class="p">)</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="n">s_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s_start</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dphi</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">s_start</span> <span class="o">+</span> <span class="n">s_size</span><span class="p">:</span><span class="n">s_start</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_size</span><span class="p">]</span>
+            <span class="n">s_start</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s_size</span>
+
+        <span class="k">return</span> <span class="n">s_start</span></div></div>
+
+
+<div class="viewcode-block" id="Field"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Field">[docs]</a><span class="k">class</span> <span class="nc">Field</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Field class.</span>
+<span class="sd">    Information about each region in the molecule.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    parent: list, Pointer to &quot;parent&quot; surface.</span>
+<span class="sd">    child : list, Pointer to &quot;children&quot; surfaces.</span>
+<span class="sd">    LorY  : int, 1: Laplace, 2: Yukawa.</span>
+<span class="sd">    kappa : float, inverse of Debye length.</span>
+<span class="sd">    E     : float, dielectric constant.</span>
+<span class="sd">    xq    : list, position of charges.</span>
+<span class="sd">    q     : list, value of charges.</span>
+<span class="sd">    pot   : int, 1: calculate energy on this field 0: ignore</span>
+<span class="sd">    coulomb  : int, 1: perform Coulomb interaction calculation, 0: don&#39;t do Coulomb.</span>
+
+<span class="sd">    # Device data</span>
+
+<span class="sd">    xq_gpu: list, x position of charges on GPU.</span>
+<span class="sd">    yq_gpu: list, y position of charges on GPU.</span>
+<span class="sd">    zq_gpu: list, z position of charges on GPU.</span>
+<span class="sd">    q_gpu : list, value of charges on GPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">coulomb</span><span class="p">,</span> <span class="n">pot</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LorY</span> <span class="o">=</span> <span class="n">LorY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">kappa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E</span>      <span class="o">=</span> <span class="n">E</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xq</span>     <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span>      <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pot</span> <span class="o">=</span> <span class="n">pot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coulomb</span> <span class="o">=</span> <span class="n">coulomb</span>
+
+
+        <span class="c1"># Device data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xq_gpu</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yq_gpu</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zq_gpu</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_gpu</span>  <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Field.load_charges"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Field.load_charges">[docs]</a>    <span class="k">def</span> <span class="nf">load_charges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qfile</span><span class="p">,</span> <span class="n">REAL</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">qfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.crd&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">readcrd</span><span class="p">(</span><span class="n">qfile</span><span class="p">,</span> <span class="n">REAL</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">qfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pqr&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">readpqr</span><span class="p">(</span><span class="n">qfile</span><span class="p">,</span> <span class="n">REAL</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Timing"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Timing">[docs]</a><span class="k">class</span> <span class="nc">Timing</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Timing class.</span>
+<span class="sd">    Timing information for different parts of the code.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time_an   : float, time spent in compute the near singular integrals.</span>
+<span class="sd">    time_P2P  : float, time spent in compute the P2P part of the treecode.</span>
+<span class="sd">    time_P2M  : float, time spent in compute the P2M part of the treecode.</span>
+<span class="sd">    time_M2M  : float, time spent in compute the M2M part of the treecode.</span>
+<span class="sd">    time_M2P  : float, time spent in compute the M2P part of the treecode.</span>
+<span class="sd">    time_trans: float, time spent in transfer data to and from the GPU.</span>
+<span class="sd">    time_sort : float, time spent in sorting data to send to the GPU.</span>
+<span class="sd">    time_mass : float, time spent in compute the mass of the sources in treecode.</span>
+<span class="sd">    AI_int    : int, counter of the amount of near singular integrals solved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_an</span>    <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_P2P</span>   <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_P2M</span>   <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_M2M</span>   <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_M2P</span>   <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_sort</span>  <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_mass</span>  <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AI_int</span>     <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters class.</span>
+<span class="sd">    It contains the information of the parameters needed to run the code.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    kappa        :  float, inverse of Debye length.</span>
+<span class="sd">    restart      :  int, Restart of GMRES.</span>
+<span class="sd">    tol          :  float, Tolerance of GMRES.</span>
+<span class="sd">    max_iter     :  int, Max number of GMRES iterations.</span>
+<span class="sd">    P            :  int, Order of Taylor expansion.</span>
+<span class="sd">    eps          :  int, Epsilon machine.</span>
+<span class="sd">    Nm           :  int, Number of terms in Taylor expansion.</span>
+<span class="sd">    NCRIT        :  int, Max number of targets per twig box.</span>
+<span class="sd">    theta        :  float, MAC criterion for treecode.</span>
+<span class="sd">    K            :  int, Number of Gauss points per element.</span>
+<span class="sd">    K_fine       :  int, Number of Gauss points per element for near singular integrals.</span>
+<span class="sd">    threshold    :  float, L/d criterion for semi-analytic intergrals.</span>
+<span class="sd">    Nk           :  int, Gauss points per side for semi-analytical integrals.</span>
+<span class="sd">    BSZ          :  int, CUDA block size.</span>
+<span class="sd">    Nround       :  int, Max size of sorted target array.</span>
+<span class="sd">    BlocksPerTwig:  int, Number of CUDA blocks that fit per tree twig.</span>
+<span class="sd">    N            :  int, Total number of elements.</span>
+<span class="sd">    Neq          :  int, Total number of equations.</span>
+<span class="sd">    qe           :  float, Charge of an electron (1.60217646e-19).</span>
+<span class="sd">    Na           :  float, Avogadro&#39;s number (6.0221415e23).</span>
+<span class="sd">    E_0          :  float, Vacuum dielectric constant (8.854187818e-12).</span>
+<span class="sd">    REAL         :  Data type.</span>
+<span class="sd">    E_field      :  list, Regions where energy will be calculated.</span>
+<span class="sd">    GPU          :  int, =1: with GPU, =0: no GPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kappa</span>         <span class="o">=</span> <span class="mf">0.</span>              <span class="c1"># inverse of Debye length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restart</span>       <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Restart of GMRES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>           <span class="o">=</span> <span class="mf">0.</span>              <span class="c1"># Tolerance of GMRES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span>      <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Max number of GMRES iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span>             <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Order of Taylor expansion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eps</span>           <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Epsilon machine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nm</span>            <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Number of terms in Taylor expansion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NCRIT</span>         <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Max number of targets per twig box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span>         <span class="o">=</span> <span class="mf">0.</span>              <span class="c1"># MAC criterion for treecode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K</span>             <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Number of Gauss points per element</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K_fine</span>        <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Number of Gauss points per element for near singular integrals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>     <span class="o">=</span> <span class="mf">0.</span>              <span class="c1"># L/d criterion for semi-analytic intergrals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nk</span>            <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Gauss points per side for semi-analytical integrals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BSZ</span>           <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># CUDA block size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nround</span>        <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Max size of sorted target array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BlocksPerTwig</span> <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Number of CUDA blocks that fit per tree twig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span>             <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Total number of elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Neq</span>           <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Total number of equations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qe</span>            <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">e</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Na</span>            <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">Avogadro</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_0</span>           <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">epsilon_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">REAL</span>          <span class="o">=</span> <span class="mi">0</span>               <span class="c1"># Data type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">E_field</span>       <span class="o">=</span> <span class="p">[]</span>              <span class="c1"># Regions where energy will be calculated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GPU</span>           <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>              <span class="c1"># =1: with GPU, =0: no GPU</span></div>
+
+
+<div class="viewcode-block" id="IndexConstant"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.classes.IndexConstant">[docs]</a><span class="k">class</span> <span class="nc">IndexConstant</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Precompute indices required for the treecode computation.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    II         : list, multipole order in the x-direction for the treecode.</span>
+<span class="sd">    JJ         : list, multipole order in the y-direction for the treecode.</span>
+<span class="sd">    KK         : list, multipole order in the z-direction for the treecode.</span>
+<span class="sd">    index_large: list, pointers to the position of multipole order i, j, k</span>
+<span class="sd">                       in the multipole array, organized in a 1D array of size</span>
+<span class="sd">                       P*P*P. Index is given by index[i*P*P+j*P+k]</span>
+<span class="sd">    index_small: list, pointers to the position of multipole order i, j, k</span>
+<span class="sd">                       in the multipole array, organized in a 1D array which is</span>
+<span class="sd">                       compressed with respect to index_large (does not consider</span>
+<span class="sd">                       combinations of i,j,k which do not have a multipole).</span>
+<span class="sd">    index      : list, copy of index_small</span>
+<span class="sd">    index_ptr  : list, pointer to index_small. Data in index_small is organized</span>
+<span class="sd">                      in a i-major fashion (i,j,k), and index_ptr points at the</span>
+<span class="sd">                      position in index_small where the order i changes.</span>
+<span class="sd">    combII     : array, combinatory of (I, i) where I is the maximum i multipole.</span>
+<span class="sd">                       Used in coefficients of M2M.</span>
+<span class="sd">    combJJ     : array, combinatory of (J, j) where J is the maximum j multipole.</span>
+<span class="sd">                       Used in coefficients of M2M.</span>
+<span class="sd">    combKK     : array, combinatory of (K, k) where K is the maximum k multipole.</span>
+<span class="sd">                       Used in coefficients of M2M.</span>
+<span class="sd">    IImii      : array, I-i where I is the maximum i multipole.</span>
+<span class="sd">                       Used in exponents of M2M.</span>
+<span class="sd">    JJmjj      : array, J-j where J is the maximum j multipole.</span>
+<span class="sd">                       Used in exponents of M2M.</span>
+<span class="sd">    KKmkk      : array, K-k where K is the maximum k multipole.</span>
+<span class="sd">                       Used in exponents of M2M.</span>
+
+<span class="sd">    # Device data</span>
+
+<span class="sd">    indexDev   : list, index_large on GPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">II</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">JJ</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">KK</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span>       <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_small</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_large</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_ptr</span>   <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combII</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combJJ</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combKK</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IImii</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">JJmjj</span>  <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">KKmkk</span>  <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Device data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexDev</span> <span class="o">=</span> <span class="p">[]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
