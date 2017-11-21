@@ -1,11 +1,11 @@
 # Dockerfile for PyGBe
 # --------------------
 # To build the image:
-# `nvidia-docker build --tag=pygbe:0.3 .`
+# `nvidia-docker build --tag=pygbe:master .`
 # To run a container:
-# `nvidia-docker run --name=pygbe -it pygbe:0.3 /bin/bash`
+# `nvidia-docker run --name=pygbe -it pygbe:master /bin/bash`
 # To access the software:
-# Once in the container, pygbe can be found in `/opt/pygbe/0.3`
+# Once in the container, pygbe can be found in `/opt/pygbe/master`
 # To stop the container:
 # `nvidia-docker stop pygbe`
 # To restart the container:
@@ -55,7 +55,7 @@ RUN VERSION=2017.1.1 && \
     make install
 
 # Install PyGBe
-RUN VERSION=0.3 && \
+RUN VERSION=master && \
     TARBALL=${VERSION}.tar.gz && \
     wget https://github.com/barbagroup/pygbe/archive/${TARBALL} -P /tmp && \
     PYGBE_DIR=/opt/pygbe/${VERSION} && \
