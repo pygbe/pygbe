@@ -13,8 +13,8 @@ C++, wrapped using SWIG.
 
 ## Biomolecular electrostatics:
 
-[![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](http://dx.doi.org/10.21105/joss.00043)
-[![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](http://www.doi2bib.org/#/doi/10.21105/joss.00043)
+[![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00043/status.svg)](https://doi.org/10.21105/joss.00043)
+[![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](https://www.doi2bib.org/bib/10.21105%2Fjoss.00043)
 
 In this application, PyGBe uses continuum electrostatics to compute the solvation
 energy for proteins modeled with any number of dielectric regions. The 
@@ -23,6 +23,9 @@ Poisson-Boltzmann equation of the [implicit-solvent](https://en.wikipedia.org/wi
 model in integral form.
 
 ## Localized Surface Plasmon Resonance:
+
+[![DOI_JOSS](http://joss.theoj.org/papers/10.21105/joss.00306/status.svg)](https://doi.org/10.21105/joss.00306)
+[![CITE_BIB](https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg)](https://www.doi2bib.org/bib/10.21105%2Fjoss.00306)
 
 PyGBe also uses electrostatics to compute the extinction cross section of 
 scatterers that are much smaller than the incident wavelength. This is relevant, 
@@ -267,7 +270,9 @@ If you are interested in contributing to the `PyGBe` project go to the [Develope
 If PyGBe contributes to a project that leads to a scientific publication, please cite the project.
 You can use this citation or the BibTeX entry below.
 
-> Christopher D. Cooper, Natalia C. Clementi, Gilbert Forsyth, Lorena A. Barba (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics, _J. Open Source Software_, **1**(4):43, [doi:10.21105/joss.00043](http://dx.doi.org/10.21105/joss.00043)
+### Biomolecular Electrostatics
+
+> Christopher D. Cooper, Natalia C. Clementi, Gilbert Forsyth, Lorena A. Barba (2016). PyGBe: Python, GPUs and Boundary elements for biomolecular electrostatics, _J. Open Source Software_, **1**(4), 43, [doi:10.21105/joss.00043](http://dx.doi.org/10.21105/joss.00043)
 
 ```console
 @article{DCooper2016,
@@ -278,8 +283,29 @@ You can use this citation or the BibTeX entry below.
   publisher = {The Open Journal},
   volume = {1},
   number = {4},
+  pages = {43},
   author = {Christopher D. Cooper and Natalia C. Clementi and Gilbert Forsyth and Lorena A. Barba},
   title = {{PyGBe}: Python,  {GPUs} and Boundary elements for biomolecular electrostatics},
   journal = {{JOSS}}
+}
+```
+
+### Localized Surface Plasmon Resonance
+
+> Natalia C. Clementi, Gilbert Forsyth, Christopher D. Cooper, Lorena A. Barba (2017). PyGBe-LSPR: Python and GPU Boundary-integral solver for electrostatics, _J. Open Source Software_, **2**(19), 306, [doi:10.21105/joss.00306](https://doi.org/10.21105/joss.00306)
+
+```console
+@article{CClementi2017,
+  doi = {10.21105/joss.00306},
+  url = {https://doi.org/10.21105/joss.00306},
+  year  = {2017},
+  month = {nov},
+  publisher = {The Open Journal},
+  volume = {2},
+  number = {19},
+  pages = {306},
+  author = {Natalia C. Clementi and Gilbert Forsyth and Christopher D. Cooper and Lorena A. Barba},
+  title = {{PyGBe}-{LSPR}: Python and {GPU} Boundary-integral solver for electrostatics},
+  journal = {The Journal of Open Source Software}
 }
 ```

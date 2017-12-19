@@ -1,11 +1,11 @@
 # Dockerfile for PyGBe
 # --------------------
 # To build the image:
-# `nvidia-docker build --tag=pygbe:0.3 .`
+# `nvidia-docker build --tag=pygbe:master .`
 # To run a container:
-# `nvidia-docker run --name=pygbe -it pygbe:0.3 /bin/bash`
+# `nvidia-docker run --name=pygbe -it pygbe:master /bin/bash`
 # To access the software:
-# Once in the container, pygbe can be found in `/opt/pygbe/0.3`
+# Once in the container, pygbe can be found in `/opt/pygbe/pygbe-master`
 # To stop the container:
 # `nvidia-docker stop pygbe`
 # To restart the container:
@@ -20,7 +20,7 @@ FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 # Install basic requirements.
 RUN apt-get update && \
-    apt-get install -y wget
+    apt-get install -y wget unzip
 
 # Install Miniconda.
 RUN FILENAME=Miniconda3-4.3.21-Linux-x86_64.sh && \
@@ -55,12 +55,9 @@ RUN VERSION=2017.1.1 && \
     make install
 
 # Install PyGBe
-RUN VERSION=0.3 && \
-    TARBALL=${VERSION}.tar.gz && \
-    wget https://github.com/barbagroup/pygbe/archive/${TARBALL} -P /tmp && \
-    PYGBE_DIR=/opt/pygbe/${VERSION} && \
-    mkdir -p ${PYGBE_DIR} && \
-    tar -xzf /tmp/${TARBALL} -C ${PYGBE_DIR} --strip-components=1 && \
-    rm -f /tmp/${TARBALL} && \
-    cd ${PYGBE_DIR} && \
+RUN wget https://github.com/barbagroup/pygbe/archive/master.zip -P /tmp && \
+    mkdir -p /opt/pygbe && \
+    unzip /tmp/master.zip -d /opt/pygbe/ && \
+    rm -f /tmp/master.zip && \
+    cd /opt/pygbe/pygbe-master && \
     python setup.py install clean

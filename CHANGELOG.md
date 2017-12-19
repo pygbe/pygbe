@@ -4,6 +4,27 @@
 ---
 
 
+## 0.3.1
+---
+### Added
+
+* Suggestions from JOSS reviewers.
+* Dockerfile for alternative installation.
+
+### Changed
+
+* README with latest version of packages tested.
+  * Support for `CUDA 8.0` using `gcc 5.4.0` and, PyCUDA 2017.1.1.
+
+### Fixed
+
+* Problem with format of files needed to run performance check.
+* Broken link in documentation.
+* Small bug: overwriting a variable doesn't allow casting type. 
+
+### Removed
+
+
 ## 0.3
 ---
 ### Added
@@ -44,6 +65,7 @@ treecode to accept complex numbers.
 * All commented out code
 * Unused imports and unused variables removed.
 
+
 ## 0.2.1
 ---
 ### Added
@@ -59,15 +81,15 @@ treecode to accept complex numbers.
 * Updated license with new contributors
 * Layout of sphinx documentation toolbars (home button added, more verbose layout)
 
-
 ### Fixed
 
-* Uncaught exception when pygbe doesnt run correctly
+* Uncaught exception when pygbe doesn't run correctly
 * Wrong error type in regression test master script
 * Performance runs work on non-X backends
 * Uncaught out-of-memory exceptions in regression tests
 
 ### Removed
+
 
 ## 0.2
 ---
@@ -83,7 +105,6 @@ treecode to accept complex numbers.
 * Sphinx documentation
 * In addition to text output, numerical results are stored to a pickled dictionary for easy access
   
-
 ### Changed
 * Repo structure altered to match Python packaging guidelines.
 * Modularized code and removed all relative imports
@@ -102,7 +123,6 @@ lys
 ```
 * Refactored regression tests, added simple caching to avoid test repeats
 * Move many, many functions around so that individual `.py` filenames are more descriptive and accurate
-
 
 ### Removed
 * Makefiles (functionality replaced by `setup.py`)
