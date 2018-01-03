@@ -7,6 +7,11 @@ Translation has to be modified in script.
 Axis are assumed to be oriented as   |__ x
                                     /
                                    z  
+The rotation and tilt angles are passed by command line as arguments. 
+The translation has to be modified in the script. 
+As it is now, the protein will be located at 10 Ang of the surface of sphere of
+radius 250 Ang. The displacement occurs in the z direction. In the x and y 
+directions the protein is centered in 0.  
 '''
 
 import numpy
