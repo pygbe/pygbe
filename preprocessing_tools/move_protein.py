@@ -10,7 +10,7 @@ Axis are assumed to be oriented as   |__ x
 The rotation and tilt angles are passed by command line as arguments. 
 The translation has to be modified in the script. 
 As it is now, the protein will be located at 10 Ang of the surface of sphere of
-radius 250 Ang. The displacement occurs in the z direction. In the x and y 
+radius 125 Ang. The displacement occurs in the z direction. In the x and y 
 directions the protein is centered in 0.  
 '''
 
@@ -118,26 +118,38 @@ xmin = min(vert_new[:,0])
 ymin = min(vert_new[:,1])
 zmin = min(vert_new[:,2])
 
-R_sensor = 250 #Angstrom
+#index of when the min in z happend 
+idx_zmin = numpy.argmin(vert_new[:, 2])
+
+R_sensor = 125 #Angstrom
 dist = 10 #Angstrom
+x_trans = 0
 y_trans = 0
-x_trans = 0 
 z_trans = R_sensor + dist
 
 ctr = numpy.average(vert_new, axis=0) 
 
+x_zmin = vert_new[idx_zmin, 0]
+y_zmin = vert_new[idx_zmin, 1]
 
-translation = numpy.array([ctr[0], ctr[1], zmin - z_trans]) # z_trans Angs apart of th sphere in the z direction
+
+translation = numpy.array([x_zmin, y_zmin, zmin - z_trans]) # z_trans Angs apart of th sphere in the z direction
 
 # Move according to translation
 
 vert_new -= translation
 xq_new -= translation
 
+### Checking
+r_min_last = numpy.min(numpy.linalg.norm(vert_new, axis=1))
+idx_rmin_last = numpy.argmin(numpy.linalg.norm(vert_new, axis=1))
+
+
+print(xq_new)
 
 ## Check
 ctr = numpy.average(vert_new, axis=0) 
-print(ctr)
+
 d = find_dipole(xq_new, q)
 dx = numpy.array([0, d[1], d[2]])
 dy = numpy.array([d[0], 0, d[2]])
@@ -163,11 +175,10 @@ if alpha_y>numpy.pi:
 
 if verbose:
     print ('Desired configuration:')
-if abs(ctr[0])<1e-10 and abs(ctr[1])<1e-10:
-    if verbose:
-        print ('\tProtein is centered, %f angs over the surface in the z direction'%(min(vert_new[:,2])))
-else:
-    print ('\tProtein NOT well located!')
+
+    print ('\tProtein is centered, {}'.format(ctr))
+    print ('\tProtein r minimum is {}, located at {}'.format(r_min_last,
+                                                      vert_new[idx_rmin_last, :]))
 
 if abs(d[2])<1e-10:
     if verbose:
