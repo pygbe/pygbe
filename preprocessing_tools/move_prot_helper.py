@@ -197,7 +197,6 @@ def modify_pqr(inpqr, outpqr, xq):
                 line_split = line.split()
                 if line_split[0] == 'ATOM':
                     atm_nu += 1
-                    print(atm_nu)
                     line_add = ' %3.3f  %3.3f  %3.3f '%(xq[atm_nu,0], xq[atm_nu,1], xq[atm_nu,2])
                     line_new = line[:27] + line_add + line[55:]
                     file_o.write(line_new)
