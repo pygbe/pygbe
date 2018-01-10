@@ -191,16 +191,17 @@ def rotate_z(pos, angle):
 def modify_pqr(inpqr, outpqr, xq):
 
     with open(outpqr, 'w') as file_o:
-        for line in inpqr:
-            line_split = line.split()
-
-            if line_split[0] == 'ATOM':
-                atm_nu = int(line_split[1])-1
-                line_add = ' %3.3f  %3.3f  %3.3f '%(xq[atm_nu,0], xq[atm_nu,1], xq[atm_nu,2])
-                line_new = line[:27] + line_add + line[55:]
-                file_o.write(line_new)
-            else:
-                file_o.write(line)
-    file_o.close()
-
+        atm_nu = -1
+        with open(inpqr, 'r') as file_i:
+            for line in file_i:
+                line_split = line.split()
+                if line_split[0] == 'ATOM':
+                    atm_nu += 1
+                    print(atm_nu)
+                    line_add = ' %3.3f  %3.3f  %3.3f '%(xq[atm_nu,0], xq[atm_nu,1], xq[atm_nu,2])
+                    line_new = line[:27] + line_add + line[55:]
+                    file_o.write(line_new)
+                    atm_nu
+                else:
+                    file_o.write(line)
 
