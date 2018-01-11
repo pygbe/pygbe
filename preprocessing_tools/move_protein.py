@@ -145,8 +145,6 @@ r_min_last = numpy.min(numpy.linalg.norm(vert_new, axis=1))
 idx_rmin_last = numpy.argmin(numpy.linalg.norm(vert_new, axis=1))
 
 
-print(xq_new)
-
 ## Check
 ctr = numpy.average(vert_new, axis=0) 
 
