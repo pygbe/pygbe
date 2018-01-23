@@ -79,6 +79,7 @@ def read_pqr(filename, REAL):
     pos     : (Nqx3) array, positions of the charges.
     q       : (Nqx1) array, value of the charges.
     Nq      : float, number of charges, length of array q. 
+    rad      : (Nqx1) array, value of the radius of the charges.   
     """
 
     with open(filename, 'r') as f:
@@ -86,20 +87,23 @@ def read_pqr(filename, REAL):
 
     pos = []
     q = []
+    rad = []
     for line in lines:
         line = line.split()
 
         if line[0] == 'ATOM':
             #  grab coordinates and charge from columns
-            x, y, z, q0 = [REAL(i) for i in line[5:-1]]
+            x, y, z, q0, r0 = [REAL(i) for i in line[5:]]
             q.append(q0)
+            rad.append(r0)
             pos.append([x, y, z])
 
     pos = numpy.array(pos)
     q = numpy.array(q)
+    rad = numpy.array(rad)
     Nq = len(q)
 
-    return pos, q, Nq 
+    return pos, q, Nq, rad 
 
 
 def find_dipole(xq, q):
