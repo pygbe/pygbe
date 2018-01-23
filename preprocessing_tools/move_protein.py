@@ -40,7 +40,7 @@ outpqr = inpqr + name
 
 #Read mesh and pqr
 vert = read_vertex(inMesh+'.vert', float)
-xq, q, Nq = read_pqr(inpqr+'.pqr', float)
+xq, q, Nq, rad = read_pqr(inpqr+'.pqr', float)
 
 #### Setup initial configuration
 # Initial configuration: dipole parallel to y and outermost atom to center parallel to x
@@ -202,7 +202,7 @@ numpy.savetxt(outMesh+'.vert', vert_new)
 cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
 os.system(cmd)
 
-modify_pqr(inpqr+'.pqr', outpqr+'.pqr', xq_new)
+modify_pqr(inpqr+'.pqr', outpqr+'.pqr', xq_new, q, rad)
 
 if verbose:
     print ('\nWritten to '+outMesh+'.vert(.face) and '+outpqr+'.pqr')

@@ -52,7 +52,7 @@ outpqr = inpqr + name
 #vert = read_vertex(inMesh+'.vert', float)
 vert = numpy.loadtxt(inMesh+'.vert', dtype=float)
 
-xq, q, Nq = read_pqr(inpqr+'.pqr', float)
+xq, q, Nq, rad = read_pqr(inpqr+'.pqr', float)
 
 xq_new = rotate_y(xq, angle_y)
 vert_new = rotate_y(vert, angle_y)
@@ -73,6 +73,6 @@ numpy.savetxt(outMesh+'.vert', vert_new)
 cmd = 'cp '+inMesh+'.face '+outMesh+'.face'
 os.system(cmd)
 
-modify_pqr(inpqr+'.pqr', outpqr+'.pqr', xq_new)
+modify_pqr(inpqr+'.pqr', outpqr+'.pqr', xq_new, q, rad)
 
 print ('\nWritten to '+outMesh+'.vert(.face) and '+outpqr+'.pqr')
