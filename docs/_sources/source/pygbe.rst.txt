@@ -1,14 +1,6 @@
 pygbe package
 =============
 
-Subpackages
------------
-
-.. toctree::
-
-    pygbe.tree
-    pygbe.util
-
 Submodules
 ----------
 
