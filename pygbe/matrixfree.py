@@ -581,11 +581,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
 
         # Effect of an incomming electric field (only on outmost region)
         # Assuming field comes in z direction
-        LorY = field_array[j].LorY
+        LorY = field.LorY
 
-        if len(field_array[j].parent) == 0 and abs(electric_field) > 1e-12:
+        if len(field.parent) == 0 and abs(electric_field) > 1e-12:
 
-             for s in field_array[j].child:  # Loop over child surfaces
+             for s in field.child:  # Loop over child surfaces 
                 #Locate position of surface s in RHS
                 s_start = 0
                 for ss in range(s):
