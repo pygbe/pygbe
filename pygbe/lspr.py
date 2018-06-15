@@ -271,6 +271,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         print('Time Cext: {}s'.format(toc - tic))
 
         print('\nWavelength: {:.2f} nm'.format(wavelength/10))
+        print('Incoming Electric Field: {:.4f} [C/(\u212B^2 \u03B5_o)]'.format(electric_field))
 
         print('\nCext per surface')
         for i in range(len(Cext)):
@@ -279,6 +280,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         results_dict['time_Cext'] = toc - tic
         results_dict['surf_Cext'] = surf_Cext
         results_dict['wavelength'] = wavelength
+        results_dict['E_field'] = electric_field
         results_dict['Cext_list'] = Cext
         results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
 
