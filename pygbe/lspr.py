@@ -247,7 +247,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     results_dict['iterations'] = iteration
     solve_time = toc - tic
     print('Solve time        : {}s'.format(solve_time))
-    phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
+    phifname = '{:%Y-%m-%d-%H%M%S}-phi_{}.txt'.format(datetime.now(), wavelength)
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
 
@@ -270,12 +270,15 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         toc = time.time()
         print('Time Cext: {}s'.format(toc - tic))
 
+        print('\nWavelength: {:.2f} nm'.format(wavelength/10))
+
         print('\nCext per surface')
         for i in range(len(Cext)):
             print('Surface {}: {} nm^2'.format(surf_Cext[i], Cext[i]))
 
         results_dict['time_Cext'] = toc - tic
         results_dict['surf_Cext'] = surf_Cext
+        results_dict['wavelength'] = wavelength
         results_dict['Cext_list'] = Cext
         results_dict['Cext_0'] = Cext[0]   #We do convergence analysis in the main sphere
 
@@ -288,7 +291,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     output_pickle = outputfname.split('-')
     output_pickle.pop(-1)
-    output_pickle.append('resultspickle')
+    output_pickle.append('resultspickle'+str(wavelength))
     output_pickle = '-'.join(output_pickle)
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f, 2)
