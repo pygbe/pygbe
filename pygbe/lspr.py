@@ -271,7 +271,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         print('Time Cext: {}s'.format(toc - tic))
 
         print('\nWavelength: {:.2f} nm'.format(wavelength/10))
-        print('Incoming Electric Field: {:.4f} C/(\u212B^2 \u03B5_o)'.format(electric_field))
+        print('Incoming Electric Field: {:.4f} C/(Ang^2 eps_o)'.format(electric_field))
 
         print('\nCext per surface')
         for i in range(len(Cext)):
