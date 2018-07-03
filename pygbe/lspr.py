@@ -293,7 +293,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
 
     output_pickle = outputfname.split('-')
     output_pickle.pop(-1)
-    output_pickle.append('resultspickle'+str(wavelength))
+    output_pickle.append('resultspickle_'+str(wavelength))
     output_pickle = '-'.join(output_pickle)
     with open(os.path.join(output_dir, output_pickle), 'wb') as f:
         pickle.dump(results_dict, f, 2)
