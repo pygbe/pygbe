@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pygbe.tree package &#8212; PyGBe 0.2.1 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.2.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -29,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="pygbe-tree-package">
@@ -49,7 +42,7 @@
 <dl class="class">
 <dt id="pygbe.tree.FMMutils.Cell">
 <em class="property">class </em><code class="descclassname">pygbe.tree.FMMutils.</code><code class="descname">Cell</code><span class="sig-paren">(</span><em>NCRIT</em>, <em>Nm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pygbe/tree/FMMutils.html#Cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pygbe.tree.FMMutils.Cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Cell class. It contains the information about the cells in the tree.</p>
 <dl class="attribute">
 <dt id="pygbe.tree.FMMutils.Cell.nsource">
@@ -248,7 +241,7 @@ potential using the sorted data, on the GPU.</p>
 <li><strong>V_gpu</strong> (<em>array</em><em>, </em><em>far field contribution to the single layer potential.</em>) – </li>
 <li><strong>ind0</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) – in the multipole array.</li>
 <li><strong>param</strong> (<em>class</em><em>, </em><em>parameters related to the surface.</em>) – </li>
-<li><strong>int</strong><strong>, </strong><strong>Laplace</strong><strong> (</strong><strong>1</strong><strong>) or </strong><strong>Yukawa</strong><strong> (</strong><strong>2</strong><strong>)</strong><strong></strong> (<a class="reference internal" href="pygbe.html#pygbe.classes.Field.LorY" title="pygbe.classes.Field.LorY"><em>LorY</em></a>) – </li>
+<li><strong>int</strong><strong>, </strong><strong>Laplace</strong><strong> (</strong><strong>1</strong><strong>) or </strong><strong>Yukawa</strong><strong> (</strong><strong>2</strong><strong>)</strong><strong></strong> (<em>LorY</em>) – </li>
 <li><strong>timing</strong> (<em>class</em><em>, </em><em>it contains timing information for different parts of</em>) – the code.</li>
 <li><strong>kernel</strong> (<em>pycuda source module.</em>) – </li>
 </ul>
@@ -830,7 +823,7 @@ the GMRES.</p>
 <li><strong>NCRIT</strong> (<em>int</em><em>, </em><em>maximum number of boundary elements per twig box of tree</em>) – structure.</li>
 <li><strong>offTwg</strong> (<em>array</em><em>, </em><em>pointer to the first element in the array P2P_list which</em>) – contains the P2P interaction list for each twig cell.</li>
 <li><strong>offMlt</strong> (<em>array</em><em>, </em><em>pointer to the first element in the array M2P_list which</em>) – contains the M2P interaction list for each twig cell.</li>
-<li><strong>s_src</strong> (<em>int</em><em>, </em><em>position</em><em> (</em><a class="reference internal" href="pygbe.html#pygbe.classes.IndexConstant.index" title="pygbe.classes.IndexConstant.index"><em>index</em></a><em>) </em><em>in the surface-array of the surface that</em>) – contains the sources.</li>
+<li><strong>s_src</strong> (<em>int</em><em>, </em><em>position</em><em> (</em><em>index</em><em>) </em><em>in the surface-array of the surface that</em>) – contains the sources.</li>
 </ul>
 </td>
 </tr>
@@ -936,7 +929,7 @@ Particles in this context means boundary elements.</p>
 <li><strong>index</strong> (<em>list</em><em>, </em><em>pointers to the location of the mulipole of order i</em><em>,</em><em>j</em><em>,</em><em>k</em>) – in the multipole array.</li>
 <li><strong>combII</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><em>I</em><em>, </em><em>i</em><em>) </em><em>where I is the maximum i multipole.</em>) – </li>
 <li><strong>combJJ</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><em>J</em><em>, </em><em>j</em><em>) </em><em>where J is the maximum j multipole.</em>) – </li>
-<li><strong>combKK</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><a class="reference internal" href="pygbe.html#pygbe.classes.Parameters.K" title="pygbe.classes.Parameters.K"><em>K</em></a><em>, </em><em>k</em><em>) </em><em>where K is the maximum k multipole.</em>) – </li>
+<li><strong>combKK</strong> (<em>array</em><em>, </em><em>combinatory of</em><em> (</em><em>K</em><em>, </em><em>k</em><em>) </em><em>where K is the maximum k multipole.</em>) – </li>
 <li><strong>IImii</strong> (<em>array</em><em>, </em><em>I-i where I is the maximum i multipole.</em>) – </li>
 <li><strong>JJmjj</strong> (<em>array</em><em>, </em><em>J-j where J is the maximum j multipole.</em>) – </li>
 <li><strong>KKmkk</strong> (<em>array</em><em>, </em><em>K-k where K is the maximum k multipole.</em>) – </li>
@@ -977,6 +970,7 @@ position in index_small where the order i changes.</li>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -1023,12 +1017,14 @@ position in index_small where the order i changes.</li>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1039,8 +1035,8 @@ position in index_small where the order i changes.</li>
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

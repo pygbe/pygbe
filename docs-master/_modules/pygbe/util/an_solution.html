@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pygbe.util.an_solution &#8212; PyGBe 0.2.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.2.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -29,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for pygbe.util.an_solution</h1><div class="highlight"><pre>
@@ -94,8 +87,8 @@
                     <span class="n">phi</span> <span class="o">+=</span> <span class="n">cons1</span> <span class="o">*</span> <span class="n">cons2</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">rho_k</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">sph1</span> <span class="o">*</span> <span class="n">sph2</span>
 
         <span class="n">PHI</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">PHI</span></div>
+</div>
+    <span class="k">return</span> <span class="n">PHI</span>
 
 
 <div class="viewcode-block" id="get_K"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.get_K">[docs]</a><span class="k">def</span> <span class="nf">get_K</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
@@ -119,8 +112,8 @@
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">K</span> <span class="o">+=</span> <span class="mi">2</span><span class="o">**</span><span class="n">s</span> <span class="o">*</span> <span class="n">n_fact</span> <span class="o">*</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">factorial</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_fact2</span> <span class="o">*</span>
                                                      <span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">s</span><span class="p">))</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="n">s</span>
-
-    <span class="k">return</span> <span class="n">K</span></div>
+</div>
+    <span class="k">return</span> <span class="n">K</span>
 
 
 <div class="viewcode-block" id="an_P"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.an_P">[docs]</a><span class="k">def</span> <span class="nf">an_P</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">xq</span><span class="p">,</span> <span class="n">E_1</span><span class="p">,</span> <span class="n">E_2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
@@ -193,8 +186,8 @@
 
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span><span class="p">)</span>
     <span class="n">E_P</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">PHI</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">E_P</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_P</span>
 
 
 
@@ -293,8 +286,8 @@
     <span class="n">Einter</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">CC0</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">phi_inter</span>
     <span class="n">E1sphere</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">CC0</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">phi_1</span>
     <span class="n">E2sphere</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">CC0</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">phi_2</span>
-
-    <span class="k">return</span> <span class="n">Einter</span><span class="p">,</span> <span class="n">E1sphere</span><span class="p">,</span> <span class="n">E2sphere</span></div>
+</div>
+    <span class="k">return</span> <span class="n">Einter</span><span class="p">,</span> <span class="n">E1sphere</span><span class="p">,</span> <span class="n">E2sphere</span>
 
 
 <div class="viewcode-block" id="constant_potential_single_point"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_single_point">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_single_point</span><span class="p">(</span><span class="n">phi0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">kappa</span><span class="p">):</span>
@@ -317,8 +310,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">phi</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">r</span> <span class="o">*</span> <span class="n">phi0</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">r</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">phi</span></div>
+</div>
+    <span class="k">return</span> <span class="n">phi</span>
 
 
 <div class="viewcode-block" id="constant_charge_single_point"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_charge_single_point">[docs]</a><span class="k">def</span> <span class="nf">constant_charge_single_point</span><span class="p">(</span><span class="n">sigma0</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -343,8 +336,8 @@
 
     <span class="n">dphi0</span> <span class="o">=</span> <span class="o">-</span><span class="n">sigma0</span> <span class="o">/</span> <span class="n">epsilon</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="o">-</span><span class="n">dphi0</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">r</span><span class="p">))</span> <span class="o">/</span> <span class="n">r</span>
-
-    <span class="k">return</span> <span class="n">phi</span></div>
+</div>
+    <span class="k">return</span> <span class="n">phi</span>
 
 
 <div class="viewcode-block" id="constant_potential_single_charge"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_single_charge">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_single_charge</span><span class="p">(</span><span class="n">phi0</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -366,8 +359,8 @@
 
     <span class="n">dphi</span> <span class="o">=</span> <span class="o">-</span><span class="n">phi0</span> <span class="o">*</span> <span class="p">((</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">radius</span><span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="o">-</span><span class="n">epsilon</span> <span class="o">*</span> <span class="n">dphi</span>  <span class="c1"># Surface charge</span>
-
-    <span class="k">return</span> <span class="n">sigma</span></div>
+</div>
+    <span class="k">return</span> <span class="n">sigma</span>
 
 
 <div class="viewcode-block" id="constant_charge_single_potential"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_charge_single_potential">[docs]</a><span class="k">def</span> <span class="nf">constant_charge_single_potential</span><span class="p">(</span><span class="n">sigma0</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -389,8 +382,8 @@
 
     <span class="n">dphi</span> <span class="o">=</span> <span class="o">-</span><span class="n">sigma0</span> <span class="o">/</span> <span class="n">epsilon</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="o">-</span><span class="n">dphi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">radius</span><span class="p">)</span>  <span class="c1"># Surface potential</span>
-
-    <span class="k">return</span> <span class="n">phi</span></div>
+</div>
+    <span class="k">return</span> <span class="n">phi</span>
 
 
 
@@ -455,8 +448,8 @@
     <span class="n">CC0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
 
     <span class="n">E_solv</span> <span class="o">=</span> <span class="n">CC0</span> <span class="o">*</span> <span class="p">(</span><span class="n">u1</span> <span class="o">+</span> <span class="n">u2</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">E_solv</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_solv</span>
 
 
 <div class="viewcode-block" id="constant_potential_twosphere_2"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_twosphere_2">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_twosphere_2</span><span class="p">(</span><span class="n">phi01</span><span class="p">,</span> <span class="n">phi02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -493,8 +486,8 @@
             <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">kappa</span> <span class="o">*</span> <span class="n">h</span><span class="p">)))</span> <span class="o">+</span> <span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">h</span><span class="p">)))</span>
 
     <span class="n">CC0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
-    <span class="n">E_solv</span> <span class="o">*=</span> <span class="n">CC0</span>
-    <span class="k">return</span> <span class="n">E_solv</span></div>
+    <span class="n">E_solv</span> <span class="o">*=</span> <span class="n">CC0</span></div>
+    <span class="k">return</span> <span class="n">E_solv</span>
 
 
 <div class="viewcode-block" id="constant_potential_single_energy"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_single_energy">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_single_energy</span><span class="p">(</span><span class="n">phi0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -536,8 +529,8 @@
     <span class="n">C1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">phi0</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">epsilon</span>
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
     <span class="n">E</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">U1_inf</span>
-
-    <span class="k">return</span> <span class="n">E</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E</span>
 
 
 <div class="viewcode-block" id="constant_charge_single_energy"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_charge_single_energy">[docs]</a><span class="k">def</span> <span class="nf">constant_charge_single_energy</span><span class="p">(</span><span class="n">sigma0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -580,8 +573,8 @@
     <span class="n">C1</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">sigma0</span> <span class="o">*</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r1</span>
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
     <span class="n">E</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">U1_inf</span>
-
-    <span class="k">return</span> <span class="n">E</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E</span>
 
 
 <div class="viewcode-block" id="constant_potential_twosphere_dissimilar"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_twosphere_dissimilar">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_twosphere_dissimilar</span><span class="p">(</span><span class="n">phi01</span><span class="p">,</span> <span class="n">phi02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span>
@@ -692,8 +685,8 @@
     <span class="n">C2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">phi02</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">epsilon</span>
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
     <span class="n">E_inter</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="p">(</span><span class="n">C1</span> <span class="o">*</span> <span class="p">(</span><span class="n">U1_h</span> <span class="o">-</span> <span class="n">U1_inf</span><span class="p">)</span> <span class="o">+</span> <span class="n">C2</span> <span class="o">*</span> <span class="p">(</span><span class="n">U2_h</span> <span class="o">-</span> <span class="n">U2_inf</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 
 <div class="viewcode-block" id="constant_charge_twosphere_dissimilar"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_charge_twosphere_dissimilar">[docs]</a><span class="k">def</span> <span class="nf">constant_charge_twosphere_dissimilar</span><span class="p">(</span><span class="n">sigma01</span><span class="p">,</span> <span class="n">sigma02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span>
@@ -804,8 +797,8 @@
     <span class="n">C2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">sigma02</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r2</span>
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
     <span class="n">E_inter</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="p">(</span><span class="n">C1</span> <span class="o">*</span> <span class="p">(</span><span class="n">U1_h</span> <span class="o">-</span> <span class="n">U1_inf</span><span class="p">)</span> <span class="o">+</span> <span class="n">C2</span> <span class="o">*</span> <span class="p">(</span><span class="n">U2_h</span> <span class="o">-</span> <span class="n">U2_inf</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 
 <div class="viewcode-block" id="molecule_constant_potential"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.molecule_constant_potential">[docs]</a><span class="k">def</span> <span class="nf">molecule_constant_potential</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">phi02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">E_1</span><span class="p">,</span> <span class="n">E_2</span><span class="p">):</span>
@@ -923,8 +916,8 @@
     <span class="n">C1</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="mf">0.5</span>
     <span class="n">C2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">phi02</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">E_2</span>
     <span class="n">E_inter</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="p">(</span><span class="n">C1</span> <span class="o">*</span> <span class="n">phi_inter</span> <span class="o">+</span> <span class="n">C2</span> <span class="o">*</span> <span class="n">U_inter</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 
 <div class="viewcode-block" id="molecule_constant_charge"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.molecule_constant_charge">[docs]</a><span class="k">def</span> <span class="nf">molecule_constant_charge</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">sigma02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">E_1</span><span class="p">,</span> <span class="n">E_2</span><span class="p">):</span>
@@ -1042,8 +1035,8 @@
     <span class="n">C1</span> <span class="o">=</span> <span class="n">q</span> <span class="o">*</span> <span class="mf">0.5</span>
     <span class="n">C2</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">sigma02</span> <span class="o">*</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">r2</span>
     <span class="n">E_inter</span> <span class="o">=</span> <span class="n">C0</span> <span class="o">*</span> <span class="p">(</span><span class="n">C1</span> <span class="o">*</span> <span class="n">phi_inter</span> <span class="o">+</span> <span class="n">C2</span> <span class="o">*</span> <span class="n">U_inter</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 
 <div class="viewcode-block" id="constant_potential_twosphere_identical"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_potential_twosphere_identical">[docs]</a><span class="k">def</span> <span class="nf">constant_potential_twosphere_identical</span><span class="p">(</span><span class="n">phi01</span><span class="p">,</span> <span class="n">phi02</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span>
@@ -1128,8 +1121,8 @@
     <span class="n">C0</span> <span class="o">=</span> <span class="n">qe</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="mf">1e10</span> <span class="o">/</span> <span class="p">(</span><span class="n">cal2J</span> <span class="o">*</span> <span class="n">E_0</span><span class="p">)</span>
     <span class="n">C1</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">phi01</span> <span class="o">*</span> <span class="n">phi01</span>
     <span class="n">E_inter</span> <span class="o">=</span> <span class="n">U</span> <span class="o">*</span> <span class="n">C1</span> <span class="o">*</span> <span class="n">C0</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 
 <div class="viewcode-block" id="constant_charge_twosphere_identical"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.constant_charge_twosphere_identical">[docs]</a><span class="k">def</span> <span class="nf">constant_charge_twosphere_identical</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">kappa</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
@@ -1217,8 +1210,8 @@
     <span class="n">E_inter</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="n">CC0</span><span class="p">(</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">C0</span> <span class="o">*</span> <span class="p">(</span>
         <span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span><span class="p">)))</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span>
             <span class="mi">1</span> <span class="o">+</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">kappa</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">E_inter</span></div>
+</div>
+    <span class="k">return</span> <span class="n">E_inter</span>
 
 <div class="viewcode-block" id="Cext_analytical"><a class="viewcode-back" href="../../../source/pygbe.util.html#pygbe.util.an_solution.Cext_analytical">[docs]</a><span class="k">def</span> <span class="nf">Cext_analytical</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">diel_out</span><span class="p">,</span> <span class="n">diel_in</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1240,11 +1233,12 @@
     <span class="n">wavenumber</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">diel_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">wavelength</span>
     <span class="n">C1</span> <span class="o">=</span> <span class="n">wavenumber</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">diel_in</span> <span class="o">/</span> <span class="n">diel_out</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">diel_in</span> <span class="o">/</span> <span class="n">diel_out</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">Cext_an</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="n">wavenumber</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">C1</span><span class="o">.</span><span class="n">imag</span> 
-    
-    <span class="k">return</span> <span class="n">Cext_an</span></div>
+    </div>
+    <span class="k">return</span> <span class="n">Cext_an</span>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -1293,12 +1287,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1309,8 +1305,8 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pygbe.main &#8212; PyGBe 0.2.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -29,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for pygbe.main</h1><div class="highlight"><pre>
@@ -87,12 +80,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Logger.write"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">terminal</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Logger.flush"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.Logger.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Required for Python 3&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">&quot;&quot;&quot;Required for Python 3&quot;&quot;&quot;</span></div></div>
+        <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="read_inputs"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.read_inputs">[docs]</a><span class="k">def</span> <span class="nf">read_inputs</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -137,13 +130,13 @@
                         <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Custom geometry folder prefix&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+</div>
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="check_file_exists"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.check_file_exists">[docs]</a><span class="k">def</span> <span class="nf">check_file_exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Try to open the file `filename` and return True if it&#39;s valid &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+    <span class="sd">&quot;&quot;&quot;Try to open the file `filename` and return True if it&#39;s valid &quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="find_config_files"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.find_config_files">[docs]</a><span class="k">def</span> <span class="nf">find_config_files</span><span class="p">(</span><span class="n">cliargs</span><span class="p">):</span>
@@ -178,8 +171,8 @@
         <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">iglob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="s1">&#39;*.param&#39;</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="n">resolve_relative_config_file</span><span class="p">(</span><span class="n">cliargs</span><span class="o">.</span><span class="n">param</span><span class="p">,</span> <span class="n">full_path</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span></div>
+</div>
+    <span class="k">return</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">cliargs</span><span class="o">.</span><span class="n">param</span>
 
 
 <div class="viewcode-block" id="resolve_relative_config_file"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.resolve_relative_config_file">[docs]</a><span class="k">def</span> <span class="nf">resolve_relative_config_file</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">full_path</span><span class="p">):</span>
@@ -201,8 +194,8 @@
     <span class="k">elif</span> <span class="n">check_file_exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Did not find expected config files</span><span class="se">\n</span><span class="s1">&#39;</span>
-                 <span class="s1">&#39;Could not find </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span></div>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Did not find expected config files</span><span class="se">\n</span><span class="s1">&#39;</span></div>
+                 <span class="s1">&#39;Could not find </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">config_file</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="check_for_nvcc"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.check_for_nvcc">[docs]</a><span class="k">def</span> <span class="nf">check_for_nvcc</span><span class="p">():</span>
@@ -215,8 +208,8 @@
             <span class="s2">&quot;Could not find `nvcc` on your PATH.  Is cuda installed?  &quot;</span>
             <span class="s2">&quot;PyGBe will continue to run but will run significantly slower.  &quot;</span>
             <span class="s2">&quot;For optimal performance, add `nvcc` to your PATH&quot;</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">log_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_output_fname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -521,8 +514,8 @@
     <span class="k">if</span> <span class="n">return_results_dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">results_dict</span>
 
-    <span class="k">if</span> <span class="n">return_output_fname</span> <span class="ow">and</span> <span class="n">log_output</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">outputfname</span></div>
+    <span class="k">if</span> <span class="n">return_output_fname</span> <span class="ow">and</span> <span class="n">log_output</span><span class="p">:</span></div>
+        <span class="k">return</span> <span class="n">outputfname</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -530,6 +523,7 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -578,12 +572,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -594,8 +590,8 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

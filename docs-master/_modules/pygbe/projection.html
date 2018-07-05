@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pygbe.projection &#8212; PyGBe 0.2.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -29,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for pygbe.projection</h1><div class="highlight"><pre>
@@ -197,8 +190,8 @@
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
     <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
-
-    <span class="k">return</span> <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span></div>
+</div>
+    <span class="k">return</span> <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span>
 
 
 <div class="viewcode-block" id="project_Kt"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.project_Kt">[docs]</a><span class="k">def</span> <span class="nf">project_Kt</span><span class="p">(</span><span class="n">XKt</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">Kt_diag</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span>
@@ -327,8 +320,8 @@
     <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
     <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
     <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
-
-    <span class="k">return</span> <span class="n">Kt_lyr</span></div>
+</div>
+    <span class="k">return</span> <span class="n">Kt_lyr</span>
 
 
 <div class="viewcode-block" id="get_phir"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.get_phir">[docs]</a><span class="k">def</span> <span class="nf">get_phir</span><span class="p">(</span><span class="n">XK</span><span class="p">,</span> <span class="n">XV</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">xq</span><span class="p">,</span> <span class="n">Cells</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">):</span>
@@ -421,8 +414,8 @@
             <span class="n">Cells</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span> <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">X_Kc</span><span class="p">,</span> <span class="n">X_Vc</span><span class="p">,</span> <span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Kval</span><span class="p">,</span>
             <span class="n">Vval</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">AI_int</span><span class="p">,</span> <span class="n">time_P2P</span><span class="p">)</span>
         <span class="n">phi_reac</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">Kval</span> <span class="o">+</span> <span class="n">Vval</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">phi_reac</span><span class="p">,</span> <span class="n">AI_int</span></div>
+</div>
+    <span class="k">return</span> <span class="n">phi_reac</span><span class="p">,</span> <span class="n">AI_int</span>
 
 
 <div class="viewcode-block" id="get_phir_gpu"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.get_phir_gpu">[docs]</a><span class="k">def</span> <span class="nf">get_phir_gpu</span><span class="p">(</span><span class="n">XK</span><span class="p">,</span> <span class="n">XV</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
@@ -522,11 +515,12 @@
 
     <span class="n">phir_cpu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
     <span class="n">phir_cpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">phir</span><span class="p">,</span> <span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">phir_cpu</span><span class="p">,</span> <span class="n">AI_int</span></div>
+</div>
+    <span class="k">return</span> <span class="n">phir_cpu</span><span class="p">,</span> <span class="n">AI_int</span>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -575,12 +569,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -591,8 +587,8 @@
       &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 
