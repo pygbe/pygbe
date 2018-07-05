@@ -20,7 +20,7 @@ before_install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no 
   - conda config --add channels conda-forge
-  - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx
+  - conda create -q -n pygbe python=3.5 numpy scipy swig sphinx=1.7.0
   - source activate pygbe
   - pip install doctr
 
