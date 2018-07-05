@@ -1,0 +1,599 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pygbe.projection &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pygbe.projection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">It contains the functions to calculate the different potentials:</span>
+<span class="sd">-The single and double layer potential.</span>
+<span class="sd">-The adjoint double layer potential.</span>
+<span class="sd">-The reaction potential.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">pi</span>
+
+<span class="kn">from</span> <span class="nn">pygbe.classes</span> <span class="k">import</span> <span class="n">Event</span>
+<span class="kn">from</span> <span class="nn">pygbe.quadrature</span> <span class="k">import</span> <span class="n">getWeights</span>
+<span class="kn">from</span> <span class="nn">pygbe.tree.FMMutils</span> <span class="k">import</span> <span class="p">(</span><span class="n">getMultipole</span><span class="p">,</span> <span class="n">upwardSweep</span><span class="p">,</span> <span class="n">M2P_sort</span><span class="p">,</span> <span class="n">M2PKt_sort</span><span class="p">,</span>
+                                 <span class="n">M2P_gpu</span><span class="p">,</span> <span class="n">M2PKt_gpu</span><span class="p">,</span> <span class="n">P2P_sort</span><span class="p">,</span> <span class="n">P2PKt_sort</span><span class="p">,</span> <span class="n">P2P_gpu</span><span class="p">,</span>
+                                 <span class="n">P2PKt_gpu</span><span class="p">,</span> <span class="n">M2P_nonvec</span><span class="p">,</span> <span class="n">P2P_nonvec</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pycuda.autoinit</span>
+    <span class="kn">import</span> <span class="nn">pycuda.driver</span> <span class="k">as</span> <span class="nn">cuda</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<div class="viewcode-block" id="project"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.project">[docs]</a><span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="n">XK</span><span class="p">,</span> <span class="n">XV</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span>
+            <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It computes the single and double layer potentials.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    XK     : array, input for the double layer potential.</span>
+<span class="sd">    XV     : array, input for the single layer potential.</span>
+<span class="sd">    LorY   : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    surfSrc: class, source surface, the one that contains the gauss points.</span>
+<span class="sd">    surfTar: class, target surface, the one that contains the collocation</span>
+<span class="sd">                    points.</span>
+<span class="sd">    K_diag : array, diagonal elements of the double layer integral operator.</span>
+<span class="sd">    V_diag : array, diagonal elements of the single layer integral operator.</span>
+<span class="sd">    IorE   : int, internal (1) or external (2).</span>
+<span class="sd">    self   : int, position in the surface array of the source surface.</span>
+<span class="sd">    param  : class, parameters related to the surface.</span>
+<span class="sd">    ind0   : array, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing : class, it contains timing information for different parts of the</span>
+<span class="sd">                    code.</span>
+<span class="sd">    kernel : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    K_lyr  : array, double layer potential.</span>
+<span class="sd">    V_lyr  : array, single layer potential.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">Ns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>  <span class="c1"># Representative length</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">getWeights</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">X_V</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Ky</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kz</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Vc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="n">NsK</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_V</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">NsK</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+    <span class="n">X_Kx</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">NsK</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+        <span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">X_Ky</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">NsK</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+        <span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">X_Kz</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">NsK</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+        <span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">X_Kc</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+    <span class="n">X_Vc</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">getMultipole</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">xj</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">yj</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">zj</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span>
+                 <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">))):</span>
+        <span class="n">PC</span> <span class="o">=</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">upwardSweep</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">PC</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">II</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">JJ</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">KK</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combII</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combJJ</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combKK</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">IImii</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">JJmjj</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">KKmkk</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">index_small</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">index_ptr</span><span class="p">)</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">X_V</span> <span class="o">=</span> <span class="n">X_V</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Kx</span> <span class="o">=</span> <span class="n">X_Kx</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Ky</span> <span class="o">=</span> <span class="n">X_Ky</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Kz</span> <span class="o">=</span> <span class="n">X_Kz</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Kc</span> <span class="o">=</span> <span class="n">X_Kc</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Vc</span> <span class="o">=</span> <span class="n">X_Vc</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">param</span><span class="o">.</span><span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
+    <span class="n">K_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
+    <span class="n">V_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
+
+    <span class="c1">### CPU code</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">K_aux</span><span class="p">,</span> <span class="n">V_aux</span> <span class="o">=</span> <span class="n">M2P_sort</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">K_aux</span><span class="p">,</span> <span class="n">V_aux</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                <span class="n">ind0</span><span class="o">.</span><span class="n">index_large</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">timing</span><span class="p">)</span>
+
+        <span class="n">K_aux</span><span class="p">,</span> <span class="n">V_aux</span> <span class="o">=</span> <span class="n">P2P_sort</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span> <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">X_Kc</span><span class="p">,</span>
+                                <span class="n">X_Vc</span><span class="p">,</span> <span class="n">K_aux</span><span class="p">,</span> <span class="n">V_aux</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">V_diag</span><span class="p">,</span>
+                                <span class="n">IorE</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">)</span>
+
+    <span class="c1">### GPU code</span>
+    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">K_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">K_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">V_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">V_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">offsetMlt</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">K_gpu</span><span class="p">,</span> <span class="n">V_gpu</span> <span class="o">=</span> <span class="n">M2P_gpu</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">K_gpu</span><span class="p">,</span> <span class="n">V_gpu</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                                   <span class="n">param</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+        <span class="n">K_gpu</span><span class="p">,</span> <span class="n">V_gpu</span> <span class="o">=</span> <span class="n">P2P_gpu</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span> <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">X_Kc</span><span class="p">,</span>
+                               <span class="n">X_Vc</span><span class="p">,</span> <span class="n">K_gpu</span><span class="p">,</span> <span class="n">V_gpu</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">K_diag</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span>
+                               <span class="n">w</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+        <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+        <span class="n">K_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">K_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">K_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">V_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">V_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">V_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+        <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">K_lyr</span> <span class="o">=</span> <span class="n">K_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span>
+    <span class="n">V_lyr</span> <span class="o">=</span> <span class="n">V_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+</div>
+    <span class="k">return</span> <span class="n">K_lyr</span><span class="p">,</span> <span class="n">V_lyr</span>
+
+
+<div class="viewcode-block" id="project_Kt"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.project_Kt">[docs]</a><span class="k">def</span> <span class="nf">project_Kt</span><span class="p">(</span><span class="n">XKt</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">Kt_diag</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span>
+               <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It computes the adjoint double layer potential.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    XKt    : array, input for the adjoint double layer potential.</span>
+<span class="sd">    LorY   : int, Laplace (1) or Yukawa (2).</span>
+<span class="sd">    surfSrc: class, source surface, the one that contains the gauss points.</span>
+<span class="sd">    surfTar: class, target surface, the one that contains the collocation points.</span>
+<span class="sd">    Kt_diag: array, diagonal elements of the adjoint double layer integral</span>
+<span class="sd">                    operator.</span>
+<span class="sd">    self   : int, position in the surface array of the source surface.</span>
+<span class="sd">    param  : class, parameters related to the surface.</span>
+<span class="sd">    ind0   : array, it contains the indices related to the treecode computation.</span>
+<span class="sd">    timing : class, it contains timing information for different parts of the</span>
+<span class="sd">                    code.</span>
+<span class="sd">    kernel : pycuda source module.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    Kt_lyr: array, adjoint double layer potential.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tic</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+        <span class="n">toc</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">Ns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">triangle</span><span class="p">)</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">K</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">getWeights</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kt</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Ktc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="n">NsK</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kt</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XKt</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">NsK</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+    <span class="n">X_Ktc</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">XKt</span><span class="p">[</span><span class="n">NsK</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_mass</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">X_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Ns</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">getMultipole</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">xj</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">yj</span><span class="p">,</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">zj</span><span class="p">,</span> <span class="n">X_Kt</span><span class="p">,</span>
+                 <span class="n">X_aux</span><span class="p">,</span> <span class="n">X_aux</span><span class="p">,</span> <span class="n">X_aux</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_P2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">))):</span>
+        <span class="n">PC</span> <span class="o">=</span> <span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">upwardSweep</span><span class="p">(</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">PC</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">II</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">JJ</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">KK</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combII</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combJJ</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">combKK</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">IImii</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">JJmjj</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">KKmkk</span><span class="p">,</span> <span class="n">ind0</span><span class="o">.</span><span class="n">index_small</span><span class="p">,</span>
+                    <span class="n">ind0</span><span class="o">.</span><span class="n">index_ptr</span><span class="p">)</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_M2M</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">X_Kt</span> <span class="o">=</span> <span class="n">X_Kt</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">X_Ktc</span> <span class="o">=</span> <span class="n">X_Ktc</span><span class="p">[</span><span class="n">surfSrc</span><span class="o">.</span><span class="n">sortSource</span><span class="p">]</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">param</span><span class="o">.</span><span class="n">Nround</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)</span> <span class="o">*</span> <span class="n">param</span><span class="o">.</span><span class="n">NCRIT</span>
+    <span class="n">Ktx_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
+    <span class="n">Kty_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
+    <span class="n">Ktz_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">Nround</span><span class="p">)</span>
+
+    <span class="c1">### CPU code</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">offsetMlt</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Ktx_aux</span><span class="p">,</span> <span class="n">Kty_aux</span><span class="p">,</span> <span class="n">Ktz_aux</span> <span class="o">=</span> <span class="n">M2PKt_sort</span><span class="p">(</span>
+                <span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">Ktx_aux</span><span class="p">,</span> <span class="n">Kty_aux</span><span class="p">,</span> <span class="n">Ktz_aux</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                <span class="n">ind0</span><span class="o">.</span><span class="n">index_large</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">timing</span><span class="p">)</span>
+
+        <span class="n">Ktx_aux</span><span class="p">,</span> <span class="n">Kty_aux</span><span class="p">,</span> <span class="n">Ktz_aux</span> <span class="o">=</span> <span class="n">P2PKt_sort</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">X_Kt</span><span class="p">,</span> <span class="n">X_Ktc</span><span class="p">,</span>
+                                               <span class="n">Ktx_aux</span><span class="p">,</span> <span class="n">Kty_aux</span><span class="p">,</span> <span class="n">Ktz_aux</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                               <span class="n">LorY</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">)</span>
+
+    <span class="c1">### GPU code</span>
+    <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">GPU</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">Ktx_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">Ktx_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">Kty_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">Kty_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+        <span class="n">Ktz_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">Ktz_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">surfTar</span><span class="o">.</span><span class="n">offsetMlt</span><span class="p">[</span><span class="bp">self</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfTar</span><span class="o">.</span><span class="n">twig</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Ktx_gpu</span><span class="p">,</span> <span class="n">Kty_gpu</span><span class="p">,</span> <span class="n">Ktz_gpu</span> <span class="o">=</span> <span class="n">M2PKt_gpu</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">Ktx_gpu</span><span class="p">,</span>
+                                                  <span class="n">Kty_gpu</span><span class="p">,</span> <span class="n">Ktz_gpu</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">ind0</span><span class="p">,</span>
+                                                  <span class="n">param</span><span class="p">,</span> <span class="n">LorY</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+        <span class="n">Ktx_gpu</span><span class="p">,</span> <span class="n">Kty_gpu</span><span class="p">,</span> <span class="n">Ktz_gpu</span> <span class="o">=</span> <span class="n">P2PKt_gpu</span><span class="p">(</span><span class="n">surfSrc</span><span class="p">,</span> <span class="n">surfTar</span><span class="p">,</span> <span class="n">X_Kt</span><span class="p">,</span> <span class="n">X_Ktc</span><span class="p">,</span>
+                                              <span class="n">Ktx_gpu</span><span class="p">,</span> <span class="n">Kty_gpu</span><span class="p">,</span> <span class="n">Ktz_gpu</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">LorY</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">timing</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+
+        <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+        <span class="n">Ktx_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">Ktx_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ktx_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">Kty_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">Kty_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Kty_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">Ktz_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">Ktz_gpu</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ktz_aux</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+        <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+        <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="n">timing</span><span class="o">.</span><span class="n">time_trans</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+
+    <span class="n">tic</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">Kt_lyr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ktx_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+              <span class="n">Kty_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+              <span class="n">Ktz_aux</span><span class="p">[</span><span class="n">surfTar</span><span class="o">.</span><span class="n">unsort</span><span class="p">]</span><span class="o">*</span><span class="n">surfTar</span><span class="o">.</span><span class="n">normal</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Kt_diag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-12</span><span class="p">:</span>  <span class="c1"># if same surface</span>
+        <span class="n">Kt_lyr</span> <span class="o">+=</span> <span class="n">Kt_diag</span> <span class="o">*</span> <span class="n">XKt</span>
+
+    <span class="n">toc</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+    <span class="n">toc</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+    <span class="n">timing</span><span class="o">.</span><span class="n">time_sort</span> <span class="o">+=</span> <span class="n">tic</span><span class="o">.</span><span class="n">time_till</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+</div>
+    <span class="k">return</span> <span class="n">Kt_lyr</span>
+
+
+<div class="viewcode-block" id="get_phir"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.get_phir">[docs]</a><span class="k">def</span> <span class="nf">get_phir</span><span class="p">(</span><span class="n">XK</span><span class="p">,</span> <span class="n">XV</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">xq</span><span class="p">,</span> <span class="n">Cells</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It computes the reaction potential.</span>
+<span class="sd">    To compute this potential we need more terms in the Taylor expansion, that</span>
+<span class="sd">    is the reason why we need fine parameters (par_reac class) and a different</span>
+<span class="sd">    array of indices (ind_reac) than ind0.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    XK      : array, input for the double layer potential.</span>
+<span class="sd">    XV      : array, input for the single layer potential.</span>
+<span class="sd">    surface : class, surface where we are computing the reaction potential.</span>
+<span class="sd">    xq      : array, it contains the position of the charges.</span>
+<span class="sd">    Cells   : array, it contains the tree cells.</span>
+<span class="sd">    par_reac: class, fine parameters related to the surface.</span>
+<span class="sd">    ind_reac: array, it contains the indices related to the treecode</span>
+<span class="sd">                     computation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    phi_reac: array, reaction potential.</span>
+<span class="sd">    AI_int  : int, counter of the amount of near singular integrals solved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">XK</span><span class="p">)</span>
+    <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Setup vector</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">K</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">getWeights</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">X_V</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Ky</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kz</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Vc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">):</span>
+        <span class="n">X_V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+        <span class="n">X_Kx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">X_Ky</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">X_Kz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">X_Kc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+        <span class="n">X_Vc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># P2M</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">getMultipole</span><span class="p">(</span><span class="n">Cells</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">xj</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">yj</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">zj</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span> <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span>
+                 <span class="n">X_Kz</span><span class="p">,</span> <span class="n">ind_reac</span><span class="p">,</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">NCRIT</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">time_P2M</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+    <span class="c1"># M2M</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Cells</span><span class="p">))):</span>
+        <span class="n">PC</span> <span class="o">=</span> <span class="n">Cells</span><span class="p">[</span><span class="n">C</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">upwardSweep</span><span class="p">(</span><span class="n">Cells</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">PC</span><span class="p">,</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">II</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">JJ</span><span class="p">,</span>
+                    <span class="n">ind_reac</span><span class="o">.</span><span class="n">KK</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">combII</span><span class="p">,</span>
+                    <span class="n">ind_reac</span><span class="o">.</span><span class="n">combJJ</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">combKK</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">IImii</span><span class="p">,</span>
+                    <span class="n">ind_reac</span><span class="o">.</span><span class="n">JJmjj</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">KKmkk</span><span class="p">,</span> <span class="n">ind_reac</span><span class="o">.</span><span class="n">index_small</span><span class="p">,</span>
+                    <span class="n">ind_reac</span><span class="o">.</span><span class="n">index_ptr</span><span class="p">)</span>
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">time_M2M</span> <span class="o">=</span> <span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span>
+
+    <span class="c1"># Evaluation</span>
+    <span class="n">IorE</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># This evaluation is on charge points, no self-operator</span>
+    <span class="c1"># 0 means it doesn&#39;t matter if it is internal or external.</span>
+    <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">phi_reac</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xq</span><span class="p">))</span>
+    <span class="n">time_P2P</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">time_M2P</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xq</span><span class="p">)):</span>
+        <span class="n">CJ</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Kval</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">Vval</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Kval</span><span class="p">,</span> <span class="n">Vval</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">time_M2P</span> <span class="o">=</span> <span class="n">M2P_nonvec</span><span class="p">(</span><span class="n">Cells</span><span class="p">,</span> <span class="n">CJ</span><span class="p">,</span> <span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Kval</span><span class="p">,</span> <span class="n">Vval</span><span class="p">,</span>
+                                                  <span class="n">ind_reac</span><span class="o">.</span><span class="n">index_large</span><span class="p">,</span>
+                                                  <span class="n">par_reac</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">time_M2P</span><span class="p">)</span>
+        <span class="n">Kval</span><span class="p">,</span> <span class="n">Vval</span><span class="p">,</span> <span class="n">AI_int</span><span class="p">,</span> <span class="n">time_P2P</span> <span class="o">=</span> <span class="n">P2P_nonvec</span><span class="p">(</span>
+            <span class="n">Cells</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">X_V</span><span class="p">,</span> <span class="n">X_Kx</span><span class="p">,</span> <span class="n">X_Ky</span><span class="p">,</span> <span class="n">X_Kz</span><span class="p">,</span> <span class="n">X_Kc</span><span class="p">,</span> <span class="n">X_Vc</span><span class="p">,</span> <span class="n">xq</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Kval</span><span class="p">,</span>
+            <span class="n">Vval</span><span class="p">,</span> <span class="n">IorE</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">AI_int</span><span class="p">,</span> <span class="n">time_P2P</span><span class="p">)</span>
+        <span class="n">phi_reac</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">Kval</span> <span class="o">+</span> <span class="n">Vval</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">pi</span><span class="p">)</span>
+</div>
+    <span class="k">return</span> <span class="n">phi_reac</span><span class="p">,</span> <span class="n">AI_int</span>
+
+
+<div class="viewcode-block" id="get_phir_gpu"><a class="viewcode-back" href="../../source/pygbe.html#pygbe.projection.get_phir_gpu">[docs]</a><span class="k">def</span> <span class="nf">get_phir_gpu</span><span class="p">(</span><span class="n">XK</span><span class="p">,</span> <span class="n">XV</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">par_reac</span><span class="p">,</span> <span class="n">kernel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    It computes the reaction potential on the GPU  and it brings the data</span>
+<span class="sd">    to the cpu.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ----------</span>
+<span class="sd">    XK      : array, input for the double layer potential.</span>
+<span class="sd">    XV      : array, input for the single layer potential.</span>
+<span class="sd">    surface : class, surface where we are computing the reaction potential.</span>
+<span class="sd">    field   : class, information about the different regions in the molecule.</span>
+<span class="sd">    par_reac: class, fine parameters related to the surface.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    phir_cpu: array, reaction potential brought from the GPU to the cpu.</span>
+<span class="sd">    AI_int  : int, counter of the amount of near singular integrals solved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REAL</span> <span class="o">=</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">REAL</span>
+    <span class="n">Nq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">xq</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">XK</span><span class="p">)</span>
+    <span class="n">AI_int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Setup vector</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">K</span>
+    <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">getWeights</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">X_V</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Ky</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kz</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Kc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+    <span class="n">X_Vc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">K</span><span class="p">):</span>
+        <span class="n">X_V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+        <span class="n">X_Kx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">X_Ky</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">X_Kz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">area</span><span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span> <span class="o">*</span> <span class="n">surface</span><span class="o">.</span><span class="n">normal</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">X_Kc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XK</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+        <span class="n">X_Vc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">XV</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">K</span><span class="p">]</span>
+
+    <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">sort</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">sortSource</span>
+    <span class="n">phir</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">m_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_V</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">mx_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_Kx</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">my_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_Ky</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">mz_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_Kz</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">mKc_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_Kc</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">mVc_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">X_Vc</span><span class="p">[</span><span class="n">sort</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">AI_int_gpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">xkDev</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+    <span class="n">wkDev</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">wk</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">REAL</span><span class="p">))</span>
+
+    <span class="n">get_phir</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="s2">&quot;get_phir&quot;</span><span class="p">)</span>
+    <span class="n">GSZ</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">Nq</span><span class="p">)</span> <span class="o">/</span> <span class="n">par_reac</span><span class="o">.</span><span class="n">BSZ</span><span class="p">))</span>
+
+    <span class="n">get_phir</span><span class="p">(</span><span class="n">phir</span><span class="p">,</span>
+             <span class="n">field</span><span class="o">.</span><span class="n">xq_gpu</span><span class="p">,</span>
+             <span class="n">field</span><span class="o">.</span><span class="n">yq_gpu</span><span class="p">,</span>
+             <span class="n">field</span><span class="o">.</span><span class="n">zq_gpu</span><span class="p">,</span>
+             <span class="n">m_gpu</span><span class="p">,</span>
+             <span class="n">mx_gpu</span><span class="p">,</span>
+             <span class="n">my_gpu</span><span class="p">,</span>
+             <span class="n">mz_gpu</span><span class="p">,</span>
+             <span class="n">mKc_gpu</span><span class="p">,</span>
+             <span class="n">mVc_gpu</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">xjDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">yjDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">zjDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">AreaDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">kDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">vertexDev</span><span class="p">,</span>
+             <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xj</span><span class="p">)),</span>
+             <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">Nq</span><span class="p">),</span>
+             <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">K</span><span class="p">),</span>
+             <span class="n">xkDev</span><span class="p">,</span>
+             <span class="n">wkDev</span><span class="p">,</span>
+             <span class="n">REAL</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">threshold</span><span class="p">),</span>
+             <span class="n">AI_int_gpu</span><span class="p">,</span>
+             <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">xk</span><span class="p">)),</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">XskDev</span><span class="p">,</span>
+             <span class="n">surface</span><span class="o">.</span><span class="n">WskDev</span><span class="p">,</span>
+             <span class="n">block</span><span class="o">=</span><span class="p">(</span><span class="n">par_reac</span><span class="o">.</span><span class="n">BSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+             <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">GSZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">AI_aux</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">AI_aux</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">AI_int_gpu</span><span class="p">,</span> <span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">AI_int</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">AI_aux</span><span class="p">)</span>
+
+    <span class="n">phir_cpu</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+    <span class="n">phir_cpu</span> <span class="o">=</span> <span class="n">cuda</span><span class="o">.</span><span class="n">from_device</span><span class="p">(</span><span class="n">phir</span><span class="p">,</span> <span class="n">Nq</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">REAL</span><span class="p">)</span>
+</div>
+    <span class="k">return</span> <span class="n">phir_cpu</span><span class="p">,</span> <span class="n">AI_int</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

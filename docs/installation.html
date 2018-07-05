@@ -1,0 +1,225 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Installation &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run PyGBe" href="run.html" />
+    <link rel="prev" title="PyGBe: Python and GPU Boundary-integral solver for electrostatics" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="regular-installation">
+<h2>Regular installation<a class="headerlink" href="#regular-installation" title="Permalink to this headline">¶</a></h2>
+<p>The following instructions assume that the operating system is Ubuntu.
+Run the corresponding commands in your flavor of Linux to install.</p>
+<div class="section" id="dependencies-last-tested">
+<h3>Dependencies (last tested)<a class="headerlink" href="#dependencies-last-tested" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Python 3.4+ (3.6.1)</li>
+<li>Numpy 1.11.1+ (1.13.1)</li>
+<li>SciPy 0.17.1+ (0.19.1)</li>
+<li>SWIG 3.0.8+ (3.0.10)</li>
+<li>NVCC 8.0<ul>
+<li>gcc  5.4.0</li>
+</ul>
+</li>
+<li>PyCUDA 2017.1.1</li>
+<li>matplotlib 1.5.1+ (2.0.2) (optional, for post-processing only)</li>
+</ul>
+</div>
+<div class="section" id="python-and-numpy">
+<h3>Python and Numpy<a class="headerlink" href="#python-and-numpy" title="Permalink to this headline">¶</a></h3>
+<p>To install the specific version of these packages we recommend using
+either <a class="reference external" href="http://conda.pydata.org/docs/get-started.html">conda</a> or
+<a class="reference external" href="http://python-packaging-user-guide.readthedocs.org/en/latest/installing/">pip</a>.</p>
+<p>To create a new environment for using PyGBe with <code class="docutils literal notranslate"><span class="pre">conda</span></code> you can do
+the following:</p>
+<div class="code console highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pygbe</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.6</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">swig</span> <span class="n">matplotlib</span>
+<span class="n">source</span> <span class="n">activate</span> <span class="n">pygbe</span>
+</pre></div>
+</div>
+<p>and then proceed with the rest of the installation instructions
+(although note that if you do this, <code class="docutils literal notranslate"><span class="pre">swig</span></code> is already installed.</p>
+</div>
+<div class="section" id="swig">
+<h3>SWIG<a class="headerlink" href="#swig" title="Permalink to this headline">¶</a></h3>
+<p>To install SWIG we recommend using either <code class="docutils literal notranslate"><span class="pre">conda</span></code>, your distribution
+package manager or <a class="reference external" href="http://www.swig.org/download.html">SWIG’s
+website</a>.</p>
+</div>
+<div class="section" id="nvcc">
+<h3>NVCC<a class="headerlink" href="#nvcc" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://developer.nvidia.com/cuda-downloads">Download and install</a>
+the CUDA Toolkit.</p>
+</div>
+<div class="section" id="pycuda">
+<h3>PyCUDA<a class="headerlink" href="#pycuda" title="Permalink to this headline">¶</a></h3>
+<p>PyCUDA must be installed from source. Follow the
+<a class="reference external" href="http://wiki.tiker.net/PyCuda/Installation">instructions</a> on the
+PyCUDA website. We summarize the commands to install PyCUDA on Ubuntu
+here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt; cd $HOME
+&gt; mkdir src
+&gt; cd src
+&gt; wget https://github.com/inducer/pycuda/archive/v2016.1.2.tar.gz
+&gt; tar -xvzf pycuda-2016.1.2.tar.gz
+&gt; cd pycuda-2016.1.2
+&gt; python configure.py --cuda-root=/usr/local/cuda
+&gt; make
+&gt; sudo make install
+</pre></div>
+</div>
+<p>If you are not installing PyCUDA systemwide, do not use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> to
+install and simply run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>as the final command.</p>
+<p>Test the installation by running the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">cd</span> <span class="n">test</span>
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">test_driver</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="installing-pygbe">
+<h2>Installing PyGBe<a class="headerlink" href="#installing-pygbe" title="Permalink to this headline">¶</a></h2>
+<p>Create a clone of the repository on your machine:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt; cd $HOME/src
+&gt; git clone https://github.com/barbagroup/pygbe.git
+&gt; cd pygbe
+&gt; python setup.py install clean
+</pre></div>
+</div>
+<p>If you are installing PyGBe systemwide (if you installed PyCUDA
+systemwide), then use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> on the install command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="n">clean</span>
+</pre></div>
+</div>
+<p>PyGBe has been run and tested on Ubuntu 12.04, 13.10, 15.04 and 16.04.</p>
+</div>
+<div class="section" id="installation-using-docker">
+<h2>Installation using <a class="reference external" href="https://docs.docker.com/get-started/">Docker</a><a class="headerlink" href="#installation-using-docker" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">Install <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a>, (instructions in their README)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Check <a class="reference external" href="https://github.com/NVIDIA/nvidia-docker/wiki/Installation#prerequisites">pre-requisites</a></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Follow instructions at the top of <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_format.html#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">PyGBe: Python and GPU Boundary-integral solver for electrostatics</a></li>
+      <li>Next: <a href="run.html" title="next chapter">Run PyGBe</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
