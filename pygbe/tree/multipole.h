@@ -1299,6 +1299,7 @@ void multipole_sort_cy(REAL *K_aux , int K_auxSize,
         }
     }
 
+    #pragma omp parallel for default(none) private(dx, dy, dz, a) shared(unsort, xiSize, offMlt, Ctwig, xi, yi, zi, xc, yc, zc, index, Nm, P, kappa, LorY, M, Md, V_aux, K_aux) schedule(runtime)
     for (int i = 0; i < xiSize; i++)
     {
         for(int CJ = offMlt[Ctwig[i]]; CJ < offMlt[Ctwig[i] + 1]; CJ++)            

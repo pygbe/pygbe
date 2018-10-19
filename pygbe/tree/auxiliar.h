@@ -32,6 +32,8 @@ void calc_aux_cy(REAL *q , int qSize,
                     REAL *aux , int auxSize,
                     REAL E)
 {
+    #pragma omp parallel default(none) shared(qSize, xiSize, xi, yi, zi, xq0, xq1, xq2, auxSize, aux, q, normal0, normal1, normal2, E, stype)
+    {
     REAL* dx_pq;
     dx_pq = new REAL[xiSize];
     REAL* dy_pq;
@@ -41,6 +43,7 @@ void calc_aux_cy(REAL *q , int qSize,
     REAL* R_pq;
     R_pq = new REAL[xiSize];
 
+        #pragma omp for nowait
         for(int i=0; i<qSize; i++)
         {
             for (int j = 0; j < xiSize; j++)
@@ -58,16 +61,22 @@ void calc_aux_cy(REAL *q , int qSize,
 
             if (stype == 1)
             {
+                #pragma omp critical
+                {
                     for (int j = 0; j < auxSize; j++)
                     {
                         aux[j] = aux[j] - ( q[i] / ( R_pq[j] * R_pq[j] * R_pq[j] ) * (dx_pq[j] * normal0[j] + dy_pq[j] * normal1[j] + dz_pq[j] * normal2[j]) );
                     }
+                }
             } else 
             {
+                #pragma omp critical
+                {
                     for (int j = 0; j < auxSize; j++)
                     {
                         aux[j] = aux[j] + q[i] / (E * R_pq[j]) ;
                     }
+                }
             }
         }
 
@@ -75,5 +84,6 @@ void calc_aux_cy(REAL *q , int qSize,
         delete[] dy_pq;
         delete[] dz_pq;
         delete[] R_pq;
+    }
 };
 

@@ -439,12 +439,11 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
         REAL kappa, REAL threshold, REAL eps, REAL w0, int AI_int, REAL *phi_reac, int phi_reacSize)
 {
-    //double start,stop;
-    //int N_target = targetSize;
     int N_source = s_xjSize;
     REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr;
     bool L_d, same, condition_an, condition_gq;
 
+    #pragma omp parallel for default(none) shared(N_source, xt, xi, yt, yi, zt, zi, tri, Area, eps, threshold, k, s_xj, s_yj, s_zj, LorY, kappa, m, mx, my, mz, triangle, K_diag, sglInt_int, sglInt_ext, Xsk, Wsk, WskSize, mVclean, mKclean, IorE, xtSize, AI_int, phi_reac) private(dx_tri, dy_tri, dz_tri, R_tri, L_d, same, condition_an, condition_gq, dx, dy, dz, R, R2, R3, expKr)
     for(int i_tar = 0; i_tar < xtSize; i_tar++)
     {
         REAL K_aux = 0.0;
@@ -452,7 +451,6 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
         int aux = 0;
 
         int i = -1;
-        //int i_aux = 0;
         REAL V_red = 0.0;
         REAL K_red = 0.0;
 
@@ -492,8 +490,8 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
             
             if(condition_an)
             {
+                #pragma omp atomic
                 aux += 1;
-                //REAL center[3] = {xt[i_tar], yt[i_tar], zt[i_tar]};
                 REAL panel[9]  = {triangle[9*tri[j]], triangle[9*tri[j]+1], triangle[9*tri[j]+2],
                                 triangle[9*tri[j]+3], triangle[9*tri[j]+4], triangle[9*tri[j]+5],
                                 triangle[9*tri[j]+6], triangle[9*tri[j]+7], triangle[9*tri[j]+8]};
@@ -547,6 +545,7 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
         list_start = offTwg[tarTwg];
         list_end   = offTwg[tarTwg+1];
 
+        #pragma omp parallel for private(sum_K, sum_V, CJ, CJ_start, CJ_end, dx_tri, dy_tri, dz_tri, R_tri, L_d, same, condition_an, condition_gq, dx, dy, dz, R, R2, R3, expKr, start, stop) shared(list_start, list_end, interList, offSrc, triangle, xt, yt, zt, Area, eps, threshold, k, s_xj, s_yj, s_zj, LorY, kappa, m, mx, my, mz, aux, K_diag, IorE, sglInt_int, sglInt_ext, Xsk, XskSize, Wsk, WskSize, mVclean, mKclean, V_aux, K_aux) schedule(runtime)
         for(int i=CI_start; i<CI_end; i++)
         {  
             sum_K = 0.;
@@ -561,7 +560,6 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
                 for(int j=CJ_start; j<CJ_end; j++)
                 {   
                     // Check if panels are far enough for Gauss quadrature
-                    //start = get_time();
                     int ptr = 9*j;
                     REAL panel[9]  = {triangle[ptr], triangle[ptr+1], triangle[ptr+2],
                                     triangle[ptr+3], triangle[ptr+4], triangle[ptr+5],
@@ -576,12 +574,9 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
                     same = (R_tri<1e-12);
                     condition_an = ((L_d) && (k[j]==0));
                     condition_gq = (!L_d);
-                    //stop = get_time();
-                    //aux[1] += stop - start;
 
                     if(condition_gq)
                     {
-                        //start = get_time();
                         dx = xt[i] - s_xj[j];
                         dy = yt[i] - s_yj[j];
                         dz = zt[i] - s_zj[j];
@@ -599,15 +594,12 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
                             sum_V += m[j]/R;
                             sum_K += 1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
                         }
-                        //stop = get_time();
-                        //aux[1] += stop - start;
                     }
                     
                     if(condition_an)
                     {
                         start = get_time();
                         aux[0] += 1;
-                        //REAL center[3] = {xt[i], yt[i], zt[i]};
                         REAL PHI_K = 0., PHI_V = 0.;
                         
                         if (same==1)
@@ -622,8 +614,6 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
                         {
                             GQ_fine(PHI_K, PHI_V, panel, xt[i], yt[i], zt[i], kappa, Xsk, Wsk, WskSize, Area[j], LorY); 
                         }
-
-        //                printf("%f \t %f\n",PHI_V,mVclean[j]);
 
                         sum_V += PHI_V * mVclean[j];
                         sum_K += PHI_K * mKclean[j]; 
@@ -692,12 +682,9 @@ void directKt_sort_cy(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_aux
                     same = (R_tri<1e-12);
                     condition_an = ((L_d) && (k[j]==0));
                     condition_gq = (!L_d);
-                    //stop = get_time();
-                    //aux[1] += stop - start;
 
                     if(condition_gq)
                     {
-                        //start = get_time();
                         dx = xt[i] - s_xj[j];
                         dy = yt[i] - s_yj[j];
                         dz = zt[i] - s_zj[j];
@@ -718,8 +705,6 @@ void directKt_sort_cy(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_aux
                             sum_Kty -= expKr*dy;
                             sum_Ktz -= expKr*dz;
                         }
-                        //stop = get_time();
-                        //aux[1] += stop - start;
                     }
                     
                     if(condition_an)
@@ -740,9 +725,6 @@ void directKt_sort_cy(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_aux
                         {
                             GQ_fineKt(PHI_Ktx, PHI_Kty, PHI_Ktz, panel, xt[i], yt[i], zt[i], kappa, Xsk, Wsk, WskSize, Area[j], LorY); 
                         }
-
-        //                printf("%f \t %f\n",PHI_V,mVclean[j]);
-
                         sum_Ktx += PHI_Ktx * mKclean[j]; 
                         sum_Kty += PHI_Kty * mKclean[j]; 
                         sum_Ktz += PHI_Ktz * mKclean[j]; 
@@ -764,6 +746,8 @@ void coulomb_direct_cy(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int
                     REAL *m, int mSize, REAL *K_aux, int K_auxSize)
 {
     REAL sum, dx, dy, dz, r;
+ 
+    #pragma omp parallel for default(none) shared(xtSize, K_aux, xt, yt, zt, m) private(dx, dy, dz, r, sum) schedule(runtime)
     for(int i=0; i<xtSize; i++)
     {
         sum = 0.;
@@ -778,6 +762,7 @@ void coulomb_direct_cy(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int
                 sum += m[j]/r;
             }
         }
+
         K_aux[i] = m[i]*sum;
     }
 }
