@@ -112,7 +112,7 @@ sqr_per_side = int(numpy.ceil(numpy.sqrt(sz[0]*sz[2]*d/2.)))
 avg_size = sz[0]/sqr_per_side
 sqr_per_side_y = int(sz[1]/avg_size)
 nod = [sqr_per_side+1, sqr_per_side_y+1, sqr_per_side+1]    # Number of nodes
-print avg_size, sqr_per_side, sqr_per_side_y, nod
+print (avg_size, sqr_per_side, sqr_per_side_y, nod)
 
 # Faces
 # Face centers
@@ -158,16 +158,16 @@ for i in range(6):
 triangles = numpy.array(triangles) + 1 # Add 1 to conform to msms format
 nodes = numpy.array(nodes)
 
-print 'Cube center: %f, %f, %f'%(ctr[0],ctr[1],ctr[2])
-print 'Cube size  : %f, %f, %f'%(sz[0],sz[1],sz[2])
-print numpy.shape(nodes)
-print numpy.shape(triangles)
+print ('Cube center: %f, %f, %f'%(ctr[0],ctr[1],ctr[2]))
+print ('Cube size  : %f, %f, %f'%(sz[0],sz[1],sz[2]))
+print (numpy.shape(nodes))
+print (numpy.shape(triangles))
 
 if d>=10:
     mesh_out = 'sensor_%ix%ix%i_d%i'%(int(sz[0]), int(sz[1]), int(sz[2]), int(d))
 else:
     mesh_out = 'sensor_%ix%ix%i_d0%i'%(int(sz[0]), int(sz[1]), int(sz[2]), int(d))
-print 'Written to '+mesh_out
+print ('Written to ' + mesh_out)
 numpy.savetxt(mesh_out+'.face', triangles, fmt='%i')
 numpy.savetxt(mesh_out+'.vert', nodes)
 

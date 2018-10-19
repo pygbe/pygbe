@@ -112,13 +112,13 @@ Area_null = zeroAreas(vertex, triangle_raw, Area_null)
 triangle = numpy.delete(triangle_raw, Area_null, 0)
 
 if len(triangle) != len(triangle_raw):
-    print '%i deleted triangles'%(len(triangle_raw)-len(triangle))
+    print('%i deleted triangles'%(len(triangle_raw)-len(triangle)))
 
 phi0 = numpy.zeros(len(triangle), float)
 
 tri_ctr = numpy.average(vertex[triangle], axis=1)
-print len(tri_ctr)
-print len(triangle)
+print(len(tri_ctr))
+print(len(triangle))
 
 max_x = max(tri_ctr[:,0])
 min_x = min(tri_ctr[:,0])

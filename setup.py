@@ -36,8 +36,7 @@ class CustomInstall(install):
                     'pygbe/tree/direct.cpp',
                     'pygbe/tree/multipole.cpp',
                     'pygbe/tree/auxiliar.cpp',
-                    'pygbe/util/semi_analyticalwrap.cpp',
-                    'versioneer.pyc',]:
+                    'pygbe/util/semi_analyticalwrap.cpp',]:
                 os.remove(cyfile)
 
 def main():
@@ -93,7 +92,7 @@ def main():
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
                           extra_link_args=['-fopenmp'],
                 ),
-                ]),
+                ], language_level = 3),
             )
     setup(**setupkw)
 

@@ -1103,7 +1103,6 @@ void multipole_c_cy(REAL *K_aux , int K_auxSize,
                    int P, REAL kappa, int Nm, int LorY)
 {
     REAL a[Nm];
-    REAL V_auxiliar, K_auxiliar;
 
     for (int i=0; i<K_auxSize; i++)
     {   

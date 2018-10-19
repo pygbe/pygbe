@@ -192,7 +192,7 @@ void intSide(REAL &PHI_K, REAL &PHI_V, REAL *v1, REAL *v2, REAL p, REAL kappa, R
     REAL rOrthog[3];
     axpy(v21, v1, rOrthog, alpha, -1, 3);
 
-    REAL d_toEdge = norm(rOrthog);
+    //REAL d_toEdge = norm(rOrthog);
     REAL v1_neg[3];
     ax(v1, v1_neg, -1, 3);
     
@@ -439,8 +439,8 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
         REAL kappa, REAL threshold, REAL eps, REAL w0, int AI_int, REAL *phi_reac, int phi_reacSize)
 {
-    double start,stop;
-    int N_target = targetSize;
+    //double start,stop;
+    //int N_target = targetSize;
     int N_source = s_xjSize;
     REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr;
     bool L_d, same, condition_an, condition_gq;
@@ -452,7 +452,7 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
         int aux = 0;
 
         int i = -1;
-        int i_aux = 0;
+        //int i_aux = 0;
         REAL V_red = 0.0;
         REAL K_red = 0.0;
 
@@ -493,7 +493,7 @@ void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, i
             if(condition_an)
             {
                 aux += 1;
-                REAL center[3] = {xt[i_tar], yt[i_tar], zt[i_tar]};
+                //REAL center[3] = {xt[i_tar], yt[i_tar], zt[i_tar]};
                 REAL panel[9]  = {triangle[9*tri[j]], triangle[9*tri[j]+1], triangle[9*tri[j]+2],
                                 triangle[9*tri[j]+3], triangle[9*tri[j]+4], triangle[9*tri[j]+5],
                                 triangle[9*tri[j]+6], triangle[9*tri[j]+7], triangle[9*tri[j]+8]};
@@ -607,7 +607,7 @@ void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int 
                     {
                         start = get_time();
                         aux[0] += 1;
-                        REAL center[3] = {xt[i], yt[i], zt[i]};
+                        //REAL center[3] = {xt[i], yt[i], zt[i]};
                         REAL PHI_K = 0., PHI_V = 0.;
                         
                         if (same==1)
