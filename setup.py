@@ -4,6 +4,7 @@ from distutils.command.build import build
 from distutils.command.clean import clean
 from setuptools.command.install import install
 from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
 import numpy
 import shutil
 import versioneer
@@ -11,7 +12,7 @@ import versioneer
 class CustomBuild(build):
     """
     Subclasses build command to ensure that built_ext is run before files
-    are copied.  Make setuptools compile the SWIG files first, then run install
+    are copied.  Make setuptools compile the Cython files first, then run install
     """
     def run(self):
         self.run_command('build_ext')
@@ -20,7 +21,7 @@ class CustomBuild(build):
 class CustomInstall(install):
     """
     Subclasses install command to ensure that built_ext is run before files
-    are copied.  Make setuptools compile the SWIG files first, then run install
+    are copied.  Make setuptools compile the Cython files first, then run install
     """
     def run(self):
         self.run_command('build_ext')
@@ -28,18 +29,16 @@ class CustomInstall(install):
         #setuptools cleanup is weak, do it manually
         cmdline = ''.join(sys.argv[1:])
         if 'clean' in cmdline:
-            for tree in ['PyGBe.egg-info', 'build', 'dist']:
+            for tree in ['PyGBe.egg-info', 'build', 'dist', '__pycache__']:
                 shutil.rmtree(tree, ignore_errors=True)
-            for swigfile in [
-                    'pygbe/tree/calculateMultipoles.py',
-                    'pygbe/tree/calculateMultipoles_wrap.cpp',
-                    'pygbe/tree/direct.py',
-                    'pygbe/tree/direct_wrap.cpp',
-                    'pygbe/tree/multipole.py',
-                    'pygbe/tree/multipole_wrap.cpp',
-                    'pygbe/util/semi_analyticalwrap.py',
-                    'pygbe/util/semi_analyticalwrap_wrap.cpp',]:
-                os.remove(swigfile)
+            for cyfile in [
+                    'pygbe/tree/calculateMultipoles.cpp',
+                    'pygbe/tree/direct.cpp',
+                    'pygbe/tree/multipole.cpp',
+                    'pygbe/tree/auxiliar.cpp',
+                    'pygbe/util/semi_analyticalwrap.cpp',
+                    'versioneer.pyc',]:
+                os.remove(cyfile)
 
 def main():
     setupkw = dict(
@@ -57,33 +56,44 @@ def main():
             #create an entrance point that points to pygbe.main.main
             entry_points={'console_scripts': ['pygbe = pygbe.main:main',
                                               'pygbe-lspr = pygbe.lspr:main']},
-            #SWIG modules with all compilation options
-            ext_modules = [
-                Extension("_multipole",
-                          sources=["pygbe/tree/multipole.i", "pygbe/tree/multipole.cpp"],
-                          swig_opts=['-c++','-py3'],
+            #Cython modules with all compilation options
+            ext_modules = cythonize([
+                Extension("pygbe.tree.multipole",
+                          sources=["pygbe/tree/multipole.pyx"],
+                          language = "c++",
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
+                          extra_link_args=['-fopenmp'],
                 ),
-                Extension("_direct",
-                          sources=["pygbe/tree/direct.i", "pygbe/tree/direct.cpp"],
-                          swig_opts=['-c++','-py3'],
+                Extension("pygbe.tree.direct",
+                          sources=["pygbe/tree/direct.pyx"],
+                          language = "c++",
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
+                          extra_link_args=['-fopenmp'],
                 ),
-                Extension("_calculateMultipoles",
-                          sources=["pygbe/tree/calculateMultipoles.i", "pygbe/tree/calculateMultipoles.cpp"],
-                          swig_opts=['-c++','-py3'],
+                Extension("pygbe.tree.auxiliar",
+                          sources=["pygbe/tree/auxiliar.pyx"],
+                          language = "c++",
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
+                          extra_link_args=['-fopenmp'],
                 ),
-                Extension("_semi_analyticalwrap",
-                          sources=["pygbe/util/semi_analyticalwrap.i", "pygbe/util/semi_analyticalwrap.cpp"],
-                          swig_opts=['-c++','-py3'],
+                Extension("pygbe.tree.calculateMultipoles",
+                          sources=["pygbe/tree/calculateMultipoles.pyx"],
+                          language = "c++",
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
+                          extra_link_args=['-fopenmp'],
                 ),
-                ],
+                Extension("pygbe.util.semi_analyticalwrap",
+                          sources=["pygbe/util/semi_analyticalwrap.pyx"],
+                          language = "c++",
+                          include_dirs=[numpy.get_include()],
+                          extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
+                          extra_link_args=['-fopenmp'],
+                ),
+                ]),
             )
     setup(**setupkw)
 

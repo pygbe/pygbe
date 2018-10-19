@@ -1,6 +1,20 @@
-#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #define REAL double
+
+REAL __inline__ power(REAL x, int I);
+
+void P2M_cy(REAL *M, int Msize, REAL *Md, int Mdsize,
+        REAL *x, int xSize, REAL *y, int ySize, REAL *z, int zSize, 
+        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize,
+        REAL xc, REAL yc, REAL zc, int *I, int Isize, int *J, int Jsize, int *K, int Ksize);
+
+void M2M_cy(REAL *MP, int MPsize, REAL *MC, int MCsize, REAL dx, REAL dy, REAL dz, 
+         int *I, int Isize, int *J, int Jsize, int *K, int Ksize,  
+         REAL *cI, int cIsize, REAL *cJ, int cJsize, REAL *cK, int cKsize,  
+         int *Imi, int Imisize, int *Jmj, int Jmjsize, int *Kmk, int Kmksize,
+         int *index, int indexSize, int *ptr, int ptrSize);
+
 
 REAL __inline__ power(REAL x, int I)
 {
@@ -13,9 +27,9 @@ REAL __inline__ power(REAL x, int I)
         result *= x;
     }
     return result;
-}
+};
 
-void P2M(REAL *M, int Msize, REAL *Md, int Mdsize,
+void P2M_cy(REAL *M, int Msize, REAL *Md, int Mdsize,
         REAL *x, int xSize, REAL *y, int ySize, REAL *z, int zSize, 
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize,
         REAL xc, REAL yc, REAL zc, int *I, int Isize, int *J, int Jsize, int *K, int Ksize)
@@ -38,9 +52,9 @@ void P2M(REAL *M, int Msize, REAL *Md, int Mdsize,
             Md[i] -= mz[j] * K[i]*constant/dz;
         }
     }
-}
+};
 
-void M2M(REAL *MP, int MPsize, REAL *MC, int MCsize, REAL dx, REAL dy, REAL dz, 
+void M2M_cy(REAL *MP, int MPsize, REAL *MC, int MCsize, REAL dx, REAL dy, REAL dz, 
          int *I, int Isize, int *J, int Jsize, int *K, int Ksize,  
          REAL *cI, int cIsize, REAL *cJ, int cJsize, REAL *cK, int cKsize,  
          int *Imi, int Imisize, int *Jmj, int Jmjsize, int *Kmk, int Kmksize,

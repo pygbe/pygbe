@@ -739,8 +739,9 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
         MdSort[i * param.Nm:i * param.Nm + param.Nm] = surfSrc.tree[C].Md
 
     multipole_sort(K_aux, V_aux, surfTar.offsetTarget, surfTar.sizeTarget,
-                   surfTar.offsetMlt[surf], MSort, MdSort, surfTar.xiSort,
-                   surfTar.yiSort, surfTar.ziSort, surfTar.xcSort[surf],
+                   surfTar.offsetMlt[surf], MSort, MdSort, surfTar.xi,
+                   surfTar.yi, surfTar.zi, surfTar.xiSort,
+                   surfTar.yiSort, surfTar.ziSort, surfTar.unsort, surfTar.sortTarget, surfTar.xcSort[surf],
                    surfTar.ycSort[surf], surfTar.zcSort[surf], index, param.P,
                    param.kappa, int(param.Nm), int(LorY))
 

@@ -1,20 +1,56 @@
-#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #include <iostream>
 #include <time.h>
 #define REAL double
 
+REAL norm(REAL *x);
+
+void cross(REAL *x, REAL *y, REAL *z);
+
+void MV(REAL *M, REAL *V, REAL *res);
+
+REAL dot_prod(REAL *x, REAL *y);
+
+void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N);
+
+void ax(REAL *x, REAL *y, REAL alpha, int N);
+
+void lineInt(REAL *PHI, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, REAL *wk, int K);
+
+void intSide(REAL *PHI, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *wk, int K);
+
+void SA_wrap(REAL *PHI, REAL *y, REAL *x, REAL kappa, int same, REAL *xk, int xkSize, REAL *wk);
+
+void SA_wrap_arr_cy(REAL *y, int ySize, REAL *x, int xSize, 
+            REAL *phi_Y, int pYSize, REAL *dphi_Y, int dpYSize, 
+            REAL *phi_L, int pLSize, REAL *dphi_L, int dpLSize,
+            REAL kappa, int *same, int sameSize, REAL *xk, int xkSize, REAL *wk, int wkSize);
+
+void P2P_c_cy(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, REAL *dML, int dMLSize,    
+        REAL *triangle, int triangleSize, int *tri, int triSize, int *k, int kSize, 
+        REAL *xi, int xiSize, REAL *yi, int yiSize, REAL *zi, int ziSize,
+        REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize,
+        REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mclean, int mcleanSize, int *target, int targetSize,
+        REAL *Area, int AreaSize, REAL *xk, int xkSize, 
+        REAL *wk, int wkSize, REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize);
+
+
+
+
+
 REAL norm(REAL *x)
 {
     return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
-}
+};
 
 void cross(REAL *x, REAL *y, REAL *z) // z is the resulting array
 {
     z[0] = x[1]*y[2] - x[2]*y[1];
     z[1] = x[2]*y[0] - x[0]*y[2];
     z[2] = x[0]*y[1] - x[1]*y[0];
-}
+};
 
 void MV(REAL *M, REAL *V, REAL *res) // 3x3 mat-vec
 {
@@ -28,12 +64,12 @@ void MV(REAL *M, REAL *V, REAL *res) // 3x3 mat-vec
         }
         res[i] = sum;
     }
-}
+};
 
 REAL dot_prod(REAL *x, REAL *y) // len(3) vector dot product
 {
     return x[0]*y[0] + x[1]*y[1] + x[2]*y[2];
-}
+};
 
 void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N)
 {
@@ -41,7 +77,7 @@ void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N)
     {
         z[i] = sign*alpha*x[i] + y[i];
     }
-}
+};
 
 void ax(REAL *x, REAL *y, REAL alpha, int N)
 {
@@ -50,7 +86,7 @@ void ax(REAL *x, REAL *y, REAL alpha, int N)
         y[i] = alpha*x[i];
     }
 
-}
+};
 
 void lineInt(REAL *PHI, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, REAL *wk, int K)
 {
@@ -85,7 +121,7 @@ void lineInt(REAL *PHI, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, 
         PHI[2]+= wk[i]*(R-absZ) * dtheta/2;
         PHI[3]+= wk[i]*(z/R - signZ) * dtheta/2;
     }
-}
+};
 
 void intSide(REAL *PHI, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *wk, int K)
 {
@@ -159,7 +195,7 @@ void intSide(REAL *PHI, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *
             PHI[i] -= PHI_aux[i];
     }
 
-}
+};
 
 
 void SA_wrap(REAL *PHI, REAL *y, REAL *x, REAL kappa, 
@@ -234,9 +270,9 @@ void SA_wrap(REAL *PHI, REAL *y, REAL *x, REAL kappa,
     }
 
 //    printf("PHI: %f, %f, %f, %f\n",PHI[0],PHI[1],PHI[2], PHI[3]);
-}
+};
 
-void SA_wrap_arr(REAL *y, int ySize, REAL *x, int xSize, 
+void SA_wrap_arr_cy(REAL *y, int ySize, REAL *x, int xSize, 
             REAL *phi_Y, int pYSize, REAL *dphi_Y, int dpYSize, 
             REAL *phi_L, int pLSize, REAL *dphi_L, int dpLSize,
             REAL kappa, int *same, int sameSize, REAL *xk, int xkSize, REAL *wk, int wkSize)
@@ -253,10 +289,10 @@ void SA_wrap_arr(REAL *y, int ySize, REAL *x, int xSize,
         phi_L[i]  = PHI_1[2];
         dphi_L[i] = PHI_1[3];
     }
-}
+};
 
 
-void P2P_c(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, REAL *dML, int dMLSize,    
+void P2P_c_cy(REAL *MY, int MYSize, REAL *dMY, int dMYSize, REAL *ML, int MLSize, REAL *dML, int dMLSize,    
         REAL *triangle, int triangleSize, int *tri, int triSize, int *k, int kSize, 
         REAL *xi, int xiSize, REAL *yi, int yiSize, REAL *zi, int ziSize,
         REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize,

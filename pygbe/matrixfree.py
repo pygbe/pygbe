@@ -7,6 +7,7 @@ from numpy import pi
 
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms
 from pygbe.tree.direct import coulomb_direct
+from pygbe.tree.auxiliar import calc_aux
 from pygbe.projection import project, project_Kt, get_phir, get_phir_gpu
 from pygbe.classes import Parameters, IndexConstant
 from pygbe.util.semi_analytical import GQ_1D
@@ -452,35 +453,6 @@ def locate_s_in_RHS(surf_index, surf_array):
 
     return s_start
 
-def calc_aux(field, surface):
-    """Helper function to calculate aux
-
-    Arguments
-    ---------
-    field: Field object, current field being evaluated
-    surface: Surface object, current surface being evaluated
-
-    Returns
-    -------
-    aux: numpy array
-    """
-    aux = numpy.zeros_like(surface.xi)
-    for i, q in enumerate(field.q):
-        dx_pq = surface.xi - field.xq[i, 0]
-        dy_pq = surface.yi - field.xq[i, 1]
-        dz_pq = surface.zi - field.xq[i, 2]
-        R_pq = numpy.sqrt(dx_pq**2 + dy_pq**2 + dz_pq**2)
-
-        if surface.surf_type == 'asc_surface':
-            aux -= (q / (R_pq**3) *
-                    (dx_pq*surface.normal[:,0] +
-                     dy_pq*surface.normal[:,1] +
-                     dz_pq*surface.normal[:,2]))
-        else:
-            aux += q / (field.E * R_pq)
-
-    return aux
-
 def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field=0):
     """
     It generate the right hand side (RHS) for the GMRES.
@@ -521,7 +493,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
                 #           Locate position of surface s in RHS
                 s_start = locate_s_in_RHS(s, surf_array)
                 s_size = len(surf_array[s].xi)
-                aux = calc_aux(field, surf_array[s])
+                aux = numpy.zeros_like(surf_array[s].xi)
+                stype = 0
+                if surf_array[s].surf_type == 'asc_surface':
+                    stype = 1
+                calc_aux(numpy.ravel(field.q), numpy.ravel(field.xq[:, 0]), numpy.ravel(field.xq[:, 1]), numpy.ravel(field.xq[:, 2]), numpy.ravel(surf_array[s].xi), numpy.ravel(surf_array[s].yi), numpy.ravel(surf_array[s].zi), numpy.ravel(surf_array[s].normal[:, 0]), numpy.ravel(surf_array[s].normal[:, 1]), numpy.ravel(surf_array[s].normal[:, 2]), stype, aux, field.E)
 #               For CHILD surfaces, q contributes to RHS in
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
@@ -551,20 +527,11 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
                 s_start = locate_s_in_RHS(s, surf_array)
                 s_size = len(surf_array[s].xi)
 
-                aux = numpy.zeros(len(surf_array[s].xi))
-                for i in range(Nq):
-                    dx_pq = surf_array[s].xi - field.xq[i, 0]
-                    dy_pq = surf_array[s].yi - field.xq[i, 1]
-                    dz_pq = surf_array[s].zi - field.xq[i, 2]
-                    R_pq = numpy.sqrt(dx_pq**2 + dy_pq**2 + dz_pq**2)
-
-                    if surf_array[s].surf_type == 'asc_surface':
-                        aux -= (field.q[i]/(R_pq*R_pq*R_pq) *
-                                (dx_pq*surf_array[s].normal[:,0] +
-                                 dy_pq*surf_array[s].normal[:,1] +
-                                 dz_pq*surf_array[s].normal[:,2]))
-                    else:
-                        aux += field.q[i] / (field.E * R_pq)
+                aux = numpy.zeros_like(surf_array[s].xi)
+                stype = 0
+                if surf_array[s].surf_type == 'asc_surface':
+                    stype = 1
+                calc_aux(numpy.ravel(field.q), numpy.ravel(field.xq[:, 0]), numpy.ravel(field.xq[:, 1]), numpy.ravel(field.xq[:, 2]), numpy.ravel(surf_array[s].xi), numpy.ravel(surf_array[s].yi), numpy.ravel(surf_array[s].zi), numpy.ravel(surf_array[s].normal[:, 0]), numpy.ravel(surf_array[s].normal[:, 1]), numpy.ravel(surf_array[s].normal[:, 2]), stype, aux, field.E)
 
 #               No preconditioner
 #                F[s_start:s_start+s_size] += aux
@@ -1304,7 +1271,7 @@ def coulomb_energy(f, param):
     """
 
     point_energy = numpy.zeros(len(f.q), param.REAL)
-    coulomb_direct(f.xq[:, 0], f.xq[:, 1], f.xq[:, 2], f.q, point_energy)
+    coulomb_direct(numpy.ravel(f.xq[:, 0]), numpy.ravel(f.xq[:, 1]), numpy.ravel(f.xq[:, 2]), numpy.ravel(f.q), numpy.ravel(point_energy))
 
     cal2J = 4.184
     C0 = param.qe**2 * param.Na * 1e-3 * 1e10 / (cal2J * param.E_0)

@@ -9,7 +9,7 @@ treecode to accelerate each iteration of a GMRES solver to O(N logN),
 for N unknowns. It exploits NVIDIA GPU hardware on the most
 computationally intensive parts of the code using CUDA kernels in the
 treecode, interfacing with PyCUDA. Some parts of the code are written in
-C++, wrapped using SWIG.
+C++, wrapped using Cython.
 
 ## Biomolecular electrostatics:
 
@@ -50,7 +50,7 @@ corresponding commands in your flavor of Linux to install.
 * Python 3.4+ (3.6.1)
 * Numpy 1.11.1+ (1.13.1)
 * SciPy 0.17.1+ (0.19.1)
-* SWIG 3.0.8+ (3.0.10)
+* Cython 0.24.1+ (0.24.1)
 * NVCC 8.0 
     * gcc  5.4.0
 * PyCUDA 2017.1.1
@@ -66,17 +66,17 @@ To create a new environment for using PyGBe with `conda` you can do the
 following:
 
 ```console
-conda create -n pygbe python=3.6 numpy scipy swig matplotlib
+conda create -n pygbe python=3.6 numpy scipy cython matplotlib
 source activate pygbe
 ```
 
 and then proceed with the rest of the installation instructions (although note
-that if you do this, `swig` is already installed.
+that if you do this, `cython` is already installed.
 
-#### SWIG
+#### Cython
 
-To install SWIG we recommend using either `conda`, your distribution package
-manager or [SWIG's website](http://www.swig.org/download.html).
+To install Cython we recommend using either `conda`, your distribution package
+manager or [Cython's website](http://cython.org/).
 
 #### NVCC
 

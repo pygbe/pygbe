@@ -9,6 +9,7 @@ from numpy import pi
 
 from pygbe.classes import Event
 from pygbe.quadrature import getWeights
+from pygbe.tree.direct import direct_c
 from pygbe.tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
                                  M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
                                  P2PKt_gpu, M2P_nonvec, P2P_nonvec)
@@ -123,7 +124,8 @@ def project(XK, XV, LorY, surfSrc, surfTar, K_diag, V_diag, IorE, self, param,
 
     ### CPU code
     if param.GPU == 0:
-        K_aux, V_aux = M2P_sort(surfSrc, surfTar, K_aux, V_aux, self,
+        if surfTar.offsetMlt[self, len(surfTar.twig)] > 0:
+        	K_aux, V_aux = M2P_sort(surfSrc, surfTar, K_aux, V_aux, self,
                                 ind0.index_large, param, LorY, timing)
 
         K_aux, V_aux = P2P_sort(surfSrc, surfTar, X_V, X_Kx, X_Ky, X_Kz, X_Kc,
@@ -290,7 +292,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
     return Kt_lyr
 
 
-def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
+def get_phir_tree(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     """
     It computes the reaction potential.
     To compute this potential we need more terms in the Taylor expansion, that
@@ -368,7 +370,10 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.
     time_M2P = 0.
+    ala = 1
     for i in range(len(xq)):
+        prc = ala * 100 / len(xq)
+        print(str(int(prc)) + '%')
         CJ = 0
         Kval = 0.
         Vval = 0.
@@ -376,10 +381,134 @@ def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
         Kval, Vval, source, time_M2P = M2P_nonvec(Cells, CJ, xq[i], Kval, Vval,
                                                   ind_reac.index_large,
                                                   par_reac, source, time_M2P)
-        Kval, Vval, AI_int, time_P2P = P2P_nonvec(
-            Cells, surface, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, xq[i], Kval,
-            Vval, IorE, par_reac, w, source, AI_int, time_P2P)
+        if len(source) != 0:
+            Kval, Vval, AI_int, time_P2P = P2P_nonvec(
+                Cells, surface, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, xq[i], Kval,
+                Vval, IorE, par_reac, w, source, AI_int, time_P2P)
         phi_reac[i] = (-Kval + Vval) / (4 * pi)
+        ala += 1
+
+    return phi_reac, AI_int
+
+
+def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
+    """
+    It computes the reaction potential.
+    To compute this potential we need more terms in the Taylor expansion, that
+    is the reason why we need fine parameters (par_reac class) and a different
+    array of indices (ind_reac) than ind0.
+
+    Arguments
+    ----------
+    XK      : array, input for the double layer potential.
+    XV      : array, input for the single layer potential.
+    surface : class, surface where we are computing the reaction potential.
+    xq      : array, it contains the position of the charges.
+    Cells   : array, it contains the tree cells.
+    par_reac: class, fine parameters related to the surface.
+    ind_reac: array, it contains the indices related to the treecode
+                     computation.
+
+    Returns
+    --------
+    phi_reac: array, reaction potential.
+    AI_int  : int, counter of the amount of near singular integrals solved.
+    """
+
+    N = len(XK)
+    AI_int = 0
+
+    # Setup vector
+    K = par_reac.K
+    tic = time.time()
+    w = getWeights(K)
+    X_V = numpy.zeros(N * K)
+    X_Kx = numpy.zeros(N * K)
+    X_Ky = numpy.zeros(N * K)
+    X_Kz = numpy.zeros(N * K)
+    X_Kc = numpy.zeros(N * K)
+    X_Vc = numpy.zeros(N * K)
+
+    for i in range(N * K):
+        X_V[i] = XV[i // K] * w[i % K] * surface.area[i // K]
+        X_Kx[i] = XK[i // K] * w[i % K] * surface.area[
+            i // K] * surface.normal[i // K, 0]
+        X_Ky[i] = XK[i // K] * w[i % K] * surface.area[
+            i // K] * surface.normal[i // K, 1]
+        X_Kz[i] = XK[i // K] * w[i % K] * surface.area[
+            i // K] * surface.normal[i // K, 2]
+        X_Kc[i] = XK[i // K]
+        X_Vc[i] = XV[i // K]
+
+    # Evaluation
+    IorE = 0  # This evaluation is on charge points, no self-operator
+    # 0 means it doesn't matter if it is internal or external.
+
+    
+    AI_int = 0
+    phi_reac = numpy.zeros(len(xq))
+    source = list(range(len(surface.xj)))
+    source = numpy.int32(numpy.array(source))
+
+    m, mx, my, mz, mKc, mVc = X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc
+
+    LorY = 1
+    
+    s_xj = surface.xj[source]
+    s_yj = surface.yj[source]
+    s_zj = surface.zj[source]
+    s_m = m[source]
+    s_mx = mx[source]
+    s_my = my[source]
+    s_mz = mz[source]
+    s_mKc = mKc[source]
+    s_mVc = mVc[source]
+
+    tri = source / par_reac.K  # Triangle
+    k = source % par_reac.K  # Gauss point
+
+    K_diag = 0
+    V_diag = 0
+
+    xq_arr = numpy.ravel(numpy.array([xq[:, 0]]))
+    yq_arr = numpy.ravel(numpy.array([xq[:, 1]]))
+    zq_arr = numpy.ravel(numpy.array([xq[:, 2]]))
+
+    direct_c(int(LorY),
+             K_diag,
+             V_diag,
+             int(IorE),
+             numpy.ravel(surface.vertex[surface.triangle[:]]),
+             numpy.int32(tri),
+             numpy.int32(k),
+             surface.xi,
+             surface.yi,
+             surface.zi,
+             s_xj,
+             s_yj,
+             s_zj,
+             xq_arr,
+             yq_arr,
+             zq_arr,
+             s_m,
+             s_mx,
+             s_my,
+             s_mz,
+             s_mKc,
+             s_mVc,
+             numpy.array(
+                 [-1], dtype=numpy.int32),
+             surface.area,
+             surface.sglInt_int,
+             surface.sglInt_ext,
+             surface.xk,
+             surface.wk,
+             surface.Xsk,
+             surface.Wsk,
+             par_reac.kappa,
+             par_reac.threshold,
+             par_reac.eps,
+             w[0], AI_int, numpy.ravel(phi_reac))
 
     return phi_reac, AI_int
 
