@@ -34,56 +34,24 @@ void calc_aux_cy(REAL *q , int qSize,
 {
     #pragma omp parallel default(none) shared(qSize, xiSize, xi, yi, zi, xq0, xq1, xq2, auxSize, aux, q, normal0, normal1, normal2, E, stype)
     {
-    REAL* dx_pq;
-    dx_pq = new REAL[xiSize];
-    REAL* dy_pq;
-    dy_pq = new REAL[xiSize];
-    REAL* dz_pq;
-    dz_pq = new REAL[xiSize];
-    REAL* R_pq;
-    R_pq = new REAL[xiSize];
+    REAL auxiliar;
 
         #pragma omp for nowait
-        for(int i=0; i<qSize; i++)
+        for (int j = 0; j < xiSize; j++)
         {
-            for (int j = 0; j < xiSize; j++)
+            for (int i=0; i<qSize; i++)
             {
-                dx_pq[j] = xi[j] - xq0[i];
-                dy_pq[j] = yi[j] - xq1[i];
-                dz_pq[j] = zi[j] - xq2[i];
-            }
-
-            for (int j = 0; j < xiSize; j++)
-            {
-                R_pq[j] = sqrt(dx_pq[j] * dx_pq[j] + dy_pq[j] * dy_pq[j] + dz_pq[j] * dz_pq[j]);
-            }
-
-
-            if (stype == 1)
-            {
-                #pragma omp critical
+                if (stype == 1)
                 {
-                    for (int j = 0; j < auxSize; j++)
-                    {
-                        aux[j] = aux[j] - ( q[i] / ( R_pq[j] * R_pq[j] * R_pq[j] ) * (dx_pq[j] * normal0[j] + dy_pq[j] * normal1[j] + dz_pq[j] * normal2[j]) );
-                    }
-                }
-            } else 
-            {
-                #pragma omp critical
+                    auxiliar = - ( q[i] / ( ( sqrt( (xi[j] - xq0[i]) * (xi[j] - xq0[i]) + (yi[j] - xq1[i]) * (yi[j] - xq1[i]) + (zi[j] - xq2[i]) * (zi[j] - xq2[i]) ) ) * ( sqrt( (xi[j] - xq0[i]) * (xi[j] - xq0[i]) + (yi[j] - xq1[i]) * (yi[j] - xq1[i]) + (zi[j] - xq2[i]) * (zi[j] - xq2[i]) ) ) * ( sqrt( (xi[j] - xq0[i]) * (xi[j] - xq0[i]) + (yi[j] - xq1[i]) * (yi[j] - xq1[i]) + (zi[j] - xq2[i]) * (zi[j] - xq2[i]) ) ) ) * ( (xi[j] - xq0[i]) * normal0[j] + (yi[j] - xq1[i]) * normal1[j] + (zi[j] - xq2[i]) * normal2[j] ) );
+                } else
                 {
-                    for (int j = 0; j < auxSize; j++)
-                    {
-                        aux[j] = aux[j] + q[i] / (E * R_pq[j]) ;
-                    }
+                    auxiliar = q[i] / (E * ( sqrt( (xi[j] - xq0[i]) * (xi[j] - xq0[i]) + (yi[j] - xq1[i]) * (yi[j] - xq1[i]) + (zi[j] - xq2[i]) * (zi[j] - xq2[i]) ) )) ;
                 }
+
+                aux[j] = aux[j] + auxiliar;
             }
         }
-
-        delete[] dx_pq;
-        delete[] dy_pq;
-        delete[] dz_pq;
-        delete[] R_pq;
     }
 };
 

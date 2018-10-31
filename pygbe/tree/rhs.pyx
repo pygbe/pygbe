@@ -3,7 +3,7 @@ import cython
 import numpy as np
 cimport numpy as np
 
-cdef extern from "auxiliar.h":
+cdef extern from "rhs.h":
 
 	ctypedef double REAL
 

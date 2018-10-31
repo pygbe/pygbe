@@ -35,7 +35,7 @@ class CustomInstall(install):
                     'pygbe/tree/calculateMultipoles.cpp',
                     'pygbe/tree/direct.cpp',
                     'pygbe/tree/multipole.cpp',
-                    'pygbe/tree/auxiliar.cpp',
+                    'pygbe/tree/rhs.cpp',
                     'pygbe/util/semi_analyticalwrap.cpp',]:
                 os.remove(cyfile)
 
@@ -71,8 +71,8 @@ def main():
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],
                           extra_link_args=['-fopenmp'],
                 ),
-                Extension("pygbe.tree.auxiliar",
-                          sources=["pygbe/tree/auxiliar.pyx"],
+                Extension("pygbe.tree.rhs",
+                          sources=["pygbe/tree/rhs.pyx"],
                           language = "c++",
                           include_dirs=[numpy.get_include()],
                           extra_compile_args=['-fPIC', '-O3', '-funroll-loops', '-msse3', '-fopenmp'],

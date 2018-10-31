@@ -7,7 +7,7 @@ from numpy import pi
 
 from pygbe.tree.FMMutils import computeIndices, precomputeTerms
 from pygbe.tree.direct import coulomb_direct
-from pygbe.tree.auxiliar import calc_aux
+from pygbe.tree.rhs import calc_aux
 from pygbe.projection import project, project_Kt, get_phir, get_phir_gpu
 from pygbe.classes import Parameters, IndexConstant
 from pygbe.util.semi_analytical import GQ_1D
