@@ -117,9 +117,9 @@ def readpqr(filename, REAL):
     pos = []
     q = []
 
-    if len(lines[0].split()) == 11:
+    if len(lines[-5].replace('-', ' -').split()) == 11:
         for line in lines:
-            line = line.split()
+            line = line.replace('-', ' -').split()
 
             if line[0] == 'ATOM':
                 #  grab coordinates and charge from columns
@@ -127,9 +127,10 @@ def readpqr(filename, REAL):
                 q.append(q0)
                 pos.append([x, y, z])
 
-    if len(lines[0].split()) == 10:
+
+    if len(lines[-5].replace('-', ' -').split()) == 10:
         for line in lines:
-            line = line.split()
+            line = line.replace('-', ' -').split()
 
             if line[0] == 'ATOM':
                 #  grab coordinates and charge from columns

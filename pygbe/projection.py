@@ -294,7 +294,7 @@ def project_Kt(XKt, LorY, surfSrc, surfTar, Kt_diag, self, param, ind0, timing,
 
 def get_phir_tree(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     """
-    It computes the reaction potential.
+    It computes the reaction potential using treecode.
     To compute this potential we need more terms in the Taylor expansion, that
     is the reason why we need fine parameters (par_reac class) and a different
     array of indices (ind_reac) than ind0.
@@ -370,10 +370,7 @@ def get_phir_tree(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     phi_reac = numpy.zeros(len(xq))
     time_P2P = 0.
     time_M2P = 0.
-    ala = 1
     for i in range(len(xq)):
-        prc = ala * 100 / len(xq)
-        print(str(int(prc)) + '%')
         CJ = 0
         Kval = 0.
         Vval = 0.
@@ -386,14 +383,13 @@ def get_phir_tree(XK, XV, surface, xq, Cells, par_reac, ind_reac):
                 Cells, surface, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc, xq[i], Kval,
                 Vval, IorE, par_reac, w, source, AI_int, time_P2P)
         phi_reac[i] = (-Kval + Vval) / (4 * pi)
-        ala += 1
 
     return phi_reac, AI_int
 
 
 def get_phir(XK, XV, surface, xq, Cells, par_reac, ind_reac):
     """
-    It computes the reaction potential.
+    It computes the reaction potential using direct interacion.
     To compute this potential we need more terms in the Taylor expansion, that
     is the reason why we need fine parameters (par_reac class) and a different
     array of indices (ind_reac) than ind0.

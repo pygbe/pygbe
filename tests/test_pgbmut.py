@@ -6,11 +6,12 @@ import functools
 try:
     import pycuda
 except ImportError:
-    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
-    if ans in ['Y', 'y']:
-        pass
-    else:
-        sys.exit()
+    #ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
+    print('PyCUDA not found. Regression tests will run on CPU and may take several minutes.')
+    #if ans in ['Y', 'y']:
+    #    pass
+    #else:
+    #    sys.exit()
 
 from pygbe.main import main
 
