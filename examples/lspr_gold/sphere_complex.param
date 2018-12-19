@@ -2,7 +2,7 @@ Precision   double
 K           3
 Nk          9  
 K_fine      37
-thresold    0.5
+threshold   0.5
 BSZ         128
 restart     100
 tolerance   1e-6
