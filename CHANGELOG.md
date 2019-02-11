@@ -3,6 +3,26 @@
 ## Current development
 ---
 
+## 0.3.2
+---
+### Added
+
+* Notes to Dockerfile on how to run.
+* `pytest` specific version to Dockerfile otherwise pycuda won't installed properly 
+
+### Changed
+
+* Log output to include information of the wavelength and electric field for lspr cases.
+* How file-name is written  to include wavelength information for lspr cases
+
+### Fixed
+
+* CPU bug in matrixfree RHS function
+* Docsrings problem with sphinxs
+* Typo "thresold" in param files. 
+
+### Removed
+
 
 ## 0.3.1
 ---
