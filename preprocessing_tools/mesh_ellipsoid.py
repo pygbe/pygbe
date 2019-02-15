@@ -135,16 +135,27 @@ def get_triangulation(n, ico=icosahedron()):
 
     1) calculate the triangles (unique by construction)
     2) remove non-unique nodes and edges
+
+    Arguments
+    ---------
+
+    Returns
+    -------
+
+
     """
-    verts = numpy.array([ico.p[ico.tri[:,0]],
-                      ico.p[ico.tri[:,1]],
-                      ico.p[ico.tri[:,2]]])
+    verts = numpy.array([ico.p[ico.tri[:, 0]],
+                        ico.p[ico.tri[:, 1]],
+                        ico.p[ico.tri[:, 2]]])
+
     bary = get_barymat(n)
-    newverts = numpy.tensordot(verts, bary,  axes=[(0,), (-1,)]).transpose(0,2,1)
+    newverts = numpy.tensordot(verts,
+                               bary, axes=[(0,), (-1,)]).transpose(0, 2, 1)
+
     numverts = newverts.shape[1]
-    if newverts.size/3 > 1e6: print("newverts.size/3 is high: {0}".format(
-            newverts.size/3))
-    flat_coordinates = numpy.arange(newverts.size/3).reshape(20, numverts)
+    if newverts.size/3 > 1e6:
+        print("newverts.size/3 is high: {0}".format(newverts.size / 3))
+    flat_coordinates = numpy.arange(newverts.size / 3).reshape(20, numverts)
 
     barbary, tribary = triangulate_bary(bary)
 
@@ -153,8 +164,9 @@ def get_triangulation(n, ico=icosahedron()):
 
     for i in range(20):
         for j in range(3):
-            newtri[i, :, j] = flat_coordinates[i, tribary[:,j]]
-            if j < 2: newbar[i, :, j] = flat_coordinates[i, barbary[:,j]]
+            newtri[i, :, j] = flat_coordinates[i, tribary[:, j]]
+            if j < 2:
+                newbar[i, :, j] = flat_coordinates[i, barbary[:, j]]
 
     newverts = newverts.reshape(newverts.size//3, 3)
     newtri = newtri.reshape(newtri.size//3, 3)
@@ -163,40 +175,54 @@ def get_triangulation(n, ico=icosahedron()):
     scalars = numpy.sqrt((newverts**2).sum(-1))
     newverts = (newverts.T / scalars).T
     # remove repeated vertices
-    aux, iunique, irepeat = numpy.unique(numpy.dot(newverts//1e-8, 100*numpy.arange(1,4,1)),
-                                      return_index=True, return_inverse=True)
+    aux, iunique, irepeat = numpy.unique(numpy.dot(newverts//1e-8,
+                                         100*numpy.arange(1, 4, 1)),
+                                         return_index=True,
+                                         return_inverse=True)
 
     univerts = newverts[iunique]
     unitri = irepeat[newtri]
     unibar = irepeat[newbar]
-    mid = .5 * (univerts[unibar[:,0]] + univerts[unibar[:,1]])
-    aux, iu  = numpy.unique(numpy.dot(mid//1e-8, 100*numpy.arange(1,4,1)), return_index=True)
+    mid = .5 * (univerts[unibar[:, 0]] + univerts[unibar[:, 1]])
+    aux, iu = numpy.unique(numpy.dot(mid//1e-8, 100*numpy.arange(1, 4, 1)),
+                           return_index=True)
     unimid = mid[iu]
-    unibar = unibar[iu,:]
+    unibar = unibar[iu, :]
     return univerts, unitri, unibar
+
 
 class icosphere(icosahedron):
     """
-    """
-    def __init__(self, n):
-        """
-        define an icosahedron based discretization of the sphere
+        Define an icosahedron based discretization of the sphere
         n is the order of barycentric triangles used to refine each
-        face of the icosaheral base mesh.
+        face of the icosahedral base mesh.
         """
+    def __init__(self, n):    
         self.p, self.tri, self.bar = get_triangulation(n+1, icosahedron)
+
 
 def cart2sph(xyz):
     """
     Convert Cartesian coordinates to spherical coordinates.
     https://stackoverflow.com/q/4116658
+
+    Arguments
+    ---------
+    xyz : array (m, 3) that contains xyz coordinates. Where m is the amount of
+          points.
+
+    Returns
+    -------
+    ptsnew: array (m, 3) that contains the converted spherical coordinates.
+
     """
     ptsnew = numpy.zeros_like(xyz)
     xy = xyz[:,0]**2 + xyz[:,1]**2
-    ptsnew[:,0] = numpy.sqrt(xy + xyz[:,2]**2)
-    ptsnew[:,1] = numpy.arctan2(numpy.sqrt(xy), xyz[:,2]) # for elevation angle defined from Z-axis down
-    #ptsnew[:,1] = numpy.arctan2(xyz[:,2], numpy.sqrt(xy)) # for elevation angle defined from XY-plane up
-    ptsnew[:,2] = numpy.arctan2(xyz[:,1], xyz[:,0])
+    ptsnew[:, 0] = numpy.sqrt(xy + xyz[:,2]**2)
+    # for elevation angle defined from Z-axis down
+    ptsnew[:, 1] = numpy.arctan2(numpy.sqrt(xy), xyz[:, 2])
+    # for elevation angle defined from XY-plane up
+    ptsnew[:, 2] = numpy.arctan2(xyz[:, 1], xyz[:, 0])
     return ptsnew
 
 
