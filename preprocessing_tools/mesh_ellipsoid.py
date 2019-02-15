@@ -233,9 +233,9 @@ if __name__ == "__main__":
 
     # Get a unit sphere triangulation with a specified level of refinement. 
     # A refinement level of N will have (20*N^2) faces and (10*N^2 + 2) vertices
-    isph=icosphere(10)
-    vertices=isph.p
-    faces=isph.tri
+    isph = icosphere(10)
+    vertices = isph.p
+    faces = isph.tri
 
     # get spherical coordinates for each point and project it to the corresponding
     # point on the ellipsoid. a,b,c are the semi-major axes of the ellipsoid
