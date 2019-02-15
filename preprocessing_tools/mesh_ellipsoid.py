@@ -1,57 +1,63 @@
-#=======================================================================
+# =======================================================================
 # 2019 Changes by Natalia Clementi @ncclementi
-#=======================================================================
+# =======================================================================
 # 2016 Changes by ARM (abhilashreddy.com)
 #  - made to work with Python 3+
 #  - made to work with recent versions of matplotlib
-#=======================================================================
-#
+# =======================================================================
 # Author: William G.K. Martin (wgm2111@cu where cu=columbia.edu)
 # copyright (c) 2010
-# liscence: BSD style
-#
+# licence: BSD style
 # ======================================================================
 
 import numpy 
 import matplotlib.tri as Triang
 
+
 def get_points():
     '''
-    Creates the coordinates of the vertices of the base icosahedron
-    using the golden ratio https://en.wikipedia.org/wiki/Regular_icosahedron.
+    Creates the coordinates of the vertices of the base icosahedron using
+    the golden ratio https://en.wikipedia.org/wiki/Regular_icosahedron.
 
     Returns
     -------
-    p[reorder_index, :] array, contains the points of the icosahedron, with 
-    indices reordered in downward spiral. 
+    p[reorder_index, :] array, contains the points of the icosahedron, with
+    indices reordered in downward spiral
     '''
 
     # Define the vertices with the golden ratio
-    a = (1. + numpy.sqrt(5.))/2.0   # golden ratio
+    a = (1. + numpy.sqrt(5.)) / 2.0   # golden ratio
 
-    p = numpy.array([[a,-a,-a, a, 1, 1,-1,-1, 0, 0, 0, 0],
-                  [0, 0, 0, 0, a,-a,-a, a, 1, 1,-1,-1],
-                  [1, 1,-1,-1, 0, 0, 0, 0, a,-a,-a, a]]).transpose()
-    #normalize to fall into a unit sphere
+    p = numpy.array([[a, -a, -a, a, 1, 1, -1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, a, -a, -a, a, 1, 1, -1, -1],
+                    [1, 1, -1, -1, 0, 0, 0, 0, a, -a, -a, a]]).transpose()
+    #normalize to fall into a unit sphere.
     p = p / numpy.sqrt((p**2).sum(1))[0]
 
     # rotate top point to the z-axis
-    ang = numpy.arctan(p[0,0] / p[0,2])
+    ang = numpy.arctan(p[0, 0] / p[0, 2])
     ca, sa = numpy.cos(ang), numpy.sin(ang)
     rotation = numpy.array([[ca, 0, -sa], [0, 1.0, 0], [sa, 0, ca]])
-    p = numpy.inner(rotation, p).transpose()
-    
+    p = numpy.inner(rotation, p).transpose()      
     # reorder in a downward spiral
     reorder_index = [0, 3, 4, 8, -1, 5,-2, -3, 7, 1, 6, 2]
-    
     return p[reorder_index, :]
 
 
 def get_barymat(n):
-    """
-    Define the matrix that will refine points on a triangle
+    '''
+    Define the barycentric matrix that will refine points on a triangle.
 
-    """
+    Arguments
+    ---------
+    n : integer, number of points in a triangle edge after refinement.
+
+    Returns
+    -------
+    bcmat : matrix,  dimensions (n*(n+1)/2, 3). Each row contains the
+    barycentric coordinates of each point after division.
+    '''
+
     numrows = n*(n+1)//2
 
     # define the values that will be needed
@@ -59,12 +65,11 @@ def get_barymat(n):
     vals = ns / float(n-1)
 
     # initialize array
-    bcmat = numpy.zeros((numrows, 3))#numpy.arange(numrows*3).reshape((numrows, 3))
-
+    bcmat = numpy.zeros((numrows, 3))  
     # loop over blocks to fill in the matrix
-    shifts = numpy.arange(n,0,-1)
-    starts = numpy.zeros(n, dtype=int);
-    starts[1:] += numpy.cumsum(shifts[:-1]) # starts are the cumulative shifts
+    shifts = numpy.arange(n, 0, -1)
+    starts = numpy.zeros(n, dtype=int)
+    starts[1:] += numpy.cumsum(shifts[:-1])  # starts are the cumulative shifts
     stops = starts + shifts
     for n_, start, stop, shift in zip(ns, starts, stops, shifts):
         bcmat[start:stop, 0] = vals[shift-1::-1]
@@ -75,36 +80,50 @@ def get_barymat(n):
 
 class icosahedron(object):
     """
-    The vertices of an icosahedron, together with triangles, edges, and
-    triangle midpoints and edge midpoints.  The class data stores the
+    The vertices of an icosahedron, together with triangles, edges,
+    triangle midpoints and edge midpoints.  
     """
 
     # define points (vertices)
     p = get_points()
-    px, py, pz = p[:,0], p[:,1], p[:,2]
-
     # define triangles (faces)
-    tri = numpy.array([[1,2,3,4,5,6,2,7,2,8,3, 9,10,10,6, 6, 7, 8, 9,10],
-                    [0,0,0,0,0,1,7,2,3,3,4, 4, 4, 5,5, 7, 8, 9,10, 6],
-                    [2,3,4,5,1,7,1,8,8,9,9,10, 5, 6,1,11,11,11,11,11]]).transpose()
+    tri = numpy.array([
+            [1, 2, 3, 4, 5, 6, 2, 7, 2, 8, 3, 9, 10, 10, 6, 6, 7, 8, 9, 10],
+            [0, 0, 0, 0, 0, 1, 7, 2, 3, 3, 4, 4, 4, 5, 5, 7, 8, 9, 10, 6],
+            [2, 3, 4, 5, 1, 7, 1, 8, 8, 9, 9, 10, 5, 6, 1, 11, 11, 11, 11, 11]
+            ]).transpose()
 
-    trimids = (p[tri[:,0]] + p[tri[:,1]] + p[tri[:,2]]) / 3.0
+    trimids = (p[tri[:, 0]] + p[tri[:, 1]] + p[tri[:, 2]]) / 3.0
 
     # define bars (edges)
     bar = list()
     for t in tri:
-        bar += [numpy.array([i,j]) for i, j in [t[0:2], t[1:], t[[2, 0]]] if j>i]
+        bar += [numpy.array([i, j]) for i, j
+                in [t[0:2], t[1:], t[[2, 0]]] if j > i]
     bar = numpy.array(bar)
-    barmids = (p[bar[:,0]] + p[bar[:,1]]) / 2.0
+    barmids = (p[bar[:, 0]] + p[bar[:, 1]]) / 2.0
 
 
 def triangulate_bary(bary):
     """
-    triangulate a barycentric triangle using matplotlib.
-    return (bars, triangles)
+    Triangulate a single barycentric triangle using matplotlib.
+
+    Argument
+    --------
+    bary: barycentric matrix obtained using get_barymat.
+
+    Return
+    ------
+    dely.edges: array (nedges, 2) that contains the indices of the two vertices
+                 that form each edge after the triangulation.
+    dely.triangles:array (ntriangles, 3) that contains the indices of the three
+                   vertices that form each triangle after the triangulation. 
     """
-    x, y = numpy.cos(-numpy.pi/4.)*bary[:,0] + numpy.sin(-numpy.pi/4.)*bary[:,1] , bary[:,2]
-    dely = Triang.Triangulation(x,y)
+
+    x, y = numpy.cos(-numpy.pi/4.) * bary[:, 0] + //
+    numpy.sin(-numpy.pi/4.) * bary[:, 1], bary[:, 2]
+
+    dely = Triang.Triangulation(x, y)
     return dely.edges, dely.triangles
 
 
