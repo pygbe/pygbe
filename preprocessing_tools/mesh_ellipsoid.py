@@ -1,4 +1,6 @@
 #=======================================================================
+# 2019 Changes by Natalia Clementi @ncclementi
+#=======================================================================
 # 2016 Changes by ARM (abhilashreddy.com)
 #  - made to work with Python 3+
 #  - made to work with recent versions of matplotlib
@@ -15,14 +17,22 @@ import matplotlib.tri as Triang
 
 def get_points():
     '''
-    Create the coordinates of the vertices of the base icosahedron
+    Creates the coordinates of the vertices of the base icosahedron
+    using the golden ratio https://en.wikipedia.org/wiki/Regular_icosahedron.
 
+    Returns
+    -------
+    p[reorder_index, :] array, contains the points of the icosahedron, with 
+    indices reordered in downward spiral. 
     '''
-    # Define the verticies with the golden ratio
+
+    # Define the vertices with the golden ratio
     a = (1. + numpy.sqrt(5.))/2.0   # golden ratio
+
     p = numpy.array([[a,-a,-a, a, 1, 1,-1,-1, 0, 0, 0, 0],
                   [0, 0, 0, 0, a,-a,-a, a, 1, 1,-1,-1],
                   [1, 1,-1,-1, 0, 0, 0, 0, a,-a,-a, a]]).transpose()
+    #normalize to fall into a unit sphere
     p = p / numpy.sqrt((p**2).sum(1))[0]
 
     # rotate top point to the z-axis
@@ -30,9 +40,12 @@ def get_points():
     ca, sa = numpy.cos(ang), numpy.sin(ang)
     rotation = numpy.array([[ca, 0, -sa], [0, 1.0, 0], [sa, 0, ca]])
     p = numpy.inner(rotation, p).transpose()
+    
     # reorder in a downward spiral
     reorder_index = [0, 3, 4, 8, -1, 5,-2, -3, 7, 1, 6, 2]
+    
     return p[reorder_index, :]
+
 
 def get_barymat(n):
     """
@@ -62,11 +75,11 @@ def get_barymat(n):
 
 class icosahedron(object):
     """
-    The verticies of an icosahedron, together with triangles, edges, and
+    The vertices of an icosahedron, together with triangles, edges, and
     triangle midpoints and edge midpoints.  The class data stores the
     """
 
-    # define points (verticies)
+    # define points (vertices)
     p = get_points()
     px, py, pz = p[:,0], p[:,1], p[:,2]
 
@@ -127,10 +140,10 @@ def get_triangulation(n, ico=icosahedron()):
     newverts = newverts.reshape(newverts.size//3, 3)
     newtri = newtri.reshape(newtri.size//3, 3)
     newbar = newbar.reshape(newbar.size//2, 2)
-    # normalize verticies
+    # normalize vertices
     scalars = numpy.sqrt((newverts**2).sum(-1))
     newverts = (newverts.T / scalars).T
-    # remove repeated verticies
+    # remove repeated vertices
     aux, iunique, irepeat = numpy.unique(numpy.dot(newverts//1e-8, 100*numpy.arange(1,4,1)),
                                       return_index=True, return_inverse=True)
 
