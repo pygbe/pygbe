@@ -1,0 +1,218 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Input File Format &#8212; PyGBe 0.2.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Generate meshes and pqr" href="mesh_pqr_setup.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="input-file-format">
+<h1>Input File Format<a class="headerlink" href="#input-file-format" title="Permalink to this headline">¶</a></h1>
+<p>In this file, the format for the input files is detailed. To run, PyGBe needs
+two input files: a <code class="docutils literal notranslate"><span class="pre">config</span></code> file and a <code class="docutils literal notranslate"><span class="pre">parameters</span></code> file. You can find
+samples of these files in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory.</p>
+<div class="section" id="config-file-format">
+<h2>Config file format<a class="headerlink" href="#config-file-format" title="Permalink to this headline">¶</a></h2>
+<p>This file has two parts:</p>
+<p><code class="docutils literal notranslate"><span class="pre">FILE:</span></code> indicates in that line a mesh file will be specified. This
+code interfaces with the MSMS format, which generates a
+<code class="docutils literal notranslate"><span class="pre">filename.vert</span></code> and <code class="docutils literal notranslate"><span class="pre">filename.face</span></code> files. Each <code class="docutils literal notranslate"><span class="pre">filename</span></code> has the
+information for the mesh of one surface. To account for more than one
+surface (ie. for Stern layers, solvent filled cavities, several
+proteins), more than one <code class="docutils literal notranslate"><span class="pre">FILE</span></code> line is needed. After <code class="docutils literal notranslate"><span class="pre">filename</span></code>,
+the user must specify what kind of surface <code class="docutils literal notranslate"><span class="pre">filename</span></code> is. It can be:</p>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">stern_layer</span></code>: surface interfacer stern layer with solvent.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">dielectric_interface</span></code>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>In Poisson Boltzmann applications: surface interfaces low dielectric
+(inside protein) and high dielectric (outside protein).</li>
+<li>In LSPR applications: surface interfaces dielectric inside the
+particle and the dielectric of the medium.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">internal_cavity</span></code>: surface is an internal cavity (a result of
+‘-all_components’ flag in MSMS). This is important to specify
+because by default MSMS changes the vertex ordering for internal
+cavities.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">dirichlet_surface</span></code>: surface of specified potential. The value of
+this potential is read from a text file which has to be specified
+next to ‘dirichlet_surface’. (See .phi0 file in example).</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">neumann_surface</span></code>: surface of specified potential. The value of
+this potential is read from a text file which has to be specified
+next to ‘neumann_surface’. (See .phi0 file in example).</p>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">FIELD:</span></code> specifies physical parameters of the different regions.
+Parameters:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">LorY</span></code>: 1: Laplace, 2: Yukawa</li>
+<li><code class="docutils literal notranslate"><span class="pre">E?</span></code>: 1: calculate the energy in this region 0: don’t calculate
+energy in this region Note: if region is surrounded by a dirichlet or
+neumann surface, surface energy will be calculated.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Dielec</span></code>: Dielectric constant</li>
+<li><code class="docutils literal notranslate"><span class="pre">kappa</span></code>: reciprocal of Debye length</li>
+<li><code class="docutils literal notranslate"><span class="pre">charges?</span></code>: 0: No charges inside this region 1: There are charges
+in this region</li>
+<li><code class="docutils literal notranslate"><span class="pre">coulomb?</span></code>: 0: don’t calculate coulomb energy in this region 1:
+calculate coulomb energy in this region</li>
+<li><code class="docutils literal notranslate"><span class="pre">charge_file</span></code>: location of the ‘.pqr’ file with the location of the
+charges</li>
+<li><code class="docutils literal notranslate"><span class="pre">Nparent</span></code>: Number of ‘parent’ surfaces (surface containing this
+region) Of course, this is either 1 of 0 (if it corresponds to the
+infinite region)</li>
+<li><code class="docutils literal notranslate"><span class="pre">parent</span></code>: file of the parent surface mesh, according to their
+position in the FILE list, starting from 0 (eg. if the mesh file for
+the parent is the third one specified in the FILE section, parent=2)</li>
+<li><code class="docutils literal notranslate"><span class="pre">Nchild</span></code>: number of child surfaces (surfaces completely contained
+in this region).</li>
+<li><code class="docutils literal notranslate"><span class="pre">children</span></code>: position of the mesh files for the children surface in
+the FILE section</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">WAVE:</span></code> Only applicable in LSPR problems. It specifies physical parameters of
+the incoming electric field in LSPR applications.
+Parameters:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">Efield</span></code>: electric field intensity, it is in the ‘z’ direction, ‘-‘
+indicates ‘-z’.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Wavelength</span></code>: wavelength of the incident electric field, in Ångström.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="parameters-file-format">
+<h1>Parameters file format<a class="headerlink" href="#parameters-file-format" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">Precision</span></code>: double or float. (float not supported yet!).</li>
+<li><code class="docutils literal notranslate"><span class="pre">K</span></code>: number of Gauss points per element (1, 3, 4, and 7 are
+supported).</li>
+<li><code class="docutils literal notranslate"><span class="pre">Nk</span></code>: number of Gauss points per triangle edge for semi-analytical
+integration.</li>
+<li><code class="docutils literal notranslate"><span class="pre">K_fine</span></code>: number of Gauss points per element for near singular
+integrals.</li>
+<li><code class="docutils literal notranslate"><span class="pre">threshold</span></code>: defines region near singularity where semi-analytical
+technique is used. if sqrt(2*Area)/r &gt; threshold, integration is
+done semi-analytically.</li>
+<li><code class="docutils literal notranslate"><span class="pre">BSZ</span></code>: CUDA block size.</li>
+<li><code class="docutils literal notranslate"><span class="pre">restart</span></code>: number of iterations for GMRES to do restart.</li>
+<li><code class="docutils literal notranslate"><span class="pre">tolerance</span></code>: GMRES tolerance.</li>
+<li><code class="docutils literal notranslate"><span class="pre">max_iter</span></code>: maximum number of GMRES iterations.</li>
+<li><code class="docutils literal notranslate"><span class="pre">P</span></code>: order of expansion in treecode.</li>
+<li><code class="docutils literal notranslate"><span class="pre">eps</span></code>: epsilon machine.</li>
+<li><code class="docutils literal notranslate"><span class="pre">NCRIT</span></code>: maximum number of boundary elements per twig box of tree
+structure.</li>
+<li><code class="docutils literal notranslate"><span class="pre">theta</span></code>: multipole acceptance criterion of treecode.</li>
+<li><code class="docutils literal notranslate"><span class="pre">GPU</span></code>: 0: don’t use GPU. 1: use GPU.</li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyGBe</a></h1>
+
+
+
+<p class="blurb">Python, GPUs and Boundary elements for biomolecular electrostatics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=barbagroup&repo=pygbe&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<a href="http://dx.doi.org/10.21105/joss.00043"><img src="http://joss.theoj.org/papers/10.21105/joss.00043/status.svg"></a>
+<a href="http://www.doi2bib.org/#/doi/10.21105/joss.00043"><img src="https://img.shields.io/badge/Cite%20PyGBe-bibtex-blue.svg"></a><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run.html">Run PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Citing PyGBe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_pqr_setup.html">Generate meshes and pqr</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Input File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#parameters-file-format">Parameters file format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="othersoftware.html">Other software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programmatic.html">Programmatic use of PyGBe</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="mesh_pqr_setup.html" title="previous chapter">Generate meshes and pqr</a></li>
+      <li>Next: <a href="references.html" title="next chapter">References</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Christopher Cooper, Natalia Clementi, Gil Forsyth, Lorena Barba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
