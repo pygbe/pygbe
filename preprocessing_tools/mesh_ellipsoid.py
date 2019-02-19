@@ -12,6 +12,32 @@
 
 import numpy 
 import matplotlib.tri as Triang
+from argparse import ArgumentParser
+
+def read_inputs():
+    """
+    Parse command-line arguments to run mesh_ellipsoide.
+
+    User should provide:
+    -n  : int, number of points in a triangle edge desired after refinement.
+    -a1 : float, a1 principal semi-axis (a1, 0, 0).
+    -a2 : float, a2 principal semi-axis (0, a2, 0).
+    -a3 : float, a3 principal semi-axis (0, 0, a3).
+    """
+
+    parser = ArgumentParser(description='Manage mesh_ellipsoid command line arguments')
+
+
+    parser.add_argument('-n', '--num_points', dest='n', type=int, default=None,
+                    help="number of points in a triangle edge to refine into")
+    parser.add_argument('-a1', '--a1_semi_ax', dest='a1', type=float, default=None,
+                    help="a1 principal semi-axis (a1, 0, 0)")
+    parser.add_argument('-a2', '--a2_semi_ax', dest='a2', type=float, default=None,
+                    help="a2 principal semi-axis (0, a2, 0)")
+    parser.add_argument('-a3', '--a3_semi_ax', dest='a3', type=float, default=None,
+                    help="a3 principal semi-axis (0, 0, a3)")
+
+    return parser.parse_args()
 
 
 def get_points():
@@ -31,7 +57,7 @@ def get_points():
     p = numpy.array([[a, -a, -a, a, 1, 1, -1, -1, 0, 0, 0, 0],
                     [0, 0, 0, 0, a, -a, -a, a, 1, 1, -1, -1],
                     [1, 1, -1, -1, 0, 0, 0, 0, a, -a, -a, a]]).transpose()
-    #normalize to fall into a unit sphere.
+    # normalize to fall into a unit sphere.
     p = p / numpy.sqrt((p**2).sum(1))[0]
 
     # rotate top point to the z-axis
@@ -40,7 +66,7 @@ def get_points():
     rotation = numpy.array([[ca, 0, -sa], [0, 1.0, 0], [sa, 0, ca]])
     p = numpy.inner(rotation, p).transpose()      
     # reorder in a downward spiral
-    reorder_index = [0, 3, 4, 8, -1, 5,-2, -3, 7, 1, 6, 2]
+    reorder_index = [0, 3, 4, 8, -1, 5, -2, -3, 7, 1, 6, 2]
     return p[reorder_index, :]
 
 
@@ -129,7 +155,7 @@ def triangulate_bary(bary):
 
 def get_triangulation(n, ico=icosahedron()):
     """
-    Compute the triangulation of the sphere by refineing each face of the
+    Compute the triangulation of the sphere by refining each face of the
     icosahedron to an nth order barycentric triangle.  There are two key issues
     that this routine addresses.
 
@@ -138,11 +164,13 @@ def get_triangulation(n, ico=icosahedron()):
 
     Arguments
     ---------
+    n : integer, number of points in a triangle edge after refinement.
 
     Returns
     -------
-
-
+    univerts : array, new vertices coordinates after removing repeated nodes
+    unitri : array, new triangles indices.
+    unibar : array, new edges indices. 
     """
     verts = numpy.array([ico.p[ico.tri[:, 0]],
                         ico.p[ico.tri[:, 1]],
@@ -217,8 +245,8 @@ def cart2sph(xyz):
 
     """
     ptsnew = numpy.zeros_like(xyz)
-    xy = xyz[:,0]**2 + xyz[:,1]**2
-    ptsnew[:, 0] = numpy.sqrt(xy + xyz[:,2]**2)
+    xy = xyz[:, 0]**2 + xyz[:, 1]**2
+    ptsnew[:, 0] = numpy.sqrt(xy + xyz[:, 2]**2)
     # for elevation angle defined from Z-axis down
     ptsnew[:, 1] = numpy.arctan2(numpy.sqrt(xy), xyz[:, 2])
     # for elevation angle defined from XY-plane up
@@ -227,39 +255,57 @@ def cart2sph(xyz):
 
 
 if __name__ == "__main__":
-    import numpy
-    from matplotlib import pyplot
-    from mpl_toolkits.mplot3d import Axes3D
+    
+    args = read_inputs()
 
-    # Get a unit sphere triangulation with a specified level of refinement. 
-    # A refinement level of N will have (20*N^2) faces and (10*N^2 + 2) vertices
-    isph = icosphere(10)
+    n = args.n
+    a1 = args.a1
+    a2 = args.a2
+    a3 = args.a3
+
+    # Get a unit sphere triangulation with a specified level of refinement.
+    # A refinement level of N will have (20*N^2) faces and (10*N^2 + 2)
+    # vertices
+    isph = icosphere(n)
     vertices = isph.p
     faces = isph.tri
 
-    # get spherical coordinates for each point and project it to the corresponding
-    # point on the ellipsoid. a,b,c are the semi-major axes of the ellipsoid
-    spvert=cart2sph(vertices)
-    a,b,c=1.0,1.0,0.5
-    vertices[:,0]=a*numpy.cos(spvert[:,2])*numpy.sin(spvert[:,1])
-    vertices[:,1]=b*numpy.sin(spvert[:,2])*numpy.sin(spvert[:,1])
-    vertices[:,2]=c*numpy.cos(spvert[:,1])
+    # get spherical coordinates for each point and project it to the
+    # corresponding point on the ellipsoid. a,b,c are the semi-major axes
+    #  of the ellipsoid
 
-    # plotting
-    fig = pyplot.figure(figsize=(10,10))
-    ax = fig.gca(projection='3d')
-    ax.plot_trisurf(vertices[:,0],vertices[:,1],vertices[:,2],cmap='cool', triangles=faces, linewidth=0.20,edgecolor='black',alpha=1.0)
+    spvert = cart2sph(vertices)
+
+    vertices[:, 0] = a1*numpy.cos(spvert[:, 2])*numpy.sin(spvert[:, 1])
+    vertices[:, 1] = a2*numpy.sin(spvert[:, 2])*numpy.sin(spvert[:, 1])
+    vertices[:, 2] = a3*numpy.cos(spvert[:, 1])
 
 
-    # Create cubic bounding box to simulate equal aspect ratio for x,y and z axes
-    X,Y,Z=vertices[:,0],vertices[:,1],vertices[:,2]
-    
-    max_range = numpy.array([X.max()-X.min(), Y.max()-Y.min(), Z.max()-Z.min()]).max()
-    Xb = 0.5*max_range*numpy.mgrid[-1:2:2,-1:2:2,-1:2:2][0].flatten() + 0.5*(X.max()+X.min())
-    Yb = 0.5*max_range*numpy.mgrid[-1:2:2,-1:2:2,-1:2:2][1].flatten() + 0.5*(Y.max()+Y.min())
-    Zb = 0.5*max_range*numpy.mgrid[-1:2:2,-1:2:2,-1:2:2][2].flatten() + 0.5*(Z.max()+Z.min())
-    # Comment or uncomment following both lines to test the fake bounding box:
-    for xb, yb, zb in zip(Xb, Yb, Zb):
-       ax.plot([xb], [yb], [zb], 'w')
 
-    pyplot.show()
+
+
+
+    #  plotting
+    #fig = pyplot.figure(figsize=(10,10))
+    #ax = fig.gca(projection='3d')
+    #ax.plot_trisurf(vertices[:,0],vertices[:,1],vertices[:,2], color='white',
+    #            triangles=faces, linewidth=0.20,edgecolor='black',alpha=1.0)
+
+    #arrayOfTicks = np.linspace(-70,70, 5)
+
+    #ax.xaxis.pane.fill = False
+    #ax.yaxis.pane.fill = False
+    #ax.zaxis.pane.fill = False
+    #ax.grid(True)
+
+    #ax.w_xaxis.set_ticks(arrayOfTicks) 
+    #ax.w_yaxis.set_ticks(arrayOfTicks) 
+    #ax.w_zaxis.set_ticks(arrayOfTicks) 
+
+    #ilim = arrayOfTicks.min()
+    #slim = arrayOfTicks.max()
+
+    #ax.set_xlim3d(ilim, slim)
+    #ax.set_ylim3d(ilim, slim)
+    #ax.set_zlim3d(ilim, slim)
+    #ax.view_init(0, -75)
