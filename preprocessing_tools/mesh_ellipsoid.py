@@ -273,6 +273,11 @@ if __name__ == "__main__":
     vertices = isph.p
     faces = isph.tri + 1 # Agrees with msms format
 
+    #### CONFIRM IF THIS IS CORRECT AFTER TALK WITH CHRIS. 
+    index_format = numpy.zeros_like(faces)
+    index_format[:, 0] = faces[:, 0]
+    index_format[:, 1] = faces[:, 2]
+    index_format[:, 2] = faces[:, 1]
 
     # get spherical coordinates for each point and project it to the
     # corresponding point on the ellipsoid. a,b,c are the semi-major axes
@@ -286,7 +291,7 @@ if __name__ == "__main__":
 
     
     numpy.savetxt(filename+'.vert', vertices, fmt='%.4f')
-    numpy.savetxt(filename+'.face', faces, fmt='%i')
+    numpy.savetxt(filename+'.face', index_format, fmt='%i')
 
 
 
