@@ -1,5 +1,21 @@
 # =======================================================================
 # 2019 Changes by Natalia Clementi @ncclementi
+# Add translation center to allow creation of meshes not centered on (0,0,0)
+# Modify script to save faces and vertices in different files
+# Add argument parser to accept input variables chosen by user  For example:
+# to create a an ellipsoid of 180 triangles (faces = 20*N^2), with principal 
+# axes (a1, a2, a3) = (2, 4, 5.5), centered on (1.5, -2, 4.2) and filename: 
+# ellipsoid_example the user will run
+#  
+# $ python mesh_ellipsoid.py -n 3 -a1 2 -a2 4 -a3 5.5 -xyzc 1.5,-2,4.2 -fn ellipsoid_example
+# 
+# This will create two files ellipsoid_example.vert (which contains the 
+# coordinates of the vertices) and ellipsoid_example.face (which contains the 
+# connectivity).
+#
+# Warning!! In the resulting mesh files, for our needs, the counting of the
+# indices for the triangles starts on 1 and the orientation has been inverted.
+# (check lines 311 to 318)
 # =======================================================================
 # 2016 Changes by ARM (abhilashreddy.com)
 #  - made to work with Python 3+
@@ -15,8 +31,20 @@ import matplotlib.tri as Triang
 from argparse import ArgumentParser, ArgumentTypeError
 
 def coords_center(s):
+    '''Adapted from https://stackoverflow.com/questions/9978880
+    Splitter of string x,y,z into variables to use in parser
+    
+    Arguments
+    ---------
+    s: string, has to have form x,y,z
+    
+    Returns
+    -------
+    x, y, z : floats, coordinates x, y, z.
+    
+    '''
     try:
-        x, y, z = map(int, s.split(','))
+        x, y, z = map(float, s.split(','))
         return x, y, z
     except:
         raise ArgumentTypeError("Coordinates must be x,y,z")
@@ -275,7 +303,6 @@ if __name__ == "__main__":
     a3 = args.a3
     xc, yc, zc = args.xyzc
     filename = args.filename
-
     # Get a unit sphere triangulation with a specified level of refinement.
     # A refinement level of N will have (20*N^2) faces and (10*N^2 + 2)
     # vertices
@@ -284,14 +311,13 @@ if __name__ == "__main__":
 
     faces = isph.tri + 1 # Agrees with msms format
 
-    #### CONFIRM IF THIS IS CORRECT AFTER TALK WITH CHRIS. 
     index_format = numpy.zeros_like(faces)
     index_format[:, 0] = faces[:, 0]
-    index_format[:, 1] = faces[:, 2]
+    index_format[:, 1] = faces[:, 2] #Orientation needed to match with msms
     index_format[:, 2] = faces[:, 1]
 
     # get spherical coordinates for each point and project it to the
-    # corresponding point on the ellipsoid. a,b,c are the semi-major axes
+    # corresponding point on the ellipsoid. a1,a2,a3 are the semi-major axes
     #  of the ellipsoid
 
     spvert = cart2sph(vertices)
@@ -303,10 +329,7 @@ if __name__ == "__main__":
     numpy.savetxt(filename+'.vert', vertices+numpy.array([xc,yc,zc]), fmt='%.4f')
     numpy.savetxt(filename+'.face', index_format, fmt='%i')
 
-
-
-
-    #  plotting
+    # plotting
     #fig = pyplot.figure(figsize=(10,10))
     #ax = fig.gca(projection='3d')
     #ax.plot_trisurf(vertices[:,0],vertices[:,1],vertices[:,2], color='white',
