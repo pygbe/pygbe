@@ -1,5 +1,6 @@
 # =======================================================================
 # 2019 Changes by Natalia Clementi @ncclementi
+# Add documentation and comments.
 # Add translation center to allow creation of meshes not centered on (0,0,0)
 # Modify script to save faces and vertices in different files
 # Add argument parser to accept input variables chosen by user  For example:
@@ -15,7 +16,7 @@
 #
 # Warning!! In the resulting mesh files, for our needs, the counting of the
 # indices for the triangles starts on 1 and the orientation has been inverted.
-# (check lines 311 to 318)
+# (check lines 312 to 319)
 # =======================================================================
 # 2016 Changes by ARM (abhilashreddy.com)
 #  - made to work with Python 3+
