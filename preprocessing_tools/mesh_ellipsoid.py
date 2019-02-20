@@ -12,7 +12,14 @@
 
 import numpy 
 import matplotlib.tri as Triang
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
+
+def coords_center(s):
+    try:
+        x, y, z = map(int, s.split(','))
+        return x, y, z
+    except:
+        raise ArgumentTypeError("Coordinates must be x,y,z")
 
 def read_inputs():
     """
@@ -36,6 +43,8 @@ def read_inputs():
                     help="a2 principal semi-axis (0, a2, 0)")
     parser.add_argument('-a3', '--a3_semi_ax', dest='a3', type=float, default=None,
                     help="a3 principal semi-axis (0, 0, a3)")
+    parser.add_argument('-xyzc', '--xyz_center', dest='xyzc', type=coords_center,
+                        default='0,0,0', help="xc,yc,zc center coordinates")
     parser.add_argument('-fn', '--filename', dest='filename', type=str, default=None,
                         help="output file name")
 
@@ -264,13 +273,15 @@ if __name__ == "__main__":
     a1 = args.a1
     a2 = args.a2
     a3 = args.a3
+    xc, yc, zc = args.xyzc
     filename = args.filename
 
     # Get a unit sphere triangulation with a specified level of refinement.
     # A refinement level of N will have (20*N^2) faces and (10*N^2 + 2)
     # vertices
     isph = icosphere(n)
-    vertices = isph.p
+    vertices = isph.p  
+
     faces = isph.tri + 1 # Agrees with msms format
 
     #### CONFIRM IF THIS IS CORRECT AFTER TALK WITH CHRIS. 
@@ -289,7 +300,7 @@ if __name__ == "__main__":
     vertices[:, 1] = a2*numpy.sin(spvert[:, 2])*numpy.sin(spvert[:, 1])
     vertices[:, 2] = a3*numpy.cos(spvert[:, 1])
 
-    numpy.savetxt(filename+'.vert', vertices, fmt='%.4f')
+    numpy.savetxt(filename+'.vert', vertices+numpy.array([xc,yc,zc]), fmt='%.4f')
     numpy.savetxt(filename+'.face', index_format, fmt='%i')
 
 
