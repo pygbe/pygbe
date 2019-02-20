@@ -148,8 +148,8 @@ def triangulate_bary(bary):
                    vertices that form each triangle after the triangulation. 
     """
 
-    x, y = numpy.cos(-numpy.pi/4.) * bary[:, 0] + //
-    numpy.sin(-numpy.pi/4.) * bary[:, 1], bary[:, 2]
+    x = numpy.cos(-numpy.pi/4.)*bary[:, 0] + numpy.sin(-numpy.pi/4.)*bary[:, 1]
+    y = bary[:, 2]
 
     dely = Triang.Triangulation(x, y)
     return dely.edges, dely.triangles
@@ -289,7 +289,6 @@ if __name__ == "__main__":
     vertices[:, 1] = a2*numpy.sin(spvert[:, 2])*numpy.sin(spvert[:, 1])
     vertices[:, 2] = a3*numpy.cos(spvert[:, 1])
 
-    
     numpy.savetxt(filename+'.vert', vertices, fmt='%.4f')
     numpy.savetxt(filename+'.face', index_format, fmt='%i')
 
