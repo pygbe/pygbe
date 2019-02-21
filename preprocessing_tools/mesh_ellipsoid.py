@@ -15,8 +15,7 @@
 # connectivity).
 #
 # Warning!! In the resulting mesh files, for our needs, the counting of the
-# indices for the triangles starts on 1 and the orientation has been inverted.
-# (check lines 312 to 319)
+# indices for the triangles starts on 1 (check line 311)
 # =======================================================================
 # 2016 Changes by ARM (abhilashreddy.com)
 #  - made to work with Python 3+
@@ -309,13 +308,7 @@ if __name__ == "__main__":
     # vertices
     isph = icosphere(n)
     vertices = isph.p  
-
     faces = isph.tri + 1 # Agrees with msms format
-
-    index_format = numpy.zeros_like(faces)
-    index_format[:, 0] = faces[:, 0]
-    index_format[:, 1] = faces[:, 2] #Orientation needed to match with msms
-    index_format[:, 2] = faces[:, 1]
 
     # get spherical coordinates for each point and project it to the
     # corresponding point on the ellipsoid. a1,a2,a3 are the semi-major axes
@@ -328,7 +321,7 @@ if __name__ == "__main__":
     vertices[:, 2] = a3*numpy.cos(spvert[:, 1])
 
     numpy.savetxt(filename+'.vert', vertices+numpy.array([xc,yc,zc]), fmt='%.4f')
-    numpy.savetxt(filename+'.face', index_format, fmt='%i')
+    numpy.savetxt(filename+'.face', faces, fmt='%i')
 
     # plotting
     #fig = pyplot.figure(figsize=(10,10))
