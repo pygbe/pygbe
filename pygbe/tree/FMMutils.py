@@ -3,7 +3,7 @@ It contains the functions to build the tree and compute all the interactions.
 """
 import time
 import numpy
-from scipy.misc import comb
+from scipy.special import comb
 
 # Wrapped code
 from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
