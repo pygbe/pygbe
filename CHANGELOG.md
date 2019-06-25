@@ -2,6 +2,14 @@
 ----
 ## Current development
 ---
+### Added
+
+### Changed
+
+### Fixed
+- Deprecated import  
+      `scipy.misc.comb deprecated` -> `scipy.special.comb`
+### Removed
 
 ## 0.3.2
 ---
