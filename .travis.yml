@@ -3,7 +3,7 @@ python:
   - "3.5"
 env:
   global:
-    - secure: "bLP+5HW9seXOSi1Kyjf1XyOiLBOWf/hDKIW5f+/TCi5afFGdxlQp4BNcxwG9ZQ61Er2dcD5kuQ3Lop+AA3GSpt43a3cPhCZ/LX37b17QKeEAr8IhzgrAoH+hlQheWnbgzGxvOYjhywUwIU+bsotRoZLRrrwBYZXqOWLshFCeReM="
+    - secure: "JApC40mvWa5WaFwYnshlvz6HjYwqFOUZmLVU+UNhS3aQDDX4C9HBx8yOz4y5kqDpAMXZXdWko3AfxDvQbg17DJBzzaPJH5FMltMYYIN1CuPilZvHaSu0msnSbXKErEey6Nong2ChriUBwPuoVkjY98CtY/Itbl7yF9pHzVvPB2g="
 
 
 sudo: false
