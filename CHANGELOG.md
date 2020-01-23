@@ -2,7 +2,21 @@
 ----
 ## Current development
 ---
+### Added
 
+* Paralelization of the CPU code
+* Option to run convergence tests using CPU or GPU
+
+### Changed
+
+* The usage of SWIG into cython
+* Changed Dockerfile to work with cython
+
+### Fixed
+
+* The way PyGBe reads pqr files so it is compatible with all of them
+
+### Removed
 
 ## 0.3.1
 ---

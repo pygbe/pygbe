@@ -43,6 +43,9 @@ directory
 
     py.test
 
+You can choose wheter to run tests on CPU or GPU by using the 
+flag --arch=cpu of --arch=gpu respectively. PyGBe will use GPU by default.
+
 Convergence tests
 ^^^^^^^^^^^^^^^^^
 
