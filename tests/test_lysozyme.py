@@ -7,11 +7,11 @@ import sys
 import atexit
 
 def report_e():
-    print('Lysozime test could not run using GPU because pycuda were not found. CPU were used instead.')
+    print('Lysozyme test could not run using GPU because pycuda were not found. CPU were used instead.')
 def report_g():
-    print('Lysozime test had run using GPU.')
+    print('Lysozyme test had run using GPU.')
 def report_c():
-    print('Lysozime test had run using CPU.')
+    print('Lysozyme test had run using CPU.')
 
 from pygbe.main import main
 
