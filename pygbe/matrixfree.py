@@ -618,7 +618,6 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
                         K_diag = 0
                         V_diag = 0
                         IorE   = 2
-                        print('IM HERE') 
                         K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
                                                 phi_field, LorY, src, tar,
                                                 K_diag, V_diag, IorE, s_idx, param,
