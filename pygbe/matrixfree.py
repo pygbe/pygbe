@@ -609,21 +609,24 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
                     continue
 
                 else:
-                    #Assuming field comes in z direction then
-                    phi_field = electric_field*tar.normal[:,2]
-                    #The contribution is in the exterior equation
-                    K_diag = -2 * pi
-                    V_diag = 0
-                    IorE   = 2
+                    for s_idx in field.child:
+                        src = surf_array[s_idx]   
+                        #Assuming field comes in z direction then
+                        #electric field contains the - sign in config file
+                        phi_field = electric_field*src.normal[:,2]
+                        #The contribution is in the exterior equation
+                        K_diag = 0
+                        V_diag = 0
+                        IorE   = 2
 
-                    K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
-                                            phi_field, LorY, tar, tar,
-                                            K_diag, V_diag, IorE, s, param,
-                                            ind0, timing, kernel)
+                        K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
+                                                phi_field, LorY, src, tar,
+                                                K_diag, V_diag, IorE, s_idx, param,
+                                                ind0, timing, kernel)
 
-                    F[s_start:s_start + s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[1, :]
+                        F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
 
-                    F[s_start+s_size:s_start+2*s_size] += (1 - tar.E_hat) * V_lyr * tar.Precond[3,:]
+                        F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[3,:]
 
 #   Dirichlet/Neumann contribution to RHS
 #    for field in field_array:
