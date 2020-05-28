@@ -1,6 +1,15 @@
 # PyGBe Change Log
 ----
 ## Current development
+
+###Added
+
+* Script to generate ellipsoidal meshes using icosphere 
+
+### Fixed
+
+* CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
+* LSPR 7 spheres regression test (needed fix due to RHS bug)    
 ---
 ### Added
 

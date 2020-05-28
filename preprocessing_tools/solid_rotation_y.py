@@ -7,7 +7,7 @@ import os
 
 from argparse import ArgumentParser
 
-from move_prot_helper import (read_vertex, read_pqr, rotate_y,
+from move_prot_helper import (read_vertex, read_pqr, rotate_y, rotate_x,
                              modify_pqr)
 
 def read_inputs():
@@ -49,13 +49,18 @@ outMesh = inMesh + name
 outpqr = inpqr + name
 
 #Read mesh and pqr
-#vert = read_vertex(inMesh+'.vert', float)
 vert = numpy.loadtxt(inMesh+'.vert', dtype=float)
 
 xq, q, Nq, rad = read_pqr(inpqr+'.pqr', float)
 
+#Comment if want to rotate respect to x axis. 
 xq_new = rotate_y(xq, angle_y)
 vert_new = rotate_y(vert, angle_y)
+
+# If desired to rotate on plane yz use function rotate_x, comment 2 lines above
+#Uncomment the next two lines if rotation is desired around x-axis
+#xq_new = rotate_x(xq, angle_y)
+#vert_new = rotate_x(vert, angle_y)
 
 ctr = numpy.average(vert_new, axis=0) 
 
