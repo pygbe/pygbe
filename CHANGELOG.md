@@ -1,6 +1,11 @@
 # PyGBe Change Log
 ----
 ## Current development
+
+### Fixed
+
+* CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
+* LSPR 7 spheres regression test (needed fix due to RHS bug)    
 ---
 
 ## 0.3.2
