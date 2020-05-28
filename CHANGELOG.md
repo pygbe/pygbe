@@ -2,6 +2,10 @@
 ----
 ## Current development
 
+###Added
+
+* Script to generate ellipsoidal meshes using icosphere 
+
 ### Fixed
 
 * CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
