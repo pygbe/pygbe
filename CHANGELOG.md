@@ -2,23 +2,20 @@
 ----
 ## Current development
 
-###Added
-
-* Script to generate ellipsoidal meshes using icosphere 
-
-### Fixed
-
-* CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
-* LSPR 7 spheres regression test (needed fix due to RHS bug)    
----
 ### Added
+* Script to generate ellipsoidal meshes using icosphere 
 
 ### Changed
 
 ### Fixed
 - Deprecated import  
       `scipy.misc.comb deprecated` -> `scipy.special.comb`
+* CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
+* LSPR 7 spheres regression test (needed fix due to RHS bug)
+* SyntaxError messages due to printing statements py2->py3 in generate brick file
+
 ### Removed
+
 
 ## 0.3.2
 ---
