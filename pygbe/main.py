@@ -96,6 +96,11 @@ def read_inputs(args):
                         dest='geometry',
                         type=str,
                         help="Custom geometry folder prefix")
+    parser.add_argument('-x0',
+                        '--initial_guess',
+                        dest='initial_guess',
+                        type=str,
+                        help="File containing an initial guess for the linear solver")
 
     return parser.parse_args(args)
 
@@ -372,7 +377,15 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Solve')
     # Initializing phi dtype according to the problem we are solving.
     if not complex_diel:
-        phi = numpy.zeros(param.Neq)    
+        if args.initial_guess==None:
+            phi = numpy.zeros(param.Neq)    
+        else:
+            phi = numpy.loadtxt(args.initial_guess)
+            if len(phi) != param.Neq:
+                print("Initial guess dimensions don't agree. Continuing with 0")
+                phi = numpy.zeros(param.Neq)    
+
+            
     else:
         raise ValueError('Dielectric should be real for solvation energy problems')
 
@@ -398,7 +411,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     # Calculate solvation energy
     print('\nCalculate Solvation Energy (E_solv)')
     tic = time.time()
-    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel)
+    E_solv = calculate_solvation_energy(surf_array, field_array, param, kernel, output_dir)
     toc = time.time()
     print('Time E_solv: {}s'.format(toc - tic))
     ii = -1

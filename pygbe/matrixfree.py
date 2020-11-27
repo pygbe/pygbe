@@ -11,6 +11,8 @@ from pygbe.tree.rhs import calc_aux
 from pygbe.projection import project, project_Kt, get_phir, get_phir_gpu
 from pygbe.classes import Parameters, IndexConstant
 from pygbe.util.semi_analytical import GQ_1D
+from datetime import datetime
+import os
 
 # PyCUDA libraries
 try:
@@ -1142,7 +1144,7 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
     return F
 
 
-def calculate_solvation_energy(surf_array, field_array, param, kernel):
+def calculate_solvation_energy(surf_array, field_array, param, kernel, output_dir):
     """
     It calculates the solvation energy.
 
@@ -1153,6 +1155,7 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
     field_array: array, contains the Field classes of each region on the surface.
     param      : class, parameters related to the surface.
     kernel     : pycuda source module.
+    output_dir : string, directory where outputs are stored
 
     Returns
     --------
@@ -1246,6 +1249,8 @@ def calculate_solvation_energy(surf_array, field_array, param, kernel):
                     AI_int += AI
                     phi_reac += phi_aux
 
+                phi_reac_fname = '{:%Y-%m-%d-%H%M%S}-phi_reac.txt'.format(datetime.now())
+                numpy.savetxt(os.path.join(output_dir, phi_reac_fname), phi_reac)
                 E_solv_aux += 0.5 * C0 * numpy.sum(f.q * phi_reac)
                 E_solv.append(E_solv_aux)
 
