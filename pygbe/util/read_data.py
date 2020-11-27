@@ -119,6 +119,9 @@ def readpqr(filename, REAL):
 
     from math import floor
     num = floor(len(lines)/2) - 1
+    while(lines[num][:4]!='ATOM'):
+        num += 1
+
     if len(lines[num].replace('-', ' -').split()) == 11:
         for line in lines:
             line = line.replace('-', ' -').split()
@@ -142,6 +145,7 @@ def readpqr(filename, REAL):
 
     pos = numpy.array(pos)
     q = numpy.array(q)
+
     return pos, q
 
 

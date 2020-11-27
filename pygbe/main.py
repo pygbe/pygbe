@@ -375,6 +375,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
         phi = numpy.zeros(param.Neq)    
     else:
         raise ValueError('Dielectric should be real for solvation energy problems')
+
+#   phi = numpy.loadtxt('examples/zika/phi_reference')
         
     phi, iteration = gmres_mgs(surf_array, field_array, phi, F, param, ind0,
                             timing, kernel)
