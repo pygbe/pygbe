@@ -1112,11 +1112,11 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
                     # Find location of surface s in RHS array
                     s_start = locate_s_in_RHS(s, surf_array)
-                    s_size = len(surface.xi)
+                    s_size = len(surf_array[s].xi)
 
                     # Surface s has 2 equations and K_lyr affects the internal
                     # equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start + s_size] += K_lyr * surface.Precond[0, :]
+                    F[s_start:s_start + s_size] += K_lyr * surf_array[s].Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
                       s_size] += K_lyr * surf_array[s].Precond[2, :]
 
@@ -1133,13 +1133,13 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
 
                     # Find location of surface s in RHS array
                     s_start = locate_s_in_RHS(s, surf_array)
-                    s_size = len(surface.xi)
+                    s_size = len(surf_array[s].xi)
 
                     # Surface s has 2 equations and K_lyr affects the internal
                     # equation, hence Precond[0,:] and Precond[2,:].
-                    F[s_start:s_start + s_size] += -V_lyr * surface.Precond[0, :]
+                    F[s_start:s_start + s_size] += -V_lyr * surf_array[s].Precond[0, :]
                     F[s_start + s_size:s_start + 2 *
-                      s_size] += -V_lyr * surface.Precond[2, :]
+                      s_size] += -V_lyr * surf_array[s].Precond[2, :]
 
     return F
 

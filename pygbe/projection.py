@@ -12,7 +12,7 @@ from pygbe.quadrature import getWeights
 from pygbe.tree.direct import direct_c
 from pygbe.tree.FMMutils import (getMultipole, upwardSweep, M2P_sort, M2PKt_sort,
                                  M2P_gpu, M2PKt_gpu, P2P_sort, P2PKt_sort, P2P_gpu,
-                                 P2PKt_gpu, M2P_nonvec, P2P_nonvec)
+                                 P2PKt_gpu, M2P_nonvec, P2P_nonvec, P2P_nonvec_derivative)
 
 try:
     import pycuda.autoinit
@@ -608,3 +608,133 @@ def get_phir_gpu(XK, XV, surface, field, par_reac, kernel):
     phir_cpu = cuda.from_device(phir, Nq, dtype=REAL)
 
     return phir_cpu, AI_int
+
+def get_dphirdr (XK, XV, surface, xq, Cells, par_reac, ind_reac):
+
+    REAL = par_reac.REAL
+    N = len(XK)
+    MV = numpy.zeros(len(XK))
+    L = numpy.sqrt(2*surface.area) # Representative length
+    AI_int = 0
+
+    # Setup vector
+    K = par_reac.K
+    tic = time.time()
+    w  = getWeights(K)
+    X_V = numpy.zeros(N*K)
+    X_Kx = numpy.zeros(N*K)
+    X_Ky = numpy.zeros(N*K)
+    X_Kz = numpy.zeros(N*K)
+    X_Kc = numpy.zeros(N*K)
+    X_Vc = numpy.zeros(N*K)
+
+    for i in range(N*K):
+        X_V[i]   = XV[i//K]*w[i%K]*surface.area[i//K]
+        X_Kx[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,0]
+        X_Ky[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,1]
+        X_Kz[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,2]
+        X_Kc[i]  = XK[i//K]
+        X_Vc[i]  = XV[i//K]
+    
+    toc = time.time()
+    time_set = toc - tic
+
+    # Evaluation
+    IorE = 0    # This evaluation is on charge points, no self-operator
+    AI_int = 0
+    dphix_reac = numpy.zeros(len(xq))
+    dphiy_reac = numpy.zeros(len(xq))
+    dphiz_reac = numpy.zeros(len(xq))
+    time_P2P = 0.
+    time_M2P = 0.
+    for i in range(len(xq)):
+        CJ = 0
+        dKxval = 0.
+        dKyval = 0.
+        dKzval = 0.
+        dVxval = 0.
+        dVyval = 0.
+        dVzval = 0.
+        source = []
+        dKxval, dVxval, source, time_M2P = M2P_nonvec(Cells, CJ, xq[i], dKxval, dVxval,
+                                                 ind_reac.index_large, par_reac, source, time_M2P)
+
+        dKxval, dKyval, dKzval, dVxval, \
+        dVyval, dVzval, AI_int, time_P2P = P2P_nonvec_derivative(Cells, surface, X_V, X_Kx, X_Ky, X_Kz, X_Kc, X_Vc,
+                                        xq[i], dKxval, dKyval, dKzval, dVxval, dVyval, dVzval, IorE, par_reac, w, source, AI_int, time_P2P)
+        dphix_reac[i] = (-dKxval + dVxval)/(4*pi)
+        dphiy_reac[i] = (-dKyval + dVyval)/(4*pi)
+        dphiz_reac[i] = (-dKzval + dVzval)/(4*pi)
+#    print '\tTime set: %f'%time_P2M
+#    print '\tTime P2M: %f'%time_P2M
+#    print '\tTime M2M: %f'%time_M2M
+#    print '\tTime M2P: %f'%time_M2P
+#    print '\tTime P2P: %f'%time_P2P
+
+    return dphix_reac, dphiy_reac, dphiz_reac, AI_int
+
+def get_dphirdr_gpu (XK, XV, surface, field, par_reac, kernel):
+
+    REAL = par_reac.REAL
+    Nq = len(field.xq)
+    N = len(XK)
+    MV = numpy.zeros(len(XK))
+    L = numpy.sqrt(2*surface.area) # Representative length
+    AI_int = 0
+
+    # Setup vector
+    K = par_reac.K
+    tic = time.time()
+    w    = getWeights(K)
+    X_V = numpy.zeros(N*K)
+    X_Kx = numpy.zeros(N*K)
+    X_Ky = numpy.zeros(N*K)
+    X_Kz = numpy.zeros(N*K)
+    X_Kc = numpy.zeros(N*K)
+    X_Vc = numpy.zeros(N*K)
+
+    for i in range(N*K):
+        X_V[i]   = XV[i//K]*w[i%K]*surface.area[i//K]
+        X_Kx[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,0]
+        X_Ky[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,1]
+        X_Kz[i]  = XK[i//K]*w[i%K]*surface.area[i//K]*surface.normal[i//K,2]
+        X_Kc[i]  = XK[i//K]
+        X_Vc[i]  = XV[i//K]
+
+    toc = time.time()
+    time_set = toc - tic
+    sort = surface.sortSource
+    dphir_x = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
+    dphir_y = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
+    dphir_z = cuda.to_device(numpy.zeros(Nq, dtype=REAL))
+    m_gpu   = cuda.to_device(X_V[sort].astype(REAL))
+    mx_gpu  = cuda.to_device(X_Kx[sort].astype(REAL))
+    my_gpu  = cuda.to_device(X_Ky[sort].astype(REAL))
+    mz_gpu  = cuda.to_device(X_Kz[sort].astype(REAL))
+    mKc_gpu = cuda.to_device(X_Kc[sort].astype(REAL))
+    mVc_gpu = cuda.to_device(X_Vc[sort].astype(REAL))
+    AI_int_gpu = cuda.to_device(numpy.zeros(Nq, dtype=numpy.int32))
+    xkDev = cuda.to_device(surface.xk.astype(REAL))
+    wkDev = cuda.to_device(surface.wk.astype(REAL))
+
+
+    get_dphirdr = kernel.get_function("get_dphirdr")
+    GSZ = int(numpy.ceil(float(Nq)/par_reac.BSZ))
+
+    get_dphirdr(dphir_x, dphir_y, dphir_z, field.xq_gpu, field.yq_gpu, field.zq_gpu, m_gpu, mx_gpu, my_gpu, mz_gpu, 
+            mKc_gpu, mVc_gpu, surface.xjDev, surface.yjDev, surface.zjDev, surface.AreaDev, surface.kDev, surface.vertexDev, 
+            numpy.int32(len(surface.xj)), numpy.int32(Nq), numpy.int32(par_reac.K), xkDev, wkDev, REAL(par_reac.threshold),
+             AI_int_gpu, numpy.int32(len(surface.xk)), surface.XskDev, surface.WskDev, block=(par_reac.BSZ,1,1), grid=(GSZ,1))
+
+    AI_aux = numpy.zeros(Nq, dtype=numpy.int32)
+    AI_aux = cuda.from_device(AI_int_gpu, Nq, dtype=numpy.int32)
+    AI_int = numpy.sum(AI_aux)
+
+    dphir_x_cpu = numpy.zeros(Nq, dtype=REAL)
+    dphir_x_cpu = cuda.from_device(dphir_x, Nq, dtype=REAL)
+    dphir_y_cpu = numpy.zeros(Nq, dtype=REAL)
+    dphir_y_cpu = cuda.from_device(dphir_y, Nq, dtype=REAL)
+    dphir_z_cpu = numpy.zeros(Nq, dtype=REAL)
+    dphir_z_cpu = cuda.from_device(dphir_z, Nq, dtype=REAL)
+
+    return dphir_x_cpu, dphir_y_cpu, dphir_z_cpu, AI_int
