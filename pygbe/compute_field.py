@@ -360,7 +360,35 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     dphir[:,1] = dphir_y[:]
     dphir[:,2] = dphir_z[:]
 
+#    numpy.savetxt(args.phi_file[:-7]+"dphir_capsid.txt",dphir)
     numpy.savetxt(args.phi_file[:-7]+"dphir.txt",dphir)
+
+#   extra, for internal charges in capsid
+#    start_pos = 2*len(surf_array[0].xi) + len(surf_array[1].xi)
+#    phi_vals = phi_sol[start_pos:start_pos+len(surf_array[2].xi)] 
+#    dphi_vals = phi_sol[start_pos+len(surf_array[2].xi):start_pos+2*len(surf_array[2].xi)] 
+
+#    dphir_x, dphir_y, dphir_z, AI = get_dphirdr_gpu (phi_vals, dphi_vals, surf_array[2], field_array[2], param, kernel)
+
+#    dphir = numpy.zeros((len(dphir_x),3))
+#    dphir[:,0] = dphir_x[:]
+#    dphir[:,1] = dphir_y[:]
+#    dphir[:,2] = dphir_z[:]
+
+#    start_pos = 2*len(surf_array[0].xi) + len(surf_array[1].xi) + 2*len(surf_array[2].xi)
+#    phi_vals = phi_sol[start_pos:start_pos+len(surf_array[3].xi)] 
+#    dphi_vals = phi_sol[start_pos+len(surf_array[3].xi):start_pos+2*len(surf_array[3].xi)] 
+
+#    E_hat = surf_array[3].E_hat
+#    dphir_x, dphir_y, dphir_z, AI = get_dphirdr_gpu (phi_vals, E_hat*dphi_vals, surf_array[3], field_array[2], param, kernel)
+
+#    dphir[:,0] += dphir_x[:]
+#    dphir[:,1] += dphir_y[:]
+#    dphir[:,2] += dphir_z[:]
+
+
+#    numpy.savetxt(args.phi_file[:-7]+"dphir_internal.txt",dphir)
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
