@@ -201,12 +201,16 @@ def modify_pqr(inpqr, outpqr, xq, q, rad):
                 line_split = line.split()
                 if line_split[0] == 'ATOM':
                     atm_nu += 1
-                    line_add = ' {:.3f}  {:.3f}  {:.3f}  {:.4f}  {:.4f} \n'.format(xq[atm_nu,0], 
+                    separator = '  '
+                    line_beg = separator.join(line_split[:5])
+                    
+                    line_add = '  {:.4f}  {:.4f}  {:.4f}  {:.4f}  {:.4f} \n'.format(xq[atm_nu,0], 
                                                                 xq[atm_nu,1],
                                                                 xq[atm_nu,2], 
                                                                 q[atm_nu], 
                                                                 rad[atm_nu])
-                    line_new = line[:27] + line_add 
+                    
+                    line_new = line_beg + line_add 
                     file_o.write(line_new)
                     atm_nu
                 else:

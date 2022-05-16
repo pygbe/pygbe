@@ -4,6 +4,8 @@
 # `nvidia-docker build --tag=pygbe:master .`
 # To run a container:
 # `nvidia-docker run --name=pygbe -it pygbe:master /bin/bash`
+# If running a newer version of nvdidia-docker to run container
+# `docker run --runtime=nvidia --name=pygbe -it pygbe:master /bin/bash`
 # To access the software:
 # Once in the container, pygbe can be found in `/opt/pygbe/pygbe-master`
 # To stop the container:
@@ -20,7 +22,7 @@ FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 # Install basic requirements.
 RUN apt-get update && \
-    apt-get install -y wget unzip
+    apt-get install -y wget unzip vim tmux  
 
 # Install Miniconda.
 RUN FILENAME=Miniconda3-4.3.21-Linux-x86_64.sh && \

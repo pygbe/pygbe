@@ -37,7 +37,7 @@ the quasi-static approximation is valid
 
 ## Documentation
 
-Detailed documentation is available at http://barbagroup.github.io/pygbe/docs/
+Detailed documentation is available at http://pygbe.github.io/pygbe/docs/
 
 ## Installation
 

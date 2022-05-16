@@ -1,6 +1,23 @@
 # PyGBe Change Log
 ----
 ## Current development
+
+### Added
+* Script to generate ellipsoidal meshes using icosphere 
+
+### Changed
+
+### Fixed
+- Deprecated import  
+      `scipy.misc.comb deprecated` -> `scipy.special.comb`
+* CPU and GPU RHS function on matrixfree bug (missing cross terms when multiple surfaces)
+* LSPR 7 spheres regression test (needed fix due to RHS bug)
+* SyntaxError messages due to printing statements py2->py3 in generate brick file
+
+### Removed
+
+
+## 0.3.2
 ---
 ### Added
 
@@ -11,9 +28,16 @@
 
 * The usage of SWIG into cython
 * Changed Dockerfile to work with cython
+* Notes to Dockerfile on how to run.
+* `pytest` specific version to Dockerfile otherwise pycuda won't installed properly 
+* Log output to include information of the wavelength and electric field for lspr cases.
+* How file-name is written  to include wavelength information for lspr cases
 
 ### Fixed
 
+* CPU bug in matrixfree RHS function
+* Docsrings problem with sphinxs
+* Typo "thresold" in param files. 
 * The way PyGBe reads pqr files so it is compatible with all of them
 
 ### Removed
