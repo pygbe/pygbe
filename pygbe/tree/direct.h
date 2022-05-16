@@ -1,27 +1,105 @@
-#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #include <iostream>
 #include <sys/time.h>
+#include <omp.h>
 #define REAL double
+
+double get_time (void);
+
+REAL norm(REAL *x);
+
+void cross(REAL *x, REAL *y, REAL *z);
+
+void MV(REAL *M, REAL *V, REAL *res);
+
+REAL dot_prod(REAL *x, REAL *y);
+
+void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N);
+
+void ax(REAL *x, REAL *y, REAL alpha, int N);
+
+void lineInt(REAL &PHI_K, REAL &PHI_V, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, REAL *wk, int K, int LorY);
+
+void intSide(REAL &PHI_K, REAL &PHI_V, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *wk, int K, int LorY);
+
+void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL *x, REAL kappa, int same, 
+        REAL K_diag, REAL V_diag, int LorY, REAL *xk, int xkSize, REAL *wk);
+
+void computeDiagonal_cy(REAL *VL, int VLSize, REAL *KL, int KLSize, REAL *VY, int VYSize, REAL *KY, int KYSize, 
+                    REAL *triangle, int triangleSize, REAL *centers, int centersSize, REAL kappa,
+                    REAL K_diag, REAL V_diag, REAL *xk, int xkSize, REAL *wk, int wkSize);
+
+void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, REAL xi, REAL yi, REAL zi, 
+            REAL kappa, REAL *Xk, REAL *Wk, int K_fine, REAL Area, int LorY);
+
+void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, 
+            REAL xi, REAL yi, REAL zi, REAL kappa, REAL *Xk, REAL *Wk, 
+            int K_fine, REAL Area, int LorY);
+
+
+void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+        int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
+        REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
+        REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
+        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
+        REAL kappa, REAL threshold, REAL eps, REAL w0, int AI_int, REAL *phi_reac, int phi_reacSize);
+
+void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+        int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
+        REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
+        REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
+        int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, int *offSrc, int offSrcSize, int *offTwg, int offTwgSize,  
+        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
+        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize,
+        REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize);
+
+void directKt_sort_cy(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
+        int LorY, REAL *triangle, int triangleSize,
+        int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
+        REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+        REAL *m, int mSize, REAL *mKclean, int mKcleanSize,
+        int *interList, int interListSize, int *offTar, int offTarSize, int *sizeTar, int sizeTarSize, 
+        int *offSrc, int offSrcSize, int *offTwg, int offTwgSize, REAL *Area, int AreaSize,
+        REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, REAL kappa, REAL threshold, REAL eps, REAL *aux, int auxSize);
+
+
+void coulomb_direct_cy(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize, 
+                    REAL *m, int mSize, REAL *K_aux, int K_auxSize);
+
+void direct_c_derivative_cy(REAL *dKx_aux, int dKx_auxSize, REAL *dKy_aux, int dKy_auxSize, REAL *dKz_aux, int dKz_auxSize,
+                        REAL *dVx_aux, int dVx_auxSize, REAL *dVy_aux, int dVy_auxSize, REAL *dVz_aux, int dVz_auxSize,
+                        int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+                        int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
+                        REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
+                        REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+                        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
+                        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
+                        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
+                        REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize);
+
 
 double get_time (void)
 {
     struct timeval tv; 
     gettimeofday(&tv,NULL);
     return (double)(tv.tv_sec+1e-6*tv.tv_usec);
-}
+};
 
 REAL norm(REAL *x)
 {
     return sqrt(x[0]*x[0] + x[1]*x[1] + x[2]*x[2]);
-}
+};
 
 void cross(REAL *x, REAL *y, REAL *z) // z is the resulting array
 {
     z[0] = x[1]*y[2] - x[2]*y[1];
     z[1] = x[2]*y[0] - x[0]*y[2];
     z[2] = x[0]*y[1] - x[1]*y[0];
-}
+};
 
 void MV(REAL *M, REAL *V, REAL *res) // 3x3 mat-vec
 {
@@ -35,12 +113,12 @@ void MV(REAL *M, REAL *V, REAL *res) // 3x3 mat-vec
         }
         res[i] = sum;
     }
-}
+};
 
 REAL dot_prod(REAL *x, REAL *y) // len(3) vector dot product
 {
     return x[0]*y[0] + x[1]*y[1] + x[2]*y[2];
-}
+};
 
 void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N)
 {
@@ -48,7 +126,7 @@ void axpy(REAL *x, REAL *y, REAL *z, REAL alpha, int sign, int N)
     {
         z[i] = sign*alpha*x[i] + y[i];
     }
-}
+};
 
 void ax(REAL *x, REAL *y, REAL alpha, int N)
 {
@@ -57,7 +135,7 @@ void ax(REAL *x, REAL *y, REAL alpha, int N)
         y[i] = alpha*x[i];
     }
 
-}
+};
 
 void lineInt(REAL &PHI_K, REAL &PHI_V, REAL z, REAL x, REAL v1, REAL v2, REAL kappa, REAL *xk, REAL *wk, int K, int LorY)
 {
@@ -101,7 +179,7 @@ void lineInt(REAL &PHI_K, REAL &PHI_V, REAL z, REAL x, REAL v1, REAL v2, REAL ka
             PHI_K +=  wk[i]*(z/R - signZ) * dtheta/2;
         }
     }
-}
+};
 
 void intSide(REAL &PHI_K, REAL &PHI_V, REAL *v1, REAL *v2, REAL p, REAL kappa, REAL *xk, REAL *wk, int K, int LorY)
 {
@@ -124,7 +202,7 @@ void intSide(REAL &PHI_K, REAL &PHI_V, REAL *v1, REAL *v2, REAL p, REAL kappa, R
     REAL rOrthog[3];
     axpy(v21, v1, rOrthog, alpha, -1, 3);
 
-    REAL d_toEdge = norm(rOrthog);
+    //REAL d_toEdge = norm(rOrthog);
     REAL v1_neg[3];
     ax(v1, v1_neg, -1, 3);
     
@@ -176,7 +254,7 @@ void intSide(REAL &PHI_K, REAL &PHI_V, REAL *v1, REAL *v2, REAL p, REAL kappa, R
         PHI_V -= PHI_Vaux;
     }
 
-}
+};
 
 
 void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL *x, REAL kappa, int same, 
@@ -250,9 +328,9 @@ void SA(REAL &PHI_K, REAL &PHI_V, REAL *y, REAL *x, REAL kappa, int same,
         PHI_V += V_diag;
     }
 
-}
+};
 
-void computeDiagonal(REAL *VL, int VLSize, REAL *KL, int KLSize, REAL *VY, int VYSize, REAL *KY, int KYSize, 
+void computeDiagonal_cy(REAL *VL, int VLSize, REAL *KL, int KLSize, REAL *VY, int VYSize, REAL *KY, int KYSize, 
                     REAL *triangle, int triangleSize, REAL *centers, int centersSize, REAL kappa,
                     REAL K_diag, REAL V_diag, REAL *xk, int xkSize, REAL *wk, int wkSize)
 {
@@ -284,7 +362,7 @@ void computeDiagonal(REAL *VL, int VLSize, REAL *KL, int KLSize, REAL *VY, int V
         KY[i] = PHI_K;
 
     }
-}
+};
 
 void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, REAL xi, REAL yi, REAL zi, 
             REAL kappa, REAL *Xk, REAL *Wk, int K_fine, REAL Area, int LorY)
@@ -324,7 +402,7 @@ void GQ_fine(REAL &PHI_K, REAL &PHI_V, REAL *panel, REAL xi, REAL yi, REAL zi,
         }
 
     }
-}
+};
 
 void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel, 
             REAL xi, REAL yi, REAL zi, REAL kappa, REAL *Xk, REAL *Wk, 
@@ -360,32 +438,89 @@ void GQ_fineKt(REAL &PHI_Ktx, REAL &PHI_Kty, REAL &PHI_Ktz, REAL *panel,
             PHI_Ktz -= aux*dz;
         }
     }
-}
+};
 
-void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+void GQ_fine_derivative(REAL &dPHI_Kx, REAL &dPHI_Ky, REAL &dPHI_Kz, 
+                        REAL &dPHI_Vx, REAL &dPHI_Vy, REAL &dPHI_Vz, 
+                        REAL *panel, REAL xi, REAL yi, REAL zi, REAL kappa, 
+                        REAL *Xk, REAL *Wk, int K_fine, REAL Area, int LorY)
+{
+    REAL nx, ny, nz;
+    REAL dx, dy, dz, r, r3, aux;
+
+    dPHI_Kx = 0.;
+    dPHI_Ky = 0.;
+    dPHI_Kz = 0.;
+    dPHI_Vx = 0.;
+    dPHI_Vy = 0.;
+    dPHI_Vz = 0.;
+
+    aux = 1/(2*Area);
+    nx = ((panel[4]-panel[1])*(panel[2]-panel[8]) - (panel[5]-panel[2])*(panel[1]-panel[7])) * aux;
+    ny = ((panel[5]-panel[2])*(panel[0]-panel[6]) - (panel[3]-panel[0])*(panel[2]-panel[8])) * aux;
+    nz = ((panel[3]-panel[0])*(panel[1]-panel[7]) - (panel[4]-panel[1])*(panel[0]-panel[6])) * aux;
+
+
+    #pragma unroll
+    for (int kk=0; kk<K_fine; kk++)
+    {
+        dx = xi - (panel[0]*Xk[3*kk] + panel[3]*Xk[3*kk+1] + panel[6]*Xk[3*kk+2]);
+        dy = yi - (panel[1]*Xk[3*kk] + panel[4]*Xk[3*kk+1] + panel[7]*Xk[3*kk+2]);
+        dz = zi - (panel[2]*Xk[3*kk] + panel[5]*Xk[3*kk+1] + panel[8]*Xk[3*kk+2]);
+        r  = 1/sqrt(dx*dx + dy*dy + dz*dz); // r is 1/r!!!
+        r3 = r*r*r; 
+
+        if (LorY==1)
+        {
+            aux = Wk[kk]*Area*r3;
+            dPHI_Vx -= dx*aux;
+            dPHI_Vy -= dy*aux;
+            dPHI_Vz -= dz*aux;
+            dPHI_Kx += aux*nx-3*aux*dx*(nx*dx+ny*dy+nz*dz)*(r*r);
+            dPHI_Ky += aux*ny-3*aux*dy*(nx*dx+ny*dy+nz*dz)*(r*r);
+            dPHI_Kz += aux*nz-3*aux*dz*(nx*dx+ny*dy+nz*dz)*(r*r);
+        }
+
+        else    // this else will never fire as this function is only used to calculate energy (always Laplace)
+        {
+            aux = Wk[kk]*Area*exp(-kappa*1/r)*r;
+            dPHI_Vx += aux;
+            dPHI_Kx += aux*(nx*dx+ny*dy+nz*dz)*r*(kappa+r);
+        }
+
+    }
+};
+
+void direct_c_cy(int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
         int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
         REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
         REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
         int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
-        REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
+        REAL kappa, REAL threshold, REAL eps, REAL w0, int AI_int, REAL *phi_reac, int phi_reacSize)
 {
-    double start,stop;
-    int N_target = targetSize;
     int N_source = s_xjSize;
     REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr;
     bool L_d, same, condition_an, condition_gq;
 
-    for(int i_aux=0; i_aux<N_target; i_aux++)
-    {  
-        int i = target[i_aux];
+    #pragma omp parallel for default(none) shared(N_source, xt, xi, yt, yi, zt, zi, tri, Area, eps, threshold, k, s_xj, s_yj, s_zj, LorY, kappa, m, mx, my, mz, triangle, K_diag, sglInt_int, sglInt_ext, Xsk, Wsk, WskSize, mVclean, mKclean, IorE, xtSize, AI_int, phi_reac) private(dx_tri, dy_tri, dz_tri, R_tri, L_d, same, condition_an, condition_gq, dx, dy, dz, R, R2, R3, expKr)
+    for(int i_tar = 0; i_tar < xtSize; i_tar++)
+    {
+        REAL K_aux = 0.0;
+        REAL V_aux = 0.0;
+        int aux = 0;
+
+        int i = -1;
+        REAL V_red = 0.0;
+        REAL K_red = 0.0;
+
         for(int j=0; j<N_source; j++)
         {   
             // Check if panels are far enough for Gauss quadrature
-            dx_tri = xt[i_aux] - xi[tri[j]];
-            dy_tri = yt[i_aux] - yi[tri[j]];
-            dz_tri = zt[i_aux] - zi[tri[j]];
+            dx_tri = xt[i_tar] - xi[tri[j]];
+            dy_tri = yt[i_tar] - yi[tri[j]];
+            dz_tri = zt[i_tar] - zi[tri[j]];
             R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri);
             
             L_d  = (sqrt(2*Area[tri[j]])/(R_tri+eps)>=threshold);
@@ -395,38 +530,33 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
 
             if(condition_gq)
             {
-                //start = get_time();
-                dx = xt[i_aux] - s_xj[j];
-                dy = yt[i_aux] - s_yj[j];
-                dz = zt[i_aux] - s_zj[j];
+                dx = xt[i_tar] - s_xj[j];
+                dy = yt[i_tar] - s_yj[j];
+                dz = zt[i_tar] - s_zj[j];
                 R  = sqrt(dx*dx + dy*dy + dz*dz + eps*eps);
                 R2 = R*R;
                 R3 = R2*R;
                 if (LorY==2)
                 {
                     expKr = exp(-kappa*R);
-                    V_aux[i_aux] += m[j]*expKr/R;
-                    K_aux[i_aux] += expKr/R2*(kappa+1/R) * (dx*mx[j] + dy*my[j] + dz*mz[j]);
+                    V_red += m[j]*expKr/R;
+                    K_red += expKr/R2*(kappa+1/R) * (dx*mx[j] + dy*my[j] + dz*mz[j]);
                 }
                 if (LorY==1)
                 {
-                    V_aux[i_aux] += m[j]/R;
-                    K_aux[i_aux] += 1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                    V_red += m[j]/R;
+                    K_red += 1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
                 }
-                //stop = get_time();
-                //aux[1] += stop - start;
             }
             
             if(condition_an)
             {
-                aux[0] += 1;
-                REAL center[3] = {xt[i_aux], yt[i_aux], zt[i_aux]};
+                #pragma omp atomic
+                aux += 1;
                 REAL panel[9]  = {triangle[9*tri[j]], triangle[9*tri[j]+1], triangle[9*tri[j]+2],
                                 triangle[9*tri[j]+3], triangle[9*tri[j]+4], triangle[9*tri[j]+5],
                                 triangle[9*tri[j]+6], triangle[9*tri[j]+7], triangle[9*tri[j]+8]};
                 REAL PHI_K = 0., PHI_V = 0.;
-                
-                start = get_time();
 
                 if (same==1)
                 {
@@ -438,25 +568,23 @@ void direct_c(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, 
                 }
                 else
                 {
-                    GQ_fine(PHI_K, PHI_V, panel, xt[i_aux], yt[i_aux], zt[i_aux], kappa, Xsk, Wsk, WskSize, Area[tri[j]], LorY); 
+                    GQ_fine(PHI_K, PHI_V, panel, xt[i_tar], yt[i_tar], zt[i_tar], kappa, Xsk, Wsk, WskSize, Area[tri[j]], LorY); 
                 }
 
-
-                stop = get_time();
-                aux[1] += stop - start;
-
-//                printf("%f \t %f\n",PHI_V,mVclean[j]);
-
-                V_aux[i_aux]  += PHI_V * mVclean[j];
-                K_aux[i_aux]  += PHI_K * mKclean[j]; 
-
+                V_red  += PHI_V * mVclean[j];
+                K_red  += PHI_K * mKclean[j]; 
             }
         }
+
+        V_aux += V_red;
+        K_aux += K_red;
+
+        AI_int += aux;
+        phi_reac[i_tar] = (-K_aux + V_aux) / (4 * 3.14159265358979323846);
     }
+};
 
-}
-
-void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+void direct_sort_cy(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
         int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
         REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
         REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
@@ -466,7 +594,7 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
         REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize,
         REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
 {
-    double start,stop;
+    double start, stop;
     int CI_start, CI_end, CJ_start, CJ_end, list_start, list_end, CJ;
     REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr, sum_K, sum_V;
     bool L_d, same, condition_an, condition_gq;
@@ -478,6 +606,7 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
         list_start = offTwg[tarTwg];
         list_end   = offTwg[tarTwg+1];
 
+        #pragma omp parallel for private(sum_K, sum_V, CJ, CJ_start, CJ_end, dx_tri, dy_tri, dz_tri, R_tri, L_d, same, condition_an, condition_gq, dx, dy, dz, R, R2, R3, expKr, start, stop) shared(list_start, list_end, interList, offSrc, triangle, xt, yt, zt, Area, eps, threshold, k, s_xj, s_yj, s_zj, LorY, kappa, m, mx, my, mz, aux, K_diag, IorE, sglInt_int, sglInt_ext, Xsk, XskSize, Wsk, WskSize, mVclean, mKclean, V_aux, K_aux) schedule(runtime)
         for(int i=CI_start; i<CI_end; i++)
         {  
             sum_K = 0.;
@@ -492,7 +621,6 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                 for(int j=CJ_start; j<CJ_end; j++)
                 {   
                     // Check if panels are far enough for Gauss quadrature
-                    //start = get_time();
                     int ptr = 9*j;
                     REAL panel[9]  = {triangle[ptr], triangle[ptr+1], triangle[ptr+2],
                                     triangle[ptr+3], triangle[ptr+4], triangle[ptr+5],
@@ -507,12 +635,9 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                     same = (R_tri<1e-12);
                     condition_an = ((L_d) && (k[j]==0));
                     condition_gq = (!L_d);
-                    //stop = get_time();
-                    //aux[1] += stop - start;
 
                     if(condition_gq)
                     {
-                        //start = get_time();
                         dx = xt[i] - s_xj[j];
                         dy = yt[i] - s_yj[j];
                         dz = zt[i] - s_zj[j];
@@ -530,15 +655,12 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                             sum_V += m[j]/R;
                             sum_K += 1/R3*(dx*mx[j] + dy*my[j] + dz*mz[j]);
                         }
-                        //stop = get_time();
-                        //aux[1] += stop - start;
                     }
                     
                     if(condition_an)
                     {
                         start = get_time();
                         aux[0] += 1;
-                        REAL center[3] = {xt[i], yt[i], zt[i]};
                         REAL PHI_K = 0., PHI_V = 0.;
                         
                         if (same==1)
@@ -554,8 +676,6 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
                             GQ_fine(PHI_K, PHI_V, panel, xt[i], yt[i], zt[i], kappa, Xsk, Wsk, WskSize, Area[j], LorY); 
                         }
 
-        //                printf("%f \t %f\n",PHI_V,mVclean[j]);
-
                         sum_V += PHI_V * mVclean[j];
                         sum_K += PHI_K * mKclean[j]; 
                         stop = get_time();
@@ -569,10 +689,10 @@ void direct_sort(REAL *K_aux, int K_auxSize, REAL *V_aux, int V_auxSize, int Lor
             K_aux[i] += sum_K;
         }
     }
-}
+};
 
 
-void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
+void directKt_sort_cy(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSize, REAL *Ktz_aux, int Ktz_auxSize, 
         int LorY, REAL *triangle, int triangleSize,
         int *k, int kSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, REAL *s_zj, int s_zjSize, 
         REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
@@ -623,12 +743,9 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
                     same = (R_tri<1e-12);
                     condition_an = ((L_d) && (k[j]==0));
                     condition_gq = (!L_d);
-                    //stop = get_time();
-                    //aux[1] += stop - start;
 
                     if(condition_gq)
                     {
-                        //start = get_time();
                         dx = xt[i] - s_xj[j];
                         dy = yt[i] - s_yj[j];
                         dz = zt[i] - s_zj[j];
@@ -649,8 +766,6 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
                             sum_Kty -= expKr*dy;
                             sum_Ktz -= expKr*dz;
                         }
-                        //stop = get_time();
-                        //aux[1] += stop - start;
                     }
                     
                     if(condition_an)
@@ -671,9 +786,6 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
                         {
                             GQ_fineKt(PHI_Ktx, PHI_Kty, PHI_Ktz, panel, xt[i], yt[i], zt[i], kappa, Xsk, Wsk, WskSize, Area[j], LorY); 
                         }
-
-        //                printf("%f \t %f\n",PHI_V,mVclean[j]);
-
                         sum_Ktx += PHI_Ktx * mKclean[j]; 
                         sum_Kty += PHI_Kty * mKclean[j]; 
                         sum_Ktz += PHI_Ktz * mKclean[j]; 
@@ -689,12 +801,14 @@ void directKt_sort(REAL *Ktx_aux, int Ktx_auxSize, REAL *Kty_aux, int Kty_auxSiz
             Ktz_aux[i] += sum_Ktz;
         }
     }
-}
+};
 
-void coulomb_direct(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize, 
+void coulomb_direct_cy(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize, 
                     REAL *m, int mSize, REAL *K_aux, int K_auxSize)
 {
     REAL sum, dx, dy, dz, r;
+ 
+    #pragma omp parallel for default(none) shared(xtSize, K_aux, xt, yt, zt, m) private(dx, dy, dz, r, sum) schedule(runtime)
     for(int i=0; i<xtSize; i++)
     {
         sum = 0.;
@@ -709,6 +823,111 @@ void coulomb_direct(REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int zt
                 sum += m[j]/r;
             }
         }
+
         K_aux[i] = m[i]*sum;
     }
+};
+
+void direct_c_derivative_cy(REAL *dKx_aux, int dKx_auxSize, REAL *dKy_aux, int dKy_auxSize, REAL *dKz_aux, int dKz_auxSize,
+                        REAL *dVx_aux, int dVx_auxSize, REAL *dVy_aux, int dVy_auxSize, REAL *dVz_aux, int dVz_auxSize,
+                        int LorY, REAL K_diag, REAL V_diag, int IorE, REAL *triangle, int triangleSize,
+                        int *tri, int triSize, int *k, int kSize, REAL *xi, int xiSize, REAL *yi, int yiSize, 
+                        REAL *zi, int ziSize, REAL *s_xj, int s_xjSize, REAL *s_yj, int s_yjSize, 
+                        REAL *s_zj, int s_zjSize, REAL *xt, int xtSize, REAL *yt, int ytSize, REAL *zt, int ztSize,
+                        REAL *m, int mSize, REAL *mx, int mxSize, REAL *my, int mySize, REAL *mz, int mzSize, REAL *mKclean, int mKcleanSize, REAL *mVclean, int mVcleanSize,
+                        int *target, int targetSize,REAL *Area, int AreaSize, REAL *sglInt_int, int sglInt_intSize, REAL *sglInt_ext, int sglInt_extSize, 
+                        REAL *xk, int xkSize, REAL *wk, int wkSize, REAL *Xsk, int XskSize, REAL *Wsk, int WskSize, 
+                        REAL kappa, REAL threshold, REAL eps, REAL w0, REAL *aux, int auxSize)
+{
+    double start,stop;
+    int N_target = targetSize;
+    int N_source = s_xjSize;
+    REAL dx, dy, dz, dx_tri, dy_tri, dz_tri, R, R2, R3, R_tri, expKr;
+    bool L_d, same, condition_an, condition_gq;
+
+    for(int i_aux=0; i_aux<N_target; i_aux++)
+    {  
+        int i = target[i_aux];
+        for(int j=0; j<N_source; j++)
+        {   
+            // Check if panels are far enough for Gauss quadrature
+            dx_tri = xt[i_aux] - xi[tri[j]];
+            dy_tri = yt[i_aux] - yi[tri[j]];
+            dz_tri = zt[i_aux] - zi[tri[j]];
+            R_tri  = sqrt(dx_tri*dx_tri + dy_tri*dy_tri + dz_tri*dz_tri);
+            
+            L_d  = (sqrt(2*Area[tri[j]])/(R_tri+eps)>=threshold);
+            same = (i==tri[j]);
+            condition_an = ((same || L_d) && (k[j]==0));
+            condition_gq = (!L_d);
+
+            if(condition_gq)
+            {
+                //start = get_time();
+                dx = xt[i_aux] - s_xj[j];
+                dy = yt[i_aux] - s_yj[j];
+                dz = zt[i_aux] - s_zj[j];
+                R  = 1/sqrt(dx*dx + dy*dy + dz*dz + eps*eps);
+                R2 = R*R;
+                R3 = R2*R;
+                if (LorY==2) // this if never fires as this function is only used for energy calculations (only laplace)
+                {
+                    expKr = exp(-kappa*R);
+                    dVx_aux[i_aux] += m[j]*expKr*R;
+                    dKx_aux[i_aux] += expKr*R2*(kappa+1*R) * (dx*mx[j] + dy*my[j] + dz*mz[j]);
+                }
+                if (LorY==1)
+                {
+                    dVx_aux[i_aux] -= m[j]*dx*R3;
+                    dVy_aux[i_aux] -= m[j]*dy*R3;
+                    dVz_aux[i_aux] -= m[j]*dz*R3;
+                    dKx_aux[i_aux] += mx[j]*R3-3*dx*R3*R2*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                    dKy_aux[i_aux] += my[j]*R3-3*dy*R3*R2*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                    dKz_aux[i_aux] += mz[j]*R3-3*dz*R3*R2*(dx*mx[j] + dy*my[j] + dz*mz[j]);
+                }
+                //stop = get_time();
+                //aux[1] += stop - start;
+            }
+            
+            if(condition_an)
+            {
+                aux[0] += 1;
+                REAL center[3] = {xt[i_aux], yt[i_aux], zt[i_aux]};
+                REAL panel[9]  = {triangle[9*tri[j]], triangle[9*tri[j]+1], triangle[9*tri[j]+2],
+                                triangle[9*tri[j]+3], triangle[9*tri[j]+4], triangle[9*tri[j]+5],
+                                triangle[9*tri[j]+6], triangle[9*tri[j]+7], triangle[9*tri[j]+8]};
+                REAL dPHI_Kx = 0., dPHI_Ky = 0., dPHI_Kz = 0., dPHI_Vx = 0., dPHI_Vy = 0., dPHI_Vz = 0.;
+                
+                start = get_time();
+
+                if (same==1) // So far, this if will never fire, as we only use this function for energy calculation (never singular)
+                {
+                    dPHI_Kx = K_diag;
+                    if (IorE==1)
+                        dPHI_Vx = sglInt_int[j];
+                    else
+                        dPHI_Vx = sglInt_ext[j];
+                }
+                else
+                {
+                    GQ_fine_derivative(dPHI_Kx, dPHI_Ky, dPHI_Kz, dPHI_Vx, dPHI_Vy, dPHI_Vz, panel, xt[i_aux], yt[i_aux], zt[i_aux], kappa, Xsk, Wsk, WskSize, Area[tri[j]], LorY); 
+                }
+
+
+                stop = get_time();
+                aux[1] += stop - start;
+
+//                printf("%f \t %f\n",PHI_V,mVclean[j]);
+
+                dVx_aux[i_aux]  += dPHI_Vx * mVclean[j];
+                dVy_aux[i_aux]  += dPHI_Vy * mVclean[j];
+                dVz_aux[i_aux]  += dPHI_Vz * mVclean[j];
+                dKx_aux[i_aux]  += dPHI_Kx * mKclean[j]; 
+                dKy_aux[i_aux]  += dPHI_Ky * mKclean[j]; 
+                dKz_aux[i_aux]  += dPHI_Kz * mKclean[j]; 
+
+            }
+        }
+    }
+
 }

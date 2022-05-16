@@ -116,17 +116,36 @@ def readpqr(filename, REAL):
 
     pos = []
     q = []
-    for line in lines:
-        line = line.split()
 
-        if line[0] == 'ATOM':
-            #  grab coordinates and charge from columns
-            x, y, z, q0 = [REAL(i) for i in line[5:-1]]
-            q.append(q0)
-            pos.append([x, y, z])
+    from math import floor
+    num = floor(len(lines)/2) - 1
+    while(lines[num][:4]!='ATOM'):
+        num += 1
+
+    if len(lines[num].replace('-', ' -').split()) == 11:
+        for line in lines:
+            line = line.replace('-', ' -').split()
+
+            if line[0] == 'ATOM':
+                #  grab coordinates and charge from columns
+                x, y, z, q0 = [REAL(i) for i in line[6:-1]]
+                q.append(q0)
+                pos.append([x, y, z])
+
+
+    if len(lines[num].replace('-', ' -').split()) == 10:
+        for line in lines:
+            line = line.replace('-', ' -').split()
+
+            if line[0] == 'ATOM':
+                #  grab coordinates and charge from columns
+                x, y, z, q0 = [REAL(i) for i in line[5:-1]]
+                q.append(q0)
+                pos.append([x, y, z])
 
     pos = numpy.array(pos)
     q = numpy.array(q)
+
     return pos, q
 
 

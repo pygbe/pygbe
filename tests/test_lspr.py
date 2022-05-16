@@ -3,22 +3,22 @@ import pickle
 import pytest
 import functools
 
-try:
-    import pycuda
-except ImportError:
-    ans = input('PyCUDA not found.  Regression tests will take forever.  Do you want to continue? [y/n] ')
-    if ans in ['Y', 'y']:
-        pass
-    else:
-        sys.exit()
+import sys
+import atexit
+
+def report_e():
+    print('LSPR test could not run using GPU because pycuda were not found. CPU were used instead.')
+def report_g():
+    print('LSPR test had run using GPU.')
+def report_c():
+    print('LSPR test had run using CPU.')
 
 from pygbe.lspr import main
 
-
 @pytest.mark.parametrize('key_int', ['total_elements',
                                  'iterations'])
-def test_lspr_elements_iterations(key_int):
-    results = get_results()
+def test_lspr_elements_iterations(key_int, arc):
+    results = get_results(arc)
     with open('lspr.pickle', 'rb') as f:
         base_results = pickle.load(f)
 
@@ -26,8 +26,8 @@ def test_lspr_elements_iterations(key_int):
 
 
 @pytest.mark.parametrize('key', ['Cext_0'])
-def test_lspr(key):
-    results = get_results()
+def test_lspr(key, arc):
+    results = get_results(arc)
 
     with open('lspr.pickle', 'rb') as f:
         base_results = pickle.load(f)
@@ -36,7 +36,20 @@ def test_lspr(key):
     assert abs(base_results[key] - results[key]) / abs(base_results[key] + 1e-16) < 1e-10
 
 @functools.lru_cache(4)
-def get_results():
+def get_results(arc):
+
+    if arc == 'gpu':
+        try:
+            import pycuda
+            if sys.stdout != sys.__stdout__:
+                 atexit.register(report_g)
+        except ImportError:
+            if sys.stdout != sys.__stdout__:
+                atexit.register(report_e)
+    elif arc == 'cpu':
+        if sys.stdout != sys.__stdout__:
+            atexit.register(report_c)
+
     print('Generating results for lspr example...')
     if os.getcwd().rsplit('/', 1)[1] == 'tests':
         results = main(['','../examples/lspr_silver'],

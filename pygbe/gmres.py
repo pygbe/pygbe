@@ -130,7 +130,7 @@ def gmres_mgs(surf_array, field_array, X, b, param, ind0, timing, kernel):
     if normb == 0.0:
         normb = 1.0
     if normr < tol*normb:
-        return X
+        return X, 0
 
     iteration = 0
 

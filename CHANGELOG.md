@@ -21,11 +21,15 @@
 ---
 ### Added
 
-* Notes to Dockerfile on how to run.
-* `pytest` specific version to Dockerfile otherwise pycuda won't installed properly 
+* Paralelization of the CPU code
+* Option to run convergence tests using CPU or GPU
 
 ### Changed
 
+* The usage of SWIG into cython
+* Changed Dockerfile to work with cython
+* Notes to Dockerfile on how to run.
+* `pytest` specific version to Dockerfile otherwise pycuda won't installed properly 
 * Log output to include information of the wavelength and electric field for lspr cases.
 * How file-name is written  to include wavelength information for lspr cases
 
@@ -34,9 +38,9 @@
 * CPU bug in matrixfree RHS function
 * Docsrings problem with sphinxs
 * Typo "thresold" in param files. 
+* The way PyGBe reads pqr files so it is compatible with all of them
 
 ### Removed
-
 
 ## 0.3.1
 ---

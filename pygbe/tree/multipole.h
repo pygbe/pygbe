@@ -1,9 +1,71 @@
-#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <omp.h>
 #define REAL double
 
-int setIndex(int P, int i, int j, int k)
+int setIndex_cy(int P, int i, int j, int k);
+
+void getIndex_arr_cy(int P, int N, int *indices, int indicesSize, int *ii, int iiSize, int *jj, int jjSize, int *kk, int kkSize);
+
+int __inline__ getIndex(int P, int i, int j, int k, int *Index);
+
+void getCoeff(REAL *a, REAL dx, REAL dy, REAL dz, int *index,
+                int Nm, int P, REAL kappa, int LorY);
+
+void getCoeff_shift(REAL *ax, REAL *ay, REAL *az, REAL dx, REAL dy, REAL dz, int *index,
+                int Nm, int P, REAL kappa, int LorY);
+
+void multipole_c_cy(REAL *K_aux , int K_auxSize, 
+                 REAL *V_aux , int V_auxSize,
+                   REAL *M , int MSize, 
+                   REAL *Md, int MdSize, 
+                   REAL *dx, int dxSize, 
+                   REAL *dy, int dySize, 
+                   REAL *dz, int dzSize,
+                   int *index, int indexSize,
+                   int P, REAL kappa, int Nm, int LorY);
+
+void multipole_sort_cy(REAL *K_aux , int K_auxSize, 
+                    REAL *V_aux , int V_auxSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    REAL *M , int MSize, 
+                    REAL *Md, int MdSize, 
+                    REAL *xi, int xiSize, 
+                    REAL *yi, int yiSize, 
+                    REAL *zi, int ziSize,
+                    REAL *xisort, int xisortSize, 
+                    REAL *yisort, int yisortSize, 
+                    REAL *zisort, int zisortSize,
+                    int *unsort, int unsortSize,
+                    int *sort, int sortSize,
+                    REAL *xc, int xcSize, 
+                    REAL *yc, int ycSize, 
+                    REAL *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, REAL kappa, int Nm, int LorY);
+
+void multipoleKt_sort_cy(REAL *Ktx_aux , int Ktx_auxSize, 
+                    REAL *Kty_aux , int Kty_auxSize,
+                    REAL *Ktz_aux , int Ktz_auxSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    REAL *M , int MSize, 
+                    REAL *xi, int xiSize, 
+                    REAL *yi, int yiSize, 
+                    REAL *zi, int ziSize,
+                    REAL *xc, int xcSize, 
+                    REAL *yc, int ycSize, 
+                    REAL *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, REAL kappa, int Nm, int LorY);
+
+
+
+int setIndex_cy(int P, int i, int j, int k)
 {
     int I=0, ii, jj;
     for (ii=0; ii<i; ii++)
@@ -20,19 +82,19 @@ int setIndex(int P, int i, int j, int k)
     I+=k;
 
     return I;
-}
+};
 
-void getIndex_arr(int P, int N, int *indices, int indicesSize, int *ii, int iiSize, int *jj, int jjSize, int *kk, int kkSize)
+void getIndex_arr_cy(int P, int N, int *indices, int indicesSize, int *ii, int iiSize, int *jj, int jjSize, int *kk, int kkSize)
 {
     for (int iter=0; iter<N; iter++)
-        indices[iter] = setIndex(P, ii[iter], jj[iter], kk[iter]);
+        indices[iter] = setIndex_cy(P, ii[iter], jj[iter], kk[iter]);
 
-}
+};
 
 int __inline__ getIndex(int P, int i, int j, int k, int *Index)
 {
     return Index[i*(P+1)*(P+1)+j*(P+1)+k];
-}
+};
 
 void getCoeff(REAL *a, REAL dx, REAL dy, REAL dz, int *index,
                 int Nm, int P, REAL kappa, int LorY)
@@ -490,20 +552,19 @@ void getCoeff(REAL *a, REAL dx, REAL dy, REAL dz, int *index,
             }
         }
     }
-}
+};
 
 void getCoeff_shift(REAL *ax, REAL *ay, REAL *az, REAL dx, REAL dy, REAL dz, int *index,
                 int Nm, int P, REAL kappa, int LorY)
 {
-
     REAL b[Nm], a[Nm];
 
     REAL R = sqrt(dx*dx+dy*dy+dz*dz);
-    REAL R2 = R*R;
-    REAL R3 = R2*R;
+    REAL R2 = R * R;
+    REAL R3 = R2 * R;
     
-    int i,j,k,I,Im1x,Im2x,Im1y,Im2y,Im1z,Im2z;
-    REAL C,C1,C2,Cb;
+    int i, j, k, I, Im1x, Im2x, Im1y, Im2y, Im1z, Im2z;
+    REAL C, C1, C2, Cb;
 
     if (LorY==2) // if Yukawa
     {
@@ -1029,9 +1090,9 @@ void getCoeff_shift(REAL *ax, REAL *ay, REAL *az, REAL dx, REAL dy, REAL dz, int
             }
         }
     }
-}
+};
 
-void multipole_c(REAL *K_aux , int K_auxSize, 
+void multipole_c_cy(REAL *K_aux , int K_auxSize, 
                  REAL *V_aux , int V_auxSize,
                    REAL *M , int MSize, 
                    REAL *Md, int MdSize, 
@@ -1045,11 +1106,6 @@ void multipole_c(REAL *K_aux , int K_auxSize,
 
     for (int i=0; i<K_auxSize; i++)
     {   
-        for (int ii=0; ii<Nm; ii++)
-        {   
-            a[ii] = 0.; 
-        }   
-
         getCoeff(a, dx[i], dy[i], dz[i], 
                  index,  Nm, P, kappa, LorY);
 
@@ -1057,12 +1113,11 @@ void multipole_c(REAL *K_aux , int K_auxSize,
         {   
             V_aux[i] += a[j]*M[j];
             K_aux[i] += a[j]*Md[j];
-        }   
-
+        }
     }   
-}
+};
 
-void multipole_sort(REAL *K_aux , int K_auxSize, 
+void multipole_sort_obg_cy(REAL *K_aux , int K_auxSize, 
                     REAL *V_aux , int V_auxSize,
                     int *offTar, int offTarSize,
                     int *sizeTar, int sizeTarSize,
@@ -1078,7 +1133,7 @@ void multipole_sort(REAL *K_aux , int K_auxSize,
                     int *index, int indexSize,
                     int P, REAL kappa, int Nm, int LorY)
 {
-    REAL a[Nm], dx, dy, dz;
+    REAL a[Nm], dx, dy, dz, sum_V, sum_K;
     int CI_begin, CI_end, CJ_begin, CJ_end;
 
     for(int CI=0; CI<offTarSize; CI++)
@@ -1088,33 +1143,187 @@ void multipole_sort(REAL *K_aux , int K_auxSize,
         CJ_begin = offMlt[CI];
         CJ_end   = offMlt[CI+1];
 
-        for(int CJ=CJ_begin; CJ<CJ_end; CJ++)
+        for (int i=CI_begin; i<CI_end; i++)
         {
-            for (int i=CI_begin; i<CI_end; i++)
-            {   
-                for (int ii=0; ii<Nm; ii++)
-                {   
-                    a[ii] = 0.; 
-                }   
+            sum_V = 0.;
+            sum_K = 0.;
 
+            for (int ii=0; ii<Nm; ii++)
+            {   
+                a[ii] = 0.; 
+            } 
+
+            for(int CJ=CJ_begin; CJ<CJ_end; CJ++)            
+            {   
                 dx = xi[i] - xc[CJ];
                 dy = yi[i] - yc[CJ];
                 dz = zi[i] - zc[CJ];
 
-                getCoeff(a, dx, dy, dz, index,  
-                        Nm, P, kappa, LorY);
+                getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY);
 
                 for (int j=0; j<Nm; j++)
                 {   
-                    V_aux[i] += a[j]*M[CJ*Nm+j];
-                    K_aux[i] += a[j]*Md[CJ*Nm+j];
-                } 
-            }   
+                    sum_V += a[j]*M[CJ*Nm+j];
+                    sum_K += a[j]*Md[CJ*Nm+j];
+                }
+            }
+
+            V_aux[i] += sum_V;
+            K_aux[i] += sum_K;
         }
     }
-}
+};
 
-void multipoleKt_sort(REAL *Ktx_aux , int Ktx_auxSize, 
+void multipole_sort_cy_jj(REAL *K_aux , int K_auxSize, 
+                    REAL *V_aux , int V_auxSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    REAL *M , int MSize, 
+                    REAL *Md, int MdSize, 
+                    REAL *xi, int xiSize, 
+                    REAL *yi, int yiSize, 
+                    REAL *zi, int ziSize,
+                    REAL *xisort, int xisortSize, 
+                    REAL *yisort, int yisortSize, 
+                    REAL *zisort, int zisortSize,
+                    int *unsort, int unsortSize,
+                    int *sort, int sortSize,
+                    REAL *xc, int xcSize, 
+                    REAL *yc, int ycSize, 
+                    REAL *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, REAL kappa, int Nm, int LorY)
+{
+    REAL a[Nm], dx, dy, dz, sum_V, sum_K;
+    int * Ctwig;
+    Ctwig = new int[xiSize];
+    
+
+    for(int CI=0; CI<offTarSize; CI++)
+    {
+        for (int i = offTar[CI]; i < offTar[CI] + sizeTar[CI]; i++)
+        {
+            Ctwig[sort[i]] = CI;
+        }
+    }
+
+    for (int i = 0; i < xiSize; i++)
+    {
+        sum_V = 0.;
+        sum_K = 0.;
+
+        for(int CJ = offMlt[Ctwig[i]]; CJ < offMlt[Ctwig[i] + 1]; CJ++)            
+        {   
+            dx = xi[i] - xc[CJ];
+            dy = yi[i] - yc[CJ];
+            dz = zi[i] - zc[CJ];
+
+
+            getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY);
+
+            for (int j=0; j<Nm; j++)
+            {   
+                sum_V += a[j]*M[CJ*Nm+j];
+                sum_K += a[j]*Md[CJ*Nm+j];
+            }
+
+/*
+	    R = sqrt(dx*dx+dy*dy+dz*dz);
+    	    R2 = R*R;
+    	    R3 = R2*R;
+
+		sum_V += M[CJ*Nm+0] * (1/R);
+		sum_V += M[CJ*Nm+1] * (-dz/R3);
+		sum_V += M[CJ*Nm+2] * (3*dz*dz/(R2*R3) - 1/R3);
+		sum_V += M[CJ*Nm+3] * (-dy/R3);
+		sum_V += M[CJ*Nm+4] * (3*dz*dy/(R2*R3));
+		sum_V += M[CJ*Nm+5] * (3*dy*dy/(R2*R3) - 1/R3);
+		sum_V += M[CJ*Nm+6] * (-dx/R3);
+		sum_V += M[CJ*Nm+7] * (3*dz*dx/(R2*R3));
+		sum_V += M[CJ*Nm+8] * (3*dx*dy/(R2*R3));
+		sum_V += M[CJ*Nm+9] * (3*dx*dx/(R2*R3) - 1/R3);
+
+		sum_K += Md[CJ*Nm+0] * (1/R);
+		sum_K += Md[CJ*Nm+1] * (-dz/R3);
+		sum_K += Md[CJ*Nm+2] * (3*dz*dz/(R2*R3) - 1/R3);
+		sum_K += Md[CJ*Nm+3] * (-dy/R3);
+		sum_K += Md[CJ*Nm+4] * (3*dz*dy/(R2*R3));
+		sum_K += Md[CJ*Nm+5] * (3*dy*dy/(R2*R3) - 1/R3);
+		sum_K += Md[CJ*Nm+6] * (-dx/R3);
+		sum_K += Md[CJ*Nm+7] * (3*dz*dx/(R2*R3));
+		sum_K += Md[CJ*Nm+8] * (3*dx*dy/(R2*R3));
+		sum_K += Md[CJ*Nm+9] * (3*dx*dx/(R2*R3) - 1/R3);
+*/
+        }
+
+        V_aux[unsort[i]] += sum_V;
+        K_aux[unsort[i]] += sum_K;
+    }
+   
+    delete[] Ctwig;
+
+};
+
+void multipole_sort_cy(REAL *K_aux , int K_auxSize, 
+                    REAL *V_aux , int V_auxSize,
+                    int *offTar, int offTarSize,
+                    int *sizeTar, int sizeTarSize,
+                    int *offMlt, int offMltSize,
+                    REAL *M , int MSize, 
+                    REAL *Md, int MdSize, 
+                    REAL *xi, int xiSize, 
+                    REAL *yi, int yiSize, 
+                    REAL *zi, int ziSize,
+                    REAL *xisort, int xisortSize, 
+                    REAL *yisort, int yisortSize, 
+                    REAL *zisort, int zisortSize,
+                    int *unsort, int unsortSize,
+                    int *sort, int sortSize,
+                    REAL *xc, int xcSize, 
+                    REAL *yc, int ycSize, 
+                    REAL *zc, int zcSize,
+                    int *index, int indexSize,
+                    int P, REAL kappa, int Nm, int LorY)
+{
+    REAL a[Nm], dx, dy, dz;
+    int * Ctwig;
+    Ctwig = new int[xiSize];
+    
+
+    for(int CI=0; CI<offTarSize; CI++)
+    {
+        for (int i = offTar[CI]; i < offTar[CI] + sizeTar[CI]; i++)
+        {
+            Ctwig[sort[i]] = CI;
+        }
+    }
+
+    #pragma omp parallel for default(none) private(dx, dy, dz, a) shared(unsort, xiSize, offMlt, Ctwig, xi, yi, zi, xc, yc, zc, index, Nm, P, kappa, LorY, M, Md, V_aux, K_aux) schedule(runtime)
+    for (int i = 0; i < xiSize; i++)
+    {
+        for(int CJ = offMlt[Ctwig[i]]; CJ < offMlt[Ctwig[i] + 1]; CJ++)            
+        {   
+            dx = xi[i] - xc[CJ];
+            dy = yi[i] - yc[CJ];
+            dz = zi[i] - zc[CJ];
+
+
+            getCoeff(a, dx, dy, dz, index, Nm, P, kappa, LorY);
+            
+            for (int j=0; j<Nm; j++)
+            {   
+                V_aux[unsort[i]] += a[j]*M[CJ*Nm+j];
+                K_aux[unsort[i]] += a[j]*Md[CJ*Nm+j];
+            }
+        }
+    }
+   
+    delete[] Ctwig;
+
+};
+
+void multipoleKt_sort_cy(REAL *Ktx_aux , int Ktx_auxSize, 
                     REAL *Kty_aux , int Kty_auxSize,
                     REAL *Ktz_aux , int Ktz_auxSize,
                     int *offTar, int offTarSize,

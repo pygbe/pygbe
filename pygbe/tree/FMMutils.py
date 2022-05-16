@@ -7,7 +7,7 @@ from scipy.special import comb
 
 # Wrapped code
 from pygbe.tree.multipole import multipole_c, setIndex, getIndex_arr, multipole_sort, multipoleKt_sort
-from pygbe.tree.direct import direct_c, direct_sort, directKt_sort
+from pygbe.tree.direct import direct_c, direct_sort, directKt_sort#, direct_c_derivative
 from pygbe.tree.calculateMultipoles import P2M, M2M
 
 # CUDA libraries
@@ -739,8 +739,9 @@ def M2P_sort(surfSrc, surfTar, K_aux, V_aux, surf, index, param, LorY, timing):
         MdSort[i * param.Nm:i * param.Nm + param.Nm] = surfSrc.tree[C].Md
 
     multipole_sort(K_aux, V_aux, surfTar.offsetTarget, surfTar.sizeTarget,
-                   surfTar.offsetMlt[surf], MSort, MdSort, surfTar.xiSort,
-                   surfTar.yiSort, surfTar.ziSort, surfTar.xcSort[surf],
+                   surfTar.offsetMlt[surf], MSort, MdSort, surfTar.xi,
+                   surfTar.yi, surfTar.zi, surfTar.xiSort,
+                   surfTar.yiSort, surfTar.ziSort, surfTar.unsort, surfTar.sortTarget, surfTar.xcSort[surf],
                    surfTar.ycSort[surf], surfTar.zcSort[surf], index, param.P,
                    param.kappa, int(param.Nm), int(LorY))
 
@@ -1604,3 +1605,59 @@ def P2P_nonvec(Cells, surface, m, mx, my, mz, mKc, mVc, xq, Kval, Vval, IorE,
     time_P2P += toc - tic
 
     return Kval, Vval, AI_int, time_P2P
+
+def P2P_nonvec_derivative(Cells, surface, m, mx, my, mz, mKc, mVc,
+                          xq, dKxval, dKyval, dKzval, dVxval, dVyval, dVzval, 
+                          IorE, par_reac, w, source, AI_int, time_P2P):
+
+    tic = time.time()
+    LorY = 1
+    source = numpy.int32(numpy.array(source))
+    s_xj  = surface.xj[source]
+    s_yj  = surface.yj[source]
+    s_zj  = surface.zj[source]
+    s_m   = m[source]
+    s_mx  = mx[source]
+    s_my  = my[source]
+    s_mz  = mz[source]
+    s_mKc = mKc[source]
+    s_mVc = mVc[source]
+
+    tri  = source/par_reac.K # Triangle
+    k    = source%par_reac.K # Gauss point
+
+    dKx_aux = numpy.zeros(1)
+    dKy_aux = numpy.zeros(1)
+    dKz_aux = numpy.zeros(1)
+    dVx_aux = numpy.zeros(1)
+    dVy_aux = numpy.zeros(1)
+    dVz_aux = numpy.zeros(1)
+
+    xq_arr = numpy.array([xq[0]])
+    yq_arr = numpy.array([xq[1]])
+    zq_arr = numpy.array([xq[2]])
+    target = numpy.array([-1], dtype=numpy.int32)
+
+    aux = numpy.zeros(2)
+    K_diag = 0
+    V_diag = 0
+#    direct_c_derivative(dKx_aux, dKy_aux, dKz_aux, dVx_aux, dVy_aux, dVz_aux, int(LorY), 
+#            K_diag, V_diag, int(IorE), numpy.ravel(surface.vertex[surface.triangle[:]]), 
+#            numpy.int32(tri), numpy.int32(k), surface.xi, surface.yi, surface.zi,
+#            s_xj, s_yj, s_zj, xq_arr, yq_arr, zq_arr, s_m, s_mx, s_my, s_mz, s_mKc, s_mVc, 
+#            numpy.array([-1], dtype=numpy.int32), surface.Area, surface.sglInt_int, surface.sglInt_ext,
+#            surface.xk, surface.wk, surface.Xsk, surface.Wsk,
+#            par_reac.kappa, par_reac.threshold, par_reac.eps, w[0], aux)
+
+    AI_int += int(aux[0])
+
+    dKxval += dKx_aux
+    dKyval += dKy_aux
+    dKzval += dKz_aux
+    dVxval += dVx_aux
+    dVyval += dVy_aux
+    dVzval += dVz_aux
+    toc = time.time()
+    time_P2P += toc - tic
+
+    return dKxval, dKyval, dKzval, dVxval, dVyval, dVzval, AI_int, time_P2P

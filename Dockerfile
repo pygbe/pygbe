@@ -36,10 +36,10 @@ ENV PATH=/opt/miniconda/bin:${PATH}
 
 # Install required packages.
 RUN conda install -y numpy=1.13.1 && \
-    conda install -y scipy=0.19.1 && \
-    conda install -y matplotlib && \
-    conda install -y swig&& \
-    conda install -y requests&& \
+    conda install -y scipy=0.19.1=np113py36_0 && \
+    conda install -y matplotlib=2.0.2=np113py36_0 && \
+    conda install -y cython=0.29 && \
+    conda install -y requests=2.14.2 && \
     pip install clint==0.5.1
 
 
