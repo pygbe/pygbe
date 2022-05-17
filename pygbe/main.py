@@ -401,8 +401,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
-
-    # Put result phi in corresponding surfaces
+    
+    # Put result phi in corresponding surfaces.
     s_start = 0
     for surf in surf_array:
         s_start = surf.fill_phi(phi, s_start)
