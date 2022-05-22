@@ -389,5 +389,7 @@ def read_electric_field(param, filename):
             if line[0] == 'WAVE':
                 electric_field = param.REAL((line[1]))
                 wavelength    = param.REAL((line[2]))
+            if line[0] == 'EXTERNAL':
+                electric_field = param.REAL((line[1]))
 
     return electric_field, wavelength
