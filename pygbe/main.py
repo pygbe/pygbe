@@ -184,7 +184,7 @@ def check_for_nvcc():
 
 
 def main(argv=sys.argv, log_output=True, return_output_fname=False,
-         return_results_dict=False, field=None):
+         return_results_dict=False, field=None, electric_values=None):
     """
     Run a PyGBe problem, write outputs to STDOUT and to log file in
     problem directory
@@ -203,6 +203,8 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     field : Dictionary, defaults to None.
          If passed, this dictionary will supercede any config file found, useful in
          programmatically stepping through slight changes in a problem
+    electric_values : list, defaults to None
+         If passed, provides values for `electric_field`.
 
     Returns
     --------
@@ -294,6 +296,12 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     ### Generate array of surfaces and read in elements
     surf_array = initialize_surface(field_array, configFile, param)
 
+    ### Read external electric field (potential if kappa>1e-12).  
+    if electric_values:
+        electric_field, wavelength = electric_values
+    else:
+        electric_field, wavelength = read_electric_field(param, configFile)
+
 
     ### Fill surface class
     time_sort = 0.
@@ -312,6 +320,7 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
             param.Neq += 2 * N_aux
     print('\nTotal elements : {}'.format(param.N))
     print('Total equations: {}'.format(param.Neq))
+    print('External potential: {} e/(Ang eps_0)'.format(electric_field))
 
     results_dict['total_elements'] = param.N
     results_dict['N_equation'] = param.Neq
@@ -350,10 +359,10 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     print('Generate RHS')
     tic = time.time()
     if param.GPU == 0:
-        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0)
+        F = generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_field)
     elif param.GPU == 1:
         F = generateRHS_gpu(field_array, surf_array, param, kernel, timing,
-                            ind0)
+                            ind0, electric_field)
     toc = time.time()
     rhs_time = toc - tic
 
@@ -401,11 +410,27 @@ def main(argv=sys.argv, log_output=True, return_output_fname=False,
     phifname = '{:%Y-%m-%d-%H%M%S}-phi.txt'.format(datetime.now())
     results_dict['solve_time'] = solve_time
     numpy.savetxt(os.path.join(output_dir, phifname), phi)
+
+    # Data inverse Debye length
+    for data in field_array:
+        if data.LorY == 2:
+            LorY = data.LorY
+            kappa = data.kappa
     
     # Put result phi in corresponding surfaces.
     s_start = 0
     for surf in surf_array:
-        s_start = surf.fill_phi(phi, s_start)
+        if abs(electric_field) > 1e-12:
+            if LorY == 2 and kappa > 1e-12:
+                phi_electric_field = electric_field*numpy.exp(-kappa*abs(surf.zi))
+                derphi_electric_field = -electric_field*kappa*numpy.exp(-kappa*abs(surf.zi))
+                s_start = surf.fill_phi(phi, s_start, phi_electric_field, derphi_electric_field)
+            else:
+                phi_electric_field = -electric_field*surf.zi
+                derphi_electric_field = -electric_field*surf.normal[:,2]
+                s_start = surf.fill_phi(phi, s_start, phi_electric_field, derphi_electric_field)
+        else:
+            s_start = surf.fill_phi(phi, s_start)
 
 
     # Calculate solvation energy
