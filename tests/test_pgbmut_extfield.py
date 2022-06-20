@@ -26,7 +26,7 @@ def test_PGB_mut_sensor(key, arc):
     with open('pgbmut_extfield.pickle', 'rb') as f:
         base_results = pickle.load(f)
     if arc == 'gpu':
-        assert abs(base_results[key] - results[key]) / abs(base_results[key]) < 1e-12
+        assert abs(base_results[key] - results[key]) / abs(base_results[key]) < 1e-6
     elif arc == 'cpu':
         assert abs(base_results[key] - results[key]) / abs(base_results[key]) < 1e-6
 
