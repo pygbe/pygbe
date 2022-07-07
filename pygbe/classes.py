@@ -391,25 +391,27 @@ class Surface():
 
         return area_null
 
-    def fill_phi(self, phi, s_start=0):
+    def fill_phi(self, phi, s_start=0, phi_electric_field=0, derphi_electric_field=0):
 
         """
         Place the result vector on surface structure.
 
         Arguments
         ---------
-        phi        : array, result vector.
-        s_start    : int, offset to grab the corresponding section of phi
+        phi                  : array, result vector.
+        s_start              : int, offset to grab the corresponding section of phi
+        phi_electric_field   : array,
+        derphi_electric_field: array,
         """
 
         s_size = len(self.xi)
         if self.surf_type == 'dirichlet_surface':
             self.phi = self.phi0
-            self.dphi = phi[s_start:s_start + s_size]
+            self.dphi = phi[s_start:s_start + s_size] + derphi_electric_field
             s_start += s_size
         elif self.surf_type == 'neumann_surface':
             self.dphi = self.phi0
-            self.phi = phi[s_start:s_start + s_size]
+            self.phi = phi[s_start:s_start + s_size] + phi_electric_field
             s_start += s_size
         elif self.surf_type == 'asc_surface':
             self.dphi = phi[s_start:s_start + s_size] / self.Ein

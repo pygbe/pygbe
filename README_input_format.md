@@ -75,6 +75,13 @@ Parameters:
 
 -  ``Wavelength``: wavelength of the incident electric field, in Ångström.
 
+``EXTERNAL:`` It specifies an external field (potential or electric field)
+in biomolecular electrostatic applications.
+Parameter:
+
+-  ``Efield``: external potential at z=0 if there are salt ions in the solvent, 
+otherwise, electric field intensity. Both fixed in 'z' direction.
+
 
 ## Parameters file format
 

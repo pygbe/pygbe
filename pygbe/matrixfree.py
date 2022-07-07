@@ -553,48 +553,194 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
         LorY = field.LorY
 
         if len(field.parent) == 0 and abs(electric_field) > 1e-12:
+             if LorY == 1 and complex_diel == True:
+                for s in field.child:  # Loop over child surfaces 
+                   #Locate position of surface s in RHS
+                   s_start = 0
+                   for ss in range(s):
+                       if surf_array[
+                               ss].surf_type == 'dirichlet_surface' or surf_array[
+                                   ss].surf_type == 'neumann_surface' or surf_array[
+                                       ss].surf_type == 'asc_surface':
+                           print('Surface definition error:')
+                           print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
 
-             for s in field.child:  # Loop over child surfaces 
-                #Locate position of surface s in RHS
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        print('Surface definition error:')
-                        print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
+                       else:
+                           s_start += 2 * len(surf_array[ss].xi)
 
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
+                   s_size = len(surf_array[s].xi)
 
-                s_size = len(surf_array[s].xi)
+                   tar = surf_array[s]
+                   if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
+                      or tar.surf_type=='asc_surface'):
+                       print('LSPR problems required different surface definition')
+                       print('Check the input files to correct this')
+                       continue
 
-                tar = surf_array[s]
-                if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
-                   or tar.surf_type=='asc_surface'):
-                    print('LSPR problems required different surface definition')
-                    print('Check the input files to correct this')
-                    continue
+                   else:
+                       for s_idx in field.child:
+                           src = surf_array[s_idx]   
+                           #Assuming field comes in z direction then
+                           #electric field contains the - sign in config file
+                           phi_field = electric_field*src.normal[:,2]
+                           #The contribution is in the exterior equation
+                           K_diag = 0
+                           V_diag = 0
+                           IorE   = 2
+                           K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
+                                                   phi_field, LorY, src, tar,
+                                                   K_diag, V_diag, IorE, s_idx, param,
+                                                   ind0, timing, kernel)
 
-                else:
+                           F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
+
+                           F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[3,:]
+
+             else:
+                print("Biomolecule-Surface Under External Electric Field") 
+
+                for s in field.child:
+                    param.kappa = field.kappa
+                    tar = surf_array[s]
                     for s_idx in field.child:
-                        src = surf_array[s_idx]   
-                        #Assuming field comes in z direction then
-                        #electric field contains the - sign in config file
-                        phi_field = electric_field*src.normal[:,2]
-                        #The contribution is in the exterior equation
-                        K_diag = 0
-                        V_diag = 0
-                        IorE   = 2
-                        K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
-                                                phi_field, LorY, src, tar,
-                                                K_diag, V_diag, IorE, s_idx, param,
-                                                ind0, timing, kernel)
+                        src = surf_array[s_idx]
+                        if src.surf_type == 'dielectric_interface' or src.surf_type == 'stern_layer':
+                            #Poisson-Boltzmann Equation with Electric Field
+                            #Assuming field comes in z direction
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = -electric_field*param.kappa*numpy.exp(-param.kappa*abs(src.zi))
+                                phi_Efield = electric_field*numpy.exp(-param.kappa*abs(src.zi))
+                            else: 
+                                der_phi_Efield = -electric_field*src.normal[:,2]
+                                phi_Efield = -electric_field*src.zi
 
-                        F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
+                            K_diag = -2 * pi * (s_idx == s)
+                            V_diag = 0
+                            IorE = 2
 
-                        F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[3,:]
+                            K_lyr, V_lyr = project(phi_Efield,
+                                                    der_phi_Efield, LorY, src, tar,
+                                                    K_diag, V_diag, IorE, s_idx, param,
+                                                    ind0, timing, kernel)
+                           
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+
+                                F[s_start:s_start + s_size] += -K_lyr * tar.Precond[0, :] + V_lyr * tar.Precond[0, :] 
+
+                            else:
+                                F[s_start:s_start + s_size] += -K_lyr * tar.Precond[1, :] + V_lyr * tar.Precond[1, :]
+
+                                F[s_start+s_size:s_start+2*s_size] += -K_lyr * tar.Precond[3, :] + V_lyr * tar.Precond[3, :]
+
+                        elif src.surf_type == 'dirichlet_surface':
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = numpy.zeros(len(src.zi))
+                                phi_Efield = electric_field*numpy.exp(-param.kappa*abs(src.zi))
+                            else: 
+                                der_phi_Efield = numpy.zeros(len(src.zi))
+                                phi_Efield = -electric_field*src.zi                            
+
+                            K_diag_II = -2 * pi * (s_idx == s)
+                            V_diag_II = 0
+                            IorE = 2
+                            K_lyr_EF_II, V_lyr_EF_II = project(phi_Efield,
+                                                       der_phi_Efield,
+                                                       LorY, src, tar, K_diag_II,
+                                                       V_diag_II, IorE, s_idx, param, ind0, timing, kernel)
+
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            # if s is a charged surface, the surface has only one equation,
+                            # else, s has 2 equations and K_lyr affects the external
+                            # equation (SIBLING surfaces), which is placed after the internal
+                            # one, hence Precond[1,:] and Precond[3,:].
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+                                F[s_start:s_start + s_size] += - K_lyr_EF_II * surf_array[
+                                    s].Precond[0, :]
+                            else:
+                                F[s_start:s_start + s_size] += - K_lyr_EF_II * surf_array[
+                                    s].Precond[1, :]
+                                F[s_start + s_size:s_start + 2 *
+                                  s_size] += - K_lyr_EF_II * surf_array[
+                                  s].Precond[3, :]
+
+                        elif src.surf_type == 'neumann_surface':
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = -electric_field*param.kappa*numpy.exp(-param.kappa*abs(src.zi))
+                                phi_Efield = numpy.zeros(len(src.zi))
+                            else: 
+                                der_phi_Efield = -electric_field*src.normal[:,2]
+                                phi_Efield = numpy.zeros(len(src.zi))
+
+                            K_diag_II = 0
+                            V_diag_II = 0
+                            IorE = 2
+                            K_lyr_EF_II, V_lyr_EF_II = project(phi_Efield,
+                                                       der_phi_Efield,
+                                                       LorY, src, tar, K_diag_II,
+                                                       V_diag_II, IorE, s_idx, param, ind0, timing, kernel)
+
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            # if s is a charge surface, the surface has only one equation,
+                            # else, s has 2 equations and V_lyr affects the external
+                            # equation, which is placed after the internal one, hence
+                            # Precond[1,:] and Precond[3,:].
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+                                F[s_start:s_start + s_size] += V_lyr_EF_II * surf_array[
+                                    s].Precond[0, :]
+                            else:
+                                F[s_start:s_start + s_size] += V_lyr_EF_II * surf_array[
+                                    s].Precond[1, :]
+                                F[s_start + s_size:s_start + 2 *
+                                  s_size] += V_lyr_EF_II * surf_array[s].Precond[3, :]
+
+                        else:
+                            continue
 
 #   Dirichlet/Neumann contribution to RHS
 #    for field in field_array:
@@ -975,48 +1121,194 @@ def generateRHS_gpu(field_array, surf_array, param, kernel, timing, ind0, electr
         LorY = field.LorY
 
         if len(field.parent) == 0 and abs(electric_field) > 1e-12:
+             if LorY == 1 and complex_diel == True:
+                for s in field.child:  # Loop over child surfaces
+                   #Locate position of surface s in RHS
+                   s_start = 0
+                   for ss in range(s):
+                       if surf_array[
+                               ss].surf_type == 'dirichlet_surface' or surf_array[
+                                   ss].surf_type == 'neumann_surface' or surf_array[
+                                       ss].surf_type == 'asc_surface':
+                           print('Surface definition error:')
+                           print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
 
-             for s in field.child:  # Loop over child surfaces
-                #Locate position of surface s in RHS
-                s_start = 0
-                for ss in range(s):
-                    if surf_array[
-                            ss].surf_type == 'dirichlet_surface' or surf_array[
-                                ss].surf_type == 'neumann_surface' or surf_array[
-                                    ss].surf_type == 'asc_surface':
-                        print('Surface definition error:')
-                        print('Surf type can not be dirichlet, neumann or asc for LSPR problems')
+                       else:
+                           s_start += 2 * len(surf_array[ss].xi)
 
-                    else:
-                        s_start += 2 * len(surf_array[ss].xi)
+                   s_size = len(surf_array[s].xi)
 
-                s_size = len(surf_array[s].xi)
+                   tar = surf_array[s]
+                   if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
+                      or tar.surf_type=='asc_surface'):
+                       print('LSPR problems required different surface definition')
+                       print('Check the input files to correct this')
+                       continue
 
-                tar = surf_array[s]
-                if (tar.surf_type=='dirichlet_surface' or tar.surf_type=='neumann_surface'
-                   or tar.surf_type=='asc_surface'):
-                    print('LSPR problems required different surface definition')
-                    print('Check the input files to correct this')
-                    continue
+                   else:
+                       for s_idx in field.child:
+                           src = surf_array[s_idx]
+                           #Assuming field comes in z direction then
+                           #electric field contains - sign in config file
+                           phi_field = electric_field*src.normal[:,2]
+                           #The contribution is in the exterior equation
+                           K_diag = 0
+                           V_diag = 0
+                           IorE   = 2
 
-                else:
+                           K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
+                                               phi_field, LorY, src, tar,
+                                               K_diag, V_diag, IorE, s_idx, param,
+                                               ind0, timing, kernel)
+
+                           F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
+                           F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[3,:]
+
+             else:
+                print("Biomolecule-Surface Under External Electric Field") 
+
+                for s in field.child:
+                    param.kappa = field.kappa
+                    tar = surf_array[s]
                     for s_idx in field.child:
                         src = surf_array[s_idx]
-                        #Assuming field comes in z direction then
-                        #electric field contains - sign in config file
-                        phi_field = electric_field*src.normal[:,2]
-                        #The contribution is in the exterior equation
-                        K_diag = 0
-                        V_diag = 0
-                        IorE   = 2
+                        if src.surf_type == 'dielectric_interface' or src.surf_type == 'stern_layer':
+                            #Poisson-Boltzmann Equation with Electric Field
+                            #Assuming field comes in z direction
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = -electric_field*param.kappa*numpy.exp(-param.kappa*abs(src.zi))
+                                phi_Efield = electric_field*numpy.exp(-param.kappa*abs(src.zi))
+                            else: 
+                                der_phi_Efield = -electric_field*src.normal[:,2]
+                                phi_Efield = -electric_field*src.zi 
 
-                        K_lyr, V_lyr = project(numpy.zeros(len(phi_field)),
-                                            phi_field, LorY, src, tar,
-                                            K_diag, V_diag, IorE, s_idx, param,
-                                            ind0, timing, kernel)
+                            K_diag = -2 * pi * (s_idx == s)
+                            V_diag = 0
+                            IorE = 2
 
-                        F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
-                        F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[3,:]
+                            K_lyr, V_lyr = project(phi_Efield,
+                                                    der_phi_Efield, LorY, src, tar,
+                                                    K_diag, V_diag, IorE, s_idx, param,
+                                                    ind0, timing, kernel)
+                           
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+
+                                F[s_start:s_start + s_size] += -K_lyr * tar.Precond[0, :] + V_lyr * tar.Precond[0, :] 
+
+                            else:
+                                F[s_start:s_start + s_size] += -K_lyr * tar.Precond[1, :] + V_lyr * tar.Precond[1, :]
+
+                                F[s_start+s_size:s_start+2*s_size] += -K_lyr * tar.Precond[3, :] + V_lyr * tar.Precond[3, :]
+
+                        elif src.surf_type == 'dirichlet_surface':
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = numpy.zeros(len(src.zi))
+                                phi_Efield = electric_field*numpy.exp(-param.kappa*abs(src.zi))
+                            else: 
+                                der_phi_Efield = numpy.zeros(len(src.zi))
+                                phi_Efield = -electric_field*src.zi                    
+
+                            K_diag_II = -2 * pi * (s_idx == s)
+                            V_diag_II = 0
+                            IorE = 2
+                            K_lyr_EF_II, V_lyr_EF_II = project(phi_Efield,
+                                                       der_phi_Efield,
+                                                       LorY, src, tar, K_diag_II,
+                                                       V_diag_II, IorE, s_idx, param, ind0, timing, kernel)
+
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            # if s is a charged surface, the surface has only one equation,
+                            # else, s has 2 equations and K_lyr affects the external
+                            # equation (SIBLING surfaces), which is placed after the internal
+                            # one, hence Precond[1,:] and Precond[3,:].
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+                                F[s_start:s_start + s_size] += - K_lyr_EF_II * surf_array[
+                                    s].Precond[0, :]
+                            else:
+                                F[s_start:s_start + s_size] += - K_lyr_EF_II * surf_array[
+                                    s].Precond[1, :]
+                                F[s_start + s_size:s_start + 2 *
+                                  s_size] += - K_lyr_EF_II * surf_array[
+                                  s].Precond[3, :]
+
+                        elif src.surf_type == 'neumann_surface':
+                            if LorY == 2 and param.kappa > 1e-12:
+                                der_phi_Efield = -electric_field*param.kappa*numpy.exp(-param.kappa*abs(src.zi))
+                                phi_Efield = numpy.zeros(len(src.zi))
+                            else: 
+                                der_phi_Efield = -electric_field*src.normal[:,2]
+                                phi_Efield = numpy.zeros(len(src.zi))
+
+                            K_diag_II = 0
+                            V_diag_II = 0
+                            IorE = 2
+                            K_lyr_EF_II, V_lyr_EF_II = project(phi_Efield,
+                                                       der_phi_Efield,
+                                                       LorY, src, tar, K_diag_II,
+                                                       V_diag_II, IorE, s_idx, param, ind0, timing, kernel)
+
+                            # Find location of surface s in RHS array
+                            s_start = 0
+                            for ss in range(s):
+                                if surf_array[
+                                        ss].surf_type == 'dirichlet_surface' or surf_array[
+                                            ss].surf_type == 'neumann_surface' or surf_array[
+                                                s].surf_type == 'asc_surface':
+                                    s_start += len(surf_array[ss].xi)
+                                else:
+                                    s_start += 2 * len(surf_array[ss].xi)
+
+                            s_size = len(surf_array[s].xi)
+
+                            # if s is a charge surface, the surface has only one equation,
+                            # else, s has 2 equations and V_lyr affects the external
+                            # equation, which is placed after the internal one, hence
+                            # Precond[1,:] and Precond[3,:].
+                            if surf_array[
+                                    s].surf_type == 'dirichlet_surface' or surf_array[
+                                        s].surf_type == 'neumann_surface' or surf_array[
+                                            s].surf_type == 'asc_surface':
+                                F[s_start:s_start + s_size] += V_lyr_EF_II * surf_array[
+                                    s].Precond[0, :]
+                            else:
+                                F[s_start:s_start + s_size] += V_lyr_EF_II * surf_array[
+                                    s].Precond[1, :]
+                                F[s_start + s_size:s_start + 2 *
+                                  s_size] += V_lyr_EF_II * surf_array[s].Precond[3, :]
+
+                        else:
+                            continue
 
 #   Dirichlet/Neumann contribution to RHS
     for field in field_array:
