@@ -167,8 +167,12 @@ To run lspr cases, you can use
 
     > pygbe-lspr examples/lspr_silver
 
+PyGBe also supports the [Solvation-Layer Interface Condition (SLIC)](https://pubs.acs.org/doi/abs/10.1021/acs.jctc.6b00832) model. Check out the `param` file in the ``1bpi_slic`` example to see how to modify the different SLIC parameters. Tu run, do
+
+    > pygbe-slic examples/1bpi_slic
+
 To run any PyGBe case, you can pass `pygbe` (or ``pygbe-lspr`` if it's a LSPR
-application) a relative or an absolute path to
+application or ``pygbe-slic`` for SLIC) a relative or an absolute path to
 the problem folder.
 
 Note that PyGBe will grab the first `param` and `config` files that it finds in
