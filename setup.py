@@ -54,7 +54,8 @@ def main():
             #tell setuptools to use the custom build and install classes
             #create an entrance point that points to pygbe.main.main
             entry_points={'console_scripts': ['pygbe = pygbe.main:main',
-                                              'pygbe-lspr = pygbe.lspr:main']},
+                                              'pygbe-lspr = pygbe.lspr:main',
+                                              'pygbe-slic = pygbe.slic:main']},
             #Cython modules with all compilation options
             ext_modules = cythonize([
                 Extension("pygbe.tree.multipole",
