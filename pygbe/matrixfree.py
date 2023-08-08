@@ -115,10 +115,18 @@ def selfExterior(surf, s, LorY, param, ind0, timing, kernel):
     if numpy.iscomplexobj(surf.XinK) or numpy.iscomplexobj(surf.XinV): 
     #if surf.XinK.dtype == complex or surf.XinV.dtype == complex:
 
-        K_lyr_Re, V_lyr_Re = project(surf.XinK.real, surf.E_hat * surf.XinV.real, LorY, surf,
+        # pre-multiply by E_hat (can't remember reason)
+        if numpy.iscomplexobj(surf.E_hat):
+            XinV_real = surf.E_hat.real * surf.XinV.real - surf.E_hat.imag * surf.XinV.imag
+            XinV_imag = surf.E_hat.real * surf.XinV.imag + surf.E_hat.imag * surf.XinV.real
+        else:
+            XinV_real = surf.E_hat * surf.XinV.real 
+            XinV_imag = surf.E_hat * surf.XinV.imag 
+
+        K_lyr_Re, V_lyr_Re = project(surf.XinK.real, XinV_real, LorY, surf,
                              surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
 
-        K_lyr_Im, V_lyr_Im = project(surf.XinK.imag, surf.E_hat * surf.XinV.imag, LorY, surf,
+        K_lyr_Im, V_lyr_Im = project(surf.XinK.imag, XinV_imag, LorY, surf,
                              surf, K_diag, V_diag, IorE, s, param, ind0, timing, kernel)
 
         K_lyr = K_lyr_Re + 1j * K_lyr_Im
@@ -173,10 +181,18 @@ def nonselfExterior(surf, src, tar, LorY, param, ind0, timing, kernel):
     if numpy.iscomplexobj(surf[src].XinK) or numpy.iscomplexobj(surf[src].XinV): 
     #if surf[src].XinK.dtype == complex or surf[src].XinV.dtype == complex:
 
-        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, surf[src].E_hat*surf[src].XinV.real,
+        # pre-multiply by E_hat (can't remember reason)
+        if numpy.iscomplexobj(surf[src].E_hat):
+            XinV_real = surf[src].E_hat.real * surf[src].XinV.real - surf[src].E_hat.imag * surf[src].XinV.imag
+            XinV_imag = surf[src].E_hat.real * surf[src].XinV.imag + surf[src].E_hat.imag * surf[src].XinV.real
+        else:
+            XinV_real = surf.E_hat * surf.XinV.real 
+            XinV_imag = surf.E_hat * surf.XinV.imag 
+
+        K_lyr_Re, V_lyr_Re = project(surf[src].XinK.real, XinV_real,
                                  LorY, surf[src], surf[tar], K_diag, V_diag,
                                  IorE, src, param, ind0, timing, kernel)
-        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, surf[src].E_hat*surf[src].XinV.imag,
+        K_lyr_Im, V_lyr_Im = project(surf[src].XinK.imag, XinV_imag,
                                  LorY, surf[src], surf[tar], K_diag, V_diag,
                                  IorE, src, param, ind0, timing, kernel)
 
@@ -594,7 +610,6 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
                                                    ind0, timing, kernel)
                             
                            # No preconditioner
-                           F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr 
                            F[s_start+s_size:s_start+2*s_size] += (1 - src.E_hat) * V_lyr 
                            # With preconditioner
                            # F[s_start:s_start + s_size] += (1 - src.E_hat) * V_lyr * tar.Precond[1, :]
