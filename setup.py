@@ -48,7 +48,7 @@ def main():
             license='MIT',
             version=versioneer.get_version(),
             cmdclass=versioneer.get_cmdclass(cmdclass={'build': CustomBuild, 'install': CustomInstall}),
-            url='https://github.com/barbagroup/pygbe',
+            url='https://github.com/pygbe/pygbe',
             classifiers=['Programming Language :: Python :: 3'],
             packages = find_packages(),
             #tell setuptools to use the custom build and install classes
