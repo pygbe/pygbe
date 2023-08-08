@@ -538,6 +538,12 @@ class Parameters():
     REAL         :  Data type.
     E_field      :  list, Regions where energy will be calculated.
     GPU          :  int, =1: with GPU, =0: no GPU.
+    slic_tol     :  float, tolerance for self consistent solver of SLIC
+    slic_max_it  :  int, maximum number of iterations of self consistent solver of SLIC.
+    slic_alpha   :  float, alpha parameter for SLIC.
+    slic_beta    :  float, beta parameter for SLIC.
+    slic_gamma   :  float, gamma parameter for SLIC.
+
     """
 
     def __init__(self):
@@ -565,6 +571,13 @@ class Parameters():
         self.REAL          = 0               # Data type
         self.E_field       = []              # Regions where energy will be calculated
         self.GPU           = -1              # =1: with GPU, =0: no GPU
+        self.slic_tol      = 1e-4            # tolerance for SLIC self-iterations
+        self.slic_max_it   = 20              # max iter for SLIC solver
+        self.slic_alpha    = 0.              # alpha parameter for SLIC
+        self.slic_beta     = 0.              # beta  parameter for SLIC
+        self.slic_gamma    = 0.              # gamma parameter for SLIC
+
+
 
 
 class IndexConstant():

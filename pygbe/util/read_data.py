@@ -234,6 +234,15 @@ def read_parameters(param, filename):
     param.theta = REAL(val[12])  # MAC criterion for treecode
     param.GPU = int(val[13])  # =1: use GPU, =0 no GPU
 
+    # SLIC parameters
+    if len(val)>14:
+        param.slic_tol    = REAL(val[14]) # Tolerance for SLIC solver
+        param.slic_max_it = int(val[15]) # Max self-consistent iterations
+        param.slic_alpha  = REAL(val[16]) # alpha parameter for SLIC
+        param.slic_beta   = REAL(val[17]) # beta  parameter for SLIC
+        param.slic_gamma  = REAL(val[18]) # gamma parameter for SLIC
+
+
     return dataType
 
 
