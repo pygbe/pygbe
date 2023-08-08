@@ -82,7 +82,8 @@ def gmres_mgs(surf_array, field_array, X, b_clean, param, ind0, timing, kernel):
 
 #   Apply Preconditioner on RHS
     Naux = 0 
-    b = numpy.zeros(len(b_clean))
+    b = numpy.zeros_like(b_clean)
+    
     for i in range(len(surf_array)):
         Nt = len(surf_array[i].triangle)
         if surf_array[i].surf_type=='dirichlet_surface':
