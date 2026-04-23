@@ -521,7 +521,7 @@ def generateRHS(field_array, surf_array, param, kernel, timing, ind0, electric_f
 #               EXTERIOR equation (hence Precond[1,:] and [3,:])
 
 #               No preconditioner
-                F[s_start:s_start+s_size] += aux
+                F[s_start+s_size:s_start+2*s_size] += aux
 
 #               With preconditioner
 #               If surface is dirichlet or neumann it has only one equation, affected by Precond[0,:]
